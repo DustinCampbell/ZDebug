@@ -1,7 +1,7 @@
 ﻿using System;
 using ZDebug.Core.Utilities;
 
-namespace ZDebug.Core
+namespace ZDebug.Core.Basics
 {
     public sealed partial class Memory
     {

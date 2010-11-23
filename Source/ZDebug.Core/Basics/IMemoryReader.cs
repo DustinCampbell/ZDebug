@@ -1,4 +1,4 @@
-﻿namespace ZDebug.Core
+﻿namespace ZDebug.Core.Basics
 {
     public interface IMemoryReader
     {
