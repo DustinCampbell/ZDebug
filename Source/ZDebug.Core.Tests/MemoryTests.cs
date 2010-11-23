@@ -428,7 +428,6 @@ namespace ZDebug.Core.Tests
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
             var memory = new Memory(bytes);
 
-
             Assert.That(() =>
                 memory.WriteWords(0, null),
                 Throws.InstanceOf<ArgumentNullException>());
@@ -472,6 +471,29 @@ namespace ZDebug.Core.Tests
             Assert.That(new TestDelegate(() =>
                 memory.WriteWords(2, new ushort[] { 0x0000, 0x0001 })),
                 Throws.Nothing);
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void CreateMemoryReaderWithInvalidIndexThrows()
+        {
+            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
+            var memory = new Memory(bytes);
+
+            Assert.That(() =>
+                memory.CreateReader(-1),
+                Throws.InstanceOf<ArgumentOutOfRangeException>());
+
+            Assert.That(new TestDelegate(() =>
+                memory.CreateReader(0)),
+                Throws.Nothing);
+
+            Assert.That(new TestDelegate(() =>
+                memory.CreateReader(1023)),
+                Throws.Nothing);
+
+            Assert.That(() =>
+                memory.CreateReader(1024),
+                Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
     }
 }

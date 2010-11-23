@@ -4,7 +4,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
 {
-    public sealed class Memory
+    public sealed partial class Memory
     {
         private readonly byte[] bytes;
 
@@ -26,11 +26,6 @@ namespace ZDebug.Core
             }
 
             this.bytes = stream.ReadFully();
-        }
-
-        public int Size
-        {
-            get { return bytes.Length; }
         }
 
         public byte ReadByte(int index)
@@ -170,6 +165,21 @@ namespace ZDebug.Core
                 bytes[index + (i * 2)] = (byte)(values[i] >> 8);
                 bytes[index + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
             }
+        }
+
+        public IMemoryReader CreateReader(int index)
+        {
+            if (index < 0 || index >= bytes.Length)
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+
+            return new MemoryReader(this, index);
+        }
+
+        public int Size
+        {
+            get { return bytes.Length; }
         }
     }
 }
