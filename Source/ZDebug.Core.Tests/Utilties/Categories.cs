@@ -1,4 +1,4 @@
-﻿namespace ZDebug.Core.Tests
+﻿namespace ZDebug.Core.Tests.Utilities
 {
     internal static class Categories
     {
