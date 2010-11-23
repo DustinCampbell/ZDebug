@@ -47,11 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SanityZCodeTests.cs" />
+    <Compile Include="Sanity\ZCodeTests.cs" />
     <Compile Include="Utilties\Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SanityMoqTests.cs" />
-    <Compile Include="SanityNUnitTests.cs" />
+    <Compile Include="Sanity\MoqTests.cs" />
+    <Compile Include="Sanity\NUnitTests.cs" />
     <Compile Include="Utilties\ZCode.cs" />
   </ItemGroup>
   <ItemGroup>
