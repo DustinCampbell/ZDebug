@@ -1,0 +1,17 @@
+# Ignore binary folders
+Binaries/
+obj
+bin
+
+# Except NUnit binaries
+!Tools/NUnit/bin
+
+# Ignore NUnit test results
+*.VisualState.xml
+TestResult.xml
+
+# Ignore project and solution user settings
+*.csproj.user
+*.fsproj.user
+*.vbproj.user
+*.suo
