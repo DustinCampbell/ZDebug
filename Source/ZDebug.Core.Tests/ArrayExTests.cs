@@ -51,5 +51,69 @@ namespace ZDebug.Core.Tests
 
             Assert.That(array.Length, Is.EqualTo(0));
         }
+
+        [Test, Category(Categories.Utilties)]
+        public void ResizeWithNullThrows()
+        {
+            int[] array = null;
+
+            Assert.That(() =>
+                array.Resize(0),
+                Throws.InstanceOf<ArgumentNullException>());
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void ResizeWithLengthLessThanZeroThrows()
+        {
+            var array = ArrayEx.Empty<int>();
+
+            Assert.That(() =>
+                array.Resize(-1),
+                Throws.InstanceOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void ResizeWithSameLengthProducesIdenticalArray()
+        {
+            var array = ArrayEx.Create(10, i => i + 1);
+            var resizedArray = array.Resize(array.Length);
+
+            Assert.That(resizedArray.Length, Is.EqualTo(array.Length));
+
+            Assert.That(resizedArray, Is.EqualTo(array));
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void ResizeWithSmallerLengthTruncates()
+        {
+            var array = ArrayEx.Create(10, i => i + 1);
+            var resizedArray = array.Resize(array.Length / 2);
+
+            Assert.That(resizedArray.Length, Is.LessThan(array.Length));
+
+            for (int i = 0; i < resizedArray.Length; i++)
+            {
+                Assert.That(resizedArray[i], Is.EqualTo(array[i]));
+            }
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void ResizeWithLargerLengthGrows()
+        {
+            var array = ArrayEx.Create(10, i => i + 1);
+            var resizedArray = array.Resize(array.Length * 2);
+
+            Assert.That(resizedArray.Length, Is.GreaterThan(array.Length));
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                Assert.That(resizedArray[i], Is.EqualTo(array[i]));
+            }
+
+            for (int i = array.Length; i < resizedArray.Length; i++)
+            {
+                Assert.That(resizedArray[i], Is.EqualTo(0));
+            }
+        }
     }
 }

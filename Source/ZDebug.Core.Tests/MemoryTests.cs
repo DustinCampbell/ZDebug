@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using NUnit.Framework;
 using ZDebug.Core.Tests.Utilities;
 using ZDebug.Core.Utilities;
@@ -9,10 +10,20 @@ namespace ZDebug.Core.Tests
     public class MemoryTests
     {
         [Test, Category(Categories.Memory)]
-        public void CreateWithNullThrows()
+        public void CreateWithNullArrayThrows()
         {
+            byte[] array = null;
             Assert.That(() =>
-                new Memory(null),
+                new Memory(array),
+                Throws.InstanceOf<ArgumentNullException>());
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void CreateWithNullStreamThrows()
+        {
+            Stream stream = null;
+            Assert.That(() =>
+                new Memory(stream),
                 Throws.InstanceOf<ArgumentNullException>());
         }
 
@@ -23,6 +34,18 @@ namespace ZDebug.Core.Tests
             var memory = new Memory(bytes);
 
             Assert.That(memory.Size, Is.EqualTo(bytes.Length));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void SizeEqualsLengthOfInitialStream()
+        {
+            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
+            using (var stream = new MemoryStream(bytes))
+            {
+                var memory = new Memory(stream);
+
+                Assert.That(memory.Size, Is.EqualTo(stream.Length));
+            }
         }
 
         [Test, Category(Categories.Memory)]

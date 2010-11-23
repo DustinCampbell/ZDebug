@@ -50,6 +50,7 @@
     <Compile Include="ArrayExTests.cs" />
     <Compile Include="MemoryTests.cs" />
     <Compile Include="Sanity\ZCodeTests.cs" />
+    <Compile Include="StreamExtensionsTests.cs" />
     <Compile Include="Utilties\Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sanity\MoqTests.cs" />

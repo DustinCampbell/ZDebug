@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
@@ -15,6 +16,16 @@ namespace ZDebug.Core
             }
 
             this.bytes = bytes;
+        }
+
+        public Memory(Stream stream)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
+            this.bytes = stream.ReadFully();
         }
 
         public int Size
