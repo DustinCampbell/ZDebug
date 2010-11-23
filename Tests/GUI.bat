@@ -1,0 +1,1 @@
+..\Tools\NUnit\nunit.exe .\ZDebug.nunit

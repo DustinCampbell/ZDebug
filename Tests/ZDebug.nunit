@@ -1,0 +1,9 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Debug" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="..\Binaries\Debug\ZDebug.Core.Tests.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto">
+    <assembly path="..\Binaries\Release\ZDebug.Core.Tests.dll" />
+  </Config>
+</NUnitProject>
