@@ -13,8 +13,9 @@ namespace ZDebug.Core.Tests
             Stream stream = null;
             try
             {
-                Assert.DoesNotThrow(() =>
-                    stream = ZCode.LoadCZech());
+                Assert.That(new TestDelegate(() =>
+                    stream = ZCode.LoadCZech()),
+                    Throws.Nothing);
 
                 Assert.That(stream, Is.Not.Null);
             }

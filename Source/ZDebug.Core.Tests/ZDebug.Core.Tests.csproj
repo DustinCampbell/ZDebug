@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayExTests.cs" />
+    <Compile Include="MemoryTests.cs" />
     <Compile Include="Sanity\ZCodeTests.cs" />
     <Compile Include="Utilties\Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
