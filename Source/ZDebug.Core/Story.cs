@@ -22,6 +22,11 @@ namespace ZDebug.Core
             get { return memory; }
         }
 
+        public byte Version
+        {
+            get { return memory.ReadVersion(); }
+        }
+
         public static Story FromBytes(byte[] bytes)
         {
             return new Story(bytes);
