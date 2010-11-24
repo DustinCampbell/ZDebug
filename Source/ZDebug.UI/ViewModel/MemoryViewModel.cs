@@ -26,7 +26,7 @@ namespace ZDebug.UI.ViewModel
 
             for (int i = firstLineIndex; i <= lastLineIndex; i++)
             {
-                var address = reader.Index;
+                var address = reader.Address;
                 var count = Math.Min(8, reader.RemainingBytes);
                 var values = reader.NextWords(count);
 
@@ -45,7 +45,7 @@ namespace ZDebug.UI.ViewModel
             {
                 while (reader.RemainingBytes > 0)
                 {
-                    var address = reader.Index;
+                    var address = reader.Address;
                     var count = Math.Min(8, reader.RemainingBytes);
                     var values = reader.NextWords(count);
 

@@ -1,12 +1,21 @@
-﻿namespace ZDebug.Core.Objects
+﻿using ZDebug.Core.Basics;
+
+namespace ZDebug.Core.Objects
 {
     public class ZObjectTable
     {
-        private readonly Story story;
+        private readonly Memory memory;
+        private readonly int address;
 
-        internal ZObjectTable(Story story)
+        internal ZObjectTable(Memory memory)
         {
-            this.story = story;
+            this.memory = memory;
+            this.address = memory.ReadObjectTableAddress();
+        }
+
+        public int Address
+        {
+            get { return address; }
         }
     }
 }

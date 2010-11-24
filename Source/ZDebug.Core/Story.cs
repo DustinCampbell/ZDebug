@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Objects;
 
 namespace ZDebug.Core
 {
@@ -8,16 +9,23 @@ namespace ZDebug.Core
         private readonly Memory memory;
         private readonly byte version;
 
-        private Story(byte[] bytes)
+        private readonly ZObjectTable objectTable;
+
+        private Story(Memory memory)
         {
-            this.memory = new Memory(bytes);
+            this.memory = memory;
             this.version = memory.ReadVersion();
+            this.objectTable = new ZObjectTable(memory);
+        }
+
+        private Story(byte[] bytes)
+            : this(new Memory(bytes))
+        {
         }
 
         private Story(Stream stream)
+            : this(new Memory(stream))
         {
-            this.memory = new Memory(stream);
-            this.version = memory.ReadVersion();
         }
 
         public Memory Memory
@@ -28,6 +36,11 @@ namespace ZDebug.Core
         public byte Version
         {
             get { return version; }
+        }
+
+        public ZObjectTable Objects
+        {
+            get { return objectTable; }
         }
 
         public static Story FromBytes(byte[] bytes)

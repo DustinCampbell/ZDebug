@@ -1,30 +1,23 @@
 ﻿using System;
+using ZDebug.Core.Basics;
 
 namespace ZDebug.Core.Objects
 {
-    public struct ZProperty
+    public class ZProperty
     {
+        private readonly Memory memory;
         private readonly int address;
         private readonly int number;
         private readonly int dataAddress;
-        private readonly byte[] data;
+        private readonly int length;
 
-        internal ZProperty(int address, int number, int dataAddress, byte[] data)
+        internal ZProperty(Memory memory, int address, int number, int dataAddress, int length)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            if (data.Length == 0)
-            {
-                throw new ArgumentException("Array cannot be empty.", "data");
-            }
-
+            this.memory = memory;
             this.address = address;
             this.number = number;
             this.dataAddress = dataAddress;
-            this.data = data;
+            this.length = length;
         }
 
         public int Address
@@ -44,33 +37,82 @@ namespace ZDebug.Core.Objects
 
         public int DataLength
         {
-            get { return data.Length; }
+            get { return length; }
         }
 
         public bool IsByte
         {
-            get { return data.Length == 1; }
+            get { return length == 1; }
         }
 
         public bool IsWord
         {
-            get { return data.Length == 2; }
+            get { return length == 2; }
         }
 
-        public byte AsByte
+        public bool IsBytes
         {
-            get { return data[0]; }
+            get { return length > 2; }
         }
 
-        public ushort AsWord
+        public byte ReadAsByte()
         {
-            get
+            if (!IsByte)
             {
-                var b1 = data[0];
-                var b2 = data[1];
-
-                return (ushort)(b1 << 8 | b2);
+                throw new InvalidOperationException("Attempted to read property with length " + length + " as a byte.");
             }
+
+            return memory.ReadByte(dataAddress);
+        }
+
+        public void WriteAsByte(byte value)
+        {
+            if (!IsByte)
+            {
+                throw new InvalidOperationException("Attempted to write property with length " + length + " as a byte.");
+            }
+
+            memory.WriteByte(dataAddress, value);
+        }
+
+        public ushort ReadAsWord()
+        {
+            if (!IsWord)
+            {
+                throw new InvalidOperationException("Attempted to read property with length " + length + " as a word.");
+            }
+
+            return memory.ReadWord(dataAddress);
+        }
+
+        public void WriteAsWord(ushort value)
+        {
+            if (!IsWord)
+            {
+                throw new InvalidOperationException("Attempted to write property with length " + length + " as a word.");
+            }
+
+            memory.WriteWord(dataAddress, value);
+        }
+
+        public byte[] ReadAsBytes()
+        {
+            if (!IsBytes)
+            {
+                throw new InvalidOperationException("Attempted to read property with length " + length + " as bytes.");
+            }
+
+            return memory.ReadBytes(dataAddress, length);
+        }
+
+        public void WriteAsWord(byte[] values)
+        {
+            if (!IsBytes)
+            {
+                throw new InvalidOperationException("Attempted to write property with length " + length + " as bytes.");
+            }
+
+            memory.WriteBytes(dataAddress, values);
         }
     }
 }

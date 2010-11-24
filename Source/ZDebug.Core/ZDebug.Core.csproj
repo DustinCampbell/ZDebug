@@ -40,12 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\IMemoryReader.cs" />
     <Compile Include="Basics\Memory.MemoryReader.cs" />
     <Compile Include="Basics\MemoryChangeEventArgs.cs" />
     <Compile Include="Basics\MemoryExtensions.Header.cs" />
     <Compile Include="Basics\MemoryExtensions.Objects.cs" />
+    <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Objects\ZObject.cs">
       <SubType>Code</SubType>
     </Compile>

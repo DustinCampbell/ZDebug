@@ -9,8 +9,10 @@
 
         void Skip(int length);
 
-        int Index { get; }
+        int Address { get; }
         int Size { get; }
         int RemainingBytes { get; }
+
+        Memory Memory { get; }
     }
 }

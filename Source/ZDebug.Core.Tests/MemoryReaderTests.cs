@@ -22,7 +22,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(b, Is.EqualTo(bytes[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextByte(),
@@ -42,7 +42,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(b, Is.EqualTo(bytes[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextByte(),
@@ -70,7 +70,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(b, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextBytes(2),
@@ -98,7 +98,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(b, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextBytes(2),
@@ -121,7 +121,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextWord(),
@@ -144,7 +144,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextWord(),
@@ -173,7 +173,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextWords(2),
@@ -202,7 +202,7 @@ namespace ZDebug.Core.Tests
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
 
-            Assert.That(reader.Index, Is.EqualTo(reader.Size));
+            Assert.That(reader.Address, Is.EqualTo(reader.Size));
 
             Assert.That(() =>
                 reader.NextWords(2),

@@ -8,23 +8,23 @@ namespace ZDebug.Core.Basics
         private class MemoryReader : IMemoryReader
         {
             private readonly Memory memory;
-            private int index;
+            private int address;
 
-            public MemoryReader(Memory memory, int index)
+            public MemoryReader(Memory memory, int address)
             {
                 this.memory = memory;
-                this.index = index;
+                this.address = address;
             }
 
             public byte NextByte()
             {
-                if (index + 1 > memory.Size)
+                if (address + 1 > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
 
-                var result = memory.ReadByte(index);
-                index++;
+                var result = memory.ReadByte(address);
+                address++;
                 return result;
             }
 
@@ -35,25 +35,25 @@ namespace ZDebug.Core.Basics
                     return ArrayEx.Empty<byte>();
                 }
 
-                if (index + length > memory.Size)
+                if (address + length > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
 
-                var result = memory.ReadBytes(index, length);
-                index += length;
+                var result = memory.ReadBytes(address, length);
+                address += length;
                 return result;
             }
 
             public ushort NextWord()
             {
-                if (index + 2 > memory.Size)
+                if (address + 2 > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
 
-                var result = memory.ReadWord(index);
-                index += 2;
+                var result = memory.ReadWord(address);
+                address += 2;
                 return result;
             }
 
@@ -64,29 +64,29 @@ namespace ZDebug.Core.Basics
                     return ArrayEx.Empty<ushort>();
                 }
 
-                if (index + (length * 2) > memory.Size)
+                if (address + (length * 2) > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
 
-                var result = memory.ReadWords(index, length);
-                index += (length * 2);
+                var result = memory.ReadWords(address, length);
+                address += (length * 2);
                 return result;
             }
 
             public void Skip(int length)
             {
-                if (length < 0 || index + length > memory.Size)
+                if (length < 0 || address + length > memory.Size)
                 {
                     throw new ArgumentOutOfRangeException("length");
                 }
 
-                index += length;
+                address += length;
             }
 
-            public int Index
+            public int Address
             {
-                get { return index; }
+                get { return address; }
             }
 
             public int Size
@@ -96,7 +96,12 @@ namespace ZDebug.Core.Basics
 
             public int RemainingBytes
             {
-                get { return memory.Size - index; }
+                get { return memory.Size - address; }
+            }
+
+            public Memory Memory
+            {
+                get { return memory; }
             }
         }
     }
