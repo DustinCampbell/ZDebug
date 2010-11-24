@@ -18,7 +18,7 @@ namespace ZDebug.Core.Basics
 
             public byte NextByte()
             {
-                if (index > memory.Size - 1)
+                if (index + 1 > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
@@ -35,7 +35,7 @@ namespace ZDebug.Core.Basics
                     return ArrayEx.Empty<byte>();
                 }
 
-                if (index > memory.Size - length)
+                if (index + length > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
@@ -47,7 +47,7 @@ namespace ZDebug.Core.Basics
 
             public ushort NextWord()
             {
-                if (index > memory.Size - 2)
+                if (index + 2 > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
@@ -64,7 +64,7 @@ namespace ZDebug.Core.Basics
                     return ArrayEx.Empty<ushort>();
                 }
 
-                if (index > memory.Size - (length * 2))
+                if (index + (length * 2) > memory.Size)
                 {
                     throw new InvalidOperationException("Attempted to read past end of memory");
                 }
@@ -72,6 +72,16 @@ namespace ZDebug.Core.Basics
                 var result = memory.ReadWords(index, length);
                 index += (length * 2);
                 return result;
+            }
+
+            public void Skip(int length)
+            {
+                if (length < 0 || index + length > memory.Size)
+                {
+                    throw new ArgumentOutOfRangeException("length");
+                }
+
+                index += length;
             }
 
             public int Index

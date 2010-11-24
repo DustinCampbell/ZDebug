@@ -7,6 +7,8 @@
         ushort NextWord();
         ushort[] NextWords(int length);
 
+        void Skip(int length);
+
         int Index { get; }
         int Size { get; }
         int RemainingBytes { get; }
