@@ -54,8 +54,10 @@
     <Compile Include="MemoryReaderTests.cs" />
     <Compile Include="MemoryTests.cs" />
     <Compile Include="Sanity\ZCodeTests.cs" />
-    <Compile Include="StoryTests.cs" />
-    <Compile Include="StoryTests.Objects.cs" />
+    <Compile Include="StoryTests_Dreamhold.cs" />
+    <Compile Include="StoryTests_CZech.cs" />
+    <Compile Include="StoryTests_Zork1.cs" />
+    <Compile Include="StoryTests_Curses.cs" />
     <Compile Include="StreamExtensionsTests.cs" />
     <Compile Include="Utilties\Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -77,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ZCode\zork1.z3" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ZCode\dreamhold.z8" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
