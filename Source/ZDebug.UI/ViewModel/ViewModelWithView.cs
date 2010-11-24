@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 namespace ZDebug.UI.ViewModel
 {
-    internal static class View
+    internal static class ViewModelWithView
     {
         public static TView Create<TViewModel, TView>()
             where TViewModel : ViewModelWithViewBase<TView>, new()

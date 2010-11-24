@@ -1,6 +1,9 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using AvalonDock;
 using Microsoft.Win32;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -104,5 +107,11 @@ namespace ZDebug.UI.ViewModel
         public ICommand StartDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
+
+        protected internal override void Initialize()
+        {
+            var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
+            memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
+        }
     }
 }

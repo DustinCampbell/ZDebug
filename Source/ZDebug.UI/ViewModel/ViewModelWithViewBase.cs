@@ -2,24 +2,24 @@
 
 namespace ZDebug.UI.ViewModel
 {
-    internal abstract class ViewModelWithViewBase<T> : ViewModelBase
-        where T : ContentControl
+    internal abstract class ViewModelWithViewBase<TView> : ViewModelBase
+        where TView : ContentControl
     {
         private readonly string viewName;
-        private T view;
+        private TView view;
 
         protected ViewModelWithViewBase(string viewName)
         {
             this.viewName = viewName;
         }
 
-        internal void SetView(T view)
+        internal void SetView(TView view)
         {
             this.view = view;
             this.view.DataContext = this;
         }
 
-        protected T View
+        protected TView View
         {
             get { return view; }
         }

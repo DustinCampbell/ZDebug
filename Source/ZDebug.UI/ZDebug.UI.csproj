@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\MemoryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -72,14 +76,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AutoDisableImage.cs" />
+    <Compile Include="Utilities\FrameworkElementExtensions.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
-    <Compile Include="ViewModel\View.cs" />
+    <Compile Include="ViewModel\MemoryViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelWithView.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
     <Compile Include="ViewModel\ViewModelWithViewBase.cs" />
-    <Compile Include="Views\MainWindowView.xaml.cs">
-      <DependentUpon>MainWindowView.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
