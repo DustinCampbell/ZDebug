@@ -4,6 +4,33 @@ namespace ZDebug.Core.Utilities
 {
     internal static class ArrayEx
     {
+        public static T[] Copy<T>(this T[] array, int index, int length)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if (index < 0 || index + length > array.Length)
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+
+            var result = new T[length];
+
+            if (length > 0)
+            {
+                Array.Copy(array, index, result, 0, length);
+            }
+
+            return result;
+        }
+
         public static T[] Create<T>(int length, Func<int, T> createItem = null)
         {
             if (length < 0)

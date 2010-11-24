@@ -3,7 +3,13 @@
              xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
              xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Grid>
-        <ItemsControl FontFamily="Consolas"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <ItemsControl Grid.Column="1"
+                      FontFamily="Consolas"
                       FontSize="14"
                       Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                       Padding="4"

@@ -102,14 +102,31 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
+        private void OnMemoryChanged(int index, int length, byte[] oldValues, byte[] newValues)
+        {
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryChangedEventArgs(this, index, length, oldValues, newValues));
+            }
+        }
+
         public void WriteByte(int index, byte value)
         {
-            if (index < 0 || index > bytes.Length - 1)
+            if (index < 0 || index + 1 > bytes.Length)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
 
+            byte oldValue = bytes[index];
+
             bytes[index] = value;
+
+            OnMemoryChanged(
+                index,
+                length: 1,
+                oldValues: new byte[] { oldValue },
+                newValues: new byte[] { value });
         }
 
         public void WriteBytes(int index, byte[] values)
@@ -124,23 +141,43 @@ namespace ZDebug.Core.Basics
                 return;
             }
 
-            if (index < 0 || index > bytes.Length - values.Length)
+            if (index < 0 || index + values.Length > bytes.Length)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
 
+            var oldValues = bytes.Copy(index, values.Length);
+
             Array.Copy(values, 0, bytes, index, values.Length);
+
+            OnMemoryChanged(
+                index,
+                length: values.Length,
+                oldValues: oldValues,
+                newValues: values);
         }
 
         public void WriteWord(int index, ushort value)
         {
-            if (index < 0 || index > bytes.Length - 2)
+            if (index < 0 || index + 2 > bytes.Length)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
 
-            bytes[index] = (byte)(value >> 8);
-            bytes[index + 1] = (byte)(value & 0x00ff);
+            var old1 = bytes[index];
+            var old2 = bytes[index + 1];
+
+            var b1 = (byte)(value >> 8);
+            var b2 = (byte)(value & 0x00ff);
+
+            bytes[index] = b1;
+            bytes[index + 1] = b2;
+
+            OnMemoryChanged(
+                index,
+                length: 2,
+                oldValues: new byte[] { old1, old2 },
+                newValues: new byte[] { b1, b2 });
         }
 
         public void WriteWords(int index, ushort[] values)
@@ -155,16 +192,26 @@ namespace ZDebug.Core.Basics
                 return;
             }
 
-            if (index < 0 || index > bytes.Length - (values.Length * 2))
+            if (index < 0 || index + (values.Length * 2) > bytes.Length)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
+
+            var oldValues = bytes.Copy(index, values.Length * 2);
 
             for (int i = 0; i < values.Length; i++)
             {
                 bytes[index + (i * 2)] = (byte)(values[i] >> 8);
                 bytes[index + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
             }
+
+            var newValues = bytes.Copy(index, values.Length * 2);
+
+            OnMemoryChanged(
+                index,
+                length: values.Length * 2,
+                oldValues: oldValues,
+                newValues: newValues);
         }
 
         public IMemoryReader CreateReader(int index)
@@ -181,5 +228,7 @@ namespace ZDebug.Core.Basics
         {
             get { return bytes.Length; }
         }
+
+        public event EventHandler<MemoryChangedEventArgs> MemoryChanged;
     }
 }
