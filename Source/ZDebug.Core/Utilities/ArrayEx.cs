@@ -2,7 +2,7 @@
 
 namespace ZDebug.Core.Utilities
 {
-    public static class ArrayEx
+    internal static class ArrayEx
     {
         public static T[] Create<T>(int length, Func<int, T> createItem = null)
         {
@@ -55,6 +55,33 @@ namespace ZDebug.Core.Utilities
             }
 
             return newArray;
+        }
+
+        public static TResult[] Select<T, TResult>(this T[] array, Func<T, TResult> selector)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            if (array.Length == 0)
+            {
+                return ArrayEx.Empty<TResult>();
+            }
+
+            if (selector == null)
+            {
+                throw new ArgumentNullException("selector");
+            }
+
+            var result = new TResult[array.Length];
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                result[i] = selector(array[i]);
+            }
+
+            return result;
         }
     }
 }

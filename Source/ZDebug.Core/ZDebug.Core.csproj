@@ -43,6 +43,8 @@
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\IMemoryReader.cs" />
     <Compile Include="Basics\Memory.MemoryReader.cs" />
+    <Compile Include="Basics\MemoryExtensions.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\ArrayEx.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />

@@ -4,7 +4,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Basics
 {
-    public sealed partial class Memory
+    internal sealed partial class Memory
     {
         private readonly byte[] bytes;
 

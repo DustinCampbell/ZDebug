@@ -1,6 +1,6 @@
 ﻿namespace ZDebug.Core.Basics
 {
-    public interface IMemoryReader
+    internal interface IMemoryReader
     {
         byte NextByte();
         byte[] NextBytes(int length);

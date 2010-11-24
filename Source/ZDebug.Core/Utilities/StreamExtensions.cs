@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ZDebug.Core.Utilities
 {
-    public static class StreamExtensions
+    internal static class StreamExtensions
     {
         public static byte[] ReadFully(this Stream stream)
         {

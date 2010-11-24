@@ -115,5 +115,46 @@ namespace ZDebug.Core.Tests
                 Assert.That(resizedArray[i], Is.EqualTo(0));
             }
         }
+
+        [Test, Category(Categories.Utilties)]
+        public void SelectWithNullThrows()
+        {
+            int[] array = null;
+
+            Assert.That(() =>
+                array.Select(i => (byte)i),
+                Throws.InstanceOf<ArgumentNullException>());
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void SelectWithEmptyArrayAndNullLambdaDoesNotThrow()
+        {
+            var array = ArrayEx.Empty<int>();
+
+            Assert.That(new TestDelegate(() =>
+                array.Select<int, byte>(null)),
+                Throws.Nothing);
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void SelectWithNullLambdaThrows()
+        {
+            var array = ArrayEx.Create(10, i => i + 1);
+
+            Assert.That(() =>
+                array.Select<int, byte>(null),
+                Throws.InstanceOf<ArgumentNullException>());
+        }
+
+        [Test, Category(Categories.Utilties)]
+        public void SelectIntArrayToByteArray()
+        {
+            var array = ArrayEx.Create(10, i => i + 1);
+            var newArray = array.Select(i => (byte)i);
+
+            byte[] expected = ArrayEx.Create(10, i => (byte)(i + 1));
+
+            Assert.That(newArray, Is.EqualTo(expected));
+        }
     }
 }
