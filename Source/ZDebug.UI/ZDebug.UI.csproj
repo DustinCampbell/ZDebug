@@ -93,6 +93,7 @@
     <Compile Include="ViewModel\MemoryLineViewModel.cs" />
     <Compile Include="ViewModel\MemoryViewModel.cs" />
     <Compile Include="ViewModel\ObjectsViewModel.cs" />
+    <Compile Include="ViewModel\ObjectViewModel.cs" />
     <Compile Include="ViewModel\ViewModelWithView.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
     <Compile Include="ViewModel\ViewModelWithViewBase.cs" />

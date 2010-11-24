@@ -3,9 +3,18 @@
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
     <Grid>
 
-        <ItemsControl VirtualizingStackPanel.IsVirtualizing="True"
+        <ItemsControl ItemsSource="{Binding Objects}"
+                      VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.CanContentScroll="True">
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <TextBlock Text="{Binding Number}"/>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
