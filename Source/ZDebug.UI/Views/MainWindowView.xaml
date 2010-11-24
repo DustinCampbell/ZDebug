@@ -86,6 +86,7 @@
             <ad:ResizingPanel Orientation="Vertical">
                 <ad:ResizingPanel Orientation="Horizontal">
                     <ad:DocumentPane SelectedIndex="0">
+                        <ad:DocumentContent Title="Objects" x:Name="objectsContent"/>
                         <ad:DocumentContent Title="Memory" x:Name="memoryContent"/>
                     </ad:DocumentPane>
                 </ad:ResizingPanel>

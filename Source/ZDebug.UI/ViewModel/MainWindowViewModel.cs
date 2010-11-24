@@ -141,6 +141,9 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryOpened += StoryOpened;
             DebuggerService.StoryClosed += StoryClosed;
 
+            var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
+            objectsContent.Content = ViewModelWithView.Create<ObjectsViewModel, UserControl>();
+
             var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
         }

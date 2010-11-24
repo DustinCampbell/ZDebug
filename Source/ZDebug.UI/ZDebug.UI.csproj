@@ -63,6 +63,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ObjectsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -88,6 +92,7 @@
     <Compile Include="ViewModel\MemoryMapViewModel.cs" />
     <Compile Include="ViewModel\MemoryLineViewModel.cs" />
     <Compile Include="ViewModel\MemoryViewModel.cs" />
+    <Compile Include="ViewModel\ObjectsViewModel.cs" />
     <Compile Include="ViewModel\ViewModelWithView.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
     <Compile Include="ViewModel\ViewModelWithViewBase.cs" />
