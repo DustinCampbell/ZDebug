@@ -1,8 +1,10 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AvalonDock;
 using Microsoft.Win32;
+using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
@@ -61,7 +63,7 @@ namespace ZDebug.UI.ViewModel
 
             if (dialog.ShowDialog(this.View) == true)
             {
-
+                DebuggerService.OpenStory(dialog.FileName);
             }
         }
 
@@ -108,8 +110,36 @@ namespace ZDebug.UI.ViewModel
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
 
+        public string Title
+        {
+            get
+            {
+                if (DebuggerService.HasStory)
+                {
+                    return "Z-Debug - " + Path.GetFileName(DebuggerService.FileName).ToLower();
+                }
+                else
+                {
+                    return "Z-Debug";
+                }
+            }
+        }
+
+        private void StoryOpened(object sender, StoryEventArgs e)
+        {
+            PropertyChanged("Title");
+        }
+
+        private void StoryClosed(object sender, StoryEventArgs e)
+        {
+            PropertyChanged("Title");
+        }
+
         protected internal override void Initialize()
         {
+            DebuggerService.StoryOpened += StoryOpened;
+            DebuggerService.StoryClosed += StoryClosed;
+
             var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
         }

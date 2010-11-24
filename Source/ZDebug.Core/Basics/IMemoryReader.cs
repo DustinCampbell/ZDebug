@@ -9,5 +9,6 @@
 
         int Index { get; }
         int Size { get; }
+        int RemainingBytes { get; }
     }
 }

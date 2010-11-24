@@ -83,6 +83,11 @@ namespace ZDebug.Core.Basics
             {
                 get { return memory.Size; }
             }
+
+            public int RemainingBytes
+            {
+                get { return memory.Size - index; }
+            }
         }
     }
 }

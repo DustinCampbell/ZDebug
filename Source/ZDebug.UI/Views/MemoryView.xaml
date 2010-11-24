@@ -1,6 +1,45 @@
 ﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Grid>
-            
+        <ScrollViewer>
+            <ItemsControl FontFamily="Consolas"
+                          ItemsSource="{Binding Lines}"
+                          VirtualizingStackPanel.IsVirtualizing="True">
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:MemoryLineViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,0,16,0"
+                                       Text="{Binding Address, StringFormat=\{0:x8\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="Navy"
+                                       Text="{Binding Value1, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="MediumBlue"
+                                       Text="{Binding Value2, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="Navy"
+                                       Text="{Binding Value3, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="MediumBlue"
+                                       Text="{Binding Value4, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="Navy"
+                                       Text="{Binding Value5, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="MediumBlue"
+                                       Text="{Binding Value6, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="Navy"
+                                       Text="{Binding Value7, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Foreground="MediumBlue"
+                                       Text="{Binding Value8, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

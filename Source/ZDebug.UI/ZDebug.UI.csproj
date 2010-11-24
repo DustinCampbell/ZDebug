@@ -76,8 +76,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AutoDisableImage.cs" />
+    <Compile Include="Services\DebuggerService.cs" />
+    <Compile Include="Services\StoryEventArgs.cs" />
+    <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\MemoryLineViewModel.cs" />
     <Compile Include="ViewModel\MemoryViewModel.cs" />
     <Compile Include="ViewModel\ViewModelWithView.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
@@ -109,7 +113,12 @@
     <AppDesigner Include="Properties\" />
     <Compile Include="ViewModel\ViewModelBase.PropertyChanged.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ZDebug.Core\ZDebug.Core.csproj">
+      <Project>{9484E092-64EF-4BA7-A495-77D19E04D7D2}</Project>
+      <Name>ZDebug.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\blocked.png" />
     <Resource Include="Images\breakpoint.png" />
