@@ -75,6 +75,19 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
+        public void CZech_SetAttributeByObjectNumberOf7()
+        {
+            var memory = LoadCZech();
+
+            for (int i = 0; i < 48; i++)
+            {
+                Assert.That(memory.HasAttributeByObjectNumber(7, i), Is.False);
+                memory.SetAttributeByObjectNumber(7, i, true);
+                Assert.That(memory.HasAttributeByObjectNumber(7, i), Is.True);
+            }
+        }
+
+        [Test, Category(Categories.Memory)]
         public void Curses_GetObjectCount()
         {
             var memory = LoadCurses();
