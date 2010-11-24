@@ -15,6 +15,10 @@ namespace ZDebug.Core.Tests
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////
+        // Header
+        ///////////////////////////////////////////////////////////////////////
+
         [Test, Category(Categories.Memory)]
         public void ReadVersion()
         {
@@ -118,6 +122,38 @@ namespace ZDebug.Core.Tests
         {
             var memory = LoadCZech();
             Assert.That(memory.ReadInformVersionNumber(), Is.EqualTo("6.21"));
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+        // Objects
+        ///////////////////////////////////////////////////////////////////////
+
+        [Test, Category(Categories.Memory)]
+        public void ReadObjectParentIndex()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadObjectParentIndex(6), Is.EqualTo(5));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void ReadObjectSiblingIndex()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadObjectSiblingIndex(6), Is.EqualTo(7));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void ReadObjectChildIndex()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadObjectChildIndex(7), Is.EqualTo(8));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void ReadObjectPropertyTableAddress()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadObjectPropertyTableAddress(7), Is.EqualTo(0x028e));
         }
     }
 }

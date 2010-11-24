@@ -6,8 +6,9 @@ namespace ZDebug.Core.Basics
     /// <summary>
     /// Extension methods for reading and writing Z-Machine memory.
     /// </summary>
-    internal static class MemoryExtensions
+    internal static partial class MemoryExtensions
     {
+        // header
         private const int VersionIndex = 0x00;
         private const int Flags1Index = 0x01;
         private const int ReleaseNumberIndex = 0x02;
