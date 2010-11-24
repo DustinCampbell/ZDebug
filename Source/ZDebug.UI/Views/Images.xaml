@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <BitmapImage x:Key="blockedImage" UriSource="../Images/blocked.png"/>
+    <BitmapImage x:Key="breakpointImage" UriSource="../Images/breakpoint.png"/>
+    <BitmapImage x:Key="checkImage" UriSource="../Images/check.png"/>
+    <BitmapImage x:Key="errorImage" UriSource="../Images/error.png"/>
+    <BitmapImage x:Key="goImage" UriSource="../Images/go.png"/>
+    <BitmapImage x:Key="infoImage" UriSource="../Images/info.png"/>
+    <BitmapImage x:Key="infoBigImage" UriSource="../Images/info_big.png"/>
+    <BitmapImage x:Key="ipArrowImage" UriSource="../Images/ip_arrow.png"/>
+    <BitmapImage x:Key="magnifyImage" UriSource="../Images/magnify.png"/>
+    <BitmapImage x:Key="openImage" UriSource="../Images/open.png"/>
+    <BitmapImage x:Key="pausedImage" UriSource="../Images/paused.png"/>
+    <BitmapImage x:Key="playImage" UriSource="../Images/play.png"/>
+    <BitmapImage x:Key="refreshImage" UriSource="../Images/refresh.png"/>
+    <BitmapImage x:Key="resetImage" UriSource="../Images/reset.png"/>
+    <BitmapImage x:Key="stepImage" UriSource="../Images/step.png"/>
+    <BitmapImage x:Key="stoppedImage" UriSource="../Images/stopped.png"/>
+    <BitmapImage x:Key="warningImage" UriSource="../Images/warning.png"/>
+    <BitmapImage x:Key="watchImage" UriSource="../Images/watch.png"/>
+
+</ResourceDictionary>

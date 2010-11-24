@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style TargetType="{x:Type Image}" x:Key="smallImageStyle">
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="Width" Value="12"/>
+    </Style>
+
+    <Style TargetType="{x:Type Run}" x:Key="grayText">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}" Value="False">
+                <Setter Property="Foreground" Value="Gray"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type Run}" x:Key="blueTextIfModified">
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Path=IsFrozen}" Value="True"/>
+                    <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}" Value="False"/>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="Foreground" Value="Gray"/>
+            </MultiDataTrigger>
+
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Path=IsModified}" Value="True"/>
+                    <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}" Value="False"/>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="Foreground" Value="Blue"/>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type ListBox}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <ScrollViewer Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" 
+                                  Padding="{TemplateBinding Padding}">
+                        <ItemsPresenter />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
