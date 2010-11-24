@@ -82,7 +82,7 @@ namespace ZDebug.Core.Tests
             for (int i = 0; i < 48; i++)
             {
                 Assert.That(memory.HasAttributeByObjectNumber(7, i), Is.False);
-                memory.SetAttributeByObjectNumber(7, i, true);
+                memory.SetAttributeValueByObjectNumber(7, i, true);
                 Assert.That(memory.HasAttributeByObjectNumber(7, i), Is.True);
             }
         }

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using ZDebug.Core.Tests.Utilities;
 
 namespace ZDebug.Core.Tests
@@ -26,6 +27,19 @@ namespace ZDebug.Core.Tests
         {
             var story = LoadStory();
             Assert.That(story.ObjectTable.Count, Is.EqualTo(656));
+        }
+
+        [Test, Category(Categories.Story)]
+        public void ObjectTable_484_Attributes()
+        {
+            var story = LoadStory();
+            Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(21), Is.True);
+            Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(25), Is.True);
+
+            foreach (var n in Enumerable.Range(0, 48).Where(n => n != 21 && n != 25))
+            {
+                Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(n), Is.False);
+            }
         }
 
         [Test, Category(Categories.Memory)]

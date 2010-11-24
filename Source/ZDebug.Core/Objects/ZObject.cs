@@ -64,6 +64,21 @@ namespace ZDebug.Core.Objects
             get { return GetObjectByNumber(memory.ReadChildNumberByObjectAddress(address)); }
         }
 
+        public bool HasAttribute(int attribute)
+        {
+            return memory.HasAttributeByObjectAddress(address, attribute);
+        }
+
+        public void SetAttribute(int attribute)
+        {
+            memory.SetAttributeValueByObjectAddress(address, attribute, true);
+        }
+
+        public void ClearAttribute(int attribute)
+        {
+            memory.SetAttributeValueByObjectAddress(address, attribute, false);
+        }
+
         public ZPropertyTable PropertyTable
         {
             get

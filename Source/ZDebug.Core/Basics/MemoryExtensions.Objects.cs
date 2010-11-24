@@ -268,7 +268,7 @@ namespace ZDebug.Core.Basics
             return memory.HasAttributeByObjectAddress(objAddress, attribute);
         }
 
-        public static void SetAttributeByObjectAddress(this Memory memory, int objAddress, int attribute, bool value)
+        public static void SetAttributeValueByObjectAddress(this Memory memory, int objAddress, int attribute, bool value)
         {
             var version = memory.ReadVersion();
             var attributeCount = GetObjectAttributeCount(version);
@@ -288,11 +288,11 @@ namespace ZDebug.Core.Basics
             memory.WriteAttributeBytesByObjectAddress(objAddress, attributeBytes);
         }
 
-        public static void SetAttributeByObjectNumber(this Memory memory, int objNum, int attribute, bool value)
+        public static void SetAttributeValueByObjectNumber(this Memory memory, int objNum, int attribute, bool value)
         {
             var objAddress = GetObjectEntryAddress(memory, objNum);
 
-            memory.SetAttributeByObjectAddress(objAddress, attribute, value);
+            memory.SetAttributeValueByObjectAddress(objAddress, attribute, value);
         }
 
         private static int ReadObjectNumber(this Memory memory, byte version, int address)
