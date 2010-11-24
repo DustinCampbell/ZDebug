@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -21,17 +19,22 @@ namespace ZDebug.UI.ViewModel
         {
             var reader = e.Story.Memory.CreateReader(0);
 
-            var newLines = new List<MemoryLineViewModel>(reader.Size / 8);
-            while (reader.RemainingBytes > 0)
+            lines.BeginBulkOperation();
+            try
             {
-                var address = reader.Index;
-                var count = Math.Min(8, reader.RemainingBytes);
-                var values = reader.NextWords(count);
+                while (reader.RemainingBytes > 0)
+                {
+                    var address = reader.Index;
+                    var count = Math.Min(8, reader.RemainingBytes);
+                    var values = reader.NextWords(count);
 
-                newLines.Add(new MemoryLineViewModel(address, values));
+                    lines.Add(new MemoryLineViewModel(address, values));
+                }
             }
-
-            lines.AddRange(newLines);
+            finally
+            {
+                lines.EndBulkOperation();
+            }
         }
 
         private void StoryClosed(object sender, StoryEventArgs e)
@@ -45,9 +48,9 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryClosed += StoryClosed;
         }
 
-        public ReadOnlyObservableCollection<MemoryLineViewModel> Lines
+        public BulkObservableCollection<MemoryLineViewModel> Lines
         {
-            get { return lines.AsReadOnly(); }
+            get { return lines; }
         }
     }
 }

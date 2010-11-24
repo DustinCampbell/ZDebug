@@ -2,21 +2,115 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace ZDebug.UI.Utilities
 {
-    public class BulkObservableCollection<T> : ObservableCollection<T>
+    public class BulkObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private ReadOnlyObservableCollection<T> readOnly;
 
         private int bulkOperationCount;
         private bool collectionChangedDuringBulkOperation;
 
-        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        protected void OnPropertyChanged(string name)
         {
+            var handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        private void OnCollectionChanged(NotifyCollectionChangedAction action, T item, int index)
+        {
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
+        }
+
+        private void OnCollectionChanged(NotifyCollectionChangedAction action, T item, int index, int oldIndex)
+        {
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
+        }
+
+        private void OnCollectionChanged(NotifyCollectionChangedAction action, T item, T oldItem, int index)
+        {
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, oldItem, index));
+        }
+
+        private void OnCollectionReset()
+        {
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Items[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
+        protected void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            var handler = CollectionChanged;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+
+        protected override void ClearItems()
+        {
+            base.ClearItems();
+
             if (bulkOperationCount == 0)
             {
-                base.OnCollectionChanged(e);
+                OnCollectionReset();
+            }
+            else
+            {
+                collectionChangedDuringBulkOperation = true;
+            }
+        }
+
+        protected override void InsertItem(int index, T item)
+        {
+            base.InsertItem(index, item);
+
+            if (bulkOperationCount == 0)
+            {
+                OnPropertyChanged("Count");
+                OnPropertyChanged("Items[]");
+                OnCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
+            }
+            else
+            {
+                collectionChangedDuringBulkOperation = true;
+            }
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            var item = this[index];
+            base.RemoveItem(index);
+
+            if (bulkOperationCount == 0)
+            {
+                OnPropertyChanged("Count");
+                OnPropertyChanged("Items[]");
+                OnCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
+            }
+            else
+            {
+                collectionChangedDuringBulkOperation = true;
+            }
+        }
+
+        protected override void SetItem(int index, T item)
+        {
+            var oldItem = this[index];
+
+            base.SetItem(index, item);
+
+
+            if (bulkOperationCount == 0)
+            {
+                OnPropertyChanged("Items[]");
+                OnCollectionChanged(NotifyCollectionChangedAction.Replace, oldItem, item, index);
             }
             else
             {
@@ -40,7 +134,7 @@ namespace ZDebug.UI.Utilities
 
             if (bulkOperationCount == 0 && collectionChangedDuringBulkOperation)
             {
-                this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                OnCollectionReset();
                 collectionChangedDuringBulkOperation = false;
             }
         }
@@ -52,9 +146,20 @@ namespace ZDebug.UI.Utilities
                 BeginBulkOperation();
                 try
                 {
-                    foreach (var item in items)
+                    var list = items as IList<T>;
+                    if (list != null)
                     {
-                        this.Add(item);
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            this.Add(list[i]);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var item in items)
+                        {
+                            this.Add(item);
+                        }
                     }
                 }
                 finally
@@ -138,14 +243,8 @@ namespace ZDebug.UI.Utilities
             return BinarySearch(item, Comparer<T>.Default);
         }
 
-        public ReadOnlyObservableCollection<T> AsReadOnly()
-        {
-            if (readOnly == null)
-            {
-                readOnly = new ReadOnlyObservableCollection<T>(this);
-            }
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-            return readOnly;
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

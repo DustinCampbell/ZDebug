@@ -3,43 +3,82 @@
              xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
              xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Grid>
-        <ScrollViewer>
-            <ItemsControl FontFamily="Consolas"
-                          ItemsSource="{Binding Lines}"
-                          VirtualizingStackPanel.IsVirtualizing="True">
-                <ItemsControl.Resources>
-                    <DataTemplate DataType="{x:Type vm:MemoryLineViewModel}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0,0,16,0"
+        <ItemsControl FontFamily="Consolas"
+                      FontSize="14"
+                      Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                      Padding="4"
+                      ItemsSource="{Binding Lines}"
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True">
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+
+                        <Border BorderThickness="0,0,1,0"
+                                BorderBrush="Silver">
+                            <TextBlock Margin="0,0,7,0"
                                        Text="{Binding Address, StringFormat=\{0:x8\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="Navy"
-                                       Text="{Binding Value1, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="MediumBlue"
-                                       Text="{Binding Value2, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="Navy"
-                                       Text="{Binding Value3, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="MediumBlue"
-                                       Text="{Binding Value4, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="Navy"
-                                       Text="{Binding Value5, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="MediumBlue"
-                                       Text="{Binding Value6, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="Navy"
-                                       Text="{Binding Value7, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Foreground="MediumBlue"
-                                       Text="{Binding Value8, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.Resources>
-            </ItemsControl>
-        </ScrollViewer>
+                        </Border>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="Navy"
+                                   Text="{Binding Value1, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="MediumBlue"
+                                   Text="{Binding Value2, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="Navy"
+                                   Text="{Binding Value3, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="MediumBlue"
+                                   Text="{Binding Value4, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="Navy"
+                                   Text="{Binding Value5, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="MediumBlue"
+                                   Text="{Binding Value6, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="Navy"
+                                   Text="{Binding Value7, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                        <TextBlock Margin="8,0,0,0"
+                                   Foreground="MediumBlue"
+                                   Text="{Binding Value8, TargetNullValue={x:Static sys:String.Empty}, StringFormat=\{0:x4\}}"/>
+
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.Template>
+                <ControlTemplate>
+                    <Border BorderThickness="{TemplateBinding Border.BorderThickness}"
+                            Padding="{TemplateBinding Control.Padding}"
+                            BorderBrush="{TemplateBinding Border.BorderBrush}"
+                            Background="{TemplateBinding Panel.Background}"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer Padding="{TemplateBinding Control.Padding}"
+                                      Focusable="False">
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </ItemsControl.Template>
+
+        </ItemsControl>
     </Grid>
 </UserControl>
