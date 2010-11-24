@@ -11,21 +11,21 @@ namespace ZDebug.Core.Tests
         public void CZech_ReadObjectParentIndexOf6()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectParentIndex(6), Is.EqualTo(5));
+            Assert.That(memory.ReadObjectParentNumber(6), Is.EqualTo(5));
         }
 
         [Test, Category(Categories.Memory)]
         public void CZech_ReadObjectSiblingIndexOf6()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectSiblingIndex(6), Is.EqualTo(7));
+            Assert.That(memory.ReadObjectSiblingNumber(6), Is.EqualTo(7));
         }
 
         [Test, Category(Categories.Memory)]
         public void CZech_ReadObjectChildIndexOf7()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectChildIndex(7), Is.EqualTo(8));
+            Assert.That(memory.ReadObjectChildNumber(7), Is.EqualTo(8));
         }
 
         [Test, Category(Categories.Memory)]

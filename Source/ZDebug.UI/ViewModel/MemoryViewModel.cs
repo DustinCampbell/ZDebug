@@ -19,8 +19,8 @@ namespace ZDebug.UI.ViewModel
         private void MemoryChanged(object sender, MemoryChangedEventArgs e)
         {
             // Replace affected lines
-            int firstLineIndex = e.Index / 16;
-            int lastLineIndex = (e.Index + e.Length) / 16;
+            int firstLineIndex = e.Address / 16;
+            int lastLineIndex = (e.Address + e.Length) / 16;
 
             var reader = e.Memory.CreateReader(firstLineIndex * 16);
 
@@ -36,7 +36,7 @@ namespace ZDebug.UI.ViewModel
             // TODO: Highlight modified memory
         }
 
-        private void StoryOpened(object sender, StoryEventArgs e)
+        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
             var reader = e.Story.Memory.CreateReader(0);
 
@@ -58,17 +58,29 @@ namespace ZDebug.UI.ViewModel
             }
 
             e.Story.Memory.MemoryChanged += MemoryChanged;
+
+            PropertyChanged("HasStory");
         }
 
-        private void StoryClosed(object sender, StoryEventArgs e)
+        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             lines.Clear();
+
+            PropertyChanged("HasStory");
         }
 
         protected internal override void Initialize()
         {
-            DebuggerService.StoryOpened += StoryOpened;
-            DebuggerService.StoryClosed += StoryClosed;
+            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
+            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+
+            var memoryChartContainer = this.View.FindName<Border>("memoryChartContainer");
+            memoryChartContainer.Child = ViewModelWithView.Create<MemoryMapViewModel, UserControl>();
+        }
+
+        public bool HasStory
+        {
+            get { return DebuggerService.HasStory; }
         }
 
         public BulkObservableCollection<MemoryLineViewModel> Lines

@@ -137,7 +137,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        private static int GetObjectIndexSize(byte version)
+        private static int GetObjectNumberSize(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -153,9 +153,9 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetObjectEntryAddress(this Memory memory, int objIndex)
+        public static int GetObjectEntryAddress(this Memory memory, int objNum)
         {
-            if (objIndex < 1)
+            if (objNum < 1)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
@@ -165,7 +165,7 @@ namespace ZDebug.Core.Basics
             var entrySize = GetObjectEntrySize(version);
 
             var objectTableAddress = memory.ReadObjectTableAddress();
-            var offset = propertyDefaultsTableSize + ((objIndex - 1) * entrySize);
+            var offset = propertyDefaultsTableSize + ((objNum - 1) * entrySize);
 
             return objectTableAddress + offset;
         }
@@ -185,67 +185,151 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(objectTableAddres + offset);
         }
 
-        public static byte[] ReadObjectAttributeBytes(this Memory memory, int objIndex)
+        public static byte[] ReadObjectAttributeBytes(this Memory memory, int objNum)
         {
             var version = memory.ReadVersion();
             var attributeBytesSize = GetObjectAttributeBytesSize(version);
-            var objectEntryAddress = GetObjectEntryAddress(memory, objIndex);
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
 
             return memory.ReadBytes(objectEntryAddress, attributeBytesSize);
         }
 
-        private static int ReadObjectIndex(this Memory memory, int address, byte version)
+        public static void WriteObjectAttributeBytes(this Memory memory, int objNum, byte[] bytes)
         {
-            var indexSize = GetObjectIndexSize(version);
+            if (bytes == null)
+            {
+                throw new ArgumentNullException("bytes");
+            }
 
-            if (indexSize == 1)
+            var version = memory.ReadVersion();
+            var attributeBytesSize = GetObjectAttributeBytesSize(version);
+
+            if (bytes.Length != attributeBytesSize)
+            {
+                throw new ArgumentException("Invalid attribute byte length: " + bytes.Length, "bytes");
+            }
+
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+
+            memory.WriteBytes(objectEntryAddress, bytes);
+        }
+
+        private static int ReadObjectNumber(this Memory memory, byte version, int address)
+        {
+            var numberSize = GetObjectNumberSize(version);
+
+            if (numberSize == 1)
             {
                 return memory.ReadByte(address);
             }
-            else if (indexSize == 2)
+            else if (numberSize == 2)
             {
                 return memory.ReadWord(address);
             }
             else
             {
-                throw new InvalidOperationException("Invalid object index size: " + indexSize);
+                throw new InvalidOperationException("Invalid object number size: " + numberSize);
             }
         }
 
-        public static int ReadObjectParentIndex(this Memory memory, int objIndex)
+        private static void WriteObjectNumber(this Memory memory, byte version, int address, int value)
+        {
+            var numberSize = GetObjectNumberSize(version);
+
+            if (numberSize == 1)
+            {
+                if (value < byte.MinValue || value > byte.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
+
+                memory.WriteByte(address, (byte)value);
+            }
+            else if (numberSize == 2)
+            {
+                if (value < ushort.MinValue || value > ushort.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException("value");
+                }
+
+                memory.WriteWord(address, (ushort)value);
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid object number size: " + numberSize);
+            }
+        }
+
+        public static int ReadObjectParentNumber(this Memory memory, int objNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objIndex);
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var parentOffset = GetObjectParentOffset(version);
 
-            return memory.ReadObjectIndex(objectEntryAddress + parentOffset, version);
+            return memory.ReadObjectNumber(version, objectEntryAddress + parentOffset);
         }
 
-        public static int ReadObjectSiblingIndex(this Memory memory, int objIndex)
+        public static void WriteObjectParentNumber(this Memory memory, int objNum, int parentObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objIndex);
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+            var parentOffset = GetObjectParentOffset(version);
+
+            memory.WriteObjectNumber(version, objectEntryAddress + parentOffset, parentObjNum);
+        }
+
+        public static int ReadObjectSiblingNumber(this Memory memory, int objNum)
+        {
+            var version = memory.ReadVersion();
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var siblingOffset = GetObjectSiblingOffset(version);
 
-            return memory.ReadObjectIndex(objectEntryAddress + siblingOffset, version);
+            return memory.ReadObjectNumber(version, objectEntryAddress + siblingOffset);
         }
 
-        public static int ReadObjectChildIndex(this Memory memory, int objIndex)
+        public static void WriteObjectSiblingNumber(this Memory memory, int objNum, int siblingObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objIndex);
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+            var siblingOffset = GetObjectSiblingOffset(version);
+
+            memory.WriteObjectNumber(version, objectEntryAddress + siblingOffset, siblingObjNum);
+        }
+
+        public static int ReadObjectChildNumber(this Memory memory, int objNum)
+        {
+            var version = memory.ReadVersion();
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var childOffset = GetObjectChildOffset(version);
 
-            return memory.ReadObjectIndex(objectEntryAddress + childOffset, version);
+            return memory.ReadObjectNumber(version, objectEntryAddress + childOffset);
         }
 
-        public static ushort ReadObjectPropertyTableAddress(this Memory memory, int objIndex)
+        public static void WriteObjectChildNumber(this Memory memory, int objNum, int childObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objIndex);
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+            var childOffset = GetObjectChildOffset(version);
+
+            memory.WriteObjectNumber(version, objectEntryAddress + childOffset, childObjNum);
+        }
+
+        public static ushort ReadObjectPropertyTableAddress(this Memory memory, int objNum)
+        {
+            var version = memory.ReadVersion();
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
 
             return memory.ReadWord(objectEntryAddress + propertyTableAddressOffset);
+        }
+
+        public static void WriteObjectPropertyTableAddress(this Memory memory, int objNum, ushort address)
+        {
+            var version = memory.ReadVersion();
+            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+
+            memory.WriteWord(objectEntryAddress + propertyTableAddressOffset, address);
         }
 
         /// <summary>
@@ -277,6 +361,18 @@ namespace ZDebug.Core.Basics
             }
 
             throw new InvalidOperationException("Could not find the end of the object table");
+        }
+
+        public static ushort[] ReadShortName(this Memory memory, int address)
+        {
+            var length = memory.ReadByte(address);
+            return memory.ReadWords(address + 1, length);
+        }
+
+        public static ushort[] ReadObjectShortName(this Memory memory, int objNum)
+        {
+            var propertyTableAddress = memory.ReadObjectPropertyTableAddress(objNum);
+            return memory.ReadShortName(propertyTableAddress);
         }
     }
 }

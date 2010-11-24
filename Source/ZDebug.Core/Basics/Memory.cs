@@ -28,17 +28,17 @@ namespace ZDebug.Core.Basics
             this.bytes = stream.ReadFully();
         }
 
-        public byte ReadByte(int index)
+        public byte ReadByte(int address)
         {
-            if (index < 0 || index > bytes.Length - 1)
+            if (address < 0 || address > bytes.Length - 1)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            return bytes[index];
+            return bytes[address];
         }
 
-        public byte[] ReadBytes(int index, int length)
+        public byte[] ReadBytes(int address, int length)
         {
             if (length < 0)
             {
@@ -50,30 +50,30 @@ namespace ZDebug.Core.Basics
                 return ArrayEx.Empty<byte>();
             }
 
-            if (index < 0 || index > bytes.Length - length)
+            if (address < 0 || address > bytes.Length - length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
             byte[] result = new byte[length];
-            Array.Copy(bytes, index, result, 0, length);
+            Array.Copy(bytes, address, result, 0, length);
             return result;
         }
 
-        public ushort ReadWord(int index)
+        public ushort ReadWord(int address)
         {
-            if (index < 0 || index > bytes.Length - 2)
+            if (address < 0 || address > bytes.Length - 2)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            var b1 = bytes[index];
-            var b2 = bytes[index + 1];
+            var b1 = bytes[address];
+            var b2 = bytes[address + 1];
 
             return (ushort)(b1 << 8 | b2);
         }
 
-        public ushort[] ReadWords(int index, int length)
+        public ushort[] ReadWords(int address, int length)
         {
             if (length < 0)
             {
@@ -85,16 +85,16 @@ namespace ZDebug.Core.Basics
                 return ArrayEx.Empty<ushort>();
             }
 
-            if (index < 0 || index > bytes.Length - (length * 2))
+            if (address < 0 || address > bytes.Length - (length * 2))
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
             ushort[] result = new ushort[length];
             for (int i = 0; i < length; i++)
             {
-                var b1 = bytes[index + (i * 2)];
-                var b2 = bytes[index + (i * 2) + 1];
+                var b1 = bytes[address + (i * 2)];
+                var b2 = bytes[address + (i * 2) + 1];
 
                 result[i] = (ushort)(b1 << 8 | b2);
             }
@@ -102,34 +102,34 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
-        private void OnMemoryChanged(int index, int length, byte[] oldValues, byte[] newValues)
+        private void OnMemoryChanged(int address, int length, byte[] oldValues, byte[] newValues)
         {
             var handler = MemoryChanged;
             if (handler != null)
             {
-                handler(this, new MemoryChangedEventArgs(this, index, length, oldValues, newValues));
+                handler(this, new MemoryChangedEventArgs(this, address, length, oldValues, newValues));
             }
         }
 
-        public void WriteByte(int index, byte value)
+        public void WriteByte(int address, byte value)
         {
-            if (index < 0 || index + 1 > bytes.Length)
+            if (address < 0 || address + 1 > bytes.Length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            byte oldValue = bytes[index];
+            byte oldValue = bytes[address];
 
-            bytes[index] = value;
+            bytes[address] = value;
 
             OnMemoryChanged(
-                index,
+                address,
                 length: 1,
                 oldValues: new byte[] { oldValue },
                 newValues: new byte[] { value });
         }
 
-        public void WriteBytes(int index, byte[] values)
+        public void WriteBytes(int address, byte[] values)
         {
             if (values == null)
             {
@@ -141,46 +141,46 @@ namespace ZDebug.Core.Basics
                 return;
             }
 
-            if (index < 0 || index + values.Length > bytes.Length)
+            if (address < 0 || address + values.Length > bytes.Length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.Copy(index, values.Length);
+            var oldValues = bytes.Copy(address, values.Length);
 
-            Array.Copy(values, 0, bytes, index, values.Length);
+            Array.Copy(values, 0, bytes, address, values.Length);
 
             OnMemoryChanged(
-                index,
+                address,
                 length: values.Length,
                 oldValues: oldValues,
                 newValues: values);
         }
 
-        public void WriteWord(int index, ushort value)
+        public void WriteWord(int address, ushort value)
         {
-            if (index < 0 || index + 2 > bytes.Length)
+            if (address < 0 || address + 2 > bytes.Length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            var old1 = bytes[index];
-            var old2 = bytes[index + 1];
+            var old1 = bytes[address];
+            var old2 = bytes[address + 1];
 
             var b1 = (byte)(value >> 8);
             var b2 = (byte)(value & 0x00ff);
 
-            bytes[index] = b1;
-            bytes[index + 1] = b2;
+            bytes[address] = b1;
+            bytes[address + 1] = b2;
 
             OnMemoryChanged(
-                index,
+                address,
                 length: 2,
                 oldValues: new byte[] { old1, old2 },
                 newValues: new byte[] { b1, b2 });
         }
 
-        public void WriteWords(int index, ushort[] values)
+        public void WriteWords(int address, ushort[] values)
         {
             if (values == null)
             {
@@ -192,36 +192,36 @@ namespace ZDebug.Core.Basics
                 return;
             }
 
-            if (index < 0 || index + (values.Length * 2) > bytes.Length)
+            if (address < 0 || address + (values.Length * 2) > bytes.Length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.Copy(index, values.Length * 2);
+            var oldValues = bytes.Copy(address, values.Length * 2);
 
             for (int i = 0; i < values.Length; i++)
             {
-                bytes[index + (i * 2)] = (byte)(values[i] >> 8);
-                bytes[index + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
+                bytes[address + (i * 2)] = (byte)(values[i] >> 8);
+                bytes[address + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
             }
 
-            var newValues = bytes.Copy(index, values.Length * 2);
+            var newValues = bytes.Copy(address, values.Length * 2);
 
             OnMemoryChanged(
-                index,
+                address,
                 length: values.Length * 2,
                 oldValues: oldValues,
                 newValues: newValues);
         }
 
-        public IMemoryReader CreateReader(int index)
+        public IMemoryReader CreateReader(int address)
         {
-            if (index < 0 || index >= bytes.Length)
+            if (address < 0 || address >= bytes.Length)
             {
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException("address");
             }
 
-            return new MemoryReader(this, index);
+            return new MemoryReader(this, address);
         }
 
         public int Size
