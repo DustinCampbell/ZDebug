@@ -8,7 +8,7 @@ namespace ZDebug.Core.Basics
     {
         private readonly byte[] bytes;
 
-        public Memory(byte[] bytes)
+        internal Memory(byte[] bytes)
         {
             if (bytes == null)
             {
@@ -18,7 +18,7 @@ namespace ZDebug.Core.Basics
             this.bytes = bytes;
         }
 
-        public Memory(Stream stream)
+        internal Memory(Stream stream)
         {
             if (stream == null)
             {
