@@ -86,6 +86,20 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
+        public void ReadFileSize()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadFileSize(), Is.EqualTo(0x0333c));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void ReadChecksum()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.ReadChecksum(), Is.EqualTo(0xbaaf));
+        }
+
+        [Test, Category(Categories.Memory)]
         public void ReadTerminatingCharactersTableAddress()
         {
             var memory = LoadCZech();

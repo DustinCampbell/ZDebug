@@ -94,9 +94,27 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(AbbreviationTableAddressIndex);
         }
 
-        public static ushort ReadFileSize(this Memory memory)
+        public static int ReadFileSize(this Memory memory)
         {
-            return memory.ReadWord(FileSizeIndex);
+            var version = memory.ReadVersion();
+            var fileSize = memory.ReadWord(FileSizeIndex);
+
+            switch (version)
+            {
+                case 1:
+                case 2:
+                case 3:
+                    return fileSize * 2;
+                case 4:
+                case 5:
+                    return fileSize * 4;
+                case 6:
+                case 7:
+                case 8:
+                    return fileSize * 8;
+                default:
+                    throw new InvalidOperationException("Invalid version number: " + version);
+            }
         }
 
         public static ushort ReadChecksum(this Memory memory)
