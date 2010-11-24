@@ -8,38 +8,52 @@ namespace ZDebug.Core.Tests
     public partial class MemoryExtensionsTests
     {
         [Test, Category(Categories.Memory)]
-        public void ReadObjectParentIndex()
+        public void CZech_ReadObjectParentIndexOf6()
         {
             var memory = LoadCZech();
             Assert.That(memory.ReadObjectParentIndex(6), Is.EqualTo(5));
         }
 
         [Test, Category(Categories.Memory)]
-        public void ReadObjectSiblingIndex()
+        public void CZech_ReadObjectSiblingIndexOf6()
         {
             var memory = LoadCZech();
             Assert.That(memory.ReadObjectSiblingIndex(6), Is.EqualTo(7));
         }
 
         [Test, Category(Categories.Memory)]
-        public void ReadObjectChildIndex()
+        public void CZech_ReadObjectChildIndexOf7()
         {
             var memory = LoadCZech();
             Assert.That(memory.ReadObjectChildIndex(7), Is.EqualTo(8));
         }
 
         [Test, Category(Categories.Memory)]
-        public void ReadObjectPropertyTableAddress()
+        public void CZech_ReadObjectPropertyTableAddressOf7()
         {
             var memory = LoadCZech();
             Assert.That(memory.ReadObjectPropertyTableAddress(7), Is.EqualTo(0x028e));
         }
 
         [Test, Category(Categories.Memory)]
-        public void GetObjectCount()
+        public void Curses_GetObjectCount()
+        {
+            var memory = LoadCurses();
+            Assert.That(memory.GetObjectCount(), Is.EqualTo(502));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void CZech_GetObjectCount()
         {
             var memory = LoadCZech();
             Assert.That(memory.GetObjectCount(), Is.EqualTo(10));
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void Zork1_GetObjectCount()
+        {
+            var memory = LoadZork1();
+            Assert.That(memory.GetObjectCount(), Is.EqualTo(250));
         }
     }
 }
