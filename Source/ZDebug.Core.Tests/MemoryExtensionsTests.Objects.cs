@@ -36,6 +36,45 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
+        public void CZech_HasAttributeByObjectNumberOf5()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.HasAttributeByObjectNumber(5, 0), Is.True);
+            Assert.That(memory.HasAttributeByObjectNumber(5, 1), Is.True);
+
+            for (int i = 2; i < 48; i++)
+            {
+                Assert.That(memory.HasAttributeByObjectNumber(5, i), Is.False);
+            }
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void CZech_HasAttributeByObjectNumberOf6()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.HasAttributeByObjectNumber(6, 0), Is.False);
+            Assert.That(memory.HasAttributeByObjectNumber(6, 1), Is.False);
+            Assert.That(memory.HasAttributeByObjectNumber(6, 2), Is.True);
+            Assert.That(memory.HasAttributeByObjectNumber(6, 3), Is.True);
+
+            for (int i = 4; i < 48; i++)
+            {
+                Assert.That(memory.HasAttributeByObjectNumber(6, i), Is.False);
+            }
+        }
+
+        [Test, Category(Categories.Memory)]
+        public void CZech_HasAttributeByObjectNumberOf7()
+        {
+            var memory = LoadCZech();
+
+            for (int i = 0; i < 48; i++)
+            {
+                Assert.That(memory.HasAttributeByObjectNumber(7, i), Is.False);
+            }
+        }
+
+        [Test, Category(Categories.Memory)]
         public void Curses_GetObjectCount()
         {
             var memory = LoadCurses();

@@ -75,6 +75,22 @@ namespace ZDebug.Core.Basics
             }
         }
 
+        private static int GetObjectAttributeCount(byte version)
+        {
+            if (version >= 1 && version <= 3)
+            {
+                return 32;
+            }
+            else if (version >= 4 && version <= 8)
+            {
+                return 48;
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid version number: " + version);
+            }
+        }
+
         private static int GetObjectParentOffset(byte version)
         {
             if (version >= 1 && version <= 3)
@@ -225,6 +241,31 @@ namespace ZDebug.Core.Basics
             var objAddress = GetObjectEntryAddress(memory, objNum);
 
             memory.WriteAttributeBytesByObjectAddress(objAddress, bytes);
+        }
+
+        public static bool HasAttributeByObjectAddress(this Memory memory, int objAddress, int attribute)
+        {
+            var version = memory.ReadVersion();
+            var attributeCount = GetObjectAttributeCount(version);
+
+            if (attribute < 0 || attribute >= attributeCount)
+            {
+                throw new ArgumentOutOfRangeException("attribute");
+            }
+
+            var attributeBytes = memory.ReadAttributeBytesByObjectAddress(objAddress);
+
+            var byteIdx = attribute / 8;
+            var bitMask = 1 << (7 - (attribute % 8));
+
+            return (attributeBytes[byteIdx] & bitMask) == bitMask;
+        }
+
+        public static bool HasAttributeByObjectNumber(this Memory memory, int objNum, int attribute)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.HasAttributeByObjectAddress(objAddress, attribute);
         }
 
         private static int ReadObjectNumber(this Memory memory, byte version, int address)
