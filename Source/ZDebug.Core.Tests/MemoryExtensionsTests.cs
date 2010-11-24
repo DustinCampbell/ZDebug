@@ -155,5 +155,12 @@ namespace ZDebug.Core.Tests
             var memory = LoadCZech();
             Assert.That(memory.ReadObjectPropertyTableAddress(7), Is.EqualTo(0x028e));
         }
+
+        [Test, Category(Categories.Memory)]
+        public void GetObjectCount()
+        {
+            var memory = LoadCZech();
+            Assert.That(memory.GetObjectCount(), Is.EqualTo(10));
+        }
     }
 }

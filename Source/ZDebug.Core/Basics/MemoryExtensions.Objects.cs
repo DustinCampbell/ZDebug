@@ -247,5 +247,36 @@ namespace ZDebug.Core.Basics
 
             return memory.ReadWord(objectEntryAddress + propertyTableAddressOffset);
         }
+
+        /// <summary>
+        /// Because this operation walks the entire object table it can be expensive.
+        /// </summary>
+        public static int GetObjectCount(this Memory memory)
+        {
+            var version = memory.ReadVersion();
+            var maxObjects = GetMaxObjects(version);
+            var objectTableAddress = memory.ReadObjectTableAddress();
+            var objectEntrySize = GetObjectEntrySize(version);
+            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+            var propertyDefaultsTableSize = GetPropertyDefaultsTableSize(version);
+
+            var address = objectTableAddress + propertyDefaultsTableSize;
+            var smallestPropertyTableAddress = Int32.MaxValue;
+
+            for (int i = 1; i <= maxObjects; i++)
+            {
+                if (address >= smallestPropertyTableAddress)
+                {
+                    return i - 1;
+                }
+
+                var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
+                smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
+
+                address += objectEntrySize;
+            }
+
+            throw new InvalidOperationException("Could not find the end of the object table");
+        }
     }
 }
