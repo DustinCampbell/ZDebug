@@ -58,7 +58,8 @@ namespace ZDebug.UI.ViewModel
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "Z-Code Files (*.z3,*.z4,*.z5)|*.z3;*.z4;*.z5|All Files (*.*)|*.*"
+                Title = "Open Z-Code File",
+                Filter = "Z-Code Files (*.z3,*.z4,*.z5,*.z8)|*.z3;*.z4;*.z5;*.z8|All Files (*.*)|*.*"
             };
 
             if (dialog.ShowDialog(this.View) == true)
