@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Basics\IMemory.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\IMemoryReader.cs" />
     <Compile Include="Basics\Memory.MemoryReader.cs" />
