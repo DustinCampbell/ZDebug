@@ -8,31 +8,31 @@ namespace ZDebug.Core.Tests
     public partial class MemoryExtensionsTests
     {
         [Test, Category(Categories.Memory)]
-        public void CZech_ReadObjectParentIndexOf6()
+        public void CZech_ReadObjectParentNumberOf6()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectParentNumber(6), Is.EqualTo(5));
+            Assert.That(memory.ReadParentNumberByObjectNumber(6), Is.EqualTo(5));
         }
 
         [Test, Category(Categories.Memory)]
-        public void CZech_ReadObjectSiblingIndexOf6()
+        public void CZech_ReadObjectSiblingNumberOf6()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectSiblingNumber(6), Is.EqualTo(7));
+            Assert.That(memory.ReadSiblingNumberByObjectNumber(6), Is.EqualTo(7));
         }
 
         [Test, Category(Categories.Memory)]
-        public void CZech_ReadObjectChildIndexOf7()
+        public void CZech_ReadObjectChildNumberOf7()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectChildNumber(7), Is.EqualTo(8));
+            Assert.That(memory.ReadChildNumberByObjectNumber(7), Is.EqualTo(8));
         }
 
         [Test, Category(Categories.Memory)]
         public void CZech_ReadObjectPropertyTableAddressOf7()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadObjectPropertyTableAddress(7), Is.EqualTo(0x028e));
+            Assert.That(memory.ReadPropertyTableAddressByObjectNumber(7), Is.EqualTo(0x028e));
         }
 
         [Test, Category(Categories.Memory)]

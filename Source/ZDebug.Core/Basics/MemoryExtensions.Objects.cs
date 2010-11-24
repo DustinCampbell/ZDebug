@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using ZDebug.Core.Objects;
 
 namespace ZDebug.Core.Basics
 {
@@ -185,16 +187,22 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(objectTableAddres + offset);
         }
 
-        public static byte[] ReadObjectAttributeBytes(this Memory memory, int objNum)
+        public static byte[] ReadAttributeBytesByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
             var attributeBytesSize = GetObjectAttributeBytesSize(version);
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
 
-            return memory.ReadBytes(objectEntryAddress, attributeBytesSize);
+            return memory.ReadBytes(objAddress, attributeBytesSize);
         }
 
-        public static void WriteObjectAttributeBytes(this Memory memory, int objNum, byte[] bytes)
+        public static byte[] ReadAttributeBytesByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.ReadAttributeBytesByObjectAddress(objAddress);
+        }
+
+        public static void WriteAttributeBytesByObjectAddress(this Memory memory, int objAddress, byte[] bytes)
         {
             if (bytes == null)
             {
@@ -209,9 +217,14 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentException("Invalid attribute byte length: " + bytes.Length, "bytes");
             }
 
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
+            memory.WriteBytes(objAddress, bytes);
+        }
 
-            memory.WriteBytes(objectEntryAddress, bytes);
+        public static void WriteAttributeBytesByObjectNumber(this Memory memory, int objNum, byte[] bytes)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            memory.WriteAttributeBytesByObjectAddress(objAddress, bytes);
         }
 
         private static int ReadObjectNumber(this Memory memory, byte version, int address)
@@ -260,76 +273,155 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int ReadObjectParentNumber(this Memory memory, int objNum)
+        public static int ReadParentNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var parentOffset = GetObjectParentOffset(version);
 
-            return memory.ReadObjectNumber(version, objectEntryAddress + parentOffset);
+            return memory.ReadObjectNumber(version, objAddress + parentOffset);
         }
 
-        public static void WriteObjectParentNumber(this Memory memory, int objNum, int parentObjNum)
+        public static int ReadParentNumberByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.ReadParentNumberByObjectAddress(objAddress);
+        }
+
+        public static void WriteParentNumberByObjectAddress(this Memory memory, int objAddress, int parentObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var parentOffset = GetObjectParentOffset(version);
 
-            memory.WriteObjectNumber(version, objectEntryAddress + parentOffset, parentObjNum);
+            memory.WriteObjectNumber(version, objAddress + parentOffset, parentObjNum);
         }
 
-        public static int ReadObjectSiblingNumber(this Memory memory, int objNum)
+        public static void WriteParentNumberByObjectNumber(this Memory memory, int objNum, int parentObjNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            memory.WriteParentNumberByObjectAddress(objAddress, parentObjNum);
+        }
+
+        public static int ReadSiblingNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var siblingOffset = GetObjectSiblingOffset(version);
 
-            return memory.ReadObjectNumber(version, objectEntryAddress + siblingOffset);
+            return memory.ReadObjectNumber(version, objAddress + siblingOffset);
         }
 
-        public static void WriteObjectSiblingNumber(this Memory memory, int objNum, int siblingObjNum)
+        public static int ReadSiblingNumberByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.ReadSiblingNumberByObjectAddress(objAddress);
+        }
+
+        public static void WriteSiblingNumberByObjectAddress(this Memory memory, int objAddress, int siblingObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var siblingOffset = GetObjectSiblingOffset(version);
 
-            memory.WriteObjectNumber(version, objectEntryAddress + siblingOffset, siblingObjNum);
+            memory.WriteObjectNumber(version, objAddress + siblingOffset, siblingObjNum);
         }
 
-        public static int ReadObjectChildNumber(this Memory memory, int objNum)
+        public static void WriteSiblingNumberByObjectNumber(this Memory memory, int objNum, int siblingObjNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            memory.WriteSiblingNumberByObjectAddress(objAddress, siblingObjNum);
+        }
+
+        public static int ReadChildNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var childOffset = GetObjectChildOffset(version);
 
-            return memory.ReadObjectNumber(version, objectEntryAddress + childOffset);
+            return memory.ReadObjectNumber(version, objAddress + childOffset);
         }
 
-        public static void WriteObjectChildNumber(this Memory memory, int objNum, int childObjNum)
+        public static int ReadChildNumberByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.ReadChildNumberByObjectAddress(objAddress);
+        }
+
+        public static void WriteChildNumberByObjectAddress(this Memory memory, int objAddress, int childObjNum)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var childOffset = GetObjectChildOffset(version);
 
-            memory.WriteObjectNumber(version, objectEntryAddress + childOffset, childObjNum);
+            memory.WriteObjectNumber(version, objAddress + childOffset, childObjNum);
         }
 
-        public static ushort ReadObjectPropertyTableAddress(this Memory memory, int objNum)
+        public static void WriteChildNumberByObjectNumber(this Memory memory, int objNum, int childObjNum)
         {
-            var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
-            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+            var objAddress = GetObjectEntryAddress(memory, objNum);
 
-            return memory.ReadWord(objectEntryAddress + propertyTableAddressOffset);
+            memory.WriteChildNumberByObjectAddress(objAddress, childObjNum);
         }
 
-        public static void WriteObjectPropertyTableAddress(this Memory memory, int objNum, ushort address)
+        public static ushort ReadPropertyTableAddressByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var objectEntryAddress = GetObjectEntryAddress(memory, objNum);
             var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
 
-            memory.WriteWord(objectEntryAddress + propertyTableAddressOffset, address);
+            return memory.ReadWord(objAddress + propertyTableAddressOffset);
+        }
+
+        public static ushort ReadPropertyTableAddressByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.ReadPropertyTableAddressByObjectAddress(objAddress);
+        }
+
+        public static void WritePropertyTableAddressByObjectAddress(this Memory memory, int objAddress, ushort value)
+        {
+            var version = memory.ReadVersion();
+            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+
+            memory.WriteWord(objAddress + propertyTableAddressOffset, value);
+        }
+
+        public static void WritePropertyTableAddressByObjectNumber(this Memory memory, int objNum, ushort value)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            memory.WritePropertyTableAddressByObjectNumber(objAddress, value);
+        }
+
+        public static IList<ZObject> ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable)
+        {
+            var version = memory.ReadVersion();
+            var maxObjects = GetMaxObjects(version);
+            var objectEntrySize = GetObjectEntrySize(version);
+            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+            var propertyDefaultsTableSize = GetPropertyDefaultsTableSize(version);
+
+            var address = objectTable.Address + propertyDefaultsTableSize;
+            var smallestPropertyTableAddress = Int32.MaxValue;
+
+            var objects = new List<ZObject>();
+
+            for (int i = 1; i <= maxObjects; i++)
+            {
+                if (address >= smallestPropertyTableAddress)
+                {
+                    return objects;
+                }
+
+                objects.Add(new ZObject(memory, objectTable, address, i));
+
+                var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
+                smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
+
+                address += objectEntrySize;
+            }
+
+            throw new InvalidOperationException("Could not find the end of the object table");
         }
 
         /// <summary>
@@ -371,8 +463,27 @@ namespace ZDebug.Core.Basics
 
         public static ushort[] ReadObjectShortName(this Memory memory, int objNum)
         {
-            var propertyTableAddress = memory.ReadObjectPropertyTableAddress(objNum);
+            var propertyTableAddress = memory.ReadPropertyTableAddressByObjectNumber(objNum);
             return memory.ReadShortName(propertyTableAddress);
+        }
+
+        public static IList<ZProperty> ReadPropertyTableProperties(this Memory memory, ZPropertyTable propertyTable)
+        {
+            // read properties...
+            var props = new List<ZProperty>();
+            var reader = memory.CreateReader(propertyTable.Address);
+
+            reader.SkipShortName();
+
+            var version = memory.ReadVersion();
+            ZProperty prop = reader.NextProperty(version, propertyTable);
+            while (prop != null)
+            {
+                props.Add(prop);
+                prop = reader.NextProperty(version, propertyTable);
+            }
+
+            return props;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace ZDebug.Core
             get { return version; }
         }
 
-        public ZObjectTable Objects
+        public ZObjectTable ObjectTable
         {
             get { return objectTable; }
         }

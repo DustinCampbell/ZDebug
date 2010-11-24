@@ -6,18 +6,25 @@ namespace ZDebug.Core.Objects
     public class ZProperty
     {
         private readonly Memory memory;
+        private readonly ZPropertyTable propertyTable;
         private readonly int address;
         private readonly int number;
         private readonly int dataAddress;
         private readonly int length;
 
-        internal ZProperty(Memory memory, int address, int number, int dataAddress, int length)
+        internal ZProperty(Memory memory, ZPropertyTable propertyTable, int address, int number, int dataAddress, int length)
         {
             this.memory = memory;
+            this.propertyTable = propertyTable;
             this.address = address;
             this.number = number;
             this.dataAddress = dataAddress;
             this.length = length;
+        }
+
+        public ZPropertyTable PropertyTable
+        {
+            get { return propertyTable; }
         }
 
         public int Address

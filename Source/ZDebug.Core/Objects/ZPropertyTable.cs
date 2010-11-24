@@ -11,6 +11,7 @@ namespace ZDebug.Core.Objects
     {
         private readonly Memory memory;
         private readonly int address;
+
         private readonly ReadOnlyCollection<ZProperty> properties;
 
         internal ZPropertyTable(Memory memory, int address)
@@ -18,21 +19,8 @@ namespace ZDebug.Core.Objects
             this.memory = memory;
             this.address = address;
 
-            // read properties
-            var props = new List<ZProperty>();
-            var reader = memory.CreateReader(address);
-
-            reader.SkipShortName();
-
-            var version = memory.ReadVersion();
-            ZProperty prop = reader.NextProperty(version);
-            while (prop != null)
-            {
-                props.Add(prop);
-                prop = reader.NextProperty(version);
-            }
-
-            properties = new ReadOnlyCollection<ZProperty>(props);
+            properties = new ReadOnlyCollection<ZProperty>(
+                memory.ReadPropertyTableProperties(this));
         }
 
         public ushort[] GetShortName()

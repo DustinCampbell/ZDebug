@@ -55,6 +55,7 @@
     <Compile Include="MemoryTests.cs" />
     <Compile Include="Sanity\ZCodeTests.cs" />
     <Compile Include="StoryTests.cs" />
+    <Compile Include="StoryTests.Objects.cs" />
     <Compile Include="StreamExtensionsTests.cs" />
     <Compile Include="Utilties\Categories.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
