@@ -51,6 +51,7 @@
     <Compile Include="MemoryExtensionsTests.Header.cs" />
     <Compile Include="MemoryExtensionsTests.Objects.cs" />
     <Compile Include="MemoryExtensionsTests.cs" />
+    <Compile Include="MemoryMapTests.cs" />
     <Compile Include="MemoryReaderTests.cs" />
     <Compile Include="MemoryTests.cs" />
     <Compile Include="Sanity\ZCodeTests.cs" />

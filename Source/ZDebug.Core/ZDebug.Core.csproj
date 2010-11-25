@@ -49,6 +49,8 @@
     <Compile Include="Basics\MemoryExtensions.Header.cs" />
     <Compile Include="Basics\MemoryExtensions.Objects.cs" />
     <Compile Include="Basics\MemoryExtensions.Text.cs" />
+    <Compile Include="Basics\MemoryMap.cs" />
+    <Compile Include="Basics\MemoryMapRegion.cs" />
     <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Objects\ZObject.cs">
       <SubType>Code</SubType>

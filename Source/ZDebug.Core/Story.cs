@@ -9,12 +9,14 @@ namespace ZDebug.Core
         private readonly Memory memory;
         private readonly byte version;
 
+        private readonly MemoryMap memoryMap;
         private readonly ZObjectTable objectTable;
 
         private Story(Memory memory)
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
+            this.memoryMap = new MemoryMap(memory);
             this.objectTable = new ZObjectTable(memory);
         }
 
@@ -36,6 +38,11 @@ namespace ZDebug.Core
         public byte Version
         {
             get { return version; }
+        }
+
+        public MemoryMap MemoryMap
+        {
+            get { return memoryMap; }
         }
 
         public ZObjectTable ObjectTable
