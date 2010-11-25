@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using ZDebug.Core.Tests.Utilities;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Tests
 {
@@ -26,6 +27,15 @@ namespace ZDebug.Core.Tests
         {
             var story = LoadStory();
             Assert.That(story.ObjectTable.Count, Is.EqualTo(10));
+        }
+
+        [Test, Category(Categories.Story)]
+        public void ObjectTable_6_ShortName()
+        {
+            var story = LoadStory();
+            var shortNameZWords = story.ObjectTable.GetByNumber(6).PropertyTable.GetShortName();
+            var shortName = ZText.ZWordsAsString(shortNameZWords, ZTextFlags.All, story.Memory);
+            Assert.That(shortName, Is.EqualTo("Test Object #2"));
         }
 
         [Test, Category(Categories.Memory)]

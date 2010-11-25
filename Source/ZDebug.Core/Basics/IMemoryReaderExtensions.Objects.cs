@@ -3,7 +3,7 @@ using ZDebug.Core.Objects;
 
 namespace ZDebug.Core.Basics
 {
-    internal static class IMemoryReaderExtensions
+    internal static partial class IMemoryReaderExtensions
     {
         private static ZProperty NextProperty_V1(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable)
         {

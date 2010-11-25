@@ -4,6 +4,11 @@ namespace ZDebug.Core.Utilities
 {
     internal static class ArrayEx
     {
+        public static TOutput[] ConvertAll<TInput, TOutput>(this TInput[] array, Converter<TInput, TOutput> converter)
+        {
+            return Array.ConvertAll(array, converter);
+        }
+
         public static T[] Copy<T>(this T[] array, int index, int length)
         {
             if (array == null)
