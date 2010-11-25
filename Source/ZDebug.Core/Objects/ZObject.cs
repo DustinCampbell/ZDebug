@@ -1,4 +1,5 @@
 ﻿using ZDebug.Core.Basics;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Objects
 {
@@ -25,6 +26,15 @@ namespace ZDebug.Core.Objects
         public int Number
         {
             get { return number; }
+        }
+
+        public string ShortName
+        {
+            get
+            {
+                var shortNameZWords = PropertyTable.GetShortNameZWords();
+                return ZText.ZWordsAsString(shortNameZWords, ZTextFlags.All, memory);
+            }
         }
 
         private ZObject GetObjectByNumber(int number)

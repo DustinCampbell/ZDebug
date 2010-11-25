@@ -23,7 +23,7 @@ namespace ZDebug.Core.Objects
                 memory.ReadPropertyTableProperties(this));
         }
 
-        public ushort[] GetShortName()
+        public ushort[] GetShortNameZWords()
         {
             return memory.ReadShortName(address);
         }

@@ -34,7 +34,7 @@ namespace ZDebug.Core.Tests
         public void ObjectTable_484_ShortName()
         {
             var story = LoadStory();
-            var shortNameZWords = story.ObjectTable.GetByNumber(484).PropertyTable.GetShortName();
+            var shortNameZWords = story.ObjectTable.GetByNumber(484).PropertyTable.GetShortNameZWords();
             var shortName = ZText.ZWordsAsString(shortNameZWords, ZTextFlags.All, story.Memory);
             Assert.That(shortName, Is.EqualTo("brass grating"));
         }

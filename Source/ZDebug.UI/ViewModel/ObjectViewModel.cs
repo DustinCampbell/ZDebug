@@ -44,7 +44,7 @@ namespace ZDebug.UI.ViewModel
 
         public string ShortName
         {
-            get { return string.Empty; }
+            get { return obj.ShortName; }
         }
 
         public string Attributes

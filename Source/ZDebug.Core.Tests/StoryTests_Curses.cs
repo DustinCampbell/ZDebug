@@ -34,7 +34,7 @@ namespace ZDebug.Core.Tests
         public void ObjectTable_478_ShortName()
         {
             var story = LoadStory();
-            var shortNameZWords = story.ObjectTable.GetByNumber(478).PropertyTable.GetShortName();
+            var shortNameZWords = story.ObjectTable.GetByNumber(478).PropertyTable.GetShortNameZWords();
             var shortName = ZText.ZWordsAsString(shortNameZWords, ZTextFlags.All, story.Memory);
             Assert.That(shortName, Is.EqualTo("Old Evans"));
         }

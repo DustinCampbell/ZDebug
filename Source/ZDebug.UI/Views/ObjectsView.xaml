@@ -85,14 +85,13 @@
                             <Border
                                 Grid.Column="0"
                                 Grid.Row="0"
-                                Grid.RowSpan="3"
+                                Grid.RowSpan="2"
                                 Margin="0,0,8,0"
                                 Width="40"
                                 TextElement.FontSize="14"
                                 TextElement.FontWeight="Bold">
 
                                 <TextBlock
-                                    Margin="0,4,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Text="{Binding Number, Mode=OneWay}"/>
@@ -101,7 +100,6 @@
                             <TextBlock
                                 Grid.Column="1" 
                                 Grid.Row="0" 
-                                Margin="0,4,0,0"
                                 FontWeight="Bold"
                                 Text="{Binding ShortName, Mode=OneWay}"/>
 
