@@ -10,6 +10,8 @@
         <ListBox
             Name="listObjects"
             ItemsSource="{Binding Objects}"
+            VirtualizingStackPanel.VirtualizationMode="Recycling"
+            HorizontalContentAlignment="Stretch"
             BorderBrush="Transparent"
             Background="Transparent">
 
@@ -64,21 +66,26 @@
                         Padding="4"
                         CornerRadius="4"
                         Margin="2">
+
                         <Grid>
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="75"/>
-                                <ColumnDefinition Width="75"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
 
                             <Border
-                                Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                Grid.RowSpan="3"
                                 Margin="0,0,8,0"
                                 Width="40"
                                 TextElement.FontSize="14"
@@ -92,58 +99,118 @@
                             </Border>
 
                             <TextBlock
-                                Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="3"
+                                Grid.Column="1" 
+                                Grid.Row="0" 
                                 Margin="0,4,0,0"
                                 FontWeight="Bold"
                                 Text="{Binding ShortName, Mode=OneWay}"/>
 
-                            <TextBlock Grid.Column="1" Grid.Row="1"
-                                   Margin="0,0,0,4">
-                            <Run Text="Parent: "/>
-                            <Hyperlink Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
-                                       CommandParameter="{Binding Parent}"
-                                       Style="{StaticResource HyperlinkStyle}">
-                                <Run Text="{Binding Parent, Mode=OneWay}"/>
-                            </Hyperlink>
+                            <Grid
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                Margin="0,4,0,4">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="75"/>
+                                    <ColumnDefinition Width="75"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0">
+
+                                    <Run Text="Parent: "/>
+
+                                    <Hyperlink
+                                        Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
+                                        CommandParameter="{Binding Parent}"
+                                        Style="{StaticResource HyperlinkStyle}">
+                                    
+                                        <Run Text="{Binding Parent, Mode=OneWay}"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Grid.Column="1">
+
+                                    <Run Text="Sibling: "/>
+
+                                    <Hyperlink
+                                        Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
+                                        CommandParameter="{Binding Sibling}"
+                                        Style="{StaticResource HyperlinkStyle}">
+
+                                        <Run Text="{Binding Sibling, Mode=OneWay}"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Grid.Column="2">
+
+                                    <Run Text="Child: "/>
+
+                                    <Hyperlink
+                                        Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
+                                        CommandParameter="{Binding Child}"
+                                        Style="{StaticResource HyperlinkStyle}">
+
+                                        <Run Text="{Binding Child, Mode=OneWay}"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                            </Grid>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Grid.Row="2"
+                                Margin="0,4,0,0">
+
+                                <Run Text="Attributes:"/>
+                                <Run Text="{Binding Attributes, Mode=OneWay}"/>
                             </TextBlock>
 
-                            <TextBlock Grid.Column="2" Grid.Row="1"
-                                   Margin="0,0,0,4">
-                            <Run Text="Sibling: "/>
-                            <Hyperlink Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
-                                       CommandParameter="{Binding Sibling}"
-                                       Style="{StaticResource HyperlinkStyle}">
-                                <Run Text="{Binding Sibling, Mode=OneWay}"/>
-                            </Hyperlink>
+                            <TextBlock
+                                Grid.Column="1"
+                                Grid.Row="3"
+                                Margin="0,4,0,0">
+                                <Run Text="Properties:"/>
+                                <Run Text="{Binding PropertyTableAddress, Mode=OneWay, StringFormat=\{0:x4\}}"/>
                             </TextBlock>
 
-                            <TextBlock Grid.Column="3" Grid.Row="1"
-                                   Margin="0,0,0,4">
-                            <Run Text="Child: "/>
-                            <Hyperlink Command="{Binding ElementName=listObjects, Path=DataContext.NavigateCommand}"
-                                       CommandParameter="{Binding Child}"
-                                       Style="{StaticResource HyperlinkStyle}">
-                                <Run Text="{Binding Child, Mode=OneWay}"/>
-                            </Hyperlink>
-                            </TextBlock>
+                            <ItemsControl
+                                Grid.Column="1"
+                                Grid.Row="4"
+                                Margin="0,4,0,0"
+                                FontFamily="Consolas"
+                                ItemsSource="{Binding Properties}">
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock>
+                                            <Run Text="["/><Run Text="{Binding Number, Mode=OneWay, StringFormat=\{0\,2\}}"/><Run Text="]"/>
+                                            <Run Text="{Binding DataDisplayText, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </Grid>
                     </Border>
-                    
+
                     <DataTemplate.Triggers>
                         <DataTrigger
                             Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}"
                             Value="True">
+
                             <Setter
                                 TargetName="OuterBorder"
                                 Property="BorderBrush"
                                 Value="#3D4AFF"/>
+
                             <Setter
                                 TargetName="OuterBorder"
                                 Property="Background"
                                 Value="#F4F5FF"/>
+
                         </DataTrigger>
                     </DataTemplate.Triggers>
-                    
+
                 </DataTemplate>
 
             </ListBox.ItemTemplate>

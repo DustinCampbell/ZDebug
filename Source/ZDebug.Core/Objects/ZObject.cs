@@ -79,6 +79,11 @@ namespace ZDebug.Core.Objects
             memory.SetAttributeValueByObjectAddress(address, attribute, false);
         }
 
+        public bool[] GetAllAttributes()
+        {
+            return memory.GetAllAttributeByObjectAddress(address);
+        }
+
         public ZPropertyTable PropertyTable
         {
             get

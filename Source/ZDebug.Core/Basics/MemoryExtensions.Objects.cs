@@ -268,6 +268,33 @@ namespace ZDebug.Core.Basics
             return memory.HasAttributeByObjectAddress(objAddress, attribute);
         }
 
+        public static bool[] GetAllAttributeByObjectAddress(this Memory memory, int objAddress)
+        {
+            var version = memory.ReadVersion();
+            var attributeCount = GetObjectAttributeCount(version);
+
+            var attributeBytes = memory.ReadAttributeBytesByObjectAddress(objAddress);
+
+            var result = new bool[attributeCount];
+
+            for (int i = 0; i < attributeCount; i++)
+            {
+                var byteIdx = i / 8;
+                var bitMask = 1 << (7 - (i % 8));
+
+                result[i] = (attributeBytes[byteIdx] & bitMask) == bitMask;
+            }
+
+            return result;
+        }
+
+        public static bool[] GetAllAttributeByObjectNumber(this Memory memory, int objNum)
+        {
+            var objAddress = GetObjectEntryAddress(memory, objNum);
+
+            return memory.GetAllAttributeByObjectAddress(objAddress);
+        }
+
         public static void SetAttributeValueByObjectAddress(this Memory memory, int objAddress, int attribute, bool value)
         {
             var version = memory.ReadVersion();

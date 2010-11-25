@@ -57,11 +57,6 @@ namespace ZDebug.Core.Objects
             get { return length == 2; }
         }
 
-        public bool IsBytes
-        {
-            get { return length > 2; }
-        }
-
         public byte ReadAsByte()
         {
             if (!IsByte)
@@ -104,21 +99,11 @@ namespace ZDebug.Core.Objects
 
         public byte[] ReadAsBytes()
         {
-            if (!IsBytes)
-            {
-                throw new InvalidOperationException("Attempted to read property with length " + length + " as bytes.");
-            }
-
             return memory.ReadBytes(dataAddress, length);
         }
 
-        public void WriteAsWord(byte[] values)
+        public void WriteAsBytes(byte[] values)
         {
-            if (!IsBytes)
-            {
-                throw new InvalidOperationException("Attempted to write property with length " + length + " as bytes.");
-            }
-
             memory.WriteBytes(dataAddress, values);
         }
     }
