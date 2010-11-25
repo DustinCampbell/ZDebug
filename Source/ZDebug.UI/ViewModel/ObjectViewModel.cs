@@ -15,5 +15,25 @@ namespace ZDebug.UI.ViewModel
         {
             get { return obj.Number; }
         }
+
+        public int Parent
+        {
+            get { return obj.HasParent ? obj.Parent.Number : 0; }
+        }
+
+        public int Sibling
+        {
+            get { return obj.HasSibling ? obj.Sibling.Number : 0; }
+        }
+
+        public int Child
+        {
+            get { return obj.HasChild ? obj.Child.Number : 0; }
+        }
+
+        public string ShortName
+        {
+            get { return string.Empty; }
+        }
     }
 }
