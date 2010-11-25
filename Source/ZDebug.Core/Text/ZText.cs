@@ -40,16 +40,12 @@ namespace ZDebug.Core.Text
                 }
                 else if (zchar >= 1 && zchar <= 3)
                 {
-                    if (version <= 2)
+                    if (version == 1 || (version == 2 && zchar >= 2))
                     {
                         switch (zchar)
                         {
                             case 1:
-                                // Z-code 1 has no effect in V2..
-                                if (version == 1)
-                                {
-                                    builder.Append('\n');
-                                }
+                                builder.Append('\n');
                                 break;
                             case 2:
                                 alphabetTable.Shift();
