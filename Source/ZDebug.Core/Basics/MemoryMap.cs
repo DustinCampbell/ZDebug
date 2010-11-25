@@ -15,6 +15,8 @@ namespace ZDebug.Core.Basics
 
             regions = new List<MemoryMapRegion>();
             regions.Add(new MemoryMapRegion("Header", 0, 0x3f));
+
+            regions.Sort((r1, r2) => r1.Base.CompareTo(r2.Base));
         }
 
         public MemoryMapRegion this[int index]
