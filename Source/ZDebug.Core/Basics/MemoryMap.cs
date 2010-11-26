@@ -17,6 +17,7 @@ namespace ZDebug.Core.Basics
 
             AddHeaderRegions(memory);
             AddAbbreviationRegions(memory);
+            AddDictionaryRegion(memory);
 
             regions.Sort((r1, r2) => r1.Base.CompareTo(r2.Base));
         }
@@ -91,6 +92,22 @@ namespace ZDebug.Core.Basics
             dataEnd--;
 
             regions.Add(new MemoryMapRegion("Abbreviation data", dataBase, dataEnd));
+        }
+
+        private void AddDictionaryRegion(Memory memory)
+        {
+            var dictionaryBase = memory.ReadDictionaryAddress();
+
+            var reader = memory.CreateReader(dictionaryBase);
+            var separatorCount = reader.NextByte();
+            reader.Skip(separatorCount);
+
+            var entrySize = reader.NextByte();
+            var entryCount = reader.NextWord();
+
+            var dictionaryEnd = (reader.Address + (entrySize * entryCount)) - 1;
+
+            regions.Add(new MemoryMapRegion("Dictionary", dictionaryBase, dictionaryEnd));
         }
 
         public MemoryMapRegion this[int index]
