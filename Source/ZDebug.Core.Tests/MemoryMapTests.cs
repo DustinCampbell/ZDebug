@@ -31,7 +31,9 @@ namespace ZDebug.Core.Tests
             AssertRegion(story.MemoryMap[1], "Abbreviation data", 0x40, 0x41, 0x02);
             AssertRegion(story.MemoryMap[2], "Abbreviation pointer table", 0x42, 0x101, 0xc0);
             AssertRegion(story.MemoryMap[3], "Header extension table", 0x102, 0x109, 0x08);
-            AssertRegion(story.MemoryMap[4], "Dictionary", 0xab8c, 0xda93, 0x2f08);
+            AssertRegion(story.MemoryMap[4], "Object table", 0x10a, 0x2567, 0x245e);
+            AssertRegion(story.MemoryMap[5], "Property data", 0x2568, 0x8268, 0x5d01);
+            AssertRegion(story.MemoryMap[6], "Dictionary", 0xab8c, 0xda93, 0x2f08);
         }
     }
 }

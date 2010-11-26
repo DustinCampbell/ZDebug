@@ -69,5 +69,38 @@ namespace ZDebug.Core.Basics
             var length = reader.NextByte();
             reader.Skip(length * 2);
         }
+
+        public static void SkipProperties(this IMemoryReader reader, int version)
+        {
+            while (true)
+            {
+                var sizeByte = reader.NextByte();
+                if (sizeByte == 0)
+                {
+                    return;
+                }
+
+                int dataLength;
+                if (version >= 1 && version <= 3)
+                {
+                    dataLength = (sizeByte / 32) + 1;
+                }
+                else if ((sizeByte & 0x80) == 0x80)
+                {
+                    var nextByte = reader.NextByte() & 0x3f;
+                    dataLength = nextByte == 0 ? 64 : nextByte;
+                }
+                else if ((sizeByte & 0x40) == 0x40)
+                {
+                    dataLength = 2;
+                }
+                else
+                {
+                    dataLength = 1;
+                }
+
+                reader.Skip(dataLength);
+            }
+        }
     }
 }

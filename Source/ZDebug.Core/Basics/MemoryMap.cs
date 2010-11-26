@@ -18,6 +18,7 @@ namespace ZDebug.Core.Basics
             AddHeaderRegions(memory);
             AddAbbreviationRegions(memory);
             AddDictionaryRegion(memory);
+            AddObjectTableRegions(memory);
 
             regions.Sort((r1, r2) => r1.Base.CompareTo(r2.Base));
         }
@@ -108,6 +109,52 @@ namespace ZDebug.Core.Basics
             var dictionaryEnd = (reader.Address + (entrySize * entryCount)) - 1;
 
             regions.Add(new MemoryMapRegion("Dictionary", dictionaryBase, dictionaryEnd));
+        }
+
+        private void AddObjectTableRegions(Memory memory)
+        {
+            var objectTableBase = memory.ReadObjectTableAddress();
+            var objectTableEnd = 0;
+            var objectDataBase = 0;
+            var objectDataEnd = 0;
+
+            var version = memory.ReadVersion();
+            var entrySize = ObjectHelpers.GetEntrySize(version);
+            var propertyTableOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
+
+            int objectAddress = objectTableBase + ObjectHelpers.GetPropertyDefaultsTableSize(version);
+            while (objectDataBase == 0 || objectAddress < objectDataBase)
+            {
+                if (objectDataBase == 0 || objectAddress < objectDataBase)
+                {
+                    var propertyTable = memory.ReadWord(objectAddress + propertyTableOffset);
+
+                    if (objectDataBase == 0 || propertyTable < objectDataBase)
+                    {
+                        objectDataBase = propertyTable;
+                    }
+
+                    if (objectDataEnd == 0 || propertyTable > objectDataEnd)
+                    {
+                        objectDataEnd = propertyTable;
+                    }
+                }
+
+                objectAddress += entrySize;
+            }
+
+            objectTableEnd = objectAddress - 1;
+
+            // skip last property table to get end...
+            var reader = memory.CreateReader(objectDataEnd);
+            reader.SkipShortName();
+            reader.SkipProperties(version);
+
+            objectDataEnd = reader.Address;
+            objectDataEnd--;
+
+            regions.Add(new MemoryMapRegion("Object table", objectTableBase, objectTableEnd));
+            regions.Add(new MemoryMapRegion("Property data", objectDataBase, objectDataEnd));
         }
 
         public MemoryMapRegion this[int index]
