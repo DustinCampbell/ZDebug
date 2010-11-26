@@ -14,11 +14,34 @@ namespace ZDebug.Core.Basics
             this.memory = memory;
 
             regions = new List<MemoryMapRegion>();
-            regions.Add(new MemoryMapRegion("Header", 0, 0x3f));
 
+            AddHeaderRegions(memory);
             AddAbbreviationRegions(memory);
 
             regions.Sort((r1, r2) => r1.Base.CompareTo(r2.Base));
+        }
+
+        private void AddHeaderRegions(Memory memory)
+        {
+            regions.Add(new MemoryMapRegion("Header", 0, 0x3f));
+
+            var headerExtensionBase = memory.ReadHeaderExtensionTableAddress();
+            if (headerExtensionBase > 0)
+            {
+                var headerExtensionSize = memory.ReadWord(headerExtensionBase);
+                var headerExtensionEnd = headerExtensionBase + 2 + (headerExtensionSize * 2) - 1;
+                regions.Add(new MemoryMapRegion("Header extension table", headerExtensionBase, headerExtensionEnd));
+
+                if (headerExtensionSize > 2)
+                {
+                    var unicodeTableBase = memory.ReadWord(headerExtensionBase + 6);
+                    if (unicodeTableBase > 0)
+                    {
+                        var unicodeTableEnd = unicodeTableBase + (memory.ReadByte(unicodeTableBase) * 2);
+                        regions.Add(new MemoryMapRegion("Unicode table", unicodeTableBase, unicodeTableEnd));
+                    }
+                }
+            }
         }
 
         private void AddAbbreviationRegions(Memory memory)
