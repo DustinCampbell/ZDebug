@@ -23,6 +23,20 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Story)]
+        public void CheckIsInformStory()
+        {
+            var story = LoadStory();
+            Assert.That(story.IsInformStory, Is.True);
+        }
+
+        [Test, Category(Categories.Story)]
+        public void CheckInformVersion()
+        {
+            var story = LoadStory();
+            Assert.That(story.InformVersion, Is.EqualTo(621));
+        }
+
+        [Test, Category(Categories.Story)]
         public void ObjectTable_Count()
         {
             var story = LoadStory();
