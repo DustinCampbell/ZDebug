@@ -109,7 +109,8 @@ namespace ZDebug.Core.Tests
         public void ReadInformVersionNumber()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadInformVersionNumber(), Is.EqualTo("6.21"));
+            Assert.That(memory.ReadInformVersionNumber(), Is.EqualTo(621));
+            Assert.That(memory.ReadInformVersionText(), Is.EqualTo("6.21"));
         }
     }
 }

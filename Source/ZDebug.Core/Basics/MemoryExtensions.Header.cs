@@ -148,7 +148,24 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(HeaderExtensionTableAddressIndex);
         }
 
-        public static string ReadInformVersionNumber(this Memory memory)
+        public static int ReadInformVersionNumber(this Memory memory)
+        {
+            var informVersion = 0;
+            var b1 = memory.ReadByte(InformVersionNumberIndex);
+            if (b1 == 0)
+            {
+                return informVersion;
+            }
+
+            var zero = (byte)'0';
+
+            var b2 = memory.ReadByte(InformVersionNumberIndex + 2);
+            var b3 = memory.ReadByte(InformVersionNumberIndex + 3);
+
+            return ((b1 - zero) * 100) + ((b2 - zero) * 10) + (b3 - zero);
+        }
+
+        public static string ReadInformVersionText(this Memory memory)
         {
             return memory.ReadAsciiString(InformVersionNumberIndex, 4);
         }
