@@ -20,6 +20,7 @@ namespace ZDebug.Core.Instructions
             // variable-operand opcodes
             AddOpcode(OpcodeKind.VarOp, 0x00, "call", OpcodeFlags.Call | OpcodeFlags.Store, toVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x00, "call_vs", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, fromVersion: 5);
         }
 
         private static Tuple<OpcodeKind, byte, byte> CreateKey(OpcodeKind kind, byte number, byte version)
