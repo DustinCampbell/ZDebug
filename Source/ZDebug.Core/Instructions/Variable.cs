@@ -38,6 +38,19 @@ namespace ZDebug.Core.Instructions
             this.index = index;
         }
 
+        public override string ToString()
+        {
+            switch (kind)
+            {
+                case VariableKind.Stack:
+                    return "SP";
+                case VariableKind.Local:
+                    return "L" + index.ToString("x2");
+                default: // VariableKind.Global:
+                    return "G" + index.ToString("x2");
+            }
+        }
+
         public VariableKind Kind
         {
             get { return kind; }
