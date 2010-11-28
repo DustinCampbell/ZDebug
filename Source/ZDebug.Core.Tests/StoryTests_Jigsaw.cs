@@ -32,7 +32,7 @@ namespace ZDebug.Core.Tests
         public void CheckInformVersion()
         {
             var story = LoadStory();
-            Assert.That(story.InformVersion, Is.EqualTo(0));
+            Assert.That(story.InformData.Version, Is.EqualTo(0));
         }
     }
 }
