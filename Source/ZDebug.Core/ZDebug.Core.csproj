@@ -55,6 +55,8 @@
     <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Basics\ObjectHelpers.cs" />
     <Compile Include="Inform\InformData.cs" />
+    <Compile Include="Instructions\Value.cs" />
+    <Compile Include="Instructions\ValueKind.cs" />
     <Compile Include="Objects\ZObject.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -73,6 +75,7 @@
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
