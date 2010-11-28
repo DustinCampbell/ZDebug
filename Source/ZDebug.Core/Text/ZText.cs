@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using ZDebug.Core.Basics;
 
@@ -6,11 +7,11 @@ namespace ZDebug.Core.Text
 {
     public static class ZText
     {
-        private static byte[] ZWordsToZChars(ushort[] zwords)
+        private static byte[] ZWordsToZChars(IList<ushort> zwords)
         {
-            var result = new byte[zwords.Length * 3];
+            var result = new byte[zwords.Count * 3];
 
-            for (int i = 0; i < zwords.Length; i++)
+            for (int i = 0; i < zwords.Count; i++)
             {
                 var zword = zwords[i];
 
@@ -22,7 +23,7 @@ namespace ZDebug.Core.Text
             return result;
         }
 
-        public static string ZWordsAsString(ushort[] zwords, ZTextFlags flags, Memory memory)
+        public static string ZWordsAsString(IList<ushort> zwords, ZTextFlags flags, Memory memory)
         {
             var zchars = ZWordsToZChars(zwords);
             var builder = new StringBuilder(zchars.Length);

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Inform;
 using ZDebug.Core.Objects;
 
 namespace ZDebug.Core
@@ -8,17 +9,17 @@ namespace ZDebug.Core
     {
         private readonly Memory memory;
         private readonly byte version;
-        private readonly int informVersion;
 
         private readonly MemoryMap memoryMap;
+        private readonly InformData informData;
         private readonly ZObjectTable objectTable;
 
         private Story(Memory memory)
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
-            this.informVersion = memory.ReadInformVersionNumber();
             this.memoryMap = new MemoryMap(memory);
+            this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
         }
 
@@ -42,19 +43,19 @@ namespace ZDebug.Core
             get { return version; }
         }
 
+        public MemoryMap MemoryMap
+        {
+            get { return memoryMap; }
+        }
+
         public bool IsInformStory
         {
             get { return memory.IsInformStory(); }
         }
 
-        public int InformVersion
+        public InformData InformData
         {
-            get { return informVersion; }
-        }
-
-        public MemoryMap MemoryMap
-        {
-            get { return memoryMap; }
+            get { return informData; }
         }
 
         public ZObjectTable ObjectTable

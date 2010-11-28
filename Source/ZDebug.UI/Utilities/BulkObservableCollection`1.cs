@@ -8,8 +8,6 @@ namespace ZDebug.UI.Utilities
 {
     public class BulkObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private ReadOnlyObservableCollection<T> readOnly;
-
         private int bulkOperationCount;
         private bool collectionChangedDuringBulkOperation;
 

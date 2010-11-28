@@ -1,9 +1,38 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
 namespace ZDebug.Core.Utilities
 {
     internal static class ArrayEx
     {
+        public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] array)
+        {
+            return Array.AsReadOnly(array);
+        }
+
+        public static T[] Concat<T>(this T[] array, T[] other)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            if (other == null)
+            {
+                throw new ArgumentNullException("other");
+            }
+
+            if (other.Length == 0)
+            {
+                return array;
+            }
+
+            var newArray = array.Resize(array.Length + other.Length);
+            Array.Copy(other, 0, newArray, array.Length, other.Length);
+
+            return newArray;
+        }
+
         public static TOutput[] ConvertAll<TInput, TOutput>(this TInput[] array, Converter<TInput, TOutput> converter)
         {
             return Array.ConvertAll(array, converter);

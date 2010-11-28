@@ -215,6 +215,11 @@ namespace ZDebug.Core.Basics
             get { return regions[index]; }
         }
 
+        public MemoryMapRegion this[MemoryMapRegionKind kind]
+        {
+            get { return kindToRegionMap[kind]; }
+        }
+
         public int Count
         {
             get { return regions.Count; }
