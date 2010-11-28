@@ -64,7 +64,22 @@ namespace ZDebug.Core.Instructions
             // zero-operand opcodes
             AddOpcode(OpcodeKind.ZeroOp, 0x00, "rtrue", OpcodeFlags.Return);
             AddOpcode(OpcodeKind.ZeroOp, 0x01, "rfalse", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.ZeroOp, 0x02, "print", OpcodeFlags.ZText);
+            AddOpcode(OpcodeKind.ZeroOp, 0x03, "print_ret", OpcodeFlags.Return | OpcodeFlags.ZText);
+            AddOpcode(OpcodeKind.ZeroOp, 0x04, "nop");
+            AddOpcode(OpcodeKind.ZeroOp, 0x05, "save", OpcodeFlags.Branch, toVersion: 3);
+            AddOpcode(OpcodeKind.ZeroOp, 0x05, "save", OpcodeFlags.Store, fromVersion: 4, toVersion: 4);
+            AddOpcode(OpcodeKind.ZeroOp, 0x06, "restore", OpcodeFlags.Branch, toVersion: 3);
+            AddOpcode(OpcodeKind.ZeroOp, 0x06, "restore", OpcodeFlags.Store, fromVersion: 4, toVersion: 4);
+            AddOpcode(OpcodeKind.ZeroOp, 0x07, "restart");
+            AddOpcode(OpcodeKind.ZeroOp, 0x08, "ret_popped", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.ZeroOp, 0x09, "pop", toVersion: 4);
+            AddOpcode(OpcodeKind.ZeroOp, 0x09, "catch", OpcodeFlags.Store, fromVersion: 5);
             AddOpcode(OpcodeKind.ZeroOp, 0x0a, "quit");
+            AddOpcode(OpcodeKind.ZeroOp, 0x0b, "new_line");
+            AddOpcode(OpcodeKind.ZeroOp, 0x0c, "show_status", fromVersion: 3, toVersion: 3);
+            AddOpcode(OpcodeKind.ZeroOp, 0x0d, "verify", OpcodeFlags.Branch, fromVersion: 3);
+            AddOpcode(OpcodeKind.ZeroOp, 0x0f, "piracy", OpcodeFlags.Branch, fromVersion: 5);
 
             // variable-operand opcodes
             AddOpcode(OpcodeKind.VarOp, 0x00, "call", OpcodeFlags.Call | OpcodeFlags.Store, toVersion: 4);
@@ -80,7 +95,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x07, "random", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.VarOp, 0x08, "push");
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, toVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.Store, fromVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.Store, fromVersion: 6, toVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, fromVersion: 7, toVersion: 8);
             AddOpcode(OpcodeKind.VarOp, 0x0a, "split_window", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0b, "set_window", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0c, "call_vs2", OpcodeFlags.Call | OpcodeFlags.Store | OpcodeFlags.DoubleVar, fromVersion: 4);
