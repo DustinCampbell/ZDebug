@@ -15,6 +15,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
 
             // zero-operand opcodes
+            AddOpcode(OpcodeKind.ZeroOp, 0x00, "rtrue", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.ZeroOp, 0x01, "rfalse", OpcodeFlags.Return);
             AddOpcode(OpcodeKind.ZeroOp, 0x0a, "quit");
 
             // variable-operand opcodes
