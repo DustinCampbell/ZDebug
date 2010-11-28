@@ -43,6 +43,22 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x1c, "throw", fromVersion: 5);
 
             // one-operand opcodes
+            AddOpcode(OpcodeKind.OneOp, 0x00, "jz", OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.OneOp, 0x01, "get_sibling", OpcodeFlags.Store | OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.OneOp, 0x04, "get_prop_len", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");
+            AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Branch, fromVersion: 4);
+            AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
+            AddOpcode(OpcodeKind.OneOp, 0x0a, "print_obj");
+            AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.OneOp, 0x0c, "jump");
+            AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr");
+            AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, toVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
 
             // zero-operand opcodes
