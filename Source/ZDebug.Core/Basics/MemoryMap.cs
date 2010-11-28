@@ -8,31 +8,41 @@ namespace ZDebug.Core.Basics
     {
         private readonly Memory memory;
         private readonly List<MemoryMapRegion> regions;
+        private readonly Dictionary<MemoryMapRegionKind, MemoryMapRegion> kindToRegionMap;
 
         internal MemoryMap(Memory memory)
         {
             this.memory = memory;
 
             regions = new List<MemoryMapRegion>();
+            kindToRegionMap = new Dictionary<MemoryMapRegionKind, MemoryMapRegion>();
 
             AddHeaderRegions(memory);
             AddAbbreviationRegions(memory);
             AddDictionaryRegion(memory);
             AddObjectTableRegions(memory);
+            AddInformTables(memory);
 
             regions.Sort((r1, r2) => r1.Base.CompareTo(r2.Base));
         }
 
+        private void AddRegion(MemoryMapRegionKind kind, string name, int @base, int end)
+        {
+            var region = new MemoryMapRegion(kind, name, @base, end);
+            regions.Add(region);
+            kindToRegionMap.Add(kind, region);
+        }
+
         private void AddHeaderRegions(Memory memory)
         {
-            regions.Add(new MemoryMapRegion("Header", 0, 0x3f));
+            AddRegion(MemoryMapRegionKind.Header, "Header", 0, 0x3f);
 
             var headerExtensionBase = memory.ReadHeaderExtensionTableAddress();
             if (headerExtensionBase > 0)
             {
                 var headerExtensionSize = memory.ReadWord(headerExtensionBase);
                 var headerExtensionEnd = headerExtensionBase + 2 + (headerExtensionSize * 2) - 1;
-                regions.Add(new MemoryMapRegion("Header extension table", headerExtensionBase, headerExtensionEnd));
+                AddRegion(MemoryMapRegionKind.HeaderExtensionTable, "Header extension table", headerExtensionBase, headerExtensionEnd);
 
                 if (headerExtensionSize > 2)
                 {
@@ -40,7 +50,7 @@ namespace ZDebug.Core.Basics
                     if (unicodeTableBase > 0)
                     {
                         var unicodeTableEnd = unicodeTableBase + (memory.ReadByte(unicodeTableBase) * 2);
-                        regions.Add(new MemoryMapRegion("Unicode table", unicodeTableBase, unicodeTableEnd));
+                        AddRegion(MemoryMapRegionKind.UnicodeTable, "Unicode table", unicodeTableBase, unicodeTableEnd);
                     }
                 }
             }
@@ -58,7 +68,7 @@ namespace ZDebug.Core.Basics
             var count = version == 2 ? 32 : 96;
             var tableEnd = tableBase + (count * 2) - 1;
 
-            regions.Add(new MemoryMapRegion("Abbreviation pointer table", tableBase, tableEnd));
+            AddRegion(MemoryMapRegionKind.AbbreviationPointerTable, "Abbreviation pointer table", tableBase, tableEnd);
 
             var dataBase = 0;
             var dataEnd = 0;
@@ -92,7 +102,7 @@ namespace ZDebug.Core.Basics
 
             dataEnd--;
 
-            regions.Add(new MemoryMapRegion("Abbreviation data", dataBase, dataEnd));
+            AddRegion(MemoryMapRegionKind.AbbreviationData, "Abbreviation data", dataBase, dataEnd);
         }
 
         private void AddDictionaryRegion(Memory memory)
@@ -108,7 +118,7 @@ namespace ZDebug.Core.Basics
 
             var dictionaryEnd = (reader.Address + (entrySize * entryCount)) - 1;
 
-            regions.Add(new MemoryMapRegion("Dictionary", dictionaryBase, dictionaryEnd));
+            AddRegion(MemoryMapRegionKind.Dictionary, "Dictionary", dictionaryBase, dictionaryEnd);
         }
 
         private void AddObjectTableRegions(Memory memory)
@@ -153,8 +163,51 @@ namespace ZDebug.Core.Basics
             objectDataEnd = reader.Address;
             objectDataEnd--;
 
-            regions.Add(new MemoryMapRegion("Object table", objectTableBase, objectTableEnd));
-            regions.Add(new MemoryMapRegion("Property data", objectDataBase, objectDataEnd));
+            AddRegion(MemoryMapRegionKind.ObjectTable, "Object table", objectTableBase, objectTableEnd);
+            AddRegion(MemoryMapRegionKind.PropertyData, "Property data", objectDataBase, objectDataEnd);
+        }
+
+        private void AddInformTables(Memory memory)
+        {
+            if (!memory.IsInformStory())
+            {
+                return;
+            }
+
+            var informVersion = memory.ReadInformVersionNumber();
+            if (informVersion < 600)
+            {
+                return;
+            }
+
+            var propertyDataRegion = kindToRegionMap[MemoryMapRegionKind.PropertyData];
+            var classNumbersBase = propertyDataRegion.End + 1;
+
+            var reader = memory.CreateReader(classNumbersBase);
+
+            while (reader.NextWord() != 0)
+                ;
+
+            var classNumbersEnd = reader.Address - 1;
+
+            AddRegion(MemoryMapRegionKind.ClassPrototypeObjectNumbers, "Class prototype object numbers", classNumbersBase, classNumbersEnd);
+
+            var propertyNamesBase = reader.Address;
+            var propertyCount = reader.NextWord() - 1;
+            reader.Skip(propertyCount * 2);
+            var propertyNamesEnd = reader.Address - 1;
+
+            AddRegion(MemoryMapRegionKind.PropertyNamesTable, "Property names table", propertyNamesBase, propertyNamesEnd);
+
+            if (informVersion < 610)
+            {
+                return;
+            }
+
+            var attributeNamesBase = reader.Address;
+            var attributeNamesEnd = (attributeNamesBase + (48 * 2)) - 1;
+
+            AddRegion(MemoryMapRegionKind.AttributeNamesTable, "Attribute names table", attributeNamesBase, attributeNamesEnd);
         }
 
         public MemoryMapRegion this[int index]
