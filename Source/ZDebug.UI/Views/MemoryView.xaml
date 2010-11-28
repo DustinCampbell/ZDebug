@@ -21,7 +21,7 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0"
-                x:Name="memoryChartContainer"
+                x:Name="memoryMapContainer"
                 Padding="8,2,8,2"
                 BorderBrush="Silver"
                 BorderThickness="0,0,1,0"/>
