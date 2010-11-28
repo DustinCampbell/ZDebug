@@ -1,4 +1,5 @@
-﻿using ZDebug.Core.Collections;
+﻿using System.Collections.ObjectModel;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
@@ -8,8 +9,8 @@ namespace ZDebug.Core.Instructions
         private readonly byte index;
 
         public static readonly Variable Stack;
-        public static readonly IIndexedEnumerable<Variable> Locals;
-        public static readonly IIndexedEnumerable<Variable> Globals;
+        public static readonly ReadOnlyCollection<Variable> Locals;
+        public static readonly ReadOnlyCollection<Variable> Globals;
 
         static Variable()
         {
@@ -21,7 +22,7 @@ namespace ZDebug.Core.Instructions
                 locals[i] = new Variable(VariableKind.Local, i);
             }
 
-            Locals = locals.ToIndexedEnumerable();
+            Locals = locals.AsReadOnly();
 
             var globals = new Variable[240];
             for (byte i = 0; i < 240; i++)
@@ -29,7 +30,7 @@ namespace ZDebug.Core.Instructions
                 locals[i] = new Variable(VariableKind.Global, i);
             }
 
-            Globals = globals.ToIndexedEnumerable();
+            Globals = globals.AsReadOnly();
         }
 
         private Variable(VariableKind kind, byte index)

@@ -3,7 +3,7 @@ using ZDebug.Core.Processor;
 
 namespace ZDebug.Core.Instructions
 {
-    public class Opcode
+    public sealed class Opcode
     {
         private readonly OpcodeKind kind;
         private readonly int number;
