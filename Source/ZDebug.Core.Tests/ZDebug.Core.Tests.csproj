@@ -57,6 +57,7 @@
     <Compile Include="Sanity\ZCodeTests.cs" />
     <Compile Include="StoryTests_Dreamhold.cs" />
     <Compile Include="StoryTests_CZech.cs" />
+    <Compile Include="StoryTests_Jigsaw.cs" />
     <Compile Include="StoryTests_Zork1.cs" />
     <Compile Include="StoryTests_Curses.cs" />
     <Compile Include="StreamExtensionsTests.cs" />
@@ -83,6 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ZCode\dreamhold.z8" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ZCode\jigsaw.z8" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

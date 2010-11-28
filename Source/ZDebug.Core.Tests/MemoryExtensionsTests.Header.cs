@@ -25,7 +25,7 @@ namespace ZDebug.Core.Tests
         public void ReadSerialNumber()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadSerialNumber(), Is.EqualTo("031102"));
+            Assert.That(memory.ReadSerialNumberText(), Is.EqualTo("031102"));
         }
 
         [Test, Category(Categories.Memory)]
@@ -109,7 +109,8 @@ namespace ZDebug.Core.Tests
         public void ReadInformVersionNumber()
         {
             var memory = LoadCZech();
-            Assert.That(memory.ReadInformVersionNumber(), Is.EqualTo("6.21"));
+            Assert.That(memory.ReadInformVersionNumber(), Is.EqualTo(621));
+            Assert.That(memory.ReadInformVersionText(), Is.EqualTo("6.21"));
         }
     }
 }

@@ -6,171 +6,6 @@ namespace ZDebug.Core.Basics
 {
     internal static partial class MemoryExtensions
     {
-        private static int GetPropertyDefaultsCount(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 31;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 63;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetPropertyDefaultsTableSize(byte version)
-        {
-            return GetPropertyDefaultsCount(version) * 2;
-        }
-
-        private static int GetMaxObjects(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 255;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 65535;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectEntrySize(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 9;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 14;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectAttributeBytesSize(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 4;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 6;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectAttributeCount(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 32;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 48;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectParentOffset(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 4;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 6;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectSiblingOffset(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 5;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 8;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectChildOffset(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 6;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 10;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectPropertyTableAddressOffset(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 7;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 12;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private static int GetObjectNumberSize(byte version)
-        {
-            if (version >= 1 && version <= 3)
-            {
-                return 1;
-            }
-            else if (version >= 4 && version <= 8)
-            {
-                return 2;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
         public static int GetObjectEntryAddress(this Memory memory, int objNum)
         {
             if (objNum < 1)
@@ -179,8 +14,8 @@ namespace ZDebug.Core.Basics
             }
 
             var version = memory.ReadVersion();
-            var propertyDefaultsTableSize = GetPropertyDefaultsTableSize(version);
-            var entrySize = GetObjectEntrySize(version);
+            var propertyDefaultsTableSize = ObjectHelpers.GetPropertyDefaultsTableSize(version);
+            var entrySize = ObjectHelpers.GetEntrySize(version);
 
             var objectTableAddress = memory.ReadObjectTableAddress();
             var offset = propertyDefaultsTableSize + ((objNum - 1) * entrySize);
@@ -191,7 +26,7 @@ namespace ZDebug.Core.Basics
         public static ushort ReadPropertyDefault(this Memory memory, int propNum)
         {
             var version = memory.ReadVersion();
-            var propertyDefaultsCount = GetPropertyDefaultsCount(version);
+            var propertyDefaultsCount = ObjectHelpers.GetPropertyDefaultsCount(version);
             if (propNum < 1 || propNum > propertyDefaultsCount)
             {
                 throw new ArgumentOutOfRangeException("index");
@@ -206,7 +41,7 @@ namespace ZDebug.Core.Basics
         public static byte[] ReadAttributeBytesByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var attributeBytesSize = GetObjectAttributeBytesSize(version);
+            var attributeBytesSize = ObjectHelpers.GetAttributeBytesSize(version);
 
             return memory.ReadBytes(objAddress, attributeBytesSize);
         }
@@ -226,7 +61,7 @@ namespace ZDebug.Core.Basics
             }
 
             var version = memory.ReadVersion();
-            var attributeBytesSize = GetObjectAttributeBytesSize(version);
+            var attributeBytesSize = ObjectHelpers.GetAttributeBytesSize(version);
 
             if (bytes.Length != attributeBytesSize)
             {
@@ -246,7 +81,7 @@ namespace ZDebug.Core.Basics
         public static bool HasAttributeByObjectAddress(this Memory memory, int objAddress, int attribute)
         {
             var version = memory.ReadVersion();
-            var attributeCount = GetObjectAttributeCount(version);
+            var attributeCount = ObjectHelpers.GetAttributeCount(version);
 
             if (attribute < 0 || attribute >= attributeCount)
             {
@@ -271,7 +106,7 @@ namespace ZDebug.Core.Basics
         public static bool[] GetAllAttributeByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var attributeCount = GetObjectAttributeCount(version);
+            var attributeCount = ObjectHelpers.GetAttributeCount(version);
 
             var attributeBytes = memory.ReadAttributeBytesByObjectAddress(objAddress);
 
@@ -298,7 +133,7 @@ namespace ZDebug.Core.Basics
         public static void SetAttributeValueByObjectAddress(this Memory memory, int objAddress, int attribute, bool value)
         {
             var version = memory.ReadVersion();
-            var attributeCount = GetObjectAttributeCount(version);
+            var attributeCount = ObjectHelpers.GetAttributeCount(version);
 
             if (attribute < 0 || attribute >= attributeCount)
             {
@@ -324,7 +159,7 @@ namespace ZDebug.Core.Basics
 
         private static int ReadObjectNumber(this Memory memory, byte version, int address)
         {
-            var numberSize = GetObjectNumberSize(version);
+            var numberSize = ObjectHelpers.GetNumberSize(version);
 
             if (numberSize == 1)
             {
@@ -342,7 +177,7 @@ namespace ZDebug.Core.Basics
 
         private static void WriteObjectNumber(this Memory memory, byte version, int address, int value)
         {
-            var numberSize = GetObjectNumberSize(version);
+            var numberSize = ObjectHelpers.GetNumberSize(version);
 
             if (numberSize == 1)
             {
@@ -371,7 +206,7 @@ namespace ZDebug.Core.Basics
         public static int ReadParentNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var parentOffset = GetObjectParentOffset(version);
+            var parentOffset = ObjectHelpers.GetParentOffset(version);
 
             return memory.ReadObjectNumber(version, objAddress + parentOffset);
         }
@@ -386,7 +221,7 @@ namespace ZDebug.Core.Basics
         public static void WriteParentNumberByObjectAddress(this Memory memory, int objAddress, int parentObjNum)
         {
             var version = memory.ReadVersion();
-            var parentOffset = GetObjectParentOffset(version);
+            var parentOffset = ObjectHelpers.GetParentOffset(version);
 
             memory.WriteObjectNumber(version, objAddress + parentOffset, parentObjNum);
         }
@@ -401,7 +236,7 @@ namespace ZDebug.Core.Basics
         public static int ReadSiblingNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var siblingOffset = GetObjectSiblingOffset(version);
+            var siblingOffset = ObjectHelpers.GetSiblingOffset(version);
 
             return memory.ReadObjectNumber(version, objAddress + siblingOffset);
         }
@@ -416,7 +251,7 @@ namespace ZDebug.Core.Basics
         public static void WriteSiblingNumberByObjectAddress(this Memory memory, int objAddress, int siblingObjNum)
         {
             var version = memory.ReadVersion();
-            var siblingOffset = GetObjectSiblingOffset(version);
+            var siblingOffset = ObjectHelpers.GetSiblingOffset(version);
 
             memory.WriteObjectNumber(version, objAddress + siblingOffset, siblingObjNum);
         }
@@ -431,7 +266,7 @@ namespace ZDebug.Core.Basics
         public static int ReadChildNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var childOffset = GetObjectChildOffset(version);
+            var childOffset = ObjectHelpers.GetChildOffset(version);
 
             return memory.ReadObjectNumber(version, objAddress + childOffset);
         }
@@ -446,7 +281,7 @@ namespace ZDebug.Core.Basics
         public static void WriteChildNumberByObjectAddress(this Memory memory, int objAddress, int childObjNum)
         {
             var version = memory.ReadVersion();
-            var childOffset = GetObjectChildOffset(version);
+            var childOffset = ObjectHelpers.GetChildOffset(version);
 
             memory.WriteObjectNumber(version, objAddress + childOffset, childObjNum);
         }
@@ -461,7 +296,7 @@ namespace ZDebug.Core.Basics
         public static ushort ReadPropertyTableAddressByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
-            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+            var propertyTableAddressOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
 
             return memory.ReadWord(objAddress + propertyTableAddressOffset);
         }
@@ -476,7 +311,7 @@ namespace ZDebug.Core.Basics
         public static void WritePropertyTableAddressByObjectAddress(this Memory memory, int objAddress, ushort value)
         {
             var version = memory.ReadVersion();
-            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
+            var propertyTableAddressOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
 
             memory.WriteWord(objAddress + propertyTableAddressOffset, value);
         }
@@ -491,10 +326,10 @@ namespace ZDebug.Core.Basics
         public static IList<ZObject> ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable)
         {
             var version = memory.ReadVersion();
-            var maxObjects = GetMaxObjects(version);
-            var objectEntrySize = GetObjectEntrySize(version);
-            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
-            var propertyDefaultsTableSize = GetPropertyDefaultsTableSize(version);
+            var maxObjects = ObjectHelpers.GetMaxObjects(version);
+            var objectEntrySize = ObjectHelpers.GetEntrySize(version);
+            var propertyTableAddressOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
+            var propertyDefaultsTableSize = ObjectHelpers.GetPropertyDefaultsTableSize(version);
 
             var address = objectTable.Address + propertyDefaultsTableSize;
             var smallestPropertyTableAddress = Int32.MaxValue;
@@ -525,11 +360,11 @@ namespace ZDebug.Core.Basics
         public static int GetObjectCount(this Memory memory)
         {
             var version = memory.ReadVersion();
-            var maxObjects = GetMaxObjects(version);
+            var maxObjects = ObjectHelpers.GetMaxObjects(version);
             var objectTableAddress = memory.ReadObjectTableAddress();
-            var objectEntrySize = GetObjectEntrySize(version);
-            var propertyTableAddressOffset = GetObjectPropertyTableAddressOffset(version);
-            var propertyDefaultsTableSize = GetPropertyDefaultsTableSize(version);
+            var objectEntrySize = ObjectHelpers.GetEntrySize(version);
+            var propertyTableAddressOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
+            var propertyDefaultsTableSize = ObjectHelpers.GetPropertyDefaultsTableSize(version);
 
             var address = objectTableAddress + propertyDefaultsTableSize;
             var smallestPropertyTableAddress = Int32.MaxValue;

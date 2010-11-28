@@ -85,7 +85,20 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(Flags2Index);
         }
 
-        public static string ReadSerialNumber(this Memory memory)
+        public static int ReadSerialNumber(this Memory memory)
+        {
+            var bytes = memory.ReadBytes(SerialNumberIndex, 6);
+            var zero = (byte)'0';
+
+            return ((bytes[0] - zero) * 100000) +
+                ((bytes[1] - zero) * 10000) +
+                ((bytes[2] - zero) * 1000) +
+                ((bytes[3] - zero) * 100) +
+                ((bytes[4] - zero) * 10) +
+                (bytes[5] - zero);
+        }
+
+        public static string ReadSerialNumberText(this Memory memory)
         {
             return memory.ReadAsciiString(SerialNumberIndex, 6);
         }
@@ -148,7 +161,30 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(HeaderExtensionTableAddressIndex);
         }
 
-        public static string ReadInformVersionNumber(this Memory memory)
+        public static bool IsInformStory(this Memory memory)
+        {
+            var serialNumber = memory.ReadSerialNumber();
+            return serialNumber < 800000 || serialNumber >= 930000;
+        }
+
+        public static int ReadInformVersionNumber(this Memory memory)
+        {
+            var informVersion = 0;
+            var b1 = memory.ReadByte(InformVersionNumberIndex);
+            if (b1 == 0)
+            {
+                return informVersion;
+            }
+
+            var zero = (byte)'0';
+
+            var b2 = memory.ReadByte(InformVersionNumberIndex + 2);
+            var b3 = memory.ReadByte(InformVersionNumberIndex + 3);
+
+            return ((b1 - zero) * 100) + ((b2 - zero) * 10) + (b3 - zero);
+        }
+
+        public static string ReadInformVersionText(this Memory memory)
         {
             return memory.ReadAsciiString(InformVersionNumberIndex, 4);
         }

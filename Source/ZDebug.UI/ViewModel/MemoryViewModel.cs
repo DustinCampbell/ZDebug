@@ -74,8 +74,8 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
 
-            var memoryChartContainer = this.View.FindName<Border>("memoryChartContainer");
-            memoryChartContainer.Child = ViewModelWithView.Create<MemoryMapViewModel, UserControl>();
+            var memoryMapContainer = this.View.FindName<Border>("memoryMapContainer");
+            memoryMapContainer.Child = ViewModelWithView.Create<MemoryMapViewModel, UserControl>();
         }
 
         public bool HasStory

@@ -8,6 +8,7 @@ namespace ZDebug.Core
     {
         private readonly Memory memory;
         private readonly byte version;
+        private readonly int informVersion;
 
         private readonly MemoryMap memoryMap;
         private readonly ZObjectTable objectTable;
@@ -16,6 +17,7 @@ namespace ZDebug.Core
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
+            this.informVersion = memory.ReadInformVersionNumber();
             this.memoryMap = new MemoryMap(memory);
             this.objectTable = new ZObjectTable(memory);
         }
@@ -38,6 +40,16 @@ namespace ZDebug.Core
         public byte Version
         {
             get { return version; }
+        }
+
+        public bool IsInformStory
+        {
+            get { return memory.IsInformStory(); }
+        }
+
+        public int InformVersion
+        {
+            get { return informVersion; }
         }
 
         public MemoryMap MemoryMap
