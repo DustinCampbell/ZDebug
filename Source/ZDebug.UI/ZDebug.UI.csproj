@@ -89,6 +89,7 @@
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\MemoryMapRegionViewModel.cs" />
     <Compile Include="ViewModel\MemoryMapViewModel.cs" />
     <Compile Include="ViewModel\MemoryLineViewModel.cs" />
     <Compile Include="ViewModel\MemoryViewModel.cs" />
