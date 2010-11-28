@@ -62,6 +62,7 @@
     <Compile Include="Instructions\OpcodeFlags.cs" />
     <Compile Include="Instructions\OpcodeKind.cs" />
     <Compile Include="Instructions\OpcodeRoutine.cs" />
+    <Compile Include="Instructions\OpcodeTable.cs" />
     <Compile Include="Instructions\Operand.cs" />
     <Compile Include="Instructions\OperandKind.cs" />
     <Compile Include="Instructions\Value.cs" />
