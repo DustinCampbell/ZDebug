@@ -10,6 +10,9 @@ namespace ZDebug.Core.Instructions
         static OpcodeTable()
         {
             opcodeMap = new Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode>();
+
+            // one-operand opcodes
+            AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
         }
 
         private static Tuple<OpcodeKind, byte, byte> CreateKey(OpcodeKind kind, byte number, byte version)
