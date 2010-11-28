@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Text.cs" />
+    <Compile Include="Basics\IMemoryReader_Instructions.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\IMemoryReader.cs" />
     <Compile Include="Basics\Memory.MemoryReader.cs" />
@@ -66,6 +67,8 @@
     <Compile Include="Instructions\OpcodeTable.cs" />
     <Compile Include="Instructions\Operand.cs" />
     <Compile Include="Instructions\OperandKind.cs" />
+    <Compile Include="Instructions\Routine.cs" />
+    <Compile Include="Instructions\RoutineTable.cs" />
     <Compile Include="Instructions\Value.cs" />
     <Compile Include="Instructions\ValueKind.cs" />
     <Compile Include="Instructions\Variable.cs" />

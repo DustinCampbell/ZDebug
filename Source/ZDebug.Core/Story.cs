@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Inform;
+using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 
 namespace ZDebug.Core
@@ -13,6 +14,7 @@ namespace ZDebug.Core
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
+        private readonly RoutineTable routineTable;
 
         private Story(Memory memory)
         {
@@ -21,6 +23,7 @@ namespace ZDebug.Core
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
+            this.routineTable = new RoutineTable(memory);
         }
 
         private Story(byte[] bytes)
@@ -61,6 +64,11 @@ namespace ZDebug.Core
         public ZObjectTable ObjectTable
         {
             get { return objectTable; }
+        }
+
+        public RoutineTable RoutineTable
+        {
+            get { return routineTable; }
         }
 
         public static Story FromBytes(byte[] bytes)
