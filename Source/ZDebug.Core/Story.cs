@@ -19,7 +19,7 @@ namespace ZDebug.Core
             this.memory = memory;
             this.version = memory.ReadVersion();
             this.memoryMap = new MemoryMap(memory);
-            this.informData = new InformData(memory);
+            this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
         }
 

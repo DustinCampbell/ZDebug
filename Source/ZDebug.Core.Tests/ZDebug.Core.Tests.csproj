@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayExTests.cs" />
+    <Compile Include="InformDataTests.cs" />
     <Compile Include="MemoryExtensionsTests.Header.cs" />
     <Compile Include="MemoryExtensionsTests.Objects.cs" />
     <Compile Include="MemoryExtensionsTests.cs" />
