@@ -5,21 +5,21 @@ namespace ZDebug.Core.Instructions
 {
     public static class OpcodeTable
     {
-        private static readonly Dictionary<Tuple<OpcodeKind, int, byte>, Opcode> opcodeMap;
+        private static readonly Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode> opcodeMap;
 
         static OpcodeTable()
         {
-            opcodeMap = new Dictionary<Tuple<OpcodeKind, int, byte>, Opcode>();
+            opcodeMap = new Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode>();
         }
 
-        private static Tuple<OpcodeKind, int, byte> CreateKey(OpcodeKind kind, int number, byte version)
+        private static Tuple<OpcodeKind, byte, byte> CreateKey(OpcodeKind kind, byte number, byte version)
         {
             return Tuple.Create(kind, number, version);
         }
 
         private static void AddOpcode(
             OpcodeKind kind,
-            int number,
+            byte number,
             string name,
             OpcodeFlags flags,
             OpcodeRoutine routine = null,
@@ -35,7 +35,7 @@ namespace ZDebug.Core.Instructions
             }
         }
 
-        public static Opcode GetOpcode(OpcodeKind kind, int number, byte version)
+        public static Opcode GetOpcode(OpcodeKind kind, byte number, byte version)
         {
             var key = CreateKey(kind, number, version);
 

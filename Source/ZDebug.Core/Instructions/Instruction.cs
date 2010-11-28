@@ -11,7 +11,7 @@ namespace ZDebug.Core.Instructions
         private readonly ReadOnlyCollection<Operand> operands;
         private readonly Variable storeVariable;
         private readonly Branch? branch;
-        private readonly ReadOnlyCollection<ushort> zwords;
+        private readonly ReadOnlyCollection<ushort> ztext;
 
         public Instruction(
             int address,
@@ -20,7 +20,7 @@ namespace ZDebug.Core.Instructions
             Operand[] operands,
             Variable storeVariable = null,
             Branch? branch = null,
-            ushort[] zwords = null)
+            ushort[] ztext = null)
         {
             this.address = address;
             this.length = length;
@@ -28,7 +28,7 @@ namespace ZDebug.Core.Instructions
             this.operands = operands.AsReadOnly();
             this.storeVariable = storeVariable;
             this.branch = branch;
-            this.zwords = zwords != null ? zwords.AsReadOnly() : null;
+            this.ztext = ztext != null ? ztext.AsReadOnly() : null;
         }
 
         public int Address
@@ -71,14 +71,14 @@ namespace ZDebug.Core.Instructions
             get { return branch.Value; }
         }
 
-        public bool HasZWords
+        public bool HasZText
         {
-            get { return zwords != null; }
+            get { return ztext != null; }
         }
 
-        public ReadOnlyCollection<ushort> ZWords
+        public ReadOnlyCollection<ushort> ZText
         {
-            get { return zwords; }
+            get { return ztext; }
         }
     }
 }
