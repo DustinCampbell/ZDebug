@@ -27,7 +27,7 @@ namespace ZDebug.Core.Instructions
             var globals = new Variable[240];
             for (byte i = 0; i < 240; i++)
             {
-                locals[i] = new Variable(VariableKind.Global, i);
+                globals[i] = new Variable(VariableKind.Global, i);
             }
 
             Globals = globals.AsReadOnly();
