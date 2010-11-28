@@ -21,11 +21,15 @@ namespace ZDebug.Core.Instructions
                 locals[i] = new Variable(VariableKind.Local, i);
             }
 
+            Locals = locals.ToIndexedEnumerable();
+
             var globals = new Variable[240];
             for (byte i = 0; i < 240; i++)
             {
                 locals[i] = new Variable(VariableKind.Global, i);
             }
+
+            Globals = globals.ToIndexedEnumerable();
         }
 
         private Variable(VariableKind kind, byte index)
