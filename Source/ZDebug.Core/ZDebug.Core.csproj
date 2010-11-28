@@ -54,9 +54,16 @@
     <Compile Include="Basics\MemoryMapRegionKind.cs" />
     <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Basics\ObjectHelpers.cs" />
+    <Compile Include="Collections\IListExtensions.cs" />
     <Compile Include="Inform\InformData.cs" />
+    <Compile Include="Instructions\Opcode.cs" />
+    <Compile Include="Instructions\OpcodeKind.cs" />
+    <Compile Include="Instructions\Operand.cs" />
+    <Compile Include="Instructions\OperandKind.cs" />
     <Compile Include="Instructions\Value.cs" />
     <Compile Include="Instructions\ValueKind.cs" />
+    <Compile Include="Instructions\Variable.cs" />
+    <Compile Include="Instructions\VariableKind.cs" />
     <Compile Include="Objects\ZObject.cs">
       <SubType>Code</SubType>
     </Compile>
