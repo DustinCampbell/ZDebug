@@ -17,9 +17,16 @@ namespace ZDebug.Core.Instructions
             return Tuple.Create(kind, number, version);
         }
 
-        private static void AddOpcode(OpcodeKind kind, int number, string name, OpcodeFlags flags, byte fromVersion = 1, byte toVersion = 8)
+        private static void AddOpcode(
+            OpcodeKind kind,
+            int number,
+            string name,
+            OpcodeFlags flags,
+            OpcodeRoutine routine = null,
+            byte fromVersion = 1,
+            byte toVersion = 8)
         {
-            var opcode = new Opcode(kind, number, name, flags);
+            var opcode = new Opcode(kind, number, name, flags, routine);
 
             for (byte v = fromVersion; v <= toVersion; v++)
             {
@@ -36,7 +43,12 @@ namespace ZDebug.Core.Instructions
             if (!opcodeMap.TryGetValue(key, out opcode))
             {
                 throw new InvalidOperationException(
-                    string.Format("Could not find opcode. Kind = {0}, Number = {1:x2} ({1}), Version = {2}", kind, number, version));
+                    string.Format(
+@"Could not find opcode.
+
+Kind = {0}
+Number = {1:x2} ({1})
+Version = {2}", kind, number, version));
             }
 
             return opcode;
