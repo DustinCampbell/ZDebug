@@ -53,17 +53,21 @@ namespace ZDebug.Core.Instructions
 
         private Operand ReadOperand(OperandKind kind)
         {
-            ushort value;
+            Value value;
             if (kind == OperandKind.LargeConstant)
             {
-                value = reader.NextWord();
+                value = new Value(ValueKind.Number, reader.NextWord());
             }
-            else // OperandKind.SmallConstant || OperandKind.Variable
+            else if (kind == OperandKind.SmallConstant)
             {
-                value = reader.NextByte();
+                value = new Value(ValueKind.Number, reader.NextByte());
+            }
+            else // OperandKind.Variable
+            {
+                value = new Value(ValueKind.Variable, reader.NextByte());
             }
 
-            return new Operand(kind, new Value(ValueKind.Number, value));
+            return new Operand(kind, value);
         }
 
         private Operand[] ReadOperands(OperandKind[] kinds)

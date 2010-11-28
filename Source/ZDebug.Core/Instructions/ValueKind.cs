@@ -2,6 +2,7 @@
 {
     public enum ValueKind
     {
-        Number
+        Number,
+        Variable
     }
 }
