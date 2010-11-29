@@ -96,6 +96,10 @@
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
+    <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
+    <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
+    <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
+    <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\StoryInfoViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
