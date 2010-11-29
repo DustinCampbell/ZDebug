@@ -79,7 +79,7 @@ namespace ZDebug.Core.Instructions
                     var jumpAddress = reader.Address + jumpOffset - 2;
                     if (jumpAddress > lastAddressKnown)
                     {
-                        lastAddressKnown = jumpOffset;
+                        lastAddressKnown = jumpAddress;
                     }
 
                     if (reader.Address > lastAddressKnown)
