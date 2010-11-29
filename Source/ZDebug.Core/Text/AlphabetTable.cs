@@ -5,8 +5,8 @@ namespace ZDebug.Core.Text
 {
     internal sealed class AlphabetTable
     {
-        private const string A0 = "??????abcdefghijklmnopqrstuvwxys";
-        private const string A1 = "??????ABCDEFGHIJKLMNOPQRSTUVWXYS";
+        private const string A0 = "??????abcdefghijklmnopqrstuvwxyz";
+        private const string A1 = "??????ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string A2 = "???????\n0123456789.,!?_#'\"/\\-:()";
         private const string A3 = "???????0123456789.,!?_#'\"/\\<-:()";
 
