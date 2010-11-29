@@ -351,6 +351,11 @@ namespace ZDebug.Core.Basics
                 address += objectEntrySize;
             }
 
+            if (address >= smallestPropertyTableAddress)
+            {
+                return objects;
+            }
+
             throw new InvalidOperationException("Could not find the end of the object table");
         }
 
@@ -380,6 +385,11 @@ namespace ZDebug.Core.Basics
                 smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
 
                 address += objectEntrySize;
+            }
+
+            if (address >= smallestPropertyTableAddress)
+            {
+                return maxObjects;
             }
 
             throw new InvalidOperationException("Could not find the end of the object table");
