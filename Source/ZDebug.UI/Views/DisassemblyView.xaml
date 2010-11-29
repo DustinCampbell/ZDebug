@@ -45,7 +45,7 @@
                 <DataTemplate DataType="{x:Type vm:DisassemblyInstructionLineViewModel}">
                     <TextBlock>
                         <Run Text="  "/><Run 
-                             Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run 
+                             Foreground="DarkGray" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run 
                              Foreground="DarkGray" Text=":"/>
                         <Run Text="{Binding OpcodeName, Mode=OneWay}"/>
                     </TextBlock>
