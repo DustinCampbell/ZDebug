@@ -111,7 +111,7 @@ namespace ZDebug.Core.Text
                     {
                         var zscii1 = zchars[++i];
                         var zscii2 = zchars[++i];
-                        var zscii = ((zscii1 & 0x1f) << 5) | (zscii2 << 5);
+                        var zscii = ((zscii1 & 0x1f) << 5) | zscii2;
                         builder.Append((char)zscii);
                     }
                     else
