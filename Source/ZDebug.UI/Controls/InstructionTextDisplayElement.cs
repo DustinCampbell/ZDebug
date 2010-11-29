@@ -1,54 +1,99 @@
 ﻿using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
 using ZDebug.UI.Services;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Controls
 {
     internal partial class InstructionTextDisplayElement : FrameworkElement
     {
+        private FontAndColorSetting defaultSetting = null;
+
+        private FontAndColorSetting GetDefaultSetting()
+        {
+            if (defaultSetting == null)
+            {
+                defaultSetting = new FontAndColorSetting()
+                {
+                    Background = this.Background,
+                    FontFamily = this.FontFamily,
+                    FontSize = this.FontSize,
+                    FontStretch = this.FontStretch,
+                    FontStyle = this.FontStyle,
+                    FontWeight = this.FontWeight,
+                    Foreground = this.Foreground
+                };
+            }
+
+            return defaultSetting;
+        }
+
+        private static void UpdateIfNeeded(FontAndColorSetting setting, DependencyProperty propertyToUpdate, object value)
+        {
+            if (setting != null && setting.IsDefaultValue(propertyToUpdate))
+            {
+                setting.SetValue(propertyToUpdate, value);
+            }
+        }
+
         private static readonly PropertyChangedCallback resetVisuals = (s, e) =>
         {
-            ((InstructionTextDisplayElement)s).ResetVisuals();
+            var element = (InstructionTextDisplayElement)s;
+            element.defaultSetting = null;
+            element.ResetVisuals();
         };
 
         public static readonly DependencyProperty BackgroundProperty =
             TextElement.BackgroundProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    Panel.BackgroundProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty FontFamilyProperty =
             TextElement.FontFamilyProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    TextElement.FontFamilyProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty FontSizeProperty =
             TextElement.FontSizeProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    TextElement.FontSizeProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty FontStretchProperty =
             TextElement.FontStretchProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    TextElement.FontStretchProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty FontStyleProperty =
             TextElement.FontStyleProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    TextElement.FontStyleProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty FontWeightProperty =
             TextElement.FontWeightProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(FontWeights.Normal, resetVisuals));
 
         public static readonly DependencyProperty ForegroundProperty =
             TextElement.ForegroundProperty.AddOwner(
                 typeof(InstructionTextDisplayElement),
-                new FrameworkPropertyMetadata(resetVisuals));
+                new FrameworkPropertyMetadata(
+                    TextElement.ForegroundProperty.DefaultMetadata.DefaultValue,
+                    FrameworkPropertyMetadataOptions.Inherits, resetVisuals));
 
         public static readonly DependencyProperty InstructionProperty =
             DependencyProperty.Register(
@@ -56,35 +101,87 @@ namespace ZDebug.UI.Controls
                 typeof(Instruction),
                 typeof(InstructionTextDisplayElement),
                 new FrameworkPropertyMetadata(
-                    null,
-                    FrameworkPropertyMetadataOptions.AffectsRender,
-                    resetVisuals));
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
 
-        public static readonly DependencyProperty SeparatorBrushProperty =
+        public static readonly DependencyProperty AddressSettingProperty =
             DependencyProperty.Register(
-                "SeparatorBrush",
-                typeof(Brush),
+                "AddressSetting",
+                typeof(FontAndColorSetting),
                 typeof(InstructionTextDisplayElement),
                 new FrameworkPropertyMetadata(
-                    Brushes.Black,
-                    FrameworkPropertyMetadataOptions.AffectsRender,
-                    resetVisuals));
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
 
-        public static readonly DependencyProperty ZTextBrushProperty =
+        public static readonly DependencyProperty CommentSettingProperty =
             DependencyProperty.Register(
-                "ZTextBrush",
-                typeof(Brush),
+                "CommentSetting",
+                typeof(FontAndColorSetting),
                 typeof(InstructionTextDisplayElement),
                 new FrameworkPropertyMetadata(
-                    Brushes.Black,
-                    FrameworkPropertyMetadataOptions.AffectsRender,
-                    resetVisuals));
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty ConstantSettingProperty =
+            DependencyProperty.Register(
+                "ConstantSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty GlobalVariableSettingProperty =
+            DependencyProperty.Register(
+                "GlobalVariableSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty KeywordSettingProperty =
+            DependencyProperty.Register(
+                "KeywordSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty LocalVariableSettingProperty =
+            DependencyProperty.Register(
+                "LocalVariableSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty SeparatorSettingProperty =
+            DependencyProperty.Register(
+                "SeparatorSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty StackVariableSettingProperty =
+            DependencyProperty.Register(
+                "StackVariableSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
+
+        public static readonly DependencyProperty ZTextSettingProperty =
+            DependencyProperty.Register(
+                "ZTextSetting",
+                typeof(FontAndColorSetting),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    null, FrameworkPropertyMetadataOptions.AffectsRender, resetVisuals));
 
         private readonly VisualCollection visuals;
 
         public InstructionTextDisplayElement()
         {
             this.visuals = new VisualCollection(this);
+
+            TextOptions.SetTextHintingMode(this, TextHintingMode.Fixed);
         }
 
         private void ResetVisuals()
@@ -99,12 +196,17 @@ namespace ZDebug.UI.Controls
 
             var builder = new VisualBuilder(
                 visuals,
-                typeface: new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch),
-                fontSize: this.FontSize,
-                foreground: this.Foreground,
-                background: this.Background,
                 height: this.ActualHeight,
-                separatorBrush: this.SeparatorBrush);
+                defaultSetting: this.GetDefaultSetting(),
+                addressSetting: this.AddressSetting,
+                commentSetting: this.CommentSetting,
+                constantSetting: this.ConstantSetting,
+                globalVariableSetting: this.GlobalVariableSetting,
+                keywordSetting: this.KeywordSetting,
+                localVariableSetting: this.LocalVariableSetting,
+                separatorSetting: this.SeparatorSetting,
+                stackVariableSetting: this.StackVariableSetting,
+                ztextSetting: this.ZTextSetting);
 
             if (instruction.Operands.Count > 0)
             {
@@ -152,7 +254,7 @@ namespace ZDebug.UI.Controls
             if (instruction.HasZText && DebuggerService.HasStory)
             {
                 var ztext = ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory);
-                builder.AddZText(ztext.Replace("\n", "\\n"));
+                builder.AddZText(ztext.Replace("\n", "\\n").Replace(' ', '·'));
             }
 
             if (instruction.HasStoreVariable)
@@ -165,7 +267,7 @@ namespace ZDebug.UI.Controls
             {
                 if (instruction.Operands.Count > 0)
                 {
-                    builder.AddText(" ");
+                    builder.AddSeparator(" ");
                 }
 
                 builder.AddBranch(instruction);
@@ -180,6 +282,12 @@ namespace ZDebug.UI.Controls
         protected override int VisualChildrenCount
         {
             get { return visuals.Count; }
+        }
+
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            drawingContext.DrawRectangle(this.Background, null, new Rect(new Point(), this.RenderSize));
+            ResetVisuals();
         }
 
         public Brush Background
@@ -230,16 +338,58 @@ namespace ZDebug.UI.Controls
             set { SetValue(InstructionProperty, value); }
         }
 
-        public Brush SeparatorBrush
+        public FontAndColorSetting AddressSetting
         {
-            get { return (Brush)GetValue(SeparatorBrushProperty); }
-            set { SetValue(SeparatorBrushProperty, value); }
+            get { return (FontAndColorSetting)GetValue(AddressSettingProperty); }
+            set { SetValue(AddressSettingProperty, value); }
         }
 
-        public Brush ZTextBrush
+        public FontAndColorSetting CommentSetting
         {
-            get { return (Brush)GetValue(ZTextBrushProperty); }
-            set { SetValue(ZTextBrushProperty, value); }
+            get { return (FontAndColorSetting)GetValue(CommentSettingProperty); }
+            set { SetValue(CommentSettingProperty, value); }
+        }
+
+        public FontAndColorSetting ConstantSetting
+        {
+            get { return (FontAndColorSetting)GetValue(ConstantSettingProperty); }
+            set { SetValue(ConstantSettingProperty, value); }
+        }
+
+        public FontAndColorSetting GlobalVariableSetting
+        {
+            get { return (FontAndColorSetting)GetValue(GlobalVariableSettingProperty); }
+            set { SetValue(GlobalVariableSettingProperty, value); }
+        }
+
+        public FontAndColorSetting KeywordSetting
+        {
+            get { return (FontAndColorSetting)GetValue(KeywordSettingProperty); }
+            set { SetValue(KeywordSettingProperty, value); }
+        }
+
+        public FontAndColorSetting LocalVariableSetting
+        {
+            get { return (FontAndColorSetting)GetValue(LocalVariableSettingProperty); }
+            set { SetValue(LocalVariableSettingProperty, value); }
+        }
+
+        public FontAndColorSetting SeparatorSetting
+        {
+            get { return (FontAndColorSetting)GetValue(SeparatorSettingProperty); }
+            set { SetValue(SeparatorSettingProperty, value); }
+        }
+
+        public FontAndColorSetting StackVariableSetting
+        {
+            get { return (FontAndColorSetting)GetValue(StackVariableSettingProperty); }
+            set { SetValue(StackVariableSettingProperty, value); }
+        }
+
+        public FontAndColorSetting ZTextSetting
+        {
+            get { return (FontAndColorSetting)GetValue(ZTextSettingProperty); }
+            set { SetValue(ZTextSettingProperty, value); }
         }
     }
 }

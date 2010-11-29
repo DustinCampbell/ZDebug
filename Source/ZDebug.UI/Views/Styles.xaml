@@ -1,9 +1,20 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:ZDebug.UI.Controls">
 
-    <SolidColorBrush x:Key="OpcodeColor" Color="#084D91"/>
-    <SolidColorBrush x:Key="SeparatorColor" Color="#515151"/>
-    <SolidColorBrush x:Key="ZTextColor" Color="Maroon"/>
+    <SolidColorBrush x:Key="AddressForeground" Color="Gray"/>
+    <SolidColorBrush x:Key="OpcodeForeground" Color="Navy"/>
+    <SolidColorBrush x:Key="SeparatorForeground" Color="DarkGray"/>
+
+    <c:FontAndColorSetting x:Key="AddressSetting" Foreground="{StaticResource AddressForeground}"/>
+    <c:FontAndColorSetting x:Key="CommentSetting" Foreground="DarkGreen"/>
+    <c:FontAndColorSetting x:Key="ConstantSetting" Foreground="Peru"/>
+    <c:FontAndColorSetting x:Key="LocalVariableSetting" Foreground="Teal"/>
+    <c:FontAndColorSetting x:Key="GlobalVariableSetting" Foreground="Teal"/>
+    <c:FontAndColorSetting x:Key="KeywordSetting" Foreground="MediumBlue"/>
+    <c:FontAndColorSetting x:Key="SeparatorSetting" Foreground="{StaticResource SeparatorForeground}"/>
+    <c:FontAndColorSetting x:Key="StackVariableSetting" Foreground="Teal"/>
+    <c:FontAndColorSetting x:Key="ZTextSetting" Foreground="Maroon" Background="#ffffe6" FontFamily="Times New Roman" FontSize="15.5"/>
 
     <Style TargetType="{x:Type Image}" x:Key="smallImageStyle">
         <Setter Property="Height" Value="12"/>

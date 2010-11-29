@@ -2,11 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
              xmlns:c="clr-namespace:ZDebug.UI.Controls"
-             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+             Background="White"
              FontFamily="Consolas"
-             FontSize="14"
+             FontSize="15.0"
+             Foreground="Black"
              SnapsToDevicePixels="True"
-             UseLayoutRounding="True">
+             UseLayoutRounding="True"
+             TextOptions.TextFormattingMode="Display">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -68,19 +70,27 @@
 
                         <TextBlock Grid.Column="0">
                             <Run Text="  "/><Run 
-                                 Foreground="#494949" Text="{Binding Address, StringFormat=\{0:x4\}:, Mode=OneWay}"/>
+                                 Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
+                                 Foreground="{StaticResource SeparatorForeground}" Text=":"/>
                         </TextBlock>
 
                         <TextBlock
                             Grid.Column="1"
                             Text="{Binding OpcodeName, Mode=OneWay}"
-                            Foreground="{StaticResource OpcodeColor}"/>
+                            Foreground="{StaticResource OpcodeForeground}"/>
 
                         <c:InstructionTextDisplayElement
                             Grid.Column="2"
                             Instruction="{Binding Instruction, Mode=OneWay}"
-                            SeparatorBrush="{StaticResource SeparatorColor}"
-                            ZTextBrush="{StaticResource ZTextColor}"/>
+                            AddressSetting="{StaticResource AddressSetting}"
+                            CommentSetting="{StaticResource CommentSetting}"
+                            ConstantSetting="{StaticResource ConstantSetting}"
+                            GlobalVariableSetting="{StaticResource GlobalVariableSetting}"
+                            KeywordSetting="{StaticResource KeywordSetting}"
+                            LocalVariableSetting="{StaticResource LocalVariableSetting}"
+                            SeparatorSetting="{StaticResource SeparatorSetting}"
+                            StackVariableSetting="{StaticResource StackVariableSetting}"
+                            ZTextSetting="{StaticResource ZTextSetting}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.Resources>

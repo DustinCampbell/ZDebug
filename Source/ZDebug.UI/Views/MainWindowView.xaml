@@ -82,16 +82,16 @@
             </ToolBar>
         </ToolBarTray>
 
-        <ad:DockingManager x:Name="dockManager" Grid.Row="2">
+        <ad:DockingManager Name="dockManager" Grid.Row="2">
             <ad:ResizingPanel Orientation="Vertical">
                 <ad:ResizingPanel Orientation="Horizontal">
-                    <ad:DockablePane>
-                        <ad:DockableContent Title="Story Info" x:Name="storyInfoContent"/>
+                    <ad:DockablePane ad:ResizingPanel.ResizeWidth="150">
+                        <ad:DockableContent Title="Story Info" Name="storyInfoContent"/>
                     </ad:DockablePane>
                     <ad:DocumentPane SelectedIndex="0">
-                        <ad:DocumentContent Title="Disassembly" x:Name="disassemblyContent"/>
-                        <ad:DocumentContent Title="Objects" x:Name="objectsContent"/>
-                        <ad:DocumentContent Title="Memory" x:Name="memoryContent"/>
+                        <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>
+                        <ad:DocumentContent Title="Objects" Name="objectsContent"/>
+                        <ad:DocumentContent Title="Memory" Name="memoryContent"/>
                     </ad:DocumentPane>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
