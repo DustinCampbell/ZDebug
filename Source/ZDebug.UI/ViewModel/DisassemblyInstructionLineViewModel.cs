@@ -20,5 +20,10 @@ namespace ZDebug.UI.ViewModel
         {
             get { return instruction.Opcode.Name; }
         }
+
+        public Instruction Instruction
+        {
+            get { return instruction; }
+        }
     }
 }

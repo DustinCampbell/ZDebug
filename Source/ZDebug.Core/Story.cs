@@ -36,6 +36,16 @@ namespace ZDebug.Core
         {
         }
 
+        public int UnpackRoutineAddress(ushort byteAddress)
+        {
+            return memory.UnpackRoutineAddress(byteAddress);
+        }
+
+        public int UnpackStringAddress(ushort byteAddress)
+        {
+            return memory.UnpackStringAddress(byteAddress);
+        }
+
         public Memory Memory
         {
             get { return memory; }
