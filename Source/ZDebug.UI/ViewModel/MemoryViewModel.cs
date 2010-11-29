@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 using ZDebug.Core.Basics;
 using ZDebug.UI.Services;
@@ -46,8 +47,36 @@ namespace ZDebug.UI.ViewModel
                 while (reader.RemainingBytes > 0)
                 {
                     var address = reader.Address;
-                    var count = Math.Min(8, reader.RemainingBytes);
-                    var values = reader.NextWords(count);
+
+                    ushort[] values;
+
+                    if (reader.RemainingBytes >= 16 || reader.RemainingBytes % 2 == 0)
+                    {
+                        var count = Math.Min(8, reader.RemainingBytes / 2);
+                        values = reader.NextWords(count);
+                    }
+                    else
+                    {
+                        // if the last line is an odd number of bytes...
+
+                        // TODO: memory view always shows even number of bytes
+                        // (padding with zeroes if necessry). Need to fix it to show odd
+                        // number of bytes if that's the case.
+                        var valueList = new List<ushort>();
+                        while (reader.RemainingBytes > 0)
+                        {
+                            if (reader.RemainingBytes > 2)
+                            {
+                                valueList.Add(reader.NextWord());
+                            }
+                            else
+                            {
+                                valueList.Add((ushort)(reader.NextByte() << 8));
+                            }
+                        }
+
+                        values = valueList.ToArray();
+                    }
 
                     lines.Add(new MemoryLineViewModel(address, values));
                 }
