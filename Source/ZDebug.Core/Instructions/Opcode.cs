@@ -1,5 +1,5 @@
 ﻿using System;
-using ZDebug.Core.Processor;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.Core.Instructions
 {
@@ -20,8 +20,23 @@ namespace ZDebug.Core.Instructions
             this.routine = routine;
         }
 
-        public void Execute(IExecutionContext context)
+        public void Execute(Instruction instruction, IExecutionContext context)
         {
+            if (instruction == null)
+            {
+                throw new ArgumentNullException("instruction");
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
+            if (instruction.Opcode != null)
+            {
+                throw new ArgumentException("Instruction.Opcode must match this opcode.", "instruction");
+            }
+
             if (routine == null)
             {
                 throw new InvalidOperationException(
@@ -32,7 +47,7 @@ Kind = {1}
 Number = {2:x2} ({2})", name, kind, number));
             }
 
-            routine(context);
+            routine(instruction, context);
         }
 
         public OpcodeKind Kind

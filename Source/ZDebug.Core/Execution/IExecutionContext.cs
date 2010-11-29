@@ -1,4 +1,4 @@
-﻿namespace ZDebug.Core.Processor
+﻿namespace ZDebug.Core.Execution
 {
     public interface IExecutionContext
     {

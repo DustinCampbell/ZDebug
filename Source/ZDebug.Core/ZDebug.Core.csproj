@@ -55,6 +55,7 @@
     <Compile Include="Basics\MemoryMapRegionKind.cs" />
     <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Basics\ObjectHelpers.cs" />
+    <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Inform\InformData.cs" />
     <Compile Include="Instructions\Branch.cs" />
     <Compile Include="Instructions\BranchKind.cs" />
@@ -81,7 +82,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Objects\ZPropertyTable.cs" />
-    <Compile Include="Processor\IExecutionContext.cs" />
+    <Compile Include="Execution\IExecutionContext.cs" />
+    <Compile Include="Execution\Processor.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Story.cs" />

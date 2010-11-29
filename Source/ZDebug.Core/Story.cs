@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Execution;
 using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
@@ -15,6 +16,7 @@ namespace ZDebug.Core
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
         private readonly RoutineTable routineTable;
+        private readonly Processor processor;
 
         private Story(Memory memory)
         {
@@ -24,6 +26,7 @@ namespace ZDebug.Core
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
             this.routineTable = new RoutineTable(memory);
+            this.processor = new Processor(this);
         }
 
         private Story(byte[] bytes)
