@@ -123,6 +123,34 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x1d, "copy_table", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1e, "print_table", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1f, "check_arg_count", OpcodeFlags.Branch, fromVersion: 5);
+
+            // extended opcodes
+            AddOpcode(OpcodeKind.Ext, 0x00, "save", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x01, "restore", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x02, "log_shift", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x03, "art_shift", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x04, "set_font", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x05, "draw_picture", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x06, "picture_data", OpcodeFlags.Branch, fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x07, "erase_picture", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x08, "set_margins", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x09, "save_undo", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x0a, "restore_undo", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x0b, "print_unicode", fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x0c, "check_unicode", fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x10, "move_window", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x11, "window_size", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x12, "window_style", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x13, "get_wind_prop", OpcodeFlags.Store, fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x14, "scroll_window", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x15, "pop_stack", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x16, "read_mouse", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x17, "mouse_window", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x18, "push_stack", OpcodeFlags.Branch, fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x19, "put_wind_prop", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x1a, "print_form", fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x1b, "make_menu", OpcodeFlags.Branch, fromVersion: 6);
+            AddOpcode(OpcodeKind.Ext, 0x1c, "picture_table", fromVersion: 6);
         }
 
         private static Tuple<OpcodeKind, byte, byte> CreateKey(OpcodeKind kind, byte number, byte version)
