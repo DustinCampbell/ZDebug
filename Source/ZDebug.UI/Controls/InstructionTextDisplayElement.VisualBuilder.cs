@@ -18,6 +18,8 @@ namespace ZDebug.UI.Controls
             private readonly Brush foreground;
             private readonly Brush background;
             private readonly double height;
+            private readonly Brush separatorBrush;
+
             private double left;
 
             public VisualBuilder(
@@ -26,7 +28,8 @@ namespace ZDebug.UI.Controls
                 double fontSize,
                 Brush foreground,
                 Brush background,
-                double height)
+                double height,
+                Brush separatorBrush)
             {
                 this.visuals = visuals;
                 this.typeface = typeface;
@@ -35,6 +38,7 @@ namespace ZDebug.UI.Controls
                 this.foreground = foreground;
                 this.background = background;
                 this.height = height;
+                this.separatorBrush = separatorBrush;
             }
 
             private FormattedText CreateFormattedText(string text, Typeface typeface = null, Brush foreground = null)
@@ -83,7 +87,7 @@ namespace ZDebug.UI.Controls
 
             public void AddSeparator(string text)
             {
-                AddVisual(text, foreground: Brushes.DarkSlateGray);
+                AddVisual(text, foreground: separatorBrush);
             }
 
             public void AddText(string text)

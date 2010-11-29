@@ -60,6 +60,26 @@ namespace ZDebug.UI.Controls
                     FrameworkPropertyMetadataOptions.AffectsRender,
                     resetVisuals));
 
+        public static readonly DependencyProperty SeparatorBrushProperty =
+            DependencyProperty.Register(
+                "SeparatorBrush",
+                typeof(Brush),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    Brushes.Black,
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    resetVisuals));
+
+        public static readonly DependencyProperty ZTextBrushProperty =
+            DependencyProperty.Register(
+                "ZTextBrush",
+                typeof(Brush),
+                typeof(InstructionTextDisplayElement),
+                new FrameworkPropertyMetadata(
+                    Brushes.Black,
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    resetVisuals));
+
         private readonly VisualCollection visuals;
 
         public InstructionTextDisplayElement()
@@ -83,7 +103,8 @@ namespace ZDebug.UI.Controls
                 fontSize: this.FontSize,
                 foreground: this.Foreground,
                 background: this.Background,
-                height: this.ActualHeight);
+                height: this.ActualHeight,
+                separatorBrush: this.SeparatorBrush);
 
             if (instruction.Operands.Count > 0)
             {
@@ -131,7 +152,7 @@ namespace ZDebug.UI.Controls
             if (instruction.HasZText && DebuggerService.HasStory)
             {
                 var ztext = ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory);
-                builder.AddZText("\"" + ztext.Replace("\n", "\\n") + "\"");
+                builder.AddZText(ztext.Replace("\n", "\\n"));
             }
 
             if (instruction.HasStoreVariable)
@@ -207,6 +228,18 @@ namespace ZDebug.UI.Controls
         {
             get { return (Instruction)GetValue(InstructionProperty); }
             set { SetValue(InstructionProperty, value); }
+        }
+
+        public Brush SeparatorBrush
+        {
+            get { return (Brush)GetValue(SeparatorBrushProperty); }
+            set { SetValue(SeparatorBrushProperty, value); }
+        }
+
+        public Brush ZTextBrush
+        {
+            get { return (Brush)GetValue(ZTextBrushProperty); }
+            set { SetValue(ZTextBrushProperty, value); }
         }
     }
 }

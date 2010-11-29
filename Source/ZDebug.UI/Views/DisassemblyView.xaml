@@ -7,6 +7,16 @@
              FontSize="14"
              SnapsToDevicePixels="True"
              UseLayoutRounding="True">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Images.xaml"/>
+                <ResourceDictionary Source="Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid>
         <ItemsControl ItemsSource="{Binding Lines}"
                       VirtualizingStackPanel.IsVirtualizing="True"
@@ -51,22 +61,26 @@
                             <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        
+
                         <Grid.RowDefinitions>
                             <RowDefinition MinHeight="{DynamicResource rowHeight}"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Column="0">
                             <Run Text="  "/><Run 
-                                 Foreground="DarkSlateGray" Text="{Binding Address, StringFormat=\{0:x4\}:, Mode=OneWay}"/>
+                                 Foreground="#494949" Text="{Binding Address, StringFormat=\{0:x4\}:, Mode=OneWay}"/>
                         </TextBlock>
 
                         <TextBlock
                             Grid.Column="1"
                             Text="{Binding OpcodeName, Mode=OneWay}"
-                            Foreground="DarkSlateBlue"/>
+                            Foreground="{StaticResource OpcodeColor}"/>
 
-                        <c:InstructionTextDisplayElement Grid.Column="2" Instruction="{Binding Instruction, Mode=OneWay}"/>
+                        <c:InstructionTextDisplayElement
+                            Grid.Column="2"
+                            Instruction="{Binding Instruction, Mode=OneWay}"
+                            SeparatorBrush="{StaticResource SeparatorColor}"
+                            ZTextBrush="{StaticResource ZTextColor}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.Resources>
