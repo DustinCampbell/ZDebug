@@ -57,7 +57,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return);
             AddOpcode(OpcodeKind.OneOp, 0x0c, "jump");
             AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr");
-            AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, toVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
 
