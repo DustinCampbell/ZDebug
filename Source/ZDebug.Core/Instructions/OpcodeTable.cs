@@ -51,7 +51,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");
-            AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Branch, fromVersion: 4);
+            AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
             AddOpcode(OpcodeKind.OneOp, 0x0a, "print_obj");
             AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return);
