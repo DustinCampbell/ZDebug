@@ -13,33 +13,43 @@ namespace ZDebug.UI.Controls
         {
             private readonly VisualCollection visuals;
             private readonly Typeface typeface;
+            private readonly Typeface ztextTypeface;
             private readonly double fontSize;
             private readonly Brush foreground;
             private readonly Brush background;
             private readonly double height;
             private double left;
 
-            public VisualBuilder(VisualCollection visuals, Typeface typeface, double fontSize, Brush foreground, Brush background, double height)
+            public VisualBuilder(
+                VisualCollection visuals,
+                Typeface typeface,
+                double fontSize,
+                Brush foreground,
+                Brush background,
+                double height)
             {
                 this.visuals = visuals;
                 this.typeface = typeface;
+                this.ztextTypeface = new Typeface("Cambria");
                 this.fontSize = fontSize;
                 this.foreground = foreground;
                 this.background = background;
                 this.height = height;
             }
 
-            private FormattedText CreateFormattedText(string text)
+            private FormattedText CreateFormattedText(string text, Typeface typeface = null, Brush foreground = null)
             {
+                typeface = typeface ?? this.typeface;
+                foreground = foreground ?? this.foreground;
                 return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize, foreground);
             }
 
-            private void AddVisual(string text)
+            private void AddVisual(string text, Typeface typeface = null, Brush foreground = null)
             {
                 var visual = new DrawingVisual();
                 var context = visual.RenderOpen();
 
-                var formattedText = CreateFormattedText(text);
+                var formattedText = CreateFormattedText(text, typeface, foreground);
                 var width = formattedText.WidthIncludingTrailingWhitespace;
 
                 if (background != null)
@@ -71,6 +81,11 @@ namespace ZDebug.UI.Controls
                 AddVisual("#" + value.ToString("x2"));
             }
 
+            public void AddSeparator(string text)
+            {
+                AddVisual(text, foreground: Brushes.DarkSlateGray);
+            }
+
             public void AddText(string text)
             {
                 AddVisual(text);
@@ -82,11 +97,15 @@ namespace ZDebug.UI.Controls
                 {
                     if (@out)
                     {
-                        AddVisual("-(SP)");
+                        AddSeparator("-(");
+                        AddVisual("SP");
+                        AddSeparator(")");
                     }
                     else
                     {
-                        AddVisual("(SP)+");
+                        AddSeparator("(");
+                        AddVisual("SP");
+                        AddSeparator(")+");
                     }
                 }
                 else // VariableKind.Local || VariableKind.Global
@@ -119,7 +138,7 @@ namespace ZDebug.UI.Controls
                 {
                     if (firstOpAdded)
                     {
-                        AddText(", ");
+                        AddSeparator(", ");
                     }
 
                     AddOperand(op);
@@ -136,9 +155,9 @@ namespace ZDebug.UI.Controls
                 }
                 else if (operand.Kind == OperandKind.Variable)
                 {
-                    AddText("[");
+                    AddSeparator("[");
                     AddOperand(operand);
-                    AddText("]");
+                    AddSeparator("]");
                 }
                 else // OperandKind.LargeConstant
                 {
@@ -150,9 +169,9 @@ namespace ZDebug.UI.Controls
             {
                 var branch = instruction.Branch;
 
-                AddText("[");
+                AddSeparator("[");
                 AddText(branch.Condition ? "TRUE" : "FALSE");
-                AddText("] ");
+                AddSeparator("] ");
 
                 if (branch.Kind == BranchKind.RFalse)
                 {
@@ -171,7 +190,8 @@ namespace ZDebug.UI.Controls
 
             public void AddZText(string ztext)
             {
-                AddText(ztext);
+                // TODO: Add wrapping for ZText
+                AddVisual(ztext, ztextTypeface, Brushes.Maroon);
             }
         }
     }

@@ -58,12 +58,15 @@
 
                         <TextBlock Grid.Column="0">
                             <Run Text="  "/><Run 
-                                 Foreground="DarkGray" Text="{Binding Address, StringFormat=\{0:x4\}:, Mode=OneWay}"/>
+                                 Foreground="DarkSlateGray" Text="{Binding Address, StringFormat=\{0:x4\}:, Mode=OneWay}"/>
                         </TextBlock>
 
-                        <TextBlock Grid.Column="1" Text="{Binding OpcodeName, Mode=OneWay}"/>
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="{Binding OpcodeName, Mode=OneWay}"
+                            Foreground="DarkSlateBlue"/>
 
-                        <c:InstructionTextDisplayElement Grid.Column="2" Instruction="{Binding Instruction}"/>
+                        <c:InstructionTextDisplayElement Grid.Column="2" Instruction="{Binding Instruction, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.Resources>

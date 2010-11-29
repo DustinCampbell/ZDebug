@@ -101,9 +101,9 @@ namespace ZDebug.UI.Controls
 
                     if (instruction.Operands.Count > 1)
                     {
-                        builder.AddText(" (");
+                        builder.AddSeparator(" (");
                         builder.AddOperands(instruction.Operands.Skip(1));
-                        builder.AddText(")");
+                        builder.AddSeparator(")");
                     }
                 }
                 else if (instruction.Opcode.IsJump)
@@ -118,7 +118,7 @@ namespace ZDebug.UI.Controls
 
                     if (instruction.Operands.Count > 1)
                     {
-                        builder.AddText(", ");
+                        builder.AddSeparator(", ");
                         builder.AddOperands(instruction.Operands.Skip(1));
                     }
                 }
@@ -136,7 +136,7 @@ namespace ZDebug.UI.Controls
 
             if (instruction.HasStoreVariable)
             {
-                builder.AddText(" -> ");
+                builder.AddSeparator(" -> ");
                 builder.AddVariable(instruction.StoreVariable, @out: true);
             }
 
