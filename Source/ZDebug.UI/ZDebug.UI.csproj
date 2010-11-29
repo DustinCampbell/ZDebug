@@ -100,6 +100,8 @@
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
+    <Compile Include="Utilities\Storage.cs" />
+    <Compile Include="Utilities\Storage.WindowPlacement.cs" />
     <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />

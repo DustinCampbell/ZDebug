@@ -3,6 +3,7 @@
         xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
         xmlns:c="clr-namespace:ZDebug.UI.Controls"
         xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
+        Name="wndMain"
         Title="{Binding Title}"
         ResizeMode="CanResizeWithGrip"
         Width ="800"

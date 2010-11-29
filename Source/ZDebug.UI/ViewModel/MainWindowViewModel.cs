@@ -152,6 +152,24 @@ namespace ZDebug.UI.ViewModel
 
             var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
+
+            this.View.SourceInitialized += (s, e) =>
+            {
+                Storage.RestoreWindowLayout(this.View);
+            };
+
+            var dockManager = this.View.FindName<DockingManager>("dockManager");
+            dockManager.Loaded += (s, e) =>
+            {
+                Storage.RestoreDockingLayout(dockManager);
+            };
+
+            this.View.Closing += (s, e) =>
+            {
+                DebuggerService.CloseStory();
+                Storage.SaveDockingLayout(dockManager);
+                Storage.SaveWindowLayout(this.View);
+            };
         }
     }
 }
