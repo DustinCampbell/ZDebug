@@ -89,6 +89,7 @@
                         <ad:DockableContent Title="Story Info" x:Name="storyInfoContent"/>
                     </ad:DockablePane>
                     <ad:DocumentPane SelectedIndex="0">
+                        <ad:DocumentContent Title="Disassembly" x:Name="disassemblyContent"/>
                         <ad:DocumentContent Title="Objects" x:Name="objectsContent"/>
                         <ad:DocumentContent Title="Memory" x:Name="memoryContent"/>
                     </ad:DocumentPane>

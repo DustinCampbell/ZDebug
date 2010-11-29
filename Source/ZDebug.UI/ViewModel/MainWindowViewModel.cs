@@ -144,6 +144,9 @@ namespace ZDebug.UI.ViewModel
             var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
             storyInfoContent.Content = ViewModelWithView.Create<StoryInfoViewModel, UserControl>();
 
+            var disassemblyContent = this.View.FindName<DocumentContent>("disassemblyContent");
+            disassemblyContent.Content = ViewModelWithView.Create<DisassemblyViewModel, UserControl>();
+
             var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
             objectsContent.Content = ViewModelWithView.Create<ObjectsViewModel, UserControl>();
 
