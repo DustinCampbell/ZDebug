@@ -18,8 +18,8 @@ namespace ZDebug.Core.Instructions
             this.version = memory.ReadVersion();
             this.routines = new SortedList<int, Routine>();
 
-            var mainRoutine = memory.ReadInitialPC() - 1;
-            Add(mainRoutine);
+            var mainRoutineAddress = memory.ReadMainRoutineAddress();
+            Add(mainRoutineAddress);
         }
 
         private static bool IsAnalyzableCall(Instruction i)

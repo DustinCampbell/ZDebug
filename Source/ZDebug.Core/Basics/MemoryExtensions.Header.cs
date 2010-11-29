@@ -60,6 +60,19 @@ namespace ZDebug.Core.Basics
             return memory.ReadWord(InitialPCIndex);
         }
 
+        public static int ReadMainRoutineAddress(this Memory memory)
+        {
+            var version = memory.ReadVersion();
+            if (version != 6)
+            {
+                return memory.ReadInitialPC() - 1;
+            }
+            else
+            {
+                return memory.UnpackRoutineAddress(memory.ReadInitialPC());
+            }
+        }
+
         public static ushort ReadDictionaryAddress(this Memory memory)
         {
             return memory.ReadWord(DictionaryAddressIndex);
