@@ -8,7 +8,7 @@ bin
 
 # Ignore NUnit test results
 *.VisualState.xml
-TestResult.xml
+TestResult*.xml
 
 # Ignore project and solution user settings
 *.csproj.user

@@ -3145,6 +3145,41 @@
             </summary>
             <param name="writer">The writer on which the description is displayed</param>
         </member>
+        <member name="M:NUnit.Framework.Constraints.ContainsConstraint.Using(System.Collections.IComparer)">
+            <summary>
+            Flag the constraint to use the supplied IComparer object.
+            </summary>
+            <param name="comparer">The IComparer object to use.</param>
+            <returns>Self.</returns>
+        </member>
+        <member name="M:NUnit.Framework.Constraints.ContainsConstraint.Using``1(System.Collections.Generic.IComparer{``0})">
+            <summary>
+            Flag the constraint to use the supplied IComparer object.
+            </summary>
+            <param name="comparer">The IComparer object to use.</param>
+            <returns>Self.</returns>
+        </member>
+        <member name="M:NUnit.Framework.Constraints.ContainsConstraint.Using``1(System.Comparison{``0})">
+            <summary>
+            Flag the constraint to use the supplied Comparison object.
+            </summary>
+            <param name="comparer">The IComparer object to use.</param>
+            <returns>Self.</returns>
+        </member>
+        <member name="M:NUnit.Framework.Constraints.ContainsConstraint.Using(System.Collections.IEqualityComparer)">
+            <summary>
+            Flag the constraint to use the supplied IEqualityComparer object.
+            </summary>
+            <param name="comparer">The IComparer object to use.</param>
+            <returns>Self.</returns>
+        </member>
+        <member name="M:NUnit.Framework.Constraints.ContainsConstraint.Using``1(System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            Flag the constraint to use the supplied IEqualityComparer object.
+            </summary>
+            <param name="comparer">The IComparer object to use.</param>
+            <returns>Self.</returns>
+        </member>
         <member name="P:NUnit.Framework.Constraints.ContainsConstraint.IgnoreCase">
             <summary>
             Flag the constraint to ignore case and return self.
@@ -4760,6 +4795,14 @@
             </summary>
             <param name="actual">The value to be tested</param>
             <returns>True if no exception is thrown, otherwise false</returns>
+        </member>
+        <member name="M:NUnit.Framework.Constraints.ThrowsNothingConstraint.Matches(NUnit.Framework.Constraints.ActualValueDelegate)">
+            <summary>
+            Converts an ActualValueDelegate to a TestDelegate
+            before calling the primary overload.
+            </summary>
+            <param name="del"></param>
+            <returns></returns>
         </member>
         <member name="M:NUnit.Framework.Constraints.ThrowsNothingConstraint.WriteDescriptionTo(NUnit.Framework.Constraints.MessageWriter)">
             <summary>
