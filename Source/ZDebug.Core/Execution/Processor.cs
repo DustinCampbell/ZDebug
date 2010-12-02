@@ -38,11 +38,6 @@ namespace ZDebug.Core.Execution
                     storeVariable: null));
         }
 
-        private StackFrame CurrentFrame
-        {
-            get { return callStack.Peek(); }
-        }
-
         private Value ReadVariable(Variable variable, bool indirect = false)
         {
             switch (variable.Kind)
@@ -171,6 +166,11 @@ namespace ZDebug.Core.Execution
             var newPC = reader.Address;
             OnStepped(oldPC, newPC);
             executingInstruction = null;
+        }
+
+        public StackFrame CurrentFrame
+        {
+            get { return callStack.Peek(); }
         }
 
         public int PC
