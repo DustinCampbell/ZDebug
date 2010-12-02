@@ -6,6 +6,8 @@ namespace ZDebug.Core.Execution
     {
         Value GetOperandValue(Operand operand);
 
+        void WriteVariable(Variable variable, Value value);
+
         void Call(int address, Operand[] args, Variable storeVariable);
 
         int UnpackRoutineAddress(ushort byteAddress);
