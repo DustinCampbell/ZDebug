@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Text.cs" />

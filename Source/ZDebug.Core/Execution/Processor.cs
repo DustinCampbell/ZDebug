@@ -151,9 +151,12 @@ namespace ZDebug.Core.Execution
                 var numberToCopy = Math.Min(argValues.Length, locals.Length);
                 Array.Copy(argValues, 0, locals, 0, numberToCopy);
 
+                var oldFrame = CurrentFrame;
                 var newFrame = new StackFrame(address, argValues, locals, returnAddress, storeVariable);
 
                 callStack.Push(newFrame);
+
+                OnEnterFrame(oldFrame, newFrame);
             }
         }
 
@@ -161,23 +164,12 @@ namespace ZDebug.Core.Execution
         {
             var oldPC = reader.Address;
             executingInstruction = instructions.NextInstruction();
-
-            var steppingHandler = Stepping;
-            if (steppingHandler != null)
-            {
-                steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
-            }
+            OnStepping(oldPC);
 
             executingInstruction.Opcode.Execute(executingInstruction, this);
 
             var newPC = reader.Address;
-
-            var steppedHandler = Stepped;
-            if (steppedHandler != null)
-            {
-                steppedHandler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
-            }
-
+            OnStepped(oldPC, newPC);
             executingInstruction = null;
         }
 
@@ -194,8 +186,47 @@ namespace ZDebug.Core.Execution
             get { return executingInstruction; }
         }
 
+        private void OnStepping(int oldPC)
+        {
+            var handler = Stepping;
+            if (handler != null)
+            {
+                handler(this, new ProcessorSteppingEventArgs(oldPC));
+            }
+        }
+
+        private void OnStepped(int oldPC, int newPC)
+        {
+            var handler = Stepped;
+            if (handler != null)
+            {
+                handler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
+            }
+        }
+
+        private void OnEnterFrame(StackFrame oldFrame, StackFrame newFrame)
+        {
+            var handler = EnterFrame;
+            if (handler != null)
+            {
+                handler(this, new StackFrameEventArgs(oldFrame, newFrame));
+            }
+        }
+
+        private void OnExitFrame(StackFrame oldFrame, StackFrame newFrame)
+        {
+            var handler = ExitFrame;
+            if (handler != null)
+            {
+                handler(this, new StackFrameEventArgs(oldFrame, newFrame));
+            }
+        }
+
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;
         public event EventHandler<ProcessorSteppedEventArgs> Stepped;
+
+        public event EventHandler<StackFrameEventArgs> EnterFrame;
+        public event EventHandler<StackFrameEventArgs> ExitFrame;
 
         Value IExecutionContext.GetOperandValue(Operand operand)
         {
