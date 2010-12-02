@@ -43,7 +43,19 @@ namespace ZDebug.Core.Utilities
             return Array.ConvertAll(array, converter);
         }
 
-        public static T[] Copy<T>(this T[] array, int index, int length)
+        private static T[] ShallowCopyCore<T>(T[] array, int index, int length)
+        {
+            var result = new T[length];
+
+            if (length > 0)
+            {
+                Array.Copy(array, index, result, 0, length);
+            }
+
+            return result;
+        }
+
+        public static T[] ShallowCopy<T>(this T[] array, int index, int length)
         {
             if (array == null)
             {
@@ -60,14 +72,17 @@ namespace ZDebug.Core.Utilities
                 throw new ArgumentOutOfRangeException("index");
             }
 
-            var result = new T[length];
+            return ShallowCopyCore(array, index, length);
+        }
 
-            if (length > 0)
+        public static T[] ShallowCopy<T>(this T[] array)
+        {
+            if (array == null)
             {
-                Array.Copy(array, index, result, 0, length);
+                throw new ArgumentNullException("array");
             }
 
-            return result;
+            return ShallowCopyCore(array, 0, array.Length);
         }
 
         public static T First<T>(this T[] array)

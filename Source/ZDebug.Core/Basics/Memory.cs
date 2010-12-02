@@ -146,7 +146,7 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.Copy(address, values.Length);
+            var oldValues = bytes.ShallowCopy(address, values.Length);
 
             Array.Copy(values, 0, bytes, address, values.Length);
 
@@ -197,7 +197,7 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.Copy(address, values.Length * 2);
+            var oldValues = bytes.ShallowCopy(address, values.Length * 2);
 
             for (int i = 0; i < values.Length; i++)
             {
@@ -205,7 +205,7 @@ namespace ZDebug.Core.Basics
                 bytes[address + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
             }
 
-            var newValues = bytes.Copy(address, values.Length * 2);
+            var newValues = bytes.ShallowCopy(address, values.Length * 2);
 
             OnMemoryChanged(
                 address,
