@@ -13,6 +13,8 @@ namespace ZDebug.Core.Execution
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
 
+        private Instruction executingInstruction;
+
         internal Processor(Story story)
         {
             this.story = story;
@@ -39,6 +41,7 @@ namespace ZDebug.Core.Execution
         public void Step()
         {
             var oldPC = reader.Address;
+            executingInstruction = instructions.NextInstruction();
 
             var steppingHandler = Stepping;
             if (steppingHandler != null)
@@ -46,8 +49,7 @@ namespace ZDebug.Core.Execution
                 steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
             }
 
-            var i = instructions.NextInstruction();
-            i.Opcode.Execute(i, this);
+            executingInstruction.Opcode.Execute(executingInstruction, this);
 
             var newPC = reader.Address;
 
@@ -56,11 +58,21 @@ namespace ZDebug.Core.Execution
             {
                 steppedHandler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
             }
+
+            executingInstruction = null;
         }
 
         public int PC
         {
             get { return reader.Address; }
+        }
+
+        /// <summary>
+        /// The Instruction that is being executed (only valid during a step).
+        /// </summary>
+        public Instruction ExecutingInstruction
+        {
+            get { return executingInstruction; }
         }
 
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;

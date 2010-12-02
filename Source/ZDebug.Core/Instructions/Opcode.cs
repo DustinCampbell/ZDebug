@@ -32,7 +32,7 @@ namespace ZDebug.Core.Instructions
                 throw new ArgumentNullException("context");
             }
 
-            if (instruction.Opcode != null)
+            if (instruction.Opcode != this)
             {
                 throw new ArgumentException("Instruction.Opcode must match this opcode.", "instruction");
             }

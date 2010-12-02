@@ -6,7 +6,7 @@ namespace ZDebug.UI.ViewModel
         private bool hasBreakpoint;
         private bool hasIP;
         private DisassemblyLineState state;
-        private string toolTip;
+        private object toolTip;
 
         public bool HasBreakpoint
         {
@@ -47,7 +47,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public string ToolTip
+        public object ToolTip
         {
             get { return toolTip; }
             set

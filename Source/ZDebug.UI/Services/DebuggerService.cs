@@ -9,6 +9,7 @@ namespace ZDebug.UI.Services
         private static DebuggerState state;
         private static Story story;
         private static string fileName;
+        private static Exception currentException;
 
         private static void ChangeState(DebuggerState newState)
         {
@@ -62,6 +63,24 @@ namespace ZDebug.UI.Services
             return story;
         }
 
+        public static bool CanStepNext
+        {
+            get { return state == DebuggerState.Stopped; }
+        }
+
+        public static void StepNext()
+        {
+            try
+            {
+                story.Processor.Step();
+            }
+            catch (Exception ex)
+            {
+                currentException = ex;
+                ChangeState(DebuggerState.StoppedAtError);
+            }
+        }
+
         public static DebuggerState State
         {
             get { return state; }
@@ -80,6 +99,11 @@ namespace ZDebug.UI.Services
         public static string FileName
         {
             get { return fileName; }
+        }
+
+        public static Exception CurrentException
+        {
+            get { return currentException; }
         }
 
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;

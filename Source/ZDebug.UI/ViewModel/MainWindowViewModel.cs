@@ -89,11 +89,12 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanStepNextExecute()
         {
-            return false;
+            return DebuggerService.CanStepNext;
         }
 
         private void StepNextExecuted()
         {
+            DebuggerService.StepNext();
         }
 
         private bool CanResetSessionExecute()

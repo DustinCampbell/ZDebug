@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 
@@ -74,10 +75,22 @@ namespace ZDebug.UI.ViewModel
             addressToLineMap.Clear();
         }
 
+        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+        {
+            if (e.NewState == DebuggerState.StoppedAtError)
+            {
+                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
+                line.State = DisassemblyLineState.Blocked;
+                line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+
+            DebuggerService.StateChanged += DebuggerService_StateChanged;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 
