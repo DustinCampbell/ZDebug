@@ -94,8 +94,12 @@
     <Compile Include="Controls\AutoDisableImage.cs" />
     <Compile Include="Controls\FontAndColorSetting.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.cs" />
+    <Compile Include="Controls\InstructionTextDisplayElement.SimpleTextParagraphProperties.cs" />
+    <Compile Include="Controls\InstructionTextDisplayElement.SimpleTextRunProperties.cs" />
+    <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextSource.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.VisualBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
+    <Compile Include="Services\FontsAndColorsService.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />

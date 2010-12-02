@@ -81,16 +81,7 @@
 
                         <c:InstructionTextDisplayElement
                             Grid.Column="2"
-                            Instruction="{Binding Instruction, Mode=OneWay}"
-                            AddressSetting="{StaticResource AddressSetting}"
-                            CommentSetting="{StaticResource CommentSetting}"
-                            ConstantSetting="{StaticResource ConstantSetting}"
-                            GlobalVariableSetting="{StaticResource GlobalVariableSetting}"
-                            KeywordSetting="{StaticResource KeywordSetting}"
-                            LocalVariableSetting="{StaticResource LocalVariableSetting}"
-                            SeparatorSetting="{StaticResource SeparatorSetting}"
-                            StackVariableSetting="{StaticResource StackVariableSetting}"
-                            ZTextSetting="{StaticResource ZTextSetting}"/>
+                            Instruction="{Binding Instruction, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.Resources>

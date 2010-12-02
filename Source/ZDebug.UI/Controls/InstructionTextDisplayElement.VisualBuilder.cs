@@ -1,99 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
 using ZDebug.Core.Instructions;
+using ZDebug.UI.Services;
 
 namespace ZDebug.UI.Controls
 {
     internal partial class InstructionTextDisplayElement
     {
-        private class VisualBuilder
+        private class VisualBuilder : IDisposable
         {
             private readonly VisualCollection visuals;
-
             private readonly double height;
-
+            private readonly double width;
             private readonly FontAndColorSetting defaultSetting;
-            private readonly FontAndColorSetting addressSetting;
-            private readonly FontAndColorSetting commentSetting;
-            private readonly FontAndColorSetting constantSetting;
-            private readonly FontAndColorSetting globalVariableSetting;
-            private readonly FontAndColorSetting keywordSetting;
-            private readonly FontAndColorSetting localVariableSetting;
-            private readonly FontAndColorSetting separatorSetting;
-            private readonly FontAndColorSetting stackVariableSetting;
-            private readonly FontAndColorSetting ztextSetting;
+            private readonly TextParagraphProperties defaultParagraphProps;
 
-            private double left;
+            private readonly InstructionTextSource textSource;
+            private readonly DrawingVisual visual;
+            private readonly DrawingContext context;
 
             public VisualBuilder(
                 VisualCollection visuals,
                 double height,
-                FontAndColorSetting defaultSetting,
-                FontAndColorSetting addressSetting,
-                FontAndColorSetting commentSetting,
-                FontAndColorSetting constantSetting,
-                FontAndColorSetting globalVariableSetting,
-                FontAndColorSetting keywordSetting,
-                FontAndColorSetting localVariableSetting,
-                FontAndColorSetting separatorSetting,
-                FontAndColorSetting stackVariableSetting,
-                FontAndColorSetting ztextSetting)
+                double width,
+                FontAndColorSetting defaultSetting)
             {
                 this.visuals = visuals;
                 this.height = height;
+                this.width = width;
                 this.defaultSetting = defaultSetting;
-                this.addressSetting = addressSetting;
-                this.commentSetting = commentSetting;
-                this.constantSetting = constantSetting;
-                this.globalVariableSetting = globalVariableSetting;
-                this.keywordSetting = keywordSetting;
-                this.localVariableSetting = localVariableSetting;
-                this.separatorSetting = separatorSetting;
-                this.stackVariableSetting = stackVariableSetting;
-                this.ztextSetting = ztextSetting;
+                this.defaultParagraphProps = new SimpleTextParagraphProperties(defaultSetting);
+
+                this.visual = new DrawingVisual();
+                this.context = visual.RenderOpen();
+
+                textSource = new InstructionTextSource();
             }
 
-            private FormattedText CreateFormattedText(string text, FontAndColorSetting setting)
+            public void Dispose()
             {
-                return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
-                    setting.GetTypeface(), setting.FontSize, setting.Foreground ?? defaultSetting.Foreground, null, TextFormattingMode.Display);
+                var formatter = TextFormatter.Create(TextFormattingMode.Display);
+
+                // TODO: Handle background
+                int textSourcePosition = 0;
+                while (textSourcePosition < textSource.Length)
+                {
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, null))
+                    {
+                        var top = (height - line.Height) / 2;
+                        line.Draw(context, new Point(0.0, top), InvertAxes.None);
+                        textSourcePosition += line.Length;
+                    }
+                }
+
+                context.Close();
+                visuals.Add(visual);
             }
 
-            private void AddVisual(string text, FontAndColorSetting setting)
+            private void AddText(string text, FontAndColorSetting setting)
             {
                 setting = setting ?? defaultSetting;
 
-                var visual = new DrawingVisual();
-                var context = visual.RenderOpen();
-
-                var heightText = CreateFormattedText("Yy", setting);
-                var top = (height - heightText.Height) / 2;
-
-                var formattedText = CreateFormattedText(text, setting);
-                var width = formattedText.WidthIncludingTrailingWhitespace;
-
-                var background = setting.Background ?? defaultSetting.Background;
-                if (background != null)
-                {
-                    context.DrawRectangle(setting.Background ?? defaultSetting.Background, null, new Rect(left, 0.0, width, height));
-                }
-
-                context.DrawText(formattedText, new Point(left, top));
-
-                context.Close();
-
-                visuals.Add(visual);
-
-                left = left + width;
+                textSource.Add(text, setting);
             }
 
             public void AddAddress(int address)
             {
-                AddVisual(address.ToString("x4"), addressSetting);
+                AddText(address.ToString("x4"), FontsAndColorsService.AddressSetting);
             }
 
             public void AddBranch(Instruction instruction)
@@ -139,17 +115,17 @@ namespace ZDebug.UI.Controls
 
             public void AddConstant(ushort value)
             {
-                AddVisual("#" + value.ToString("x4"), constantSetting);
+                AddText("#" + value.ToString("x4"), FontsAndColorsService.ConstantSetting);
             }
 
             public void AddConstant(byte value)
             {
-                AddVisual("#" + value.ToString("x2"), constantSetting);
+                AddText("#" + value.ToString("x2"), FontsAndColorsService.ConstantSetting);
             }
 
             public void AddKeyword(string text)
             {
-                AddVisual(text, keywordSetting);
+                AddText(text, FontsAndColorsService.KeywordSetting);
             }
 
             public void AddOperand(Operand operand)
@@ -187,7 +163,7 @@ namespace ZDebug.UI.Controls
 
             public void AddSeparator(string text)
             {
-                AddVisual(text, separatorSetting);
+                AddText(text, FontsAndColorsService.SeparatorSetting);
             }
 
             public void AddVariable(Variable variable, bool @out = false)
@@ -197,23 +173,23 @@ namespace ZDebug.UI.Controls
                     if (@out)
                     {
                         AddSeparator("-(");
-                        AddVisual("SP", stackVariableSetting);
+                        AddText("SP", FontsAndColorsService.StackVariableSetting);
                         AddSeparator(")");
                     }
                     else
                     {
                         AddSeparator("(");
-                        AddVisual("SP", stackVariableSetting);
+                        AddText("SP", FontsAndColorsService.StackVariableSetting);
                         AddSeparator(")+");
                     }
                 }
                 else if (variable.Kind == VariableKind.Local)
                 {
-                    AddVisual(variable.ToString(), localVariableSetting);
+                    AddText(variable.ToString(), FontsAndColorsService.LocalVariableSetting);
                 }
                 else // VariableKind.Global
                 {
-                    AddVisual(variable.ToString(), globalVariableSetting);
+                    AddText(variable.ToString(), FontsAndColorsService.GlobalVariableSetting);
                 }
             }
 
@@ -221,7 +197,7 @@ namespace ZDebug.UI.Controls
             {
                 AddSeparator("[");
                 // TODO: Add wrapping for ZText
-                AddVisual(ztext, ztextSetting);
+                AddText(ztext, FontsAndColorsService.ZTextSetting);
                 AddSeparator("]");
             }
         }

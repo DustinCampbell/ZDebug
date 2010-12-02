@@ -9,9 +9,9 @@
     <c:FontAndColorSetting x:Key="AddressSetting" Foreground="{StaticResource AddressForeground}"/>
     <c:FontAndColorSetting x:Key="CommentSetting" Foreground="DarkGreen"/>
     <c:FontAndColorSetting x:Key="ConstantSetting" Foreground="Peru"/>
-    <c:FontAndColorSetting x:Key="LocalVariableSetting" Foreground="Teal"/>
     <c:FontAndColorSetting x:Key="GlobalVariableSetting" Foreground="Teal"/>
     <c:FontAndColorSetting x:Key="KeywordSetting" Foreground="MediumBlue"/>
+    <c:FontAndColorSetting x:Key="LocalVariableSetting" Foreground="Teal"/>
     <c:FontAndColorSetting x:Key="SeparatorSetting" Foreground="{StaticResource SeparatorForeground}"/>
     <c:FontAndColorSetting x:Key="StackVariableSetting" Foreground="Teal"/>
     <c:FontAndColorSetting x:Key="ZTextSetting" Foreground="Maroon" Background="#ffffe6" FontFamily="Times New Roman" FontSize="15.5"/>
