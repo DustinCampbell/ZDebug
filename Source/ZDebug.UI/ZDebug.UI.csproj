@@ -108,6 +108,7 @@
     <Compile Include="Utilities\Storage.WindowPlacement.cs" />
     <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
+    <Compile Include="ViewModel\DisassemblyLineState.cs" />
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />

@@ -5,7 +5,7 @@ namespace ZDebug.UI.Services
     internal static class FontsAndColorsService
     {
         private static readonly FontAndColorSetting defaultSetting =
-            new FontAndColorSetting(new FontFamily("Consolas"), 15.0);
+            new FontAndColorSetting(new FontFamily("Consolas"), 15.0, background: Brushes.Transparent);
         private static readonly FontAndColorSetting addressSetting =
             new FontAndColorSetting(defaultSetting, foreground: Brushes.Gray);
         private static readonly FontAndColorSetting commentSetting =

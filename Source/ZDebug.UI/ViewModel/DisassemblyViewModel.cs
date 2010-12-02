@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,11 +11,18 @@ namespace ZDebug.UI.ViewModel
     internal sealed class DisassemblyViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
+        private readonly Dictionary<int, DisassemblyLineViewModel> addressToLineMap;
 
         public DisassemblyViewModel()
             : base("DisassemblyView")
         {
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
+            addressToLineMap = new Dictionary<int, DisassemblyLineViewModel>();
+        }
+
+        private DisassemblyLineViewModel GetLineByAddress(int address)
+        {
+            return addressToLineMap[address];
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
@@ -37,15 +45,22 @@ namespace ZDebug.UI.ViewModel
 
                     var routine = routineTable[rIndex];
 
-                    lines.Add(new DisassemblyRoutineHeaderLineViewModel(routine));
+                    var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine);
+                    lines.Add(routineHeaderLine);
+                    addressToLineMap.Add(routine.Address, routineHeaderLine);
 
                     lines.Add(blank);
 
                     foreach (var i in routine.Instructions)
                     {
-                        lines.Add(new DisassemblyInstructionLineViewModel(i));
+                        var instructionLine = new DisassemblyInstructionLineViewModel(i);
+                        lines.Add(instructionLine);
+                        addressToLineMap.Add(i.Address, instructionLine);
                     }
                 }
+
+                var ipLine = GetLineByAddress(e.Story.Processor.PC);
+                ipLine.HasIP = true;
             }
             finally
             {
@@ -56,6 +71,7 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             lines.Clear();
+            addressToLineMap.Clear();
         }
 
         protected internal override void Initialize()

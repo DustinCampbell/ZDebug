@@ -38,7 +38,7 @@
                             BorderBrush="{TemplateBinding Border.BorderBrush}"
                             Background="{TemplateBinding Panel.Background}"
                             SnapsToDevicePixels="True">
-                        <ScrollViewer Padding="8,2,2,2"
+                        <ScrollViewer Padding="0,0,2,0"
                                       Focusable="False">
                             <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
                         </ScrollViewer>
@@ -47,38 +47,212 @@
             </ItemsControl.Template>
 
             <ItemsControl.Resources>
+
+                <ControlTemplate x:Key="lineTemplate" TargetType="ContentControl">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- gray margin -->
+                        <Rectangle
+                            Grid.Column="0"
+                            Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+
+                        <!-- breakpoint image-->
+                        <Image Grid.Column="0" Source="{StaticResource breakpointImage}" Width="12" Height="12">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=HasBreakpoint}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- IP arrow image -->
+                        <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="12" Height="12">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=HasIP}" Value="True"/>
+                                                <Condition Binding="{Binding Path=State}" Value="None"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- Blocked image -->
+                        <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="12" Height="12"
+                               ToolTip="{Binding ToolTip}">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Blocked">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- Paused image -->
+                        <Image Grid.Column="0" Source="{StaticResource pausedImage}" Width="12" Height="12">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Paused">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- Stopped image -->
+                        <Image Grid.Column="0" Source="{StaticResource stoppedImage}" Width="12" Height="12">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Stopped">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
+                        <!-- line background-->
+                        <Border Grid.Column="1"
+                                BorderThickness="1" CornerRadius="2"
+                                Margin="2,0,2,0"
+                                Height="{DynamicResource rowHeight}">
+                            <Rectangle Grid.Column="1">
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=HasBreakpoint}" Value="True">
+                                                <Setter Property="Fill" Value="{DynamicResource bpLineBackground}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=HasIP}" Value="True">
+                                                <Setter Property="Fill" Value="{DynamicResource ipLineBackground}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=State}" Value="Stopped">
+                                                <Setter Property="Fill" Value="{DynamicResource doneLineBackground}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=State}" Value="Paused">
+                                                <Setter Property="Fill" Value="{DynamicResource pausedLineBackground}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=State}" Value="Blocked">
+                                                <Setter Property="Fill" Value="{DynamicResource blockedLineBackground}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+
+                            <Border.Resources>
+                                <SolidColorBrush x:Key="ipLineBorder" Color="#FFFFF200"/>
+                                <SolidColorBrush x:Key="ipLineBackground" Color="#11FFF200"/>
+                                <SolidColorBrush x:Key="bpLineBorder" Color="#447F0000"/>
+                                <SolidColorBrush x:Key="bpLineBackground" Color="#117F0000"/>
+                                <SolidColorBrush x:Key="doneLineBorder" Color="#FF808080"/>
+                                <SolidColorBrush x:Key="doneLineBackground" Color="#11808080"/>
+                                <SolidColorBrush x:Key="pausedLineBorder" Color="#FF004A7F"/>
+                                <SolidColorBrush x:Key="pausedLineBackground" Color="#11004A7F"/>
+                                <SolidColorBrush x:Key="blockedLineBorder" Color="#FFFF0000"/>
+                                <SolidColorBrush x:Key="blockedLineBackground" Color="#11FF0000"/>
+                            </Border.Resources>
+
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=HasBreakpoint}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource bpLineBorder}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=HasIP}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource ipLineBorder}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Stopped">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource doneLineBorder}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Paused">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource pausedLineBorder}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=State}" Value="Blocked">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource blockedLineBorder}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                        </Border>
+
+                        <ContentPresenter
+                            Grid.Column="1"
+                            ContentSource="Content"/>
+                    </Grid>
+                </ControlTemplate>
+
                 <DataTemplate DataType="{x:Type vm:DisassemblyBlankLineViewModel}">
-                    <TextBlock Text=" "/>
+                    <ContentControl Template="{StaticResource lineTemplate}">
+                        <TextBlock Text=" "/>
+                    </ContentControl>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyRoutineHeaderLineViewModel}">
-                    <TextBlock FontWeight="Bold" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                    <ContentControl Template="{StaticResource lineTemplate}">
+                        <TextBlock
+                            Margin="4,0,0,0"
+                            FontWeight="Bold"
+                            Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                    </ContentControl>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyInstructionLineViewModel}">
-                    <Grid>
+                    <ContentControl Template="{StaticResource lineTemplate}">
+                        <Grid>
 
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{DynamicResource addressWidth}"/>
-                            <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{DynamicResource addressWidth}"/>
+                                <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0">
+                            <TextBlock Grid.Column="0">
                             <Run Text="  "/><Run 
                                  Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
                                  Foreground="{StaticResource SeparatorForeground}" Text=":"/>
-                        </TextBlock>
+                            </TextBlock>
 
-                        <TextBlock
-                            Grid.Column="1"
-                            Text="{Binding OpcodeName, Mode=OneWay}"
-                            Foreground="{StaticResource OpcodeForeground}"/>
+                            <TextBlock
+                                Grid.Column="1"
+                                Text="{Binding OpcodeName, Mode=OneWay}"
+                                Foreground="{StaticResource OpcodeForeground}"/>
 
-                        <c:InstructionTextDisplayElement
-                            Grid.Column="2"
-                            Instruction="{Binding Instruction, Mode=OneWay}"/>
-                    </Grid>
+                            <c:InstructionTextDisplayElement
+                                Grid.Column="2"
+                                Instruction="{Binding Instruction, Mode=OneWay}"/>
+                        </Grid>
+                    </ContentControl>
                 </DataTemplate>
             </ItemsControl.Resources>
 

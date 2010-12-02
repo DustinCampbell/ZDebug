@@ -84,6 +84,11 @@ namespace ZDebug.Core
             get { return routineTable; }
         }
 
+        public Processor Processor
+        {
+            get { return processor; }
+        }
+
         public static Story FromBytes(byte[] bytes)
         {
             return new Story(bytes);
