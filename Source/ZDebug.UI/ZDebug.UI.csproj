@@ -96,6 +96,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AutoDisableImage.cs" />
+    <Compile Include="Controls\CallToolTip.cs" />
     <Compile Include="Controls\ExceptionToolTip.cs" />
     <Compile Include="Services\DebuggerState.cs" />
     <Compile Include="Services\DebuggerStateChangedEventArgs.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
+    <Compile Include="ViewModel\StackFrameViewModel.cs" />
     <Compile Include="ViewModel\StoryInfoViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\MemoryMapRegionViewModel.cs" />

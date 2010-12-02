@@ -92,8 +92,28 @@
                             </Image.Style>
                         </Image>
 
+                        <!-- call stack arrow image -->
+                        <Image Grid.Column="0" Source="{StaticResource stepImage}" Width="16" Height="16"
+                               ToolTip="{Binding ToolTip}">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=IsNextInstruction}" Value="True"/>
+                                                <Condition Binding="{Binding Path=State}" Value="None"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+
                         <!-- Blocked image -->
                         <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="16" Height="16"
+                               Name="blockedImage"
                                ToolTip="{Binding ToolTip}">
                             <Image.Style>
                                 <Style TargetType="Image">

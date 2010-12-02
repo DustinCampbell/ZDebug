@@ -29,6 +29,5 @@ namespace ZDebug.UI.Controls
             this.Children.Add(titleBlock);
             this.Children.Add(messageBlock);
         }
-
     }
 }

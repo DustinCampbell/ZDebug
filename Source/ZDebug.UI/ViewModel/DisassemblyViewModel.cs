@@ -70,6 +70,8 @@ namespace ZDebug.UI.ViewModel
             }
 
             e.Story.Processor.Stepped += Processor_Stepped;
+            e.Story.Processor.EnterFrame += Processor_EnterFrame;
+            e.Story.Processor.ExitFrame += Processor_ExitFrame;
         }
 
         private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
@@ -79,6 +81,20 @@ namespace ZDebug.UI.ViewModel
 
             var newLine = GetLineByAddress(e.NewPC);
             newLine.HasIP = true;
+        }
+
+        private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
+        {
+            var returnLine = GetLineByAddress(e.NewFrame.ReturnAddress);
+            returnLine.IsNextInstruction = true;
+            returnLine.ToolTip = new CallToolTip(e.NewFrame);
+        }
+
+        private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
+        {
+            var returnLine = GetLineByAddress(e.OldFrame.ReturnAddress);
+            returnLine.IsNextInstruction = false;
+            returnLine.ToolTip = false;
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
