@@ -10,34 +10,25 @@ namespace ZDebug.UI.Controls
 {
     internal partial class InstructionTextDisplayElement
     {
-        private class VisualBuilder : IDisposable
+        private class InstructionTextBuilder
         {
-            private readonly VisualCollection visuals;
-            private readonly double height;
-            private readonly double width;
             private readonly TextParagraphProperties defaultParagraphProps;
 
             private readonly InstructionTextSource textSource;
-            private readonly DrawingVisual visual;
-            private readonly DrawingContext context;
 
-            public VisualBuilder(
-                VisualCollection visuals,
-                double height,
-                double width)
+            public InstructionTextBuilder()
             {
-                this.visuals = visuals;
-                this.height = height;
-                this.width = width;
                 this.defaultParagraphProps = new SimpleTextParagraphProperties(FontsAndColorsService.DefaultSetting);
-
-                this.visual = new DrawingVisual();
-                this.context = visual.RenderOpen();
 
                 textSource = new InstructionTextSource();
             }
 
-            public void Dispose()
+            public void Clear()
+            {
+                textSource.Clear();
+            }
+
+            public void Draw(DrawingContext context, double width, double height)
             {
                 var formatter = TextFormatter.Create(TextFormattingMode.Display);
 
@@ -52,9 +43,6 @@ namespace ZDebug.UI.Controls
                         textSourcePosition += line.Length;
                     }
                 }
-
-                context.Close();
-                visuals.Add(visual);
             }
 
             private void AddText(string text, FontAndColorSetting setting)

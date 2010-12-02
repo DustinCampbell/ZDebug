@@ -45,6 +45,12 @@ namespace ZDebug.UI.Controls
                 spans.Add(span);
             }
 
+            public void Clear()
+            {
+                textBuilder.Clear();
+                spans.Clear();
+            }
+
             public override TextSpan<CultureSpecificCharacterBufferRange> GetPrecedingText(int textSourceCharacterIndexLimit)
             {
                 var precedingSpan = spans.FindLast(s => s.Start <= textSourceCharacterIndexLimit && s.Start + s.Length >= textSourceCharacterIndexLimit);
