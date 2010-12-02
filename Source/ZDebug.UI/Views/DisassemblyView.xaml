@@ -61,7 +61,7 @@
                             Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
 
                         <!-- breakpoint image-->
-                        <Image Grid.Column="0" Source="{StaticResource breakpointImage}" Width="12" Height="12">
+                        <Image Grid.Column="0" Source="{StaticResource breakpointImage}" Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -75,7 +75,7 @@
                         </Image>
 
                         <!-- IP arrow image -->
-                        <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="12" Height="12">
+                        <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -93,7 +93,7 @@
                         </Image>
 
                         <!-- Blocked image -->
-                        <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="12" Height="12"
+                        <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="16" Height="16"
                                ToolTip="{Binding ToolTip}">
                             <Image.Style>
                                 <Style TargetType="Image">
@@ -108,7 +108,7 @@
                         </Image>
 
                         <!-- Paused image -->
-                        <Image Grid.Column="0" Source="{StaticResource pausedImage}" Width="12" Height="12">
+                        <Image Grid.Column="0" Source="{StaticResource pausedImage}" Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -122,7 +122,7 @@
                         </Image>
 
                         <!-- Stopped image -->
-                        <Image Grid.Column="0" Source="{StaticResource stoppedImage}" Width="12" Height="12">
+                        <Image Grid.Column="0" Source="{StaticResource stoppedImage}" Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
