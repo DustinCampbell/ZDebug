@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed class Processor
+    public sealed class Processor : IExecutionContext
     {
         private readonly Story story;
         private readonly IMemoryReader reader;
@@ -35,9 +36,34 @@ namespace ZDebug.Core.Execution
                     storeVariable: null));
         }
 
+        public void Step()
+        {
+            var oldPC = reader.Address;
+
+            var steppingHandler = Stepping;
+            if (steppingHandler != null)
+            {
+                steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
+            }
+
+            var i = instructions.NextInstruction();
+            i.Opcode.Execute(i, this);
+
+            var newPC = reader.Address;
+
+            var steppedHandler = Stepped;
+            if (steppedHandler != null)
+            {
+                steppedHandler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
+            }
+        }
+
         public int PC
         {
             get { return reader.Address; }
         }
+
+        public event EventHandler<ProcessorSteppingEventArgs> Stepping;
+        public event EventHandler<ProcessorSteppedEventArgs> Stepped;
     }
 }

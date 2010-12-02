@@ -55,6 +55,8 @@
     <Compile Include="Basics\MemoryMapRegionKind.cs" />
     <Compile Include="Collections\IIndexedEnumerable`1.cs" />
     <Compile Include="Basics\ObjectHelpers.cs" />
+    <Compile Include="Execution\ProcessorSteppedEventArgs.cs" />
+    <Compile Include="Execution\ProcessorSteppingEventArgs.cs" />
     <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Inform\InformData.cs" />
     <Compile Include="Instructions\Branch.cs" />
