@@ -16,14 +16,12 @@ namespace ZDebug.UI.Controls
                 public readonly int Start;
                 public readonly int Length;
                 public readonly SimpleTextRunProperties Format;
-                public readonly bool LineBreak;
 
-                public FormattedSpan(int start, int length, SimpleTextRunProperties format, bool lineBreak)
+                public FormattedSpan(int start, int length, SimpleTextRunProperties format)
                 {
                     this.Start = start;
                     this.Length = length;
                     this.Format = format;
-                    this.LineBreak = lineBreak;
                 }
             }
 
@@ -41,17 +39,9 @@ namespace ZDebug.UI.Controls
                     propMap.Add(format.GetHashCode(), props);
                 }
 
-                var span = new FormattedSpan(textBuilder.Length, text.Length, props, lineBreak: false);
+                var span = new FormattedSpan(textBuilder.Length, text.Length, props);
 
                 textBuilder.Append(text);
-                spans.Add(span);
-            }
-
-            public void AddLineBreak()
-            {
-                var span = new FormattedSpan(textBuilder.Length, 1, null, lineBreak: true);
-
-                textBuilder.Append(' ');
                 spans.Add(span);
             }
 
@@ -84,14 +74,7 @@ namespace ZDebug.UI.Controls
                     var startIndex = textSourceCharacterIndex;
                     var length = (span.Start + span.Length) - textSourceCharacterIndex;
 
-                    if (span.LineBreak)
-                    {
-                        return new TextEndOfLine(length);
-                    }
-                    else
-                    {
-                        return new TextCharacters(textBuilder.ToString(), startIndex, length, span.Format);
-                    }
+                    return new TextCharacters(textBuilder.ToString(), startIndex, length, span.Format);
                 }
 
                 return new TextEndOfParagraph(1);

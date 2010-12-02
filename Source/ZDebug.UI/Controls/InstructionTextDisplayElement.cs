@@ -52,7 +52,7 @@ namespace ZDebug.UI.Controls
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            builder.Draw(drawingContext, this.ActualWidth);
+            builder.Draw(drawingContext, this.DesiredSize.Width);
         }
 
         private void RefreshInstruction()
@@ -111,11 +111,54 @@ namespace ZDebug.UI.Controls
             if (instruction.HasZText && DebuggerService.HasStory)
             {
                 var ztextBuilder = new StringBuilder(ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory));
-                ztextBuilder.Replace("\n", "\\n");
-                ztextBuilder.Replace("\v", "\\v");
-                ztextBuilder.Replace("\r", "\\r");
-                ztextBuilder.Replace("\t", "\\t");
-                ztextBuilder.Replace(' ', '·');
+                var ztext = ztextBuilder.ToString();
+
+                if (ztext.Length > 0)
+                {
+                    int lastIndex = ztext.Length;
+                    do
+                    {
+                        lastIndex = ztext.LastIndexOfAny(new char[] { '\n', '\r', '\v', '\t', ' ' }, lastIndex - 1);
+                        if (lastIndex < 0)
+                        {
+                            break;
+                        }
+
+                        // Replace the found character with a zero-width space or line separator to allow line breaking
+                        // and insert replacement text.
+                        char foundChar = ztext[lastIndex];
+
+                        if (foundChar == ' ')
+                        {
+                            ztextBuilder[lastIndex] = '\u200b';
+                        }
+                        else if (lastIndex != ztext.Length - 1)
+                        {
+                            ztextBuilder[lastIndex] = '\u2028';
+                        }
+
+                        switch (foundChar)
+                        {
+                            case '\n':
+                                ztextBuilder.Insert(lastIndex, "\\n");
+                                break;
+                            case '\r':
+                                ztextBuilder.Insert(lastIndex, "\\r");
+                                break;
+                            case '\v':
+                                ztextBuilder.Insert(lastIndex, "\\v");
+                                break;
+                            case '\t':
+                                ztextBuilder.Insert(lastIndex, "\\t");
+                                break;
+                            case ' ':
+                                ztextBuilder.Insert(lastIndex, "\u00b7");
+                                break;
+                        }
+                    }
+                    while (lastIndex > 0);
+                }
+
                 builder.AddZText(ztextBuilder.ToString());
             }
 

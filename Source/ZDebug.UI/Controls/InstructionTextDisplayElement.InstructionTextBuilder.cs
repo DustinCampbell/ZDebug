@@ -15,12 +15,16 @@ namespace ZDebug.UI.Controls
             private readonly TextParagraphProperties defaultParagraphProps;
 
             private readonly InstructionTextSource textSource;
+            private readonly TextFormatter formatter;
+            private readonly TextRunCache cache;
 
             public InstructionTextBuilder()
             {
                 this.defaultParagraphProps = new SimpleTextParagraphProperties(FontsAndColorsService.DefaultSetting);
 
                 textSource = new InstructionTextSource();
+                formatter = TextFormatter.Create(TextFormattingMode.Display);
+                cache = new TextRunCache();
             }
 
             public void Clear()
@@ -30,15 +34,13 @@ namespace ZDebug.UI.Controls
 
             public Size Measure(Size availableSize)
             {
-                var formatter = TextFormatter.Create(TextFormattingMode.Display);
-
                 var height = 0.0;
                 var width = 0.0;
 
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
-                    using (var line = formatter.FormatLine(textSource, textSourcePosition, availableSize.Width, defaultParagraphProps, null))
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, availableSize.Width, defaultParagraphProps, previousLineBreak: null, textRunCache: cache))
                     {
                         height += line.Height;
                         width = Math.Max(width, line.Width);
@@ -52,13 +54,11 @@ namespace ZDebug.UI.Controls
 
             public void Draw(DrawingContext context, double width)
             {
-                var formatter = TextFormatter.Create(TextFormattingMode.Display);
-
                 var top = 0.0;
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
-                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, null))
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, previousLineBreak: null, textRunCache: cache))
                     {
                         line.Draw(context, new Point(0.0, top), InvertAxes.None);
                         textSourcePosition += line.Length;
@@ -75,6 +75,7 @@ namespace ZDebug.UI.Controls
                 }
 
                 textSource.Add(text, setting);
+                cache.Invalidate();
             }
 
             public void AddAddress(int address)
@@ -205,7 +206,6 @@ namespace ZDebug.UI.Controls
 
             public void AddZText(string ztext)
             {
-                // TODO: Add wrapping for ZText
                 AddText(ztext, FontsAndColorsService.ZTextSetting);
             }
         }
