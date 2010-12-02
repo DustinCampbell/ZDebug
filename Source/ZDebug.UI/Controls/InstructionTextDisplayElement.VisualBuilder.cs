@@ -15,7 +15,6 @@ namespace ZDebug.UI.Controls
             private readonly VisualCollection visuals;
             private readonly double height;
             private readonly double width;
-            private readonly FontAndColorSetting defaultSetting;
             private readonly TextParagraphProperties defaultParagraphProps;
 
             private readonly InstructionTextSource textSource;
@@ -25,14 +24,12 @@ namespace ZDebug.UI.Controls
             public VisualBuilder(
                 VisualCollection visuals,
                 double height,
-                double width,
-                FontAndColorSetting defaultSetting)
+                double width)
             {
                 this.visuals = visuals;
                 this.height = height;
                 this.width = width;
-                this.defaultSetting = defaultSetting;
-                this.defaultParagraphProps = new SimpleTextParagraphProperties(defaultSetting);
+                this.defaultParagraphProps = new SimpleTextParagraphProperties(FontsAndColorsService.DefaultSetting);
 
                 this.visual = new DrawingVisual();
                 this.context = visual.RenderOpen();
@@ -62,7 +59,10 @@ namespace ZDebug.UI.Controls
 
             private void AddText(string text, FontAndColorSetting setting)
             {
-                setting = setting ?? defaultSetting;
+                if (setting == null)
+                {
+                    throw new ArgumentNullException("setting");
+                }
 
                 textSource.Add(text, setting);
             }
@@ -195,10 +195,8 @@ namespace ZDebug.UI.Controls
 
             public void AddZText(string ztext)
             {
-                AddSeparator("[");
                 // TODO: Add wrapping for ZText
                 AddText(ztext, FontsAndColorsService.ZTextSetting);
-                AddSeparator("]");
             }
         }
     }

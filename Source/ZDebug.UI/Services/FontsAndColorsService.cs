@@ -1,22 +1,34 @@
-﻿using System;
-using System.Windows;
-using ZDebug.UI.Controls;
+﻿using System.Windows.Media;
+
 namespace ZDebug.UI.Services
 {
     internal static class FontsAndColorsService
     {
-        private static readonly Uri uri = new Uri("/ZDebug.UI;component/Views/Styles.xaml", UriKind.Relative);
-        private static readonly ResourceDictionary resources = Application.LoadComponent(uri) as ResourceDictionary;
+        private static readonly FontAndColorSetting defaultSetting =
+            new FontAndColorSetting(new FontFamily("Consolas"), 15.0);
+        private static readonly FontAndColorSetting addressSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.Gray);
+        private static readonly FontAndColorSetting commentSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.DarkGreen);
+        private static readonly FontAndColorSetting constantSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.Peru);
+        private static readonly FontAndColorSetting globalVariableSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.Teal);
+        private static readonly FontAndColorSetting keywordSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.MediumBlue);
+        private static readonly FontAndColorSetting localVariableSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.Teal);
+        private static readonly FontAndColorSetting separatorSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.DarkGray);
+        private static readonly FontAndColorSetting stackVariableSetting =
+            new FontAndColorSetting(defaultSetting, foreground: Brushes.Teal);
+        private static readonly FontAndColorSetting ztextSetting =
+            new FontAndColorSetting(defaultSetting, new FontFamily("Times New Roman"), 15.5, Brushes.Maroon, new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xe6)));
 
-        private static readonly FontAndColorSetting addressSetting = (FontAndColorSetting)resources["AddressSetting"];
-        private static readonly FontAndColorSetting commentSetting = (FontAndColorSetting)resources["CommentSetting"];
-        private static readonly FontAndColorSetting constantSetting = (FontAndColorSetting)resources["ConstantSetting"];
-        private static readonly FontAndColorSetting globalVariableSetting = (FontAndColorSetting)resources["GlobalVariableSetting"];
-        private static readonly FontAndColorSetting keywordSetting = (FontAndColorSetting)resources["KeywordSetting"];
-        private static readonly FontAndColorSetting localVariableSetting = (FontAndColorSetting)resources["LocalVariableSetting"];
-        private static readonly FontAndColorSetting separatorSetting = (FontAndColorSetting)resources["SeparatorSetting"];
-        private static readonly FontAndColorSetting stackVariableSetting = (FontAndColorSetting)resources["StackVariableSetting"];
-        private static readonly FontAndColorSetting ztextSetting = (FontAndColorSetting)resources["ZTextSetting"];
+        public static FontAndColorSetting DefaultSetting
+        {
+            get { return defaultSetting; }
+        }
 
         public static FontAndColorSetting AddressSetting
         {

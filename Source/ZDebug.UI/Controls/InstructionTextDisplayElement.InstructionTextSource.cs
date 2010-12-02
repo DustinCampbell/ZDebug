@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Windows.Media.TextFormatting;
+using ZDebug.UI.Services;
 
 namespace ZDebug.UI.Controls
 {
@@ -31,7 +32,6 @@ namespace ZDebug.UI.Controls
 
             public void Add(string text, FontAndColorSetting format)
             {
-                // TODO: Need to make FontAndColorSetting immutable so this doesn't become a problem.
                 SimpleTextRunProperties props;
                 if (!propMap.TryGetValue(format.GetHashCode(), out props))
                 {
