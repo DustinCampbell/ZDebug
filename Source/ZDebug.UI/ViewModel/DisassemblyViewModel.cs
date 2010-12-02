@@ -71,9 +71,6 @@ namespace ZDebug.UI.ViewModel
             var opcodeName = new FormattedText("check_arg_count  ", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, this.View.FontSize, this.View.Foreground);
             this.View.Resources["opcodeWidth"] = new GridLength(opcodeName.WidthIncludingTrailingWhitespace);
 
-            var fontHeight = new FormattedText("Yj", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, this.View.FontSize, this.View.Foreground);
-            this.View.Resources["rowHeight"] = fontHeight.Height + 2.0;
-
         }
 
         public BulkObservableCollection<DisassemblyLineViewModel> Lines
