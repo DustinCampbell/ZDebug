@@ -6,8 +6,21 @@ namespace ZDebug.UI.Services
 {
     internal static class DebuggerService
     {
+        private static DebuggerState state;
         private static Story story;
         private static string fileName;
+
+        private static void ChangeState(DebuggerState newState)
+        {
+            var oldState = state;
+            state = newState;
+
+            var handler = StateChanged;
+            if (handler != null)
+            {
+                handler(null, new DebuggerStateChangedEventArgs(oldState, newState));
+            }
+        }
 
         public static void CloseStory()
         {
@@ -26,6 +39,8 @@ namespace ZDebug.UI.Services
             {
                 handler(null, new StoryEventArgs(oldStory));
             }
+
+            ChangeState(DebuggerState.Unavailable);
         }
 
         public static Story OpenStory(string fileName)
@@ -42,7 +57,14 @@ namespace ZDebug.UI.Services
                 handler(null, new StoryEventArgs(story));
             }
 
+            ChangeState(DebuggerState.Stopped);
+
             return story;
+        }
+
+        public static DebuggerState State
+        {
+            get { return state; }
         }
 
         public static Story Story
@@ -59,6 +81,8 @@ namespace ZDebug.UI.Services
         {
             get { return fileName; }
         }
+
+        public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
 
         public static event EventHandler<StoryEventArgs> StoryClosed;
         public static event EventHandler<StoryEventArgs> StoryOpened;

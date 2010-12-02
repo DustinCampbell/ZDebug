@@ -92,6 +92,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AutoDisableImage.cs" />
+    <Compile Include="Services\DebuggerState.cs" />
+    <Compile Include="Services\DebuggerStateChangedEventArgs.cs" />
     <Compile Include="Services\FontAndColorSetting.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.SimpleTextParagraphProperties.cs" />
