@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using ZDebug.Core.Instructions;
@@ -94,8 +95,13 @@ namespace ZDebug.UI.Controls
 
                 if (instruction.HasZText && DebuggerService.HasStory)
                 {
-                    var ztext = ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory);
-                    builder.AddZText(ztext.Replace("\n", "\\n").Replace(' ', '·'));
+                    var ztextBuilder = new StringBuilder(ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory));
+                    ztextBuilder.Replace("\n", "\\n");
+                    ztextBuilder.Replace("\v", "\\v");
+                    ztextBuilder.Replace("\r", "\\r");
+                    ztextBuilder.Replace("\t", "\\t");
+                    ztextBuilder.Replace(' ', '·');
+                    builder.AddZText(ztextBuilder.ToString());
                 }
 
                 if (instruction.HasStoreVariable)
