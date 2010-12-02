@@ -42,12 +42,7 @@ namespace ZDebug.UI.Controls
                 RefreshInstruction();
             }
 
-            return builder.Measure(availableSize);
-        }
-
-        protected override Size ArrangeOverride(Size finalSize)
-        {
-            return base.ArrangeOverride(finalSize);
+            return builder.Measure(availableSize.Width);
         }
 
         protected override void OnRender(DrawingContext drawingContext)

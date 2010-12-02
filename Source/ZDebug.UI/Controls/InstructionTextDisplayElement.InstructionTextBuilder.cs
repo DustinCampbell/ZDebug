@@ -29,37 +29,35 @@ namespace ZDebug.UI.Controls
                 textSource.Clear();
             }
 
-            public Size Measure(Size availableSize)
+            public Size Measure(double width)
             {
                 var height = 0.0;
-                var width = 0.0;
 
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
-                    using (var line = formatter.FormatLine(textSource, textSourcePosition, availableSize.Width, defaultParagraphProps, previousLineBreak: null, textRunCache: textSource.Cache))
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, previousLineBreak: null, textRunCache: textSource.Cache))
                     {
                         height += line.Height;
-                        width = Math.Max(width, line.Width);
-
                         textSourcePosition += line.Length;
                     }
                 }
 
-                return new Size(double.IsPositiveInfinity(availableSize.Width) ? width : availableSize.Width, height);
+                return new Size(width, height);
             }
 
             public void Draw(DrawingContext context, double width)
             {
                 var top = 0.0;
+
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
                     using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, previousLineBreak: null, textRunCache: textSource.Cache))
                     {
                         line.Draw(context, new Point(0.0, top), InvertAxes.None);
-                        textSourcePosition += line.Length;
                         top += line.Height;
+                        textSourcePosition += line.Length;
                     }
                 }
             }
