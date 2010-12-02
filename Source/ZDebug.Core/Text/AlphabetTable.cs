@@ -22,11 +22,11 @@ namespace ZDebug.Core.Text
             {
                 alphabets = new string[] { A0, A1, A3 };
             }
-            else if (version >= 2 || version <= 4)
+            else if (version >= 2 && version <= 4)
             {
                 alphabets = new string[] { A0, A1, A2 };
             }
-            else if (version >= 5 || version <= 8)
+            else if (version >= 5 && version <= 8)
             {
                 var alphabetTableAddress = memory.ReadAlphabetTableAddress();
                 if (alphabetTableAddress == 0)
