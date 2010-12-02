@@ -154,6 +154,9 @@ namespace ZDebug.UI.ViewModel
             var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
+            var callStackContent = this.View.FindName<DockableContent>("callStackContent");
+            callStackContent.Content = ViewModelWithView.Create<CallStackViewModel, UserControl>();
+
             this.View.SourceInitialized += (s, e) =>
             {
                 Storage.RestoreWindowLayout(this.View);

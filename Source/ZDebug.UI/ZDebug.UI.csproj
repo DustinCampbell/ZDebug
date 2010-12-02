@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\CallStackView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DisassemblyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -109,6 +113,7 @@
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
     <Compile Include="Utilities\Storage.cs" />
     <Compile Include="Utilities\Storage.WindowPlacement.cs" />
+    <Compile Include="ViewModel\CallStackViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyLineState.cs" />

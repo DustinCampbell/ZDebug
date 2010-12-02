@@ -89,11 +89,16 @@
                     <ad:DockablePane ad:ResizingPanel.ResizeWidth="150">
                         <ad:DockableContent Title="Story Info" Name="storyInfoContent"/>
                     </ad:DockablePane>
-                    <ad:DocumentPane SelectedIndex="0">
-                        <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>
-                        <ad:DocumentContent Title="Objects" Name="objectsContent"/>
-                        <ad:DocumentContent Title="Memory" Name="memoryContent"/>
-                    </ad:DocumentPane>
+                    <ad:ResizingPanel Orientation="Vertical">
+                        <ad:DocumentPane SelectedIndex="0">
+                            <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>
+                            <ad:DocumentContent Title="Objects" Name="objectsContent"/>
+                            <ad:DocumentContent Title="Memory" Name="memoryContent"/>
+                        </ad:DocumentPane>
+                        <ad:DockablePane ad:ResizingPanel.ResizeHeight="150">
+                            <ad:DockableContent Title="Call Stack" Name="callStackContent"/>
+                        </ad:DockablePane>
+                    </ad:ResizingPanel>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
         </ad:DockingManager>
