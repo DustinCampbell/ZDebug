@@ -12,19 +12,16 @@ namespace ZDebug.UI.Controls
     {
         private class InstructionTextBuilder
         {
-            private readonly TextParagraphProperties defaultParagraphProps;
+            private static readonly TextFormatter formatter = TextFormatter.Create(TextFormattingMode.Display);
 
+            private readonly TextParagraphProperties defaultParagraphProps;
             private readonly InstructionTextSource textSource;
-            private readonly TextFormatter formatter;
-            private readonly TextRunCache cache;
 
             public InstructionTextBuilder()
             {
                 this.defaultParagraphProps = new SimpleTextParagraphProperties(FontsAndColorsService.DefaultSetting);
 
                 textSource = new InstructionTextSource();
-                formatter = TextFormatter.Create(TextFormattingMode.Display);
-                cache = new TextRunCache();
             }
 
             public void Clear()
@@ -40,7 +37,7 @@ namespace ZDebug.UI.Controls
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
-                    using (var line = formatter.FormatLine(textSource, textSourcePosition, availableSize.Width, defaultParagraphProps, previousLineBreak: null, textRunCache: cache))
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, availableSize.Width, defaultParagraphProps, previousLineBreak: null, textRunCache: textSource.Cache))
                     {
                         height += line.Height;
                         width = Math.Max(width, line.Width);
@@ -58,7 +55,7 @@ namespace ZDebug.UI.Controls
                 int textSourcePosition = 0;
                 while (textSourcePosition < textSource.Length)
                 {
-                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, previousLineBreak: null, textRunCache: cache))
+                    using (var line = formatter.FormatLine(textSource, textSourcePosition, width, defaultParagraphProps, previousLineBreak: null, textRunCache: textSource.Cache))
                     {
                         line.Draw(context, new Point(0.0, top), InvertAxes.None);
                         textSourcePosition += line.Length;
@@ -75,7 +72,6 @@ namespace ZDebug.UI.Controls
                 }
 
                 textSource.Add(text, setting);
-                cache.Invalidate();
             }
 
             public void AddAddress(int address)

@@ -27,6 +27,7 @@ namespace ZDebug.UI.Controls
 
             private static readonly Dictionary<int, SimpleTextRunProperties> propMap = new Dictionary<int, SimpleTextRunProperties>();
 
+            private readonly TextRunCache cache = new TextRunCache();
             private readonly StringBuilder textBuilder = new StringBuilder();
             private readonly List<FormattedSpan> spans = new List<FormattedSpan>();
 
@@ -43,12 +44,15 @@ namespace ZDebug.UI.Controls
 
                 textBuilder.Append(text);
                 spans.Add(span);
+
+                cache.Change(span.Start, span.Length, 0);
             }
 
             public void Clear()
             {
                 textBuilder.Clear();
                 spans.Clear();
+                cache.Invalidate();
             }
 
             public override TextSpan<CultureSpecificCharacterBufferRange> GetPrecedingText(int textSourceCharacterIndexLimit)
@@ -78,6 +82,11 @@ namespace ZDebug.UI.Controls
                 }
 
                 return new TextEndOfParagraph(1);
+            }
+
+            public TextRunCache Cache
+            {
+                get { return cache; }
             }
 
             public int Length
