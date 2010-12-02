@@ -9,7 +9,7 @@
 
         void Skip(int length);
 
-        int Address { get; }
+        int Address { get; set; }
         int Size { get; }
         int RemainingBytes { get; }
 

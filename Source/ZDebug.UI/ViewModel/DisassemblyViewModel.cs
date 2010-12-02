@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ZDebug.Core.Execution;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -67,6 +68,17 @@ namespace ZDebug.UI.ViewModel
             {
                 lines.EndBulkOperation();
             }
+
+            e.Story.Processor.Stepped += Processor_Stepped;
+        }
+
+        private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
+        {
+            var oldLine = GetLineByAddress(e.OldPC);
+            oldLine.HasIP = false;
+
+            var newLine = GetLineByAddress(e.NewPC);
+            newLine.HasIP = true;
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)

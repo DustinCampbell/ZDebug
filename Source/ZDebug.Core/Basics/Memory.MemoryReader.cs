@@ -87,6 +87,15 @@ namespace ZDebug.Core.Basics
             public int Address
             {
                 get { return address; }
+                set
+                {
+                    if (value < 0 || value > memory.Size)
+                    {
+                        throw new ArgumentOutOfRangeException("value");
+                    }
+
+                    address = value;
+                }
             }
 
             public int Size

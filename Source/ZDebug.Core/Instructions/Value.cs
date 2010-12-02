@@ -88,9 +88,20 @@ namespace ZDebug.Core.Instructions
             return (short)value.RawValue;
         }
 
-        private static readonly Value zero = new Value(ValueKind.Number, 0);
+        public static Value Number(ushort value)
+        {
+            return new Value(ValueKind.Number, value);
+        }
+
+        private static readonly Value zero = Value.Number(0);
+        private static readonly Value one = Value.Number(1);
 
         public static Value Zero
+        {
+            get { return zero; }
+        }
+
+        public static Value One
         {
             get { return zero; }
         }

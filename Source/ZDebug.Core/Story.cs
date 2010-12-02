@@ -16,6 +16,7 @@ namespace ZDebug.Core
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
         private readonly RoutineTable routineTable;
+        private readonly GlobalVariablesTable globalVariablesTable;
         private readonly Processor processor;
 
         private Story(Memory memory)
@@ -26,6 +27,7 @@ namespace ZDebug.Core
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
             this.routineTable = new RoutineTable(memory);
+            this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.processor = new Processor(this);
         }
 
@@ -82,6 +84,11 @@ namespace ZDebug.Core
         public RoutineTable RoutineTable
         {
             get { return routineTable; }
+        }
+
+        public GlobalVariablesTable GlobalVariablesTable
+        {
+            get { return globalVariablesTable; }
         }
 
         public Processor Processor

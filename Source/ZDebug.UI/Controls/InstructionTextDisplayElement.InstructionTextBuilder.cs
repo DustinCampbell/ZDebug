@@ -104,7 +104,7 @@ namespace ZDebug.UI.Controls
             {
                 if (operand.Kind == OperandKind.SmallConstant)
                 {
-                    AddVariable(Variable.FromByte((byte)operand.Value.RawValue));
+                    AddVariable(Variable.FromByte((byte)operand.RawValue));
                 }
                 else if (operand.Kind == OperandKind.Variable)
                 {
@@ -137,15 +137,15 @@ namespace ZDebug.UI.Controls
             {
                 if (operand.Kind == OperandKind.LargeConstant)
                 {
-                    AddConstant(operand.Value.RawValue);
+                    AddConstant(operand.RawValue);
                 }
                 else if (operand.Kind == OperandKind.SmallConstant)
                 {
-                    AddConstant((byte)operand.Value.RawValue);
+                    AddConstant((byte)operand.RawValue);
                 }
                 else // OperandKind.Variable
                 {
-                    AddVariable(Variable.FromByte((byte)operand.Value.RawValue));
+                    AddVariable(Variable.FromByte((byte)operand.RawValue));
                 }
             }
 

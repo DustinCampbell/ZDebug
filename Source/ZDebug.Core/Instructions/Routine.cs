@@ -75,7 +75,7 @@ namespace ZDebug.Core.Instructions
                 }
                 else if (i.Opcode.IsJump)
                 {
-                    var jumpOffset = (short)i.Operands[0].Value.RawValue;
+                    var jumpOffset = (short)i.Operands[0].RawValue;
                     var jumpAddress = reader.Address + jumpOffset - 2;
                     if (jumpAddress > lastAddressKnown)
                     {
