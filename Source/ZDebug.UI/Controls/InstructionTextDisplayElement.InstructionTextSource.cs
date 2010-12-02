@@ -16,12 +16,14 @@ namespace ZDebug.UI.Controls
                 public readonly int Start;
                 public readonly int Length;
                 public readonly SimpleTextRunProperties Format;
+                public readonly bool LineBreak;
 
-                public FormattedSpan(int start, int length, SimpleTextRunProperties format)
+                public FormattedSpan(int start, int length, SimpleTextRunProperties format, bool lineBreak)
                 {
                     this.Start = start;
                     this.Length = length;
                     this.Format = format;
+                    this.LineBreak = lineBreak;
                 }
             }
 
@@ -39,9 +41,17 @@ namespace ZDebug.UI.Controls
                     propMap.Add(format.GetHashCode(), props);
                 }
 
-                var span = new FormattedSpan(textBuilder.Length, text.Length, props);
+                var span = new FormattedSpan(textBuilder.Length, text.Length, props, lineBreak: false);
 
                 textBuilder.Append(text);
+                spans.Add(span);
+            }
+
+            public void AddLineBreak()
+            {
+                var span = new FormattedSpan(textBuilder.Length, 1, null, lineBreak: true);
+
+                textBuilder.Append(' ');
                 spans.Add(span);
             }
 
@@ -53,18 +63,12 @@ namespace ZDebug.UI.Controls
 
             public override TextSpan<CultureSpecificCharacterBufferRange> GetPrecedingText(int textSourceCharacterIndexLimit)
             {
-                var precedingSpan = spans.FindLast(s => s.Start <= textSourceCharacterIndexLimit && s.Start + s.Length >= textSourceCharacterIndexLimit);
-
-                var range = new CharacterBufferRange(textBuilder.ToString(), precedingSpan.Start, textSourceCharacterIndexLimit - precedingSpan.Length);
-
-                return new TextSpan<CultureSpecificCharacterBufferRange>(
-                    length: textSourceCharacterIndexLimit - precedingSpan.Length,
-                    value: new CultureSpecificCharacterBufferRange(CultureInfo.InvariantCulture, range));
+                return new TextSpan<CultureSpecificCharacterBufferRange>(0, new CultureSpecificCharacterBufferRange(CultureInfo.CurrentUICulture, new CharacterBufferRange("", 0, 0)));
             }
 
             public override int GetTextEffectCharacterIndexFromTextSourceCharacterIndex(int textSourceCharacterIndex)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public override TextRun GetTextRun(int textSourceCharacterIndex)
@@ -80,7 +84,14 @@ namespace ZDebug.UI.Controls
                     var startIndex = textSourceCharacterIndex;
                     var length = (span.Start + span.Length) - textSourceCharacterIndex;
 
-                    return new TextCharacters(textBuilder.ToString(), startIndex, length, span.Format);
+                    if (span.LineBreak)
+                    {
+                        return new TextEndOfLine(length);
+                    }
+                    else
+                    {
+                        return new TextCharacters(textBuilder.ToString(), startIndex, length, span.Format);
+                    }
                 }
 
                 return new TextEndOfParagraph(1);

@@ -64,10 +64,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition MinHeight="{DynamicResource rowHeight}"/>
-                        </Grid.RowDefinitions>
-
                         <TextBlock Grid.Column="0">
                             <Run Text="  "/><Run 
                                  Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run

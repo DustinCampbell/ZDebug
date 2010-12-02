@@ -24,6 +24,7 @@ namespace ZDebug.UI.Controls
                     propertyChangedCallback: (s, e) =>
                     {
                         var element = (InstructionTextDisplayElement)s;
+                        element.InvalidateMeasure();
                         element.update = true;
                     }));
 
@@ -32,6 +33,26 @@ namespace ZDebug.UI.Controls
             this.builder = new InstructionTextBuilder();
 
             TextOptions.SetTextHintingMode(this, TextHintingMode.Fixed);
+        }
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            if (update)
+            {
+                RefreshInstruction();
+            }
+
+            return builder.Measure(availableSize);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            return base.ArrangeOverride(finalSize);
+        }
+
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            builder.Draw(drawingContext, this.ActualWidth);
         }
 
         private void RefreshInstruction()
@@ -115,16 +136,6 @@ namespace ZDebug.UI.Controls
             }
 
             update = false;
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            if (update)
-            {
-                RefreshInstruction();
-            }
-
-            builder.Draw(drawingContext, this.ActualWidth, this.ActualHeight);
         }
 
         public Instruction Instruction

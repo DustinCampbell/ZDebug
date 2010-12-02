@@ -52,7 +52,7 @@ namespace ZDebug.UI.Controls
 
             public override TextWrapping TextWrapping
             {
-                get { return TextWrapping.NoWrap; }
+                get { return TextWrapping.Wrap; }
             }
         }
 
