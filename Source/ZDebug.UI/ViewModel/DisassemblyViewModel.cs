@@ -122,6 +122,7 @@ namespace ZDebug.UI.ViewModel
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
                 line.State = DisassemblyLineState.Blocked;
                 line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
+                BringLineIntoView(line);
             }
         }
 
