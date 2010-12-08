@@ -31,11 +31,11 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x12, "get_prop_addr", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x13, "get_next_prop", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x14, "add", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x15, "sub", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x16, "mul", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x17, "div", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x18, "mod", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.TwoOp, 0x14, "add", OpcodeFlags.Store, OpcodeRoutines.add);
+            AddOpcode(OpcodeKind.TwoOp, 0x15, "sub", OpcodeFlags.Store, OpcodeRoutines.sub);
+            AddOpcode(OpcodeKind.TwoOp, 0x16, "mul", OpcodeFlags.Store, OpcodeRoutines.mul);
+            AddOpcode(OpcodeKind.TwoOp, 0x17, "div", OpcodeFlags.Store, OpcodeRoutines.div);
+            AddOpcode(OpcodeKind.TwoOp, 0x18, "mod", OpcodeFlags.Store, OpcodeRoutines.mod);
             AddOpcode(OpcodeKind.TwoOp, 0x19, "call_2s", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 4);
             AddOpcode(OpcodeKind.TwoOp, 0x1a, "call_2n", OpcodeFlags.Call, fromVersion: 5);
             AddOpcode(OpcodeKind.TwoOp, 0x1b, "set_color", fromVersion: 5, toVersion: 5);

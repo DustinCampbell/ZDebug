@@ -233,6 +233,11 @@ namespace ZDebug.Core.Execution
             return GetOperandValue(operand);
         }
 
+        void IExecutionContext.WriteVariable(Variable variable, Value value)
+        {
+            WriteVariable(variable, value);
+        }
+
         void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
         {
             Call(address, operands, storeVariable);
