@@ -155,6 +155,18 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private void Jump(Branch branch)
+        {
+            if (branch.Kind == BranchKind.Address)
+            {
+                reader.Address += branch.Offset - 2;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public void Step()
         {
             var oldPC = reader.Address;
@@ -241,6 +253,11 @@ namespace ZDebug.Core.Execution
         void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
         {
             Call(address, operands, storeVariable);
+        }
+
+        void IExecutionContext.Jump(Branch branch)
+        {
+            Jump(branch);
         }
 
         int IExecutionContext.UnpackRoutineAddress(ushort byteAddress)

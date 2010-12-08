@@ -68,6 +68,16 @@ namespace ZDebug.Core.Instructions
             }
         }
 
+        public static bool operator ==(Value value1, Value value2)
+        {
+            return value1.Equals(value2);
+        }
+
+        public static bool operator !=(Value value1, Value value2)
+        {
+            return !value1.Equals(value2);
+        }
+
         public ValueKind Kind
         {
             get { return kind; }

@@ -12,7 +12,7 @@ namespace ZDebug.Core.Instructions
             opcodeMap = new Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode>();
 
             // two-operand opcodes
-            AddOpcode(OpcodeKind.TwoOp, 0x01, "je", OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.TwoOp, 0x01, "je", OpcodeFlags.Branch, OpcodeRoutines.je);
             AddOpcode(OpcodeKind.TwoOp, 0x02, "jl", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x03, "jg", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x04, "dec_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);

@@ -104,11 +104,10 @@ namespace ZDebug.UI.Utilities
 
             base.SetItem(index, item);
 
-
             if (bulkOperationCount == 0)
             {
                 OnPropertyChanged("Items[]");
-                OnCollectionChanged(NotifyCollectionChangedAction.Replace, oldItem, item, index);
+                OnCollectionChanged(NotifyCollectionChangedAction.Replace, item, oldItem, index);
             }
             else
             {

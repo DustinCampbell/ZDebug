@@ -28,11 +28,19 @@
             }
         }
 
-        public static void HasStackVariable(Instruction instruction)
+        public static void HasStoreVariable(Instruction instruction)
         {
             if (!instruction.HasStoreVariable)
             {
                 Fail(instruction, "Does not have store variable.");
+            }
+        }
+
+        public static void HasBranch(Instruction instruction)
+        {
+            if (!instruction.HasBranch)
+            {
+                Fail(instruction, "Does not have branch.");
             }
         }
     }
