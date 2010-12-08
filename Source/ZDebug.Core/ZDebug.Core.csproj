@@ -75,6 +75,8 @@
     <Compile Include="Instructions\OperandKind.cs" />
     <Compile Include="Instructions\Routine.cs" />
     <Compile Include="Instructions\RoutineTable.cs" />
+    <Compile Include="Instructions\Strict.cs" />
+    <Compile Include="Instructions\StrictException.cs" />
     <Compile Include="Instructions\Value.cs" />
     <Compile Include="Instructions\ValueKind.cs" />
     <Compile Include="Instructions\Variable.cs" />
