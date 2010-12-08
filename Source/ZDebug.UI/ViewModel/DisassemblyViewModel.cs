@@ -33,6 +33,8 @@ namespace ZDebug.UI.ViewModel
 
             var blank = new DisassemblyBlankLineViewModel();
 
+            DisassemblyLineViewModel ipLine;
+
             lines.BeginBulkOperation();
             try
             {
@@ -61,7 +63,7 @@ namespace ZDebug.UI.ViewModel
                     }
                 }
 
-                var ipLine = GetLineByAddress(e.Story.Processor.PC);
+                ipLine = GetLineByAddress(e.Story.Processor.PC);
                 ipLine.HasIP = true;
             }
             finally
@@ -69,9 +71,17 @@ namespace ZDebug.UI.ViewModel
                 lines.EndBulkOperation();
             }
 
+            BringLineIntoView(ipLine);
+
             e.Story.Processor.Stepped += Processor_Stepped;
             e.Story.Processor.EnterFrame += Processor_EnterFrame;
             e.Story.Processor.ExitFrame += Processor_ExitFrame;
+        }
+
+        private void BringLineIntoView(DisassemblyLineViewModel line)
+        {
+            var lines = this.View.FindName<ItemsControl>("lines");
+            lines.BringIntoView(line);
         }
 
         private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
@@ -81,6 +91,8 @@ namespace ZDebug.UI.ViewModel
 
             var newLine = GetLineByAddress(e.NewPC);
             newLine.HasIP = true;
+
+            BringLineIntoView(newLine);
         }
 
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)

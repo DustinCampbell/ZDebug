@@ -20,7 +20,8 @@
     </UserControl.Resources>
 
     <Grid>
-        <ItemsControl ItemsSource="{Binding Lines}"
+        <ItemsControl Name="lines"
+                      ItemsSource="{Binding Lines}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.CanContentScroll="True">
