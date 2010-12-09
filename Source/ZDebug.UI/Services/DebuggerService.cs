@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using ZDebug.Core;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Services
 {
@@ -10,6 +14,7 @@ namespace ZDebug.UI.Services
         private static Story story;
         private static string fileName;
         private static Exception currentException;
+        private static SortedSet<int> breakpoints = new SortedSet<int>();
 
         private static void ChangeState(DebuggerState newState)
         {
@@ -23,12 +28,43 @@ namespace ZDebug.UI.Services
             }
         }
 
+        private static void LoadSettings(Story story)
+        {
+            var xml = Storage.RestoreStorySettings(story);
+
+            var bpsElem = xml.Element("breakpoints");
+            if (bpsElem != null)
+            {
+                foreach (var bpElem in bpsElem.Elements("breakpoint"))
+                {
+                    var addAttr = bpElem.Attribute("address");
+                    breakpoints.Add((int)addAttr);
+                }
+            }
+        }
+
+        private static void SaveSettings(Story story)
+        {
+            var xml =
+                new XElement("settings",
+                    new XElement("story",
+                        new XAttribute("serial", story.SerialNumber),
+                        new XAttribute("release", story.ReleaseNumber),
+                        new XAttribute("version", story.Version)),
+                    new XElement("breakpoints",
+                        breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))));
+
+            Storage.SaveStorySettings(story, xml);
+        }
+
         public static void CloseStory()
         {
             if (story == null)
             {
                 return;
             }
+
+            SaveSettings(story);
 
             var oldStory = story;
 
@@ -51,6 +87,8 @@ namespace ZDebug.UI.Services
             var bytes = File.ReadAllBytes(fileName);
             DebuggerService.story = Story.FromBytes(bytes);
             DebuggerService.fileName = fileName;
+
+            LoadSettings(story);
 
             var handler = StoryOpened;
             if (handler != null)

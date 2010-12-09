@@ -11,6 +11,8 @@ namespace ZDebug.Core
     {
         private readonly Memory memory;
         private readonly byte version;
+        private readonly int serialNumber;
+        private readonly ushort releaseNumber;
 
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
@@ -23,6 +25,8 @@ namespace ZDebug.Core
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
+            this.serialNumber = memory.ReadSerialNumber();
+            this.releaseNumber = memory.ReadReleaseNumber();
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
@@ -59,6 +63,16 @@ namespace ZDebug.Core
         public byte Version
         {
             get { return version; }
+        }
+
+        public int SerialNumber
+        {
+            get { return serialNumber; }
+        }
+
+        public ushort ReleaseNumber
+        {
+            get { return releaseNumber; }
         }
 
         public MemoryMap MemoryMap

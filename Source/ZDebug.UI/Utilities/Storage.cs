@@ -6,6 +6,7 @@ using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
 using AvalonDock;
+using ZDebug.Core;
 
 namespace ZDebug.UI.Utilities
 {
@@ -113,6 +114,37 @@ namespace ZDebug.UI.Utilities
             {
                 var xml = WindowPlacement.Save(window);
                 xml.Save(windowLayoutWriter);
+            }
+        }
+
+        private static string GetStorySettingsFileName(Story story)
+        {
+            return string.Format("{0:n6}_{1}_{2}", story.SerialNumber, story.ReleaseNumber, story.Version);
+        }
+
+        public static XElement RestoreStorySettings(Story story)
+        {
+            var fileName = GetStorySettingsFileName(story);
+            using (var reader = OpenXmlFile(fileName))
+            {
+                if (reader != null)
+                {
+                    reader.MoveToContent();
+                    return XElement.Load(reader);
+                }
+                else
+                {
+                    return new XElement("settings");
+                }
+            }
+        }
+
+        public static void SaveStorySettings(Story story, XElement xml)
+        {
+            var fileName = GetStorySettingsFileName(story);
+            using (var writer = CreateXmlFile(fileName))
+            {
+                xml.Save(writer);
             }
         }
     }
