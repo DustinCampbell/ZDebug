@@ -77,7 +77,9 @@ namespace ZDebug.Core.Execution
                     break;
 
                 case VariableKind.Local:
+                    var oldValue = CurrentFrame.Locals[variable.Index];
                     CurrentFrame.SetLocal(variable.Index, value);
+                    OnLocalVariableChanged(variable.Index, oldValue, value);
                     break;
 
                 case VariableKind.Global:
@@ -234,11 +236,22 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private void OnLocalVariableChanged(int index, Value oldValue, Value newValue)
+        {
+            var handler = LocalVariableChanged;
+            if (handler != null)
+            {
+                handler(this, new LocalVariableChangedEventArgs(index, oldValue, newValue));
+            }
+        }
+
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;
         public event EventHandler<ProcessorSteppedEventArgs> Stepped;
 
         public event EventHandler<StackFrameEventArgs> EnterFrame;
         public event EventHandler<StackFrameEventArgs> ExitFrame;
+
+        public event EventHandler<LocalVariableChangedEventArgs> LocalVariableChanged;
 
         Value IExecutionContext.GetOperandValue(Operand operand)
         {
