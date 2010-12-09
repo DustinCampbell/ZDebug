@@ -38,6 +38,8 @@ namespace ZDebug.UI.ViewModel
             Update(e.Story.Processor.CurrentFrame);
 
             e.Story.Processor.EnterFrame += Processor_EnterFrame;
+            e.Story.Processor.LocalVariableChanged += Processor_LocalVariableChanged;
+            e.Story.Processor.Stepping += Processor_Stepping;
         }
 
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
@@ -45,17 +47,53 @@ namespace ZDebug.UI.ViewModel
             Update(e.NewFrame);
         }
 
+        private void Processor_LocalVariableChanged(object sender, LocalVariableChangedEventArgs e)
+        {
+            var viewModel = locals[e.Index];
+            viewModel.Value = e.NewValue;
+            viewModel.IsModified = true;
+        }
+
+        private void Processor_Stepping(object sender, ProcessorSteppingEventArgs e)
+        {
+            foreach (var local in locals)
+            {
+                local.IsModified = false;
+            }
+        }
+
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             locals.Clear();
 
             e.Story.Processor.EnterFrame -= Processor_EnterFrame;
+            e.Story.Processor.LocalVariableChanged -= Processor_LocalVariableChanged;
+        }
+
+        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+        {
+            if (e.NewState == DebuggerState.Running)
+            {
+                foreach (var local in locals)
+                {
+                    local.IsModified = false;
+                    local.IsFrozen = true;
+                }
+            }
+            else
+            {
+                foreach (var local in locals)
+                {
+                    local.IsFrozen = false;
+                }
+            }
         }
 
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
         public BulkObservableCollection<LocalVariableViewModel> Locals

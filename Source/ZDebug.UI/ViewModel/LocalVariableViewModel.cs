@@ -6,6 +6,9 @@ namespace ZDebug.UI.ViewModel
     {
         private readonly int index;
         private Value value;
+        private bool isModified;
+        private bool isFrozen;
+        private Value frozenValue;
 
         public LocalVariableViewModel(int index, Value value)
         {
@@ -20,12 +23,56 @@ namespace ZDebug.UI.ViewModel
 
         public Value Value
         {
-            get { return value; }
+            get
+            {
+                if (isFrozen)
+                {
+                    return frozenValue;
+                }
+                else
+                {
+                    return value;
+                }
+            }
             set
             {
                 if (this.value != value)
                 {
                     this.value = value;
+                    if (!isFrozen)
+                    {
+                        PropertyChanged("Value");
+                    }
+                }
+            }
+        }
+
+        public bool IsModified
+        {
+            get { return isModified; }
+            set
+            {
+                if (isModified != value)
+                {
+                    isModified = value;
+                    if (!isFrozen)
+                    {
+                        PropertyChanged("IsModified");
+                    }
+                }
+            }
+        }
+
+        public bool IsFrozen
+        {
+            get { return isFrozen; }
+            set
+            {
+                if (isFrozen != value)
+                {
+                    isFrozen = value;
+                    frozenValue = this.value;
+                    PropertyChanged("IsFrozen");
                     PropertyChanged("Value");
                 }
             }
