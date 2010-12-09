@@ -56,9 +56,12 @@ namespace ZDebug.UI.ViewModel
 
         private void Processor_Stepping(object sender, ProcessorSteppingEventArgs e)
         {
-            foreach (var local in locals)
+            if (DebuggerService.State != DebuggerState.Running)
             {
-                local.IsModified = false;
+                foreach (var local in locals)
+                {
+                    local.IsModified = false;
+                }
             }
         }
 
