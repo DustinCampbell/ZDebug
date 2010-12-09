@@ -121,5 +121,22 @@ namespace ZDebug.Core.Instructions
 
             context.Call(address, args, i.StoreVariable);
         };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Load/Store routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine storew = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 3);
+
+            var array = (ushort)context.GetOperandValue(i.Operands[0]);
+            var wordIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+
+            var address = array + (wordIndex * 2);
+
+            context.WriteWord(address, value);
+        };
     }
 }

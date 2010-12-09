@@ -84,7 +84,7 @@ namespace ZDebug.Core.Instructions
             // variable-operand opcodes
             AddOpcode(OpcodeKind.VarOp, 0x00, "call", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_vs, toVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x00, "call_vs", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_vs, fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x01, "storew");
+            AddOpcode(OpcodeKind.VarOp, 0x01, "storew", routine: OpcodeRoutines.storew);
             AddOpcode(OpcodeKind.VarOp, 0x02, "storeb");
             AddOpcode(OpcodeKind.VarOp, 0x03, "put_prop");
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", toVersion: 3);

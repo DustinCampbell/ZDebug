@@ -263,6 +263,11 @@ namespace ZDebug.Core.Execution
             WriteVariable(variable, value);
         }
 
+        void IExecutionContext.WriteWord(int address, ushort value)
+        {
+            story.Memory.WriteWord(address, value);
+        }
+
         void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
         {
             Call(address, operands, storeVariable);
