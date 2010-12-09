@@ -20,7 +20,7 @@ namespace ZDebug.UI.ViewModel
             stackFrames.BeginBulkOperation();
             try
             {
-                var mainFrame = new StackFrameViewModel(e.Story.Processor.CurrentFrame, priorFrame: null);
+                var mainFrame = new StackFrameViewModel(e.Story.Processor.CurrentFrame, callAddress: null);
                 mainFrame.IsCurrent = true;
                 stackFrames.Add(mainFrame);
             }
@@ -42,7 +42,7 @@ namespace ZDebug.UI.ViewModel
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
         {
             stackFrames[0].IsCurrent = false;
-            var newFrame = new StackFrameViewModel(e.NewFrame, e.OldFrame);
+            var newFrame = new StackFrameViewModel(e.NewFrame, callAddress: DebuggerService.Story.Processor.ExecutingInstruction.Address);
             newFrame.IsCurrent = true;
             stackFrames.Insert(0, newFrame);
         }

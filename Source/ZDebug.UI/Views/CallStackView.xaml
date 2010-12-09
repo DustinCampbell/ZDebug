@@ -12,9 +12,8 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid>
-        <ItemsControl Grid.Column="1"
-                      ItemsSource="{Binding StackFrames}"
+    <Grid Grid.IsSharedSizeScope="True">
+        <ItemsControl ItemsSource="{Binding StackFrames}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.CanContentScroll="True">
@@ -23,12 +22,18 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="CallAddress"/>
                             <ColumnDefinition Width="16"/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Address"/>
                         </Grid.ColumnDefinitions>
 
+                        <TextBlock
+                            Grid.Column="0"
+                            Margin="0,0,8,0"
+                            Text="{Binding CallAddressText, Mode=OneWay}"/>
+
                         <!-- IP arrow image -->
-                        <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="16" Height="16">
+                        <Image Grid.Column="1" Source="{StaticResource ipArrowImage}" Width="16" Height="16">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -41,8 +46,11 @@
                             </Image.Style>
                         </Image>
 
-                        <TextBlock Grid.Column="1" Text="{Binding Address, StringFormat=\{0:x4\}}"/>
-                        
+                        <TextBlock
+                            Grid.Column="2"
+                            Margin="8,0,0,0"
+                            FontWeight="Bold"
+                            Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
