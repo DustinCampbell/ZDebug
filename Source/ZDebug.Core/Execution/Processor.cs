@@ -193,6 +193,25 @@ namespace ZDebug.Core.Execution
             WriteStoreVariable(oldFrame.StoreVariable, value);
         }
 
+        private void WriteProperty(int objNum, int propNum, ushort value)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            var prop = obj.PropertyTable.GetByNumber(propNum);
+
+            if (prop.DataLength == 2)
+            {
+                story.Memory.WriteWord(prop.DataAddress, value);
+            }
+            else if (prop.DataLength == 1)
+            {
+                story.Memory.WriteByte(prop.DataAddress, (byte)(value & 0x00ff));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public void Step()
         {
             var oldPC = reader.Address;
@@ -285,6 +304,11 @@ namespace ZDebug.Core.Execution
         Value IExecutionContext.ReadWord(int address)
         {
             return Value.Number(story.Memory.ReadWord(address));
+        }
+
+        void IExecutionContext.WriteProperty(int objNum, int propNum, ushort value)
+        {
+            WriteProperty(objNum, propNum, value);
         }
 
         void IExecutionContext.WriteVariable(Variable variable, Value value)

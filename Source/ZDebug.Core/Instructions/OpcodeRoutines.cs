@@ -174,5 +174,20 @@ namespace ZDebug.Core.Instructions
 
             context.WriteWord(address, value);
         };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Object routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine put_prop = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 3);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+
+            context.WriteProperty(objNum, propNum, value);
+        };
     }
 }

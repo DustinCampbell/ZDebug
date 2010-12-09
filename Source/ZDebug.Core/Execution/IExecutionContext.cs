@@ -8,6 +8,7 @@ namespace ZDebug.Core.Execution
 
         Value ReadWord(int address);
 
+        void WriteProperty(int objNum, int propNum, ushort value);
         void WriteVariable(Variable variable, Value value);
         void WriteWord(int address, ushort value);
 
