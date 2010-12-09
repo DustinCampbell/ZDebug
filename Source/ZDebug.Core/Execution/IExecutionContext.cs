@@ -14,6 +14,8 @@ namespace ZDebug.Core.Execution
 
         void Jump(Branch branch);
 
+        void Return(Value value);
+
         int UnpackRoutineAddress(ushort byteAddress);
     }
 }

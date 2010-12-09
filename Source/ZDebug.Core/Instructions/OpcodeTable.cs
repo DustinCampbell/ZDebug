@@ -54,7 +54,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
             AddOpcode(OpcodeKind.OneOp, 0x0a, "print_obj");
-            AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return, OpcodeRoutines.ret);
             AddOpcode(OpcodeKind.OneOp, 0x0c, "jump");
             AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr");
             AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store);

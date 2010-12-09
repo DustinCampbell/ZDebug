@@ -163,10 +163,28 @@ namespace ZDebug.Core.Execution
             {
                 reader.Address += branch.Offset - 2;
             }
+            else if (branch.Kind == BranchKind.RFalse)
+            {
+                Return(Value.Zero);
+            }
+            else if (branch.Kind == BranchKind.RTrue)
+            {
+                Return(Value.One);
+            }
             else
             {
                 throw new NotSupportedException();
             }
+        }
+
+        private void Return(Value value)
+        {
+            var oldFrame = callStack.Pop();
+
+            reader.Address = oldFrame.ReturnAddress;
+            WriteStoreVariable(oldFrame.StoreVariable, value);
+
+            OnExitFrame(oldFrame, CurrentFrame);
         }
 
         public void Step()
@@ -276,6 +294,11 @@ namespace ZDebug.Core.Execution
         void IExecutionContext.Jump(Branch branch)
         {
             Jump(branch);
+        }
+
+        void IExecutionContext.Return(Value value)
+        {
+            Return(value);
         }
 
         int IExecutionContext.UnpackRoutineAddress(ushort byteAddress)
