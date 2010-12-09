@@ -180,6 +180,17 @@ namespace ZDebug.UI.Services
             get { return currentException; }
         }
 
+        public static IEnumerable<int> Breakpoints
+        {
+            get
+            {
+                foreach (var address in breakpoints)
+                {
+                    yield return address;
+                }
+            }
+        }
+
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
 
         public static event EventHandler<StoryEventArgs> StoryClosed;
