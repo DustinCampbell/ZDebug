@@ -6,8 +6,9 @@ namespace ZDebug.Core.Execution
     {
         Value GetOperandValue(Operand operand);
 
-        void WriteVariable(Variable variable, Value value);
+        Value ReadWord(int address);
 
+        void WriteVariable(Variable variable, Value value);
         void WriteWord(int address, ushort value);
 
         void Call(int address, Operand[] args, Variable storeVariable);

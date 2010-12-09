@@ -276,6 +276,11 @@ namespace ZDebug.Core.Execution
             return GetOperandValue(operand);
         }
 
+        Value IExecutionContext.ReadWord(int address)
+        {
+            return Value.Number(story.Memory.ReadWord(address));
+        }
+
         void IExecutionContext.WriteVariable(Variable variable, Value value)
         {
             WriteVariable(variable, value);

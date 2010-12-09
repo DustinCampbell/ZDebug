@@ -26,7 +26,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x0c, "clear_attr");
             AddOpcode(OpcodeKind.TwoOp, 0x0d, "store", OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj");
-            AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store, OpcodeRoutines.loadw);
             AddOpcode(OpcodeKind.TwoOp, 0x10, "loadb", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x12, "get_prop_addr", OpcodeFlags.Store);

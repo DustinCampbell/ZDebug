@@ -139,6 +139,20 @@ namespace ZDebug.Core.Instructions
         // Load/Store routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine loadw = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var array = (ushort)context.GetOperandValue(i.Operands[0]);
+            var wordIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var address = array + (wordIndex * 2);
+            var value = context.ReadWord(address);
+
+            context.WriteVariable(i.StoreVariable, value);
+        };
+
         public static readonly OpcodeRoutine storew = (i, context) =>
         {
             Strict.OperandCountIs(i, 3);
