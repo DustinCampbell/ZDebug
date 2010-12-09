@@ -127,6 +127,7 @@
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
+    <Compile Include="ViewModel\LocalVariableViewModel.cs" />
     <Compile Include="ViewModel\StackFrameViewModel.cs" />
     <Compile Include="ViewModel\StoryInfoViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />

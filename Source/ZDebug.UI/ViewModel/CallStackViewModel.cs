@@ -50,6 +50,9 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             stackFrames.Clear();
+
+            e.Story.Processor.EnterFrame -= Processor_EnterFrame;
+            e.Story.Processor.ExitFrame -= Processor_ExitFrame;
         }
 
         protected internal override void Initialize()
