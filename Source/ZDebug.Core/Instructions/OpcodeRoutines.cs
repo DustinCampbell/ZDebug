@@ -82,8 +82,22 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountInRange(i, 2, 4);
             Strict.HasBranch(i);
 
-            var x = context.GetOperandValue(i.Operands[0]);
-            var result = i.Operands.Skip(1).Any(op => x == context.GetOperandValue(op));
+            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var result = i.Operands.Skip(1).Any(op => x == (ushort)context.GetOperandValue(op));
+
+            if (result == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        public static readonly OpcodeRoutine jz = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasBranch(i);
+
+            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var result = x == 0;
 
             if (result == i.Branch.Condition)
             {

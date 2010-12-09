@@ -43,7 +43,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x1c, "throw", fromVersion: 5);
 
             // one-operand opcodes
-            AddOpcode(OpcodeKind.OneOp, 0x00, "jz", OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.OneOp, 0x00, "jz", OpcodeFlags.Branch, OpcodeRoutines.jz);
             AddOpcode(OpcodeKind.OneOp, 0x01, "get_sibling", OpcodeFlags.Store | OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store);
