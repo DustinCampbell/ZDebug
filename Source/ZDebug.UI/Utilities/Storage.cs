@@ -14,6 +14,13 @@ namespace ZDebug.UI.Utilities
         private const string DockLayoutFileName = "dock_layout.xml";
         private const string WindowLayoutFileName = "window_layout.xml";
 
+        private static string GetDockLayoutFileName(string prefix)
+        {
+            return prefix != null
+                ? prefix + "_" + DockLayoutFileName
+                : DockLayoutFileName;
+        }
+
         private static string GetWindowLayoutFileName(Window window)
         {
             return window.Name + "_" + WindowLayoutFileName;
@@ -48,9 +55,9 @@ namespace ZDebug.UI.Utilities
             return writer;
         }
 
-        public static void RestoreDockingLayout(DockingManager dockManager)
+        public static void RestoreDockingLayout(DockingManager dockManager, string prefix = null)
         {
-            using (var dockLayoutReader = OpenXmlFile(DockLayoutFileName))
+            using (var dockLayoutReader = OpenXmlFile(GetDockLayoutFileName(prefix)))
             {
                 if (dockLayoutReader != null)
                 {
@@ -59,9 +66,9 @@ namespace ZDebug.UI.Utilities
             }
         }
 
-        public static void SaveDockingLayout(DockingManager dockManager)
+        public static void SaveDockingLayout(DockingManager dockManager, string prefix = null)
         {
-            using (var dockLayoutWriter = CreateXmlFile(DockLayoutFileName))
+            using (var dockLayoutWriter = CreateXmlFile(GetDockLayoutFileName(prefix)))
             {
                 dockManager.SaveLayout(dockLayoutWriter);
             }

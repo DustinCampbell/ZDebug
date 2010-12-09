@@ -62,6 +62,9 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
+            <MenuItem Header="_Window">
+                <MenuItem Command="{Binding ResetWindowLayoutCommand}" Header="_Reset Window Layout"/>
+            </MenuItem>
         </Menu>
 
         <ToolBarTray Grid.Row="1">
@@ -95,9 +98,14 @@
                             <ad:DocumentContent Title="Objects" Name="objectsContent"/>
                             <ad:DocumentContent Title="Memory" Name="memoryContent"/>
                         </ad:DocumentPane>
-                        <ad:DockablePane ad:ResizingPanel.ResizeHeight="150">
-                            <ad:DockableContent Title="Call Stack" Name="callStackContent"/>
-                        </ad:DockablePane>
+                        <ad:ResizingPanel Orientation="Horizontal" ad:ResizingPanel.ResizeHeight="150">
+                            <ad:DockablePane>
+                                <ad:DockableContent Title="Locals" Name="localsContent"/>
+                            </ad:DockablePane>
+                            <ad:DockablePane>
+                                <ad:DockableContent Title="Call Stack" Name="callStackContent"/>
+                            </ad:DockablePane>
+                        </ad:ResizingPanel>
                     </ad:ResizingPanel>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>

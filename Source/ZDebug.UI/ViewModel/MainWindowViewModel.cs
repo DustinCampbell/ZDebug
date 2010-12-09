@@ -47,6 +47,12 @@ namespace ZDebug.UI.ViewModel
                 name: "Reset Debugging Session",
                 executed: ResetSessionExecuted,
                 canExecute: CanResetSessionExecute);
+
+            this.ResetWindowLayoutCommand = RegisterCommand(
+                text: "ResetWindowLayout",
+                name: "Reset Window Layout",
+                executed: ResetWindowLayoutExecuted,
+                canExecute: CanResetWindowLayoutExecute);
         }
 
         private bool CanOpenStoryExecute()
@@ -106,11 +112,23 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
+        private bool CanResetWindowLayoutExecute()
+        {
+            return true;
+        }
+
+        private void ResetWindowLayoutExecuted()
+        {
+            var dockManager = this.View.FindName<DockingManager>("dockManager");
+            Storage.RestoreDockingLayout(dockManager, "original");
+        }
+
         public ICommand OpenStoryCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
+        public ICommand ResetWindowLayoutCommand { get; private set; }
 
         public string Title
         {
@@ -154,6 +172,9 @@ namespace ZDebug.UI.ViewModel
             var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
+            var localsContent = this.View.FindName<DockableContent>("localsContent");
+            localsContent.Content = ViewModelWithView.Create<LocalsViewModel, UserControl>();
+
             var callStackContent = this.View.FindName<DockableContent>("callStackContent");
             callStackContent.Content = ViewModelWithView.Create<CallStackViewModel, UserControl>();
 
@@ -165,6 +186,7 @@ namespace ZDebug.UI.ViewModel
             var dockManager = this.View.FindName<DockingManager>("dockManager");
             dockManager.Loaded += (s, e) =>
             {
+                Storage.SaveDockingLayout(dockManager, "original");
                 Storage.RestoreDockingLayout(dockManager);
             };
 
