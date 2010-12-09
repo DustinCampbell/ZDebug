@@ -123,6 +123,7 @@
     <Compile Include="ViewModel\CallStackViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
+    <Compile Include="ViewModel\DisassemblyLineBehaviors.cs" />
     <Compile Include="ViewModel\DisassemblyLineState.cs" />
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />

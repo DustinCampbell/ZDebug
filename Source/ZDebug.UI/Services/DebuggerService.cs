@@ -129,11 +129,11 @@ namespace ZDebug.UI.Services
         {
             if (breakpoints.Contains(address))
             {
-                breakpoints.Remove(address);
+                RemoveBreakpoint(address);
             }
             else
             {
-                breakpoints.Add(address);
+                AddBreakpoint(address);
             }
         }
 

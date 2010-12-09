@@ -126,12 +126,33 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        private void DebuggerService_BreakpointRemoved(object sender, BreakpointEventArgs e)
+        {
+            var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
+            if (bpLine != null)
+            {
+                bpLine.HasBreakpoint = false;
+            }
+        }
+
+        private void DebuggerService_BreakpointAdded(object sender, BreakpointEventArgs e)
+        {
+            var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
+            if (bpLine != null)
+            {
+                bpLine.HasBreakpoint = true;
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
 
             DebuggerService.StateChanged += DebuggerService_StateChanged;
+
+            DebuggerService.BreakpointAdded += DebuggerService_BreakpointAdded;
+            DebuggerService.BreakpointRemoved += DebuggerService_BreakpointRemoved;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 
