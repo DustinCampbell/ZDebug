@@ -71,6 +71,8 @@ namespace ZDebug.UI.Services
             story = null;
             fileName = null;
 
+            breakpoints.Clear();
+
             var handler = StoryClosed;
             if (handler != null)
             {
@@ -99,6 +101,40 @@ namespace ZDebug.UI.Services
             ChangeState(DebuggerState.Stopped);
 
             return story;
+        }
+
+        public static void AddBreakpoint(int address)
+        {
+            breakpoints.Add(address);
+
+            var handler = BreakpointAdded;
+            if (handler != null)
+            {
+                handler(null, new BreakpointEventArgs(address));
+            }
+        }
+
+        public static void RemoveBreakpoint(int address)
+        {
+            breakpoints.Remove(address);
+
+            var handler = BreakpointRemoved;
+            if (handler != null)
+            {
+                handler(null, new BreakpointEventArgs(address));
+            }
+        }
+
+        public static void ToggleBreakpoint(int address)
+        {
+            if (breakpoints.Contains(address))
+            {
+                breakpoints.Remove(address);
+            }
+            else
+            {
+                breakpoints.Add(address);
+            }
         }
 
         public static bool CanStepNext
@@ -148,5 +184,8 @@ namespace ZDebug.UI.Services
 
         public static event EventHandler<StoryEventArgs> StoryClosed;
         public static event EventHandler<StoryEventArgs> StoryOpened;
+
+        public static event EventHandler<BreakpointEventArgs> BreakpointAdded;
+        public static event EventHandler<BreakpointEventArgs> BreakpointRemoved;
     }
 }
