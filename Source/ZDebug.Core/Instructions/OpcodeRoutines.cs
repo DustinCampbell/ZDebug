@@ -91,6 +91,15 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine jump = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var offset = (short)context.GetOperandValue(i.Operands[0]);
+
+            context.Jump(offset);
+        };
+
         public static readonly OpcodeRoutine jz = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

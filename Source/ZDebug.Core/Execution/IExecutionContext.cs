@@ -13,6 +13,7 @@ namespace ZDebug.Core.Execution
 
         void Call(int address, Operand[] args, Variable storeVariable);
 
+        void Jump(short offset);
         void Jump(Branch branch);
 
         void Return(Value value);

@@ -157,6 +157,11 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private void Jump(short offset)
+        {
+            reader.Address += offset - 2;
+        }
+
         private void Jump(Branch branch)
         {
             if (branch.Kind == BranchKind.Address)
@@ -295,6 +300,11 @@ namespace ZDebug.Core.Execution
         void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
         {
             Call(address, operands, storeVariable);
+        }
+
+        void IExecutionContext.Jump(short offset)
+        {
+            Jump(offset);
         }
 
         void IExecutionContext.Jump(Branch branch)
