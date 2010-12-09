@@ -181,10 +181,11 @@ namespace ZDebug.Core.Execution
         {
             var oldFrame = callStack.Pop();
 
-            reader.Address = oldFrame.ReturnAddress;
-            WriteStoreVariable(oldFrame.StoreVariable, value);
-
             OnExitFrame(oldFrame, CurrentFrame);
+
+            reader.Address = oldFrame.ReturnAddress;
+
+            WriteStoreVariable(oldFrame.StoreVariable, value);
         }
 
         public void Step()
