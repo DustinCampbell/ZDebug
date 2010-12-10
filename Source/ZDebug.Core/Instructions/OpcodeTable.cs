@@ -99,7 +99,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, OpcodeRoutines.pull, fromVersion: 7, toVersion: 8);
             AddOpcode(OpcodeKind.VarOp, 0x0a, "split_window", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0b, "set_window", fromVersion: 3);
-            AddOpcode(OpcodeKind.VarOp, 0x0c, "call_vs2", OpcodeFlags.Call | OpcodeFlags.Store | OpcodeFlags.DoubleVar, fromVersion: 4);
+            AddOpcode(OpcodeKind.VarOp, 0x0c, "call_vs2", OpcodeFlags.Call | OpcodeFlags.Store | OpcodeFlags.DoubleVar, OpcodeRoutines.call_vs2, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x0d, "erase_window", fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x0e, "erase_line", fromVersion: 4, toVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x0e, "erase_line", fromVersion: 6);
@@ -117,7 +117,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x17, "scan_table", OpcodeFlags.Store | OpcodeFlags.Branch, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x18, "not", OpcodeFlags.Store, OpcodeRoutines.not, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, OpcodeRoutines.call_vn, fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, OpcodeRoutines.call_vn2, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1b, "tokenize", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1c, "encode_text", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1d, "copy_table", fromVersion: 5);

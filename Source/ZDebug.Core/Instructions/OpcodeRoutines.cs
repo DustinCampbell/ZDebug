@@ -365,6 +365,31 @@ namespace ZDebug.Core.Instructions
             context.Call(address, args, i.StoreVariable);
         };
 
+        public static readonly OpcodeRoutine call_vn2 = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 8);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            var args = i.Operands.Skip(1).ToArray();
+
+            context.Call(address, args);
+        };
+
+        public static readonly OpcodeRoutine call_vs2 = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 8);
+            Strict.HasStoreVariable(i);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            var args = i.Operands.Skip(1).ToArray();
+
+            context.Call(address, args, i.StoreVariable);
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Return routines
         ///////////////////////////////////////////////////////////////////////////////////////////
