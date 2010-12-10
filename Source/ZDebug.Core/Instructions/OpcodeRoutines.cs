@@ -606,6 +606,16 @@ namespace ZDebug.Core.Instructions
             context.Print(number.ToString());
         };
 
+        public static readonly OpcodeRoutine print_obj = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            var shortName = context.GetShortName(objNum);
+            context.Print(shortName);
+        };
+
         public static readonly OpcodeRoutine print_paddr = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

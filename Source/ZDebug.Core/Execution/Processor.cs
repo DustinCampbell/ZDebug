@@ -398,6 +398,12 @@ namespace ZDebug.Core.Execution
             return story.UnpackStringAddress(byteAddress);
         }
 
+        string IExecutionContext.GetShortName(int objNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            return obj.ShortName;
+        }
+
         bool IExecutionContext.HasAttribute(int objNum, int attrNum)
         {
             return HasAttribute(objNum, attrNum);

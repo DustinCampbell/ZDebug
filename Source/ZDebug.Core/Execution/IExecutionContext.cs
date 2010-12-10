@@ -30,6 +30,7 @@ namespace ZDebug.Core.Execution
         int UnpackRoutineAddress(ushort byteAddress);
         int UnpackStringAddress(ushort byteAddress);
 
+        string GetShortName(int objNum);
         bool HasAttribute(int objNum, int attrNum);
 
         ushort[] ReadZWords(int address);
