@@ -107,6 +107,56 @@ namespace ZDebug.Core.Instructions
         // Increment/decrement routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine dec = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var variable = Variable.FromByte((byte)varIdx);
+
+            var value = (short)context.ReadVariableIndirectly(variable);
+            value -= 1;
+            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+        };
+
+        public static readonly OpcodeRoutine dec_chk = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var test = (short)context.GetOperandValue(i.Operands[1]);
+
+            var variable = Variable.FromByte((byte)varIdx);
+
+            var value = (short)context.ReadVariableIndirectly(variable);
+            value -= 1;
+            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+
+            if ((value < test) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        public static readonly OpcodeRoutine inc = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var variable = Variable.FromByte((byte)varIdx);
+
+            var value = (short)context.ReadVariableIndirectly(variable);
+            value += 1;
+            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+        };
+
         public static readonly OpcodeRoutine inc_chk = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);

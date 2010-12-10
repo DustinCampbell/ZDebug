@@ -15,7 +15,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x01, "je", OpcodeFlags.Branch, OpcodeRoutines.je);
             AddOpcode(OpcodeKind.TwoOp, 0x02, "jl", OpcodeFlags.Branch, OpcodeRoutines.jl);
             AddOpcode(OpcodeKind.TwoOp, 0x03, "jg", OpcodeFlags.Branch, OpcodeRoutines.jg);
-            AddOpcode(OpcodeKind.TwoOp, 0x04, "dec_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.TwoOp, 0x04, "dec_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef, OpcodeRoutines.dec_chk);
             AddOpcode(OpcodeKind.TwoOp, 0x05, "inc_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef, OpcodeRoutines.inc_chk);
             AddOpcode(OpcodeKind.TwoOp, 0x06, "jin", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x07, "test", OpcodeFlags.Branch);
@@ -48,8 +48,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.OneOp, 0x04, "get_prop_len", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef);
-            AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef, OpcodeRoutines.inc);
+            AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef, OpcodeRoutines.dec);
             AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");
             AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_1s, fromVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
