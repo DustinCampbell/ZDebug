@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\LocalVariableChangedEventArgs.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
