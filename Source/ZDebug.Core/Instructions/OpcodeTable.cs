@@ -127,8 +127,8 @@ namespace ZDebug.Core.Instructions
             // extended opcodes
             AddOpcode(OpcodeKind.Ext, 0x00, "save", OpcodeFlags.Store, fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x01, "restore", OpcodeFlags.Store, fromVersion: 5);
-            AddOpcode(OpcodeKind.Ext, 0x02, "log_shift", OpcodeFlags.Store, fromVersion: 5);
-            AddOpcode(OpcodeKind.Ext, 0x03, "art_shift", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x02, "log_shift", OpcodeFlags.Store, OpcodeRoutines.log_shift, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x03, "art_shift", OpcodeFlags.Store, OpcodeRoutines.art_shift, fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x04, "set_font", OpcodeFlags.Store, fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x05, "draw_picture", fromVersion: 6);
             AddOpcode(OpcodeKind.Ext, 0x06, "picture_data", OpcodeFlags.Branch, fromVersion: 6);

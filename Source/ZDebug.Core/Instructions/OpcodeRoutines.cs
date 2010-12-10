@@ -90,6 +90,36 @@ namespace ZDebug.Core.Instructions
             context.WriteVariable(i.StoreVariable, result);
         };
 
+        public static readonly OpcodeRoutine art_shift = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var number = (short)context.GetOperandValue(i.Operands[0]);
+            var places = (int)(short)context.GetOperandValue(i.Operands[1]);
+
+            var result = places > 0
+                ? number << places
+                : number >> -places;
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+        };
+
+        public static readonly OpcodeRoutine log_shift = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var number = (ushort)context.GetOperandValue(i.Operands[0]);
+            var places = (int)(short)context.GetOperandValue(i.Operands[1]);
+
+            var result = places > 0
+                ? number << places
+                : number >> -places;
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+        };
+
         public static readonly OpcodeRoutine not = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
