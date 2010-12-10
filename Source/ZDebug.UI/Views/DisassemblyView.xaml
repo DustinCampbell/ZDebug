@@ -64,6 +64,7 @@
 
                         <!-- breakpoint image-->
                         <Image Grid.Column="0" Source="{StaticResource breakpointImage}" Width="16" Height="16"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
@@ -80,6 +81,7 @@
 
                         <!-- IP arrow image -->
                         <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="16" Height="16"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
@@ -101,6 +103,7 @@
                         <!-- call stack arrow image -->
                         <Image Grid.Column="0" Source="{StaticResource stepImage}" Width="16" Height="16"
                                ToolTip="{Binding ToolTip}"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
@@ -123,6 +126,7 @@
                         <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="16" Height="16"
                                Name="blockedImage"
                                ToolTip="{Binding ToolTip}"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
@@ -139,6 +143,7 @@
 
                         <!-- Paused image -->
                         <Image Grid.Column="0" Source="{StaticResource pausedImage}" Width="16" Height="16"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
@@ -155,6 +160,7 @@
 
                         <!-- Stopped image -->
                         <Image Grid.Column="0" Source="{StaticResource stoppedImage}" Width="16" Height="16"
+                               Margin="0,1,0,0"
                                VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
