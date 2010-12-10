@@ -212,6 +212,13 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private bool HasAttribute(int objNum, int attrNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+
+            return obj.HasAttribute(attrNum);
+        }
+
         public void Step()
         {
             var oldPC = reader.Address;
@@ -349,6 +356,11 @@ namespace ZDebug.Core.Execution
         int IExecutionContext.UnpackRoutineAddress(ushort byteAddress)
         {
             return story.UnpackRoutineAddress(byteAddress);
+        }
+
+        bool IExecutionContext.HasAttribute(int objNum, int attrNum)
+        {
+            return HasAttribute(objNum, attrNum);
         }
     }
 }

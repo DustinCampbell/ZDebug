@@ -202,5 +202,21 @@ namespace ZDebug.Core.Instructions
 
             context.WriteProperty(objNum, propNum, value);
         };
+
+        public static readonly OpcodeRoutine test_attr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var result = context.HasAttribute(objNum, attrNum);
+
+            if (result == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
     }
 }

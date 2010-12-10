@@ -21,5 +21,7 @@ namespace ZDebug.Core.Execution
         void Return(Value value);
 
         int UnpackRoutineAddress(ushort byteAddress);
+
+        bool HasAttribute(int objNum, int attrNum);
     }
 }
