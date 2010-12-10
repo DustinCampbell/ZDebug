@@ -26,9 +26,11 @@ namespace ZDebug.Core.Execution
         void Return(Value value);
 
         int UnpackRoutineAddress(ushort byteAddress);
+        int UnpackStringAddress(ushort byteAddress);
 
         bool HasAttribute(int objNum, int attrNum);
 
+        ushort[] ReadZWords(int address);
         string ParseZWords(IList<ushort> zwords);
 
         void Print(string text);

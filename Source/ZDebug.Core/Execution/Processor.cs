@@ -388,9 +388,20 @@ namespace ZDebug.Core.Execution
             return story.UnpackRoutineAddress(byteAddress);
         }
 
+        int IExecutionContext.UnpackStringAddress(ushort byteAddress)
+        {
+            return story.UnpackStringAddress(byteAddress);
+        }
+
         bool IExecutionContext.HasAttribute(int objNum, int attrNum)
         {
             return HasAttribute(objNum, attrNum);
+        }
+
+        ushort[] IExecutionContext.ReadZWords(int address)
+        {
+            var reader = story.Memory.CreateReader(address);
+            return reader.NextZWords();
         }
 
         string IExecutionContext.ParseZWords(IList<ushort> zwords)

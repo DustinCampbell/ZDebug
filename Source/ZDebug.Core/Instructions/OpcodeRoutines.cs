@@ -439,5 +439,18 @@ namespace ZDebug.Core.Instructions
             var number = (short)context.GetOperandValue(i.Operands[0]);
             context.Print(number.ToString());
         };
+
+        public static readonly OpcodeRoutine print_paddr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var byteAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackStringAddress(byteAddress);
+
+            var zwords = context.ReadZWords(address);
+            var ztext = context.ParseZWords(zwords);
+
+            context.Print(ztext);
+        };
     }
 }
