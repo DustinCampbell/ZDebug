@@ -36,7 +36,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x16, "mul", OpcodeFlags.Store, OpcodeRoutines.mul);
             AddOpcode(OpcodeKind.TwoOp, 0x17, "div", OpcodeFlags.Store, OpcodeRoutines.div);
             AddOpcode(OpcodeKind.TwoOp, 0x18, "mod", OpcodeFlags.Store, OpcodeRoutines.mod);
-            AddOpcode(OpcodeKind.TwoOp, 0x19, "call_2s", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 4);
+            AddOpcode(OpcodeKind.TwoOp, 0x19, "call_2s", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_2s, fromVersion: 4);
             AddOpcode(OpcodeKind.TwoOp, 0x1a, "call_2n", OpcodeFlags.Call, fromVersion: 5);
             AddOpcode(OpcodeKind.TwoOp, 0x1b, "set_color", fromVersion: 5, toVersion: 5);
             AddOpcode(OpcodeKind.TwoOp, 0x1b, "set_color", fromVersion: 6);

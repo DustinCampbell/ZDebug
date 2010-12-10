@@ -118,6 +118,19 @@ namespace ZDebug.Core.Instructions
         // Call routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine call_2s = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            var args = i.Operands.Skip(1).ToArray();
+
+            context.Call(address, args, i.StoreVariable);
+        };
+
         public static readonly OpcodeRoutine call_vs = (i, context) =>
         {
             Strict.OperandCountInRange(i, 1, 4);
