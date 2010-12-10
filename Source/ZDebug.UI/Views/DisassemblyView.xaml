@@ -64,7 +64,8 @@
 
                         <!-- breakpoint image-->
                         <Image Grid.Column="0" Source="{StaticResource breakpointImage}" Width="16" Height="16"
-                            vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
+                               VerticalAlignment="Top"
+                               vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -79,6 +80,7 @@
 
                         <!-- IP arrow image -->
                         <Image Grid.Column="0" Source="{StaticResource ipArrowImage}" Width="16" Height="16"
+                               VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
@@ -99,7 +101,8 @@
                         <!-- call stack arrow image -->
                         <Image Grid.Column="0" Source="{StaticResource stepImage}" Width="16" Height="16"
                                ToolTip="{Binding ToolTip}"
-                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
+                               VerticalAlignment="Top"
+                               vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -120,7 +123,8 @@
                         <Image Grid.Column="0" Source="{StaticResource blockedImage}" Width="16" Height="16"
                                Name="blockedImage"
                                ToolTip="{Binding ToolTip}"
-                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
+                               VerticalAlignment="Top"
+                               vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -135,6 +139,7 @@
 
                         <!-- Paused image -->
                         <Image Grid.Column="0" Source="{StaticResource pausedImage}" Width="16" Height="16"
+                               VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
@@ -150,6 +155,7 @@
 
                         <!-- Stopped image -->
                         <Image Grid.Column="0" Source="{StaticResource stoppedImage}" Width="16" Height="16"
+                               VerticalAlignment="Top"
                                vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
                             <Image.Style>
                                 <Style TargetType="Image">
