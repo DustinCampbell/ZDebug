@@ -74,6 +74,36 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // Bit-level routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine and = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var y = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var result = Value.Number((ushort)(x & y));
+
+            context.WriteVariable(i.StoreVariable, result);
+        };
+
+        public static readonly OpcodeRoutine or = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var y = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var result = Value.Number((ushort)(x | y));
+
+            context.WriteVariable(i.StoreVariable, result);
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Jump routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 

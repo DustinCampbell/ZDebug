@@ -19,8 +19,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x05, "inc_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.TwoOp, 0x06, "jin", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x07, "test", OpcodeFlags.Branch);
-            AddOpcode(OpcodeKind.TwoOp, 0x08, "or", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x09, "and", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.TwoOp, 0x08, "or", OpcodeFlags.Store, OpcodeRoutines.or);
+            AddOpcode(OpcodeKind.TwoOp, 0x09, "and", OpcodeFlags.Store, OpcodeRoutines.and);
             AddOpcode(OpcodeKind.TwoOp, 0x0a, "test_attr", OpcodeFlags.Branch, OpcodeRoutines.test_attr);
             AddOpcode(OpcodeKind.TwoOp, 0x0b, "set_attr");
             AddOpcode(OpcodeKind.TwoOp, 0x0c, "clear_attr");
