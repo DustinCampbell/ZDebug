@@ -5,7 +5,7 @@ using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
-    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IOutputStream
+    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
         private readonly StringBuilder builder;
 
@@ -23,7 +23,7 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
-            e.Story.Processor.OutputStreams.RegisterScreen(this);
+            e.Story.Processor.RegisterScreen(this);
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
@@ -46,6 +46,21 @@ namespace ZDebug.UI.ViewModel
         void IOutputStream.Print(char ch)
         {
             builder.Append(ch);
+            PropertyChanged("Text");
+        }
+
+        void IScreen.Clear(int window)
+        {
+            if (window == 0) // lower window
+            {
+                builder.Clear();
+                PropertyChanged("Text");
+            }
+        }
+
+        void IScreen.ClearAll(bool unsplit)
+        {
+            builder.Clear();
             PropertyChanged("Text");
         }
     }

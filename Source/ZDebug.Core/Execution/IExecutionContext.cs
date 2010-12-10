@@ -55,5 +55,7 @@ namespace ZDebug.Core.Execution
 
         void Quit();
         bool VerifyChecksum();
+
+        IScreen Screen { get; }
     }
 }

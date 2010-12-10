@@ -7,13 +7,14 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed class Processor : IExecutionContext
+    public sealed partial class Processor : IExecutionContext
     {
         private readonly Story story;
         private readonly IMemoryReader reader;
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
         private readonly OutputStreams outputStreams;
+        private IScreen screen = new NullScreen();
         private Random random = new Random();
 
         private Instruction executingInstruction;
@@ -238,6 +239,17 @@ namespace ZDebug.Core.Execution
             executingInstruction = null;
         }
 
+        public void RegisterScreen(IScreen screen)
+        {
+            if (screen == null)
+            {
+                throw new ArgumentNullException("screen");
+            }
+
+            this.screen = screen;
+            this.outputStreams.RegisterScreen(screen);
+        }
+
         public StackFrame CurrentFrame
         {
             get { return callStack.Peek(); }
@@ -246,11 +258,6 @@ namespace ZDebug.Core.Execution
         public int PC
         {
             get { return reader.Address; }
-        }
-
-        public OutputStreams OutputStreams
-        {
-            get { return outputStreams; }
         }
 
         /// <summary>
@@ -587,6 +594,11 @@ namespace ZDebug.Core.Execution
         bool IExecutionContext.VerifyChecksum()
         {
             return story.ActualChecksum == story.Memory.ReadChecksum();
+        }
+
+        IScreen IExecutionContext.Screen
+        {
+            get { return screen; }
         }
     }
 }

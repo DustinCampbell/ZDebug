@@ -1,10 +1,10 @@
 ﻿namespace ZDebug.Core.Execution
 {
-    public sealed partial class OutputStreams
+    internal sealed partial class OutputStreams
     {
-        private class EmptyStream : IOutputStream
+        private class NullStream : IOutputStream
         {
-            private EmptyStream()
+            private NullStream()
             {
             }
 
@@ -16,7 +16,7 @@
             {
             }
 
-            public static readonly IOutputStream Instance = new EmptyStream();
+            public static readonly IOutputStream Instance = new NullStream();
         }
     }
 }

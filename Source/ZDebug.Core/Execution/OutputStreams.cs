@@ -1,7 +1,7 @@
 ﻿using System;
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class OutputStreams
+    internal sealed partial class OutputStreams
     {
         private readonly Story story;
         private readonly Tuple<bool, IOutputStream>[] streams;
@@ -11,15 +11,15 @@ namespace ZDebug.Core.Execution
             this.story = story;
             this.streams = new Tuple<bool, IOutputStream>[4];
 
-            this.streams[0] = Tuple.Create(false, EmptyStream.Instance);
-            this.streams[1] = Tuple.Create(true, EmptyStream.Instance);
-            this.streams[2] = Tuple.Create(false, EmptyStream.Instance);
-            this.streams[3] = Tuple.Create(false, EmptyStream.Instance);
+            this.streams[0] = Tuple.Create(false, NullStream.Instance);
+            this.streams[1] = Tuple.Create(true, NullStream.Instance);
+            this.streams[2] = Tuple.Create(false, NullStream.Instance);
+            this.streams[3] = Tuple.Create(false, NullStream.Instance);
         }
 
         public void RegisterTranscript(IOutputStream stream)
         {
-            if (streams[0].Item2 == EmptyStream.Instance)
+            if (streams[0].Item2 == NullStream.Instance)
             {
                 streams[0] = Tuple.Create(streams[0].Item1, stream);
             }
@@ -27,7 +27,7 @@ namespace ZDebug.Core.Execution
 
         public void RegisterScreen(IOutputStream stream)
         {
-            if (streams[1].Item2 == EmptyStream.Instance)
+            if (streams[1].Item2 == NullStream.Instance)
             {
                 streams[1] = Tuple.Create(streams[1].Item1, stream);
             }

@@ -820,6 +820,26 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // Window routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine erase_window = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var window = (short)context.GetOperandValue(i.Operands[0]);
+
+            if (window == -1 || window == -2)
+            {
+                context.Screen.ClearAll(unsplit: window == -1);
+            }
+            else
+            {
+                context.Screen.Clear(window);
+            }
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Miscellaneous routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
