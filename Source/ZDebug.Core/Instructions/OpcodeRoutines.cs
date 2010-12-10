@@ -336,6 +336,20 @@ namespace ZDebug.Core.Instructions
             context.Return(value);
         };
 
+        public static readonly OpcodeRoutine rfalse = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            context.Return(Value.Zero);
+        };
+
+        public static readonly OpcodeRoutine rtrue = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            context.Return(Value.One);
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Load/Store routines
         ///////////////////////////////////////////////////////////////////////////////////////////
