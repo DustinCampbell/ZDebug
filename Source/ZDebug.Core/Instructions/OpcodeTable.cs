@@ -65,7 +65,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.ZeroOp, 0x00, "rtrue", OpcodeFlags.Return, OpcodeRoutines.rtrue);
             AddOpcode(OpcodeKind.ZeroOp, 0x01, "rfalse", OpcodeFlags.Return, OpcodeRoutines.rfalse);
             AddOpcode(OpcodeKind.ZeroOp, 0x02, "print", OpcodeFlags.ZText, OpcodeRoutines.print);
-            AddOpcode(OpcodeKind.ZeroOp, 0x03, "print_ret", OpcodeFlags.Return | OpcodeFlags.ZText);
+            AddOpcode(OpcodeKind.ZeroOp, 0x03, "print_ret", OpcodeFlags.Return | OpcodeFlags.ZText, OpcodeRoutines.print_ret);
             AddOpcode(OpcodeKind.ZeroOp, 0x04, "nop");
             AddOpcode(OpcodeKind.ZeroOp, 0x05, "save", OpcodeFlags.Branch, toVersion: 3);
             AddOpcode(OpcodeKind.ZeroOp, 0x05, "save", OpcodeFlags.Store, fromVersion: 4, toVersion: 4);

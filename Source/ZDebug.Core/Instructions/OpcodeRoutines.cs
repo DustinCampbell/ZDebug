@@ -619,6 +619,16 @@ namespace ZDebug.Core.Instructions
             context.Print(ztext);
         };
 
+        public static readonly OpcodeRoutine print_ret = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasZText(i);
+
+            var ztext = context.ParseZWords(i.ZText);
+            context.Print(ztext);
+            context.Return(Value.One);
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Miscellaneous routines
         ///////////////////////////////////////////////////////////////////////////////////////////
