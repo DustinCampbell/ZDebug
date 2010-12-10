@@ -403,6 +403,15 @@ namespace ZDebug.Core.Instructions
             context.Return(value);
         };
 
+        public static readonly OpcodeRoutine ret_popped = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            var value = context.ReadVariable(Variable.Stack);
+
+            context.Return(value);
+        };
+
         public static readonly OpcodeRoutine rfalse = (i, context) =>
         {
             Strict.OperandCountIs(i, 0);

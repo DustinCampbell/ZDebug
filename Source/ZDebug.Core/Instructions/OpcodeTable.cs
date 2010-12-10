@@ -72,7 +72,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.ZeroOp, 0x06, "restore", OpcodeFlags.Branch, toVersion: 3);
             AddOpcode(OpcodeKind.ZeroOp, 0x06, "restore", OpcodeFlags.Store, fromVersion: 4, toVersion: 4);
             AddOpcode(OpcodeKind.ZeroOp, 0x07, "restart");
-            AddOpcode(OpcodeKind.ZeroOp, 0x08, "ret_popped", OpcodeFlags.Return);
+            AddOpcode(OpcodeKind.ZeroOp, 0x08, "ret_popped", OpcodeFlags.Return, OpcodeRoutines.ret_popped);
             AddOpcode(OpcodeKind.ZeroOp, 0x09, "pop", toVersion: 4);
             AddOpcode(OpcodeKind.ZeroOp, 0x09, "catch", OpcodeFlags.Store, fromVersion: 5);
             AddOpcode(OpcodeKind.ZeroOp, 0x0a, "quit");
