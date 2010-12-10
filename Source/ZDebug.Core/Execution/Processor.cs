@@ -316,6 +316,11 @@ namespace ZDebug.Core.Execution
             WriteVariable(variable, value);
         }
 
+        void IExecutionContext.WriteVariableIndirectly(Variable variable, Value value)
+        {
+            WriteVariable(variable, value, indirect: true);
+        }
+
         void IExecutionContext.WriteWord(int address, ushort value)
         {
             story.Memory.WriteWord(address, value);

@@ -43,5 +43,13 @@
                 Fail(instruction, "Does not have branch.");
             }
         }
+
+        public static void IsByte(Instruction instruction, ushort value)
+        {
+            if (value >= 256)
+            {
+                Fail(instruction, "Expected byte value but was {0:x4}.", value);
+            }
+        }
     }
 }

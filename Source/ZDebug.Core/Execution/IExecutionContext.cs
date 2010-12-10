@@ -10,6 +10,7 @@ namespace ZDebug.Core.Execution
 
         void WriteProperty(int objNum, int propNum, ushort value);
         void WriteVariable(Variable variable, Value value);
+        void WriteVariableIndirectly(Variable variable, Value value);
         void WriteWord(int address, ushort value);
 
         void Call(int address, Operand[] args, Variable storeVariable);

@@ -162,6 +162,19 @@ namespace ZDebug.Core.Instructions
             context.WriteVariable(i.StoreVariable, value);
         };
 
+        public static readonly OpcodeRoutine store = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var variable = Variable.FromByte((byte)varIdx);
+            var value = context.GetOperandValue(i.Operands[1]);
+
+            context.WriteVariableIndirectly(variable, value);
+        };
+
         public static readonly OpcodeRoutine storew = (i, context) =>
         {
             Strict.OperandCountIs(i, 3);
