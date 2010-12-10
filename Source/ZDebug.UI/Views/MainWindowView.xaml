@@ -107,6 +107,9 @@
                             </ad:DockablePane>
                         </ad:ResizingPanel>
                     </ad:ResizingPanel>
+                    <ad:DockablePane>
+                        <ad:DockableContent Title="Output" Name="outputContent"/>
+                    </ad:DockablePane>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
         </ad:DockingManager>
