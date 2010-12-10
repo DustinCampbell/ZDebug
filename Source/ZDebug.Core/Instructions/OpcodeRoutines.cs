@@ -91,6 +91,34 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine jg = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var x = (short)context.GetOperandValue(i.Operands[0]);
+            var y = (short)context.GetOperandValue(i.Operands[1]);
+
+            if ((x > y) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        public static readonly OpcodeRoutine jl = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var x = (short)context.GetOperandValue(i.Operands[0]);
+            var y = (short)context.GetOperandValue(i.Operands[1]);
+
+            if ((x < y) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
         public static readonly OpcodeRoutine jump = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

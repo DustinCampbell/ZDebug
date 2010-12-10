@@ -13,8 +13,8 @@ namespace ZDebug.Core.Instructions
 
             // two-operand opcodes
             AddOpcode(OpcodeKind.TwoOp, 0x01, "je", OpcodeFlags.Branch, OpcodeRoutines.je);
-            AddOpcode(OpcodeKind.TwoOp, 0x02, "jl", OpcodeFlags.Branch);
-            AddOpcode(OpcodeKind.TwoOp, 0x03, "jg", OpcodeFlags.Branch);
+            AddOpcode(OpcodeKind.TwoOp, 0x02, "jl", OpcodeFlags.Branch, OpcodeRoutines.jl);
+            AddOpcode(OpcodeKind.TwoOp, 0x03, "jg", OpcodeFlags.Branch, OpcodeRoutines.jg);
             AddOpcode(OpcodeKind.TwoOp, 0x04, "dec_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.TwoOp, 0x05, "inc_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.TwoOp, 0x06, "jin", OpcodeFlags.Branch);
