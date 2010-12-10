@@ -438,6 +438,32 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // Stack routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine pull = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var variable = Variable.FromByte((byte)varIdx);
+            var value = context.ReadVariable(Variable.Stack);
+
+            context.WriteVariableIndirectly(variable, value);
+        };
+
+        public static readonly OpcodeRoutine push = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var value = context.GetOperandValue(i.Operands[0]);
+
+            context.WriteVariable(Variable.Stack, value);
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Object routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 

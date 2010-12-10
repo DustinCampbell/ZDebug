@@ -93,10 +93,10 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x05, "print_char", routine: OpcodeRoutines.print_char);
             AddOpcode(OpcodeKind.VarOp, 0x06, "print_num", routine: OpcodeRoutines.print_num);
             AddOpcode(OpcodeKind.VarOp, 0x07, "random", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.VarOp, 0x08, "push");
-            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, toVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x08, "push", routine: OpcodeRoutines.push);
+            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, OpcodeRoutines.pull, toVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.Store, fromVersion: 6, toVersion: 6);
-            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, fromVersion: 7, toVersion: 8);
+            AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, OpcodeRoutines.pull, fromVersion: 7, toVersion: 8);
             AddOpcode(OpcodeKind.VarOp, 0x0a, "split_window", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0b, "set_window", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0c, "call_vs2", OpcodeFlags.Call | OpcodeFlags.Store | OpcodeFlags.DoubleVar, fromVersion: 4);
