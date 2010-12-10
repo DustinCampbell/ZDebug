@@ -398,6 +398,45 @@ namespace ZDebug.Core.Execution
             return story.UnpackStringAddress(byteAddress);
         }
 
+        int IExecutionContext.GetChild(int objNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            if (!obj.HasChild)
+            {
+                return 0;
+            }
+            else
+            {
+                return obj.Child.Number;
+            }
+        }
+
+        int IExecutionContext.GetParent(int objNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            if (!obj.HasParent)
+            {
+                return 0;
+            }
+            else
+            {
+                return obj.Parent.Number;
+            }
+        }
+
+        int IExecutionContext.GetSibling(int objNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            if (!obj.HasSibling)
+            {
+                return 0;
+            }
+            else
+            {
+                return obj.Sibling.Number;
+            }
+        }
+
         string IExecutionContext.GetShortName(int objNum)
         {
             var obj = story.ObjectTable.GetByNumber(objNum);

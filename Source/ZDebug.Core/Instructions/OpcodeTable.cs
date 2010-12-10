@@ -44,9 +44,9 @@ namespace ZDebug.Core.Instructions
 
             // one-operand opcodes
             AddOpcode(OpcodeKind.OneOp, 0x00, "jz", OpcodeFlags.Branch, OpcodeRoutines.jz);
-            AddOpcode(OpcodeKind.OneOp, 0x01, "get_sibling", OpcodeFlags.Store | OpcodeFlags.Branch);
-            AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch);
-            AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.OneOp, 0x01, "get_sibling", OpcodeFlags.Store | OpcodeFlags.Branch, OpcodeRoutines.get_sibling);
+            AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch, OpcodeRoutines.get_child);
+            AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store, OpcodeRoutines.get_parent);
             AddOpcode(OpcodeKind.OneOp, 0x04, "get_prop_len", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef, OpcodeRoutines.inc);
             AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef, OpcodeRoutines.dec);

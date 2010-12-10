@@ -30,6 +30,9 @@ namespace ZDebug.Core.Execution
         int UnpackRoutineAddress(ushort byteAddress);
         int UnpackStringAddress(ushort byteAddress);
 
+        int GetChild(int objNum);
+        int GetParent(int objNum);
+        int GetSibling(int objNum);
         string GetShortName(int objNum);
         bool HasAttribute(int objNum, int attrNum);
 

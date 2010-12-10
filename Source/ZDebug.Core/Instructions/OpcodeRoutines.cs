@@ -543,6 +543,51 @@ namespace ZDebug.Core.Instructions
         // Object routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine get_child = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasBranch(i);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var childNum = context.GetChild(objNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)childNum));
+
+            if ((childNum > 0) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        public static readonly OpcodeRoutine get_parent = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var parentNum = context.GetParent(objNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)parentNum));
+        };
+
+        public static readonly OpcodeRoutine get_sibling = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasBranch(i);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var siblingNum = context.GetSibling(objNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)siblingNum));
+
+            if ((siblingNum > 0) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
         public static readonly OpcodeRoutine put_prop = (i, context) =>
         {
             Strict.OperandCountIs(i, 3);
