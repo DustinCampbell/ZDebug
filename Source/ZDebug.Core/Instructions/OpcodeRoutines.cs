@@ -559,6 +559,16 @@ namespace ZDebug.Core.Instructions
         // Object routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine clear_attr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            context.ClearAttribute(objNum, attrNum);
+        };
+
         public static readonly OpcodeRoutine get_child = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
@@ -613,6 +623,16 @@ namespace ZDebug.Core.Instructions
             var value = (ushort)context.GetOperandValue(i.Operands[2]);
 
             context.WriteProperty(objNum, propNum, value);
+        };
+
+        public static readonly OpcodeRoutine set_attr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            context.SetAttribute(objNum, attrNum);
         };
 
         public static readonly OpcodeRoutine test_attr = (i, context) =>

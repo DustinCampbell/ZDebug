@@ -145,7 +145,14 @@ namespace ZDebug.Core.Basics
             var byteIdx = attribute / 8;
             var bitMask = 1 << (7 - (attribute % 8));
 
-            attributeBytes[byteIdx] = (byte)(attributeBytes[byteIdx] | bitMask);
+            if (value)
+            {
+                attributeBytes[byteIdx] = (byte)(attributeBytes[byteIdx] | bitMask);
+            }
+            else
+            {
+                attributeBytes[byteIdx] = (byte)(attributeBytes[byteIdx] & ~bitMask);
+            }
 
             memory.WriteAttributeBytesByObjectAddress(objAddress, attributeBytes);
         }

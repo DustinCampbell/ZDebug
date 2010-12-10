@@ -22,8 +22,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x08, "or", OpcodeFlags.Store, OpcodeRoutines.or);
             AddOpcode(OpcodeKind.TwoOp, 0x09, "and", OpcodeFlags.Store, OpcodeRoutines.and);
             AddOpcode(OpcodeKind.TwoOp, 0x0a, "test_attr", OpcodeFlags.Branch, OpcodeRoutines.test_attr);
-            AddOpcode(OpcodeKind.TwoOp, 0x0b, "set_attr");
-            AddOpcode(OpcodeKind.TwoOp, 0x0c, "clear_attr");
+            AddOpcode(OpcodeKind.TwoOp, 0x0b, "set_attr", routine: OpcodeRoutines.set_attr);
+            AddOpcode(OpcodeKind.TwoOp, 0x0c, "clear_attr", routine: OpcodeRoutines.clear_attr);
             AddOpcode(OpcodeKind.TwoOp, 0x0d, "store", OpcodeFlags.FirstOpByRef, OpcodeRoutines.store);
             AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj");
             AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store, OpcodeRoutines.loadw);

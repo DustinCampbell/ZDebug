@@ -35,6 +35,8 @@ namespace ZDebug.Core.Execution
         int GetSibling(int objNum);
         string GetShortName(int objNum);
         bool HasAttribute(int objNum, int attrNum);
+        void ClearAttribute(int objNum, int attrNum);
+        void SetAttribute(int objNum, int attrNum);
 
         ushort[] ReadZWords(int address);
         string ParseZWords(IList<ushort> zwords);

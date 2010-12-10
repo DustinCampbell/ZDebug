@@ -448,6 +448,18 @@ namespace ZDebug.Core.Execution
             return HasAttribute(objNum, attrNum);
         }
 
+        void IExecutionContext.ClearAttribute(int objNum, int attrNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            obj.ClearAttribute(attrNum);
+        }
+
+        void IExecutionContext.SetAttribute(int objNum, int attrNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            obj.SetAttribute(attrNum);
+        }
+
         ushort[] IExecutionContext.ReadZWords(int address)
         {
             var reader = story.Memory.CreateReader(address);
