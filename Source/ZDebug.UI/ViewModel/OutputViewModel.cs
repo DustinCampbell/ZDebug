@@ -29,6 +29,7 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             builder.Clear();
+            PropertyChanged("Text");
         }
 
         public string Text
