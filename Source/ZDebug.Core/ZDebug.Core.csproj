@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\LocalVariableChangedEventArgs.cs" />
+    <Compile Include="Execution\OutputStreams.cs" />
+    <Compile Include="Execution\OutputStreams.EmptyStream.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />

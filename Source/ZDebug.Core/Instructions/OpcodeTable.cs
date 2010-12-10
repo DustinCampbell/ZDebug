@@ -64,7 +64,7 @@ namespace ZDebug.Core.Instructions
             // zero-operand opcodes
             AddOpcode(OpcodeKind.ZeroOp, 0x00, "rtrue", OpcodeFlags.Return);
             AddOpcode(OpcodeKind.ZeroOp, 0x01, "rfalse", OpcodeFlags.Return);
-            AddOpcode(OpcodeKind.ZeroOp, 0x02, "print", OpcodeFlags.ZText);
+            AddOpcode(OpcodeKind.ZeroOp, 0x02, "print", OpcodeFlags.ZText, OpcodeRoutines.print);
             AddOpcode(OpcodeKind.ZeroOp, 0x03, "print_ret", OpcodeFlags.Return | OpcodeFlags.ZText);
             AddOpcode(OpcodeKind.ZeroOp, 0x04, "nop");
             AddOpcode(OpcodeKind.ZeroOp, 0x05, "save", OpcodeFlags.Branch, toVersion: 3);
@@ -76,7 +76,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.ZeroOp, 0x09, "pop", toVersion: 4);
             AddOpcode(OpcodeKind.ZeroOp, 0x09, "catch", OpcodeFlags.Store, fromVersion: 5);
             AddOpcode(OpcodeKind.ZeroOp, 0x0a, "quit");
-            AddOpcode(OpcodeKind.ZeroOp, 0x0b, "new_line");
+            AddOpcode(OpcodeKind.ZeroOp, 0x0b, "new_line", routine: OpcodeRoutines.new_line);
             AddOpcode(OpcodeKind.ZeroOp, 0x0c, "show_status", fromVersion: 3, toVersion: 3);
             AddOpcode(OpcodeKind.ZeroOp, 0x0d, "verify", OpcodeFlags.Branch, fromVersion: 3);
             AddOpcode(OpcodeKind.ZeroOp, 0x0f, "piracy", OpcodeFlags.Branch, fromVersion: 5);

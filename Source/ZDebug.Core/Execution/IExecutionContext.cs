@@ -1,4 +1,5 @@
-﻿using ZDebug.Core.Instructions;
+﻿using System.Collections.Generic;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Core.Execution
 {
@@ -27,5 +28,10 @@ namespace ZDebug.Core.Execution
         int UnpackRoutineAddress(ushort byteAddress);
 
         bool HasAttribute(int objNum, int attrNum);
+
+        string ParseZWords(IList<ushort> zwords);
+
+        void Print(string text);
+        void Print(char ch);
     }
 }

@@ -44,6 +44,14 @@
             }
         }
 
+        public static void HasZText(Instruction instruction)
+        {
+            if (!instruction.HasZText)
+            {
+                Fail(instruction, "Does not have ztext.");
+            }
+        }
+
         public static void IsByte(Instruction instruction, ushort value)
         {
             if (value >= 256)

@@ -347,5 +347,25 @@ namespace ZDebug.Core.Instructions
                 context.Jump(i.Branch);
             }
         };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Printing routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine new_line = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            context.Print('\n');
+        };
+
+        public static readonly OpcodeRoutine print = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasZText(i);
+
+            var ztext = context.ParseZWords(i.ZText);
+            context.Print(ztext);
+        };
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Text;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
@@ -12,6 +13,7 @@ namespace ZDebug.Core.Execution
         private readonly IMemoryReader reader;
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
+        private readonly OutputStreams outputStreams;
 
         private Instruction executingInstruction;
 
@@ -20,6 +22,7 @@ namespace ZDebug.Core.Execution
             this.story = story;
 
             this.callStack = new Stack<StackFrame>();
+            this.outputStreams = new OutputStreams(story);
 
             // create "call" to main routine
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
@@ -244,6 +247,11 @@ namespace ZDebug.Core.Execution
             get { return reader.Address; }
         }
 
+        public OutputStreams OutputStreams
+        {
+            get { return outputStreams; }
+        }
+
         /// <summary>
         /// The Instruction that is being executed (only valid during a step).
         /// </summary>
@@ -383,6 +391,21 @@ namespace ZDebug.Core.Execution
         bool IExecutionContext.HasAttribute(int objNum, int attrNum)
         {
             return HasAttribute(objNum, attrNum);
+        }
+
+        string IExecutionContext.ParseZWords(IList<ushort> zwords)
+        {
+            return ZText.ZWordsAsString(zwords, ZTextFlags.All, story.Memory);
+        }
+
+        void IExecutionContext.Print(string text)
+        {
+            outputStreams.Print(text);
+        }
+
+        void IExecutionContext.Print(char ch)
+        {
+            outputStreams.Print(ch);
         }
     }
 }
