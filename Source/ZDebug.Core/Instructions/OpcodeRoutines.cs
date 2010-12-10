@@ -253,6 +253,22 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine jin = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var obj1 = (ushort)context.GetOperandValue(i.Operands[0]);
+            var obj2 = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var obj1Parent = context.GetParent(obj1);
+
+            if ((obj1Parent == obj2) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
         public static readonly OpcodeRoutine jl = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
