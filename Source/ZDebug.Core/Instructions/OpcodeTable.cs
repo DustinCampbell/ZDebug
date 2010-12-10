@@ -58,7 +58,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x0c, "jump", routine: OpcodeRoutines.jump);
             AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr", routine: OpcodeRoutines.print_paddr);
             AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store, OpcodeRoutines.load);
-            AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, toVersion: 4);
+            AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, OpcodeRoutines.not, toVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, OpcodeRoutines.call_1n, fromVersion: 5);
 
             // zero-operand opcodes
@@ -115,7 +115,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x15, "sound_effect", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x16, "sound_effect", OpcodeFlags.Store, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x17, "scan_table", OpcodeFlags.Store | OpcodeFlags.Branch, fromVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x18, "not", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x18, "not", OpcodeFlags.Store, OpcodeRoutines.not, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, OpcodeRoutines.call_vn, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1b, "tokenize", fromVersion: 5);

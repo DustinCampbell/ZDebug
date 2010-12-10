@@ -90,6 +90,18 @@ namespace ZDebug.Core.Instructions
             context.WriteVariable(i.StoreVariable, result);
         };
 
+        public static readonly OpcodeRoutine not = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            var result = Value.Number((ushort)(~x));
+
+            context.WriteVariable(i.StoreVariable, result);
+        };
+
         public static readonly OpcodeRoutine or = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
