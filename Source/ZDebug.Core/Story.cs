@@ -13,6 +13,7 @@ namespace ZDebug.Core
         private readonly byte version;
         private readonly int serialNumber;
         private readonly ushort releaseNumber;
+        private readonly ushort actualChecksum;
 
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
@@ -27,6 +28,7 @@ namespace ZDebug.Core
             this.version = memory.ReadVersion();
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
+            this.actualChecksum = memory.CalculateChecksum();
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
@@ -73,6 +75,11 @@ namespace ZDebug.Core
         public ushort ReleaseNumber
         {
             get { return releaseNumber; }
+        }
+
+        internal ushort ActualChecksum
+        {
+            get { return actualChecksum; }
         }
 
         public MemoryMap MemoryMap

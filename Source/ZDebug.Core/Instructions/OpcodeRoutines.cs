@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace ZDebug.Core.Instructions
 {
@@ -143,6 +144,22 @@ namespace ZDebug.Core.Instructions
             var result = Value.Number((ushort)(x | y));
 
             context.WriteVariable(i.StoreVariable, result);
+        };
+
+        public static readonly OpcodeRoutine test = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var bitmap = (ushort)context.GetOperandValue(i.Operands[0]);
+            var flags = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var result = (bitmap & flags) == flags;
+
+            if (result == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -741,6 +758,18 @@ namespace ZDebug.Core.Instructions
             context.Print(ztext);
         };
 
+        public static readonly OpcodeRoutine print_addr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var byteAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            var zwords = context.ReadZWords(byteAddress);
+            var ztext = context.ParseZWords(zwords);
+
+            context.Print(ztext);
+        };
+
         public static readonly OpcodeRoutine print_char = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
@@ -803,6 +832,54 @@ namespace ZDebug.Core.Instructions
             var argCount = context.GetArgumentCount();
 
             if ((argNumber <= argCount) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        public static readonly OpcodeRoutine piracy = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasBranch(i);
+
+            context.Jump(i.Branch);
+        };
+
+        public static readonly OpcodeRoutine quit = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            context.Quit();
+        };
+
+        public static readonly OpcodeRoutine random = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var range = (short)context.GetOperandValue(i.Operands[0]);
+
+            if (range > 0)
+            {
+                var result = context.NextRandom(range);
+                context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+            }
+            else if (range < 0)
+            {
+                context.Randomize(+range);
+            }
+            else // range = 0s
+            {
+                context.Randomize((int)DateTime.Now.Ticks);
+            }
+        };
+
+        public static readonly OpcodeRoutine verify = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasBranch(i);
+
+            if (context.VerifyChecksum() == i.Branch.Condition)
             {
                 context.Jump(i.Branch);
             }

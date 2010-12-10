@@ -126,27 +126,39 @@ namespace ZDebug.Core.Basics
             var version = memory.ReadVersion();
             var fileSize = memory.ReadWord(FileSizeIndex);
 
-            switch (version)
+            if (version >= 1 && version <= 3)
             {
-                case 1:
-                case 2:
-                case 3:
-                    return fileSize * 2;
-                case 4:
-                case 5:
-                    return fileSize * 4;
-                case 6:
-                case 7:
-                case 8:
-                    return fileSize * 8;
-                default:
-                    throw new InvalidOperationException("Invalid version number: " + version);
+                return fileSize * 2;
+            }
+            else if (version >= 4 && version <= 5)
+            {
+                return fileSize * 4;
+            }
+            else if (version >= 6 && version <= 8)
+            {
+                return fileSize * 8;
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid version number: " + version);
             }
         }
 
         public static ushort ReadChecksum(this Memory memory)
         {
             return memory.ReadWord(ChecksumIndex);
+        }
+
+        public static ushort CalculateChecksum(this Memory memory)
+        {
+            var size = Math.Min(memory.ReadFileSize(), memory.Size);
+            ushort result = 0;
+            for (int i = 0x40; i < size; i++)
+            {
+                result += memory.ReadByte(i);
+            }
+
+            return result;
         }
 
         public static ushort ReadRoutinesOffset(this Memory memory)

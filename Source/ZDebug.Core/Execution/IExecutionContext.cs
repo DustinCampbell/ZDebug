@@ -49,5 +49,11 @@ namespace ZDebug.Core.Execution
 
         void Print(string text);
         void Print(char ch);
+
+        void Randomize(int seed);
+        int NextRandom(int range);
+
+        void Quit();
+        bool VerifyChecksum();
     }
 }

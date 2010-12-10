@@ -92,6 +92,8 @@ namespace ZDebug.UI.Services
 
             LoadSettings(story);
 
+            story.Processor.Quit += Processor_Quit;
+
             var handler = StoryOpened;
             if (handler != null)
             {
@@ -101,6 +103,11 @@ namespace ZDebug.UI.Services
             ChangeState(DebuggerState.Stopped);
 
             return story;
+        }
+
+        private static void Processor_Quit(object sender, EventArgs e)
+        {
+            ChangeState(DebuggerState.Done);
         }
 
         public static void AddBreakpoint(int address)
@@ -151,24 +158,21 @@ namespace ZDebug.UI.Services
         {
             ChangeState(DebuggerState.Running);
 
-            bool done = false;
-            while (!done)
+            while (state == DebuggerState.Running)
             {
                 try
                 {
                     story.Processor.Step();
 
-                    if (breakpoints.Contains(story.Processor.PC))
+                    if (state == DebuggerState.Running && breakpoints.Contains(story.Processor.PC))
                     {
                         ChangeState(DebuggerState.Stopped);
-                        done = true;
                     }
                 }
                 catch (Exception ex)
                 {
                     currentException = ex;
                     ChangeState(DebuggerState.StoppedAtError);
-                    done = true;
                 }
             }
         }

@@ -14,6 +14,7 @@ namespace ZDebug.Core.Execution
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
         private readonly OutputStreams outputStreams;
+        private Random random = new Random();
 
         private Instruction executingInstruction;
 
@@ -305,6 +306,15 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private void OnQuit()
+        {
+            var handler = Quit;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
+        }
+
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;
         public event EventHandler<ProcessorSteppedEventArgs> Stepped;
 
@@ -312,6 +322,8 @@ namespace ZDebug.Core.Execution
         public event EventHandler<StackFrameEventArgs> ExitFrame;
 
         public event EventHandler<LocalVariableChangedEventArgs> LocalVariableChanged;
+
+        public event EventHandler Quit;
 
         Value IExecutionContext.GetOperandValue(Operand operand)
         {
@@ -552,6 +564,29 @@ namespace ZDebug.Core.Execution
         void IExecutionContext.Print(char ch)
         {
             outputStreams.Print(ch);
+        }
+
+        void IExecutionContext.Randomize(int seed)
+        {
+            random = new Random(seed);
+        }
+
+        int IExecutionContext.NextRandom(int range)
+        {
+            // range should be inclusive, so we need to subtract 1 since System.Range.Next makes it exclusive
+            var minValue = 1;
+            var maxValue = Math.Max(minValue, range - 1);
+            return random.Next(minValue, maxValue);
+        }
+
+        void IExecutionContext.Quit()
+        {
+            OnQuit();
+        }
+
+        bool IExecutionContext.VerifyChecksum()
+        {
+            return story.ActualChecksum == story.Memory.ReadChecksum();
         }
     }
 }

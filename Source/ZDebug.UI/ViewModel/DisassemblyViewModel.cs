@@ -93,7 +93,8 @@ namespace ZDebug.UI.ViewModel
             var oldLine = GetLineByAddress(e.OldPC);
             oldLine.HasIP = false;
 
-            if (DebuggerService.State == DebuggerState.Running)
+            if (DebuggerService.State == DebuggerState.Running ||
+                DebuggerService.State == DebuggerState.Done)
             {
                 return;
             }
@@ -195,6 +196,12 @@ namespace ZDebug.UI.ViewModel
             {
                 var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
                 line.HasIP = true;
+                BringLineIntoView(line);
+            }
+            else if (e.NewState == DebuggerState.Done)
+            {
+                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
+                line.State = DisassemblyLineState.Stopped;
                 BringLineIntoView(line);
             }
         }
