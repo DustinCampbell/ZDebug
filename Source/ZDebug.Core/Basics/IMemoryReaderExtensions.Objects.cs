@@ -5,7 +5,7 @@ namespace ZDebug.Core.Basics
 {
     internal static partial class IMemoryReaderExtensions
     {
-        private static ZProperty NextProperty_V1(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable)
+        private static ZProperty NextProperty_V1(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
         {
             var address = reader.Address - 1;
             var number = sizeByte % 32;
@@ -13,10 +13,10 @@ namespace ZDebug.Core.Basics
             var dataAddress = reader.Address;
             reader.Skip(length);
 
-            return new ZProperty(reader.Memory, propertyTable, address, number, dataAddress, length);
+            return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
         }
 
-        private static ZProperty NextProperty_V4(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable)
+        private static ZProperty NextProperty_V4(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
         {
             var address = reader.Address - 1;
             var number = sizeByte & 0x3f; // number is in the bottom 6 bites
@@ -39,10 +39,10 @@ namespace ZDebug.Core.Basics
             var dataAddress = reader.Address;
             reader.Skip(length);
 
-            return new ZProperty(reader.Memory, propertyTable, address, number, dataAddress, length);
+            return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
         }
 
-        public static ZProperty NextProperty(this IMemoryReader reader, int version, ZPropertyTable propertyTable)
+        public static ZProperty NextProperty(this IMemoryReader reader, int version, ZPropertyTable propertyTable, int index)
         {
             var sizeByte = reader.NextByte();
             if (sizeByte == 0)
@@ -52,11 +52,11 @@ namespace ZDebug.Core.Basics
 
             if (version >= 1 && version <= 3)
             {
-                return reader.NextProperty_V1(sizeByte, propertyTable);
+                return reader.NextProperty_V1(sizeByte, propertyTable, index);
             }
             else if (version >= 4 && version <= 8)
             {
-                return reader.NextProperty_V4(sizeByte, propertyTable);
+                return reader.NextProperty_V4(sizeByte, propertyTable, index);
             }
             else
             {

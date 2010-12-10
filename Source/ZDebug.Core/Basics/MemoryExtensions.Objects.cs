@@ -414,6 +414,38 @@ namespace ZDebug.Core.Basics
             return memory.ReadShortName(propertyTableAddress);
         }
 
+        public static int ReadPropertyDataLength(this Memory memory, int dataAddress)
+        {
+            if (dataAddress == 0)
+            {
+                return 0;
+            }
+
+            var version = memory.ReadVersion();
+            var sizeByte = memory.ReadByte(dataAddress - 1);
+
+            int dataLength;
+            if (version <= 3)
+            {
+                dataLength = ((sizeByte & 0xE0) >> 5) + 1;
+            }
+            else if ((sizeByte & 0x80) == 0)
+            {
+                dataLength = ((sizeByte & 0x40) >> 6) + 1;
+            }
+            else
+            {
+                dataLength = sizeByte & 0x7F;
+            }
+
+            if (dataLength == 0)
+            {
+                dataLength = 64;
+            }
+
+            return dataLength;
+        }
+
         public static IList<ZProperty> ReadPropertyTableProperties(this Memory memory, ZPropertyTable propertyTable)
         {
             // read properties...
@@ -423,11 +455,12 @@ namespace ZDebug.Core.Basics
             reader.SkipShortName();
 
             var version = memory.ReadVersion();
-            ZProperty prop = reader.NextProperty(version, propertyTable);
+            var index = 0;
+            ZProperty prop = reader.NextProperty(version, propertyTable, index);
             while (prop != null)
             {
                 props.Add(prop);
-                prop = reader.NextProperty(version, propertyTable);
+                prop = reader.NextProperty(version, propertyTable, ++index);
             }
 
             return props;

@@ -586,6 +586,19 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine get_next_prop = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var nextPropNum = context.GetNextProperty(objNum, propNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)nextPropNum));
+        };
+
         public static readonly OpcodeRoutine get_parent = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
@@ -595,6 +608,44 @@ namespace ZDebug.Core.Instructions
             var parentNum = context.GetParent(objNum);
 
             context.WriteVariable(i.StoreVariable, Value.Number((ushort)parentNum));
+        };
+
+        public static readonly OpcodeRoutine get_prop = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var value = context.GetPropertyData(objNum, propNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)value));
+        };
+
+        public static readonly OpcodeRoutine get_prop_addr = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var propAddress = context.GetPropertyDataAddress(objNum, propNum);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)propAddress));
+        };
+
+        public static readonly OpcodeRoutine get_prop_len = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var dataAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            var propLen = context.GetPropertyDataLength(dataAddress);
+
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)propLen));
         };
 
         public static readonly OpcodeRoutine get_sibling = (i, context) =>

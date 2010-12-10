@@ -443,6 +443,69 @@ namespace ZDebug.Core.Execution
             return obj.ShortName;
         }
 
+        int IExecutionContext.GetNextProperty(int objNum, int propNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+
+            int nextIndex = 0;
+            if (propNum > 0)
+            {
+                var prop = obj.PropertyTable.GetByNumber(propNum);
+                if (prop == null)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                nextIndex = prop.Index + 1;
+            }
+
+            if (nextIndex == obj.PropertyTable.Count)
+            {
+                return 0;
+            }
+
+            return obj.PropertyTable[nextIndex].Number;
+        }
+
+        int IExecutionContext.GetPropertyData(int objNum, int propNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            var prop = obj.PropertyTable.GetByNumber(propNum);
+
+            if (prop == null)
+            {
+                return story.ObjectTable.GetPropertyDefault(propNum);
+            }
+
+            if (prop.DataLength == 1)
+            {
+                return story.Memory.ReadByte(prop.DataAddress);
+            }
+            else if (prop.DataLength == 2)
+            {
+                return story.Memory.ReadWord(prop.DataAddress);
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
+        int IExecutionContext.GetPropertyDataAddress(int objNum, int propNum)
+        {
+            var obj = story.ObjectTable.GetByNumber(objNum);
+            var prop = obj.PropertyTable.GetByNumber(propNum);
+
+            return prop != null
+                ? prop.DataAddress
+                : 0;
+        }
+
+        int IExecutionContext.GetPropertyDataLength(int dataAddress)
+        {
+            return story.Memory.ReadPropertyDataLength(dataAddress);
+        }
+
         bool IExecutionContext.HasAttribute(int objNum, int attrNum)
         {
             return HasAttribute(objNum, attrNum);

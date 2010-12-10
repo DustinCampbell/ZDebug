@@ -28,9 +28,9 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj");
             AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store, OpcodeRoutines.loadw);
             AddOpcode(OpcodeKind.TwoOp, 0x10, "loadb", OpcodeFlags.Store, OpcodeRoutines.loadb);
-            AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x12, "get_prop_addr", OpcodeFlags.Store);
-            AddOpcode(OpcodeKind.TwoOp, 0x13, "get_next_prop", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store, OpcodeRoutines.get_prop);
+            AddOpcode(OpcodeKind.TwoOp, 0x12, "get_prop_addr", OpcodeFlags.Store, OpcodeRoutines.get_prop_addr);
+            AddOpcode(OpcodeKind.TwoOp, 0x13, "get_next_prop", OpcodeFlags.Store, OpcodeRoutines.get_next_prop);
             AddOpcode(OpcodeKind.TwoOp, 0x14, "add", OpcodeFlags.Store, OpcodeRoutines.add);
             AddOpcode(OpcodeKind.TwoOp, 0x15, "sub", OpcodeFlags.Store, OpcodeRoutines.sub);
             AddOpcode(OpcodeKind.TwoOp, 0x16, "mul", OpcodeFlags.Store, OpcodeRoutines.mul);
@@ -47,7 +47,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x01, "get_sibling", OpcodeFlags.Store | OpcodeFlags.Branch, OpcodeRoutines.get_sibling);
             AddOpcode(OpcodeKind.OneOp, 0x02, "get_child", OpcodeFlags.Store | OpcodeFlags.Branch, OpcodeRoutines.get_child);
             AddOpcode(OpcodeKind.OneOp, 0x03, "get_parent", OpcodeFlags.Store, OpcodeRoutines.get_parent);
-            AddOpcode(OpcodeKind.OneOp, 0x04, "get_prop_len", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.OneOp, 0x04, "get_prop_len", OpcodeFlags.Store, OpcodeRoutines.get_prop_len);
             AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef, OpcodeRoutines.inc);
             AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef, OpcodeRoutines.dec);
             AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");

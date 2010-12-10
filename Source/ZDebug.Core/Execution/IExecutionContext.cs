@@ -34,6 +34,10 @@ namespace ZDebug.Core.Execution
         int GetParent(int objNum);
         int GetSibling(int objNum);
         string GetShortName(int objNum);
+        int GetNextProperty(int objNum, int propNum);
+        int GetPropertyData(int objNum, int propNum);
+        int GetPropertyDataAddress(int objNum, int propNum);
+        int GetPropertyDataLength(int dataAddress);
         bool HasAttribute(int objNum, int attrNum);
         void ClearAttribute(int objNum, int attrNum);
         void SetAttribute(int objNum, int attrNum);
