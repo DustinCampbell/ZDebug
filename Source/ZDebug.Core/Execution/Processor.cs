@@ -122,7 +122,9 @@ namespace ZDebug.Core.Execution
             }
 
             // NOTE: argument values must be retrieved in case they manipulate the stack
-            var argValues = operands.Select(GetOperandValue);
+            var argValues = operands != null
+                ? operands.Select(GetOperandValue)
+                : ArrayEx.Empty<Value>();
 
             if (address == 0)
             {
@@ -353,7 +355,7 @@ namespace ZDebug.Core.Execution
             story.Memory.WriteWord(address, value);
         }
 
-        void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
+        void IExecutionContext.Call(int address, Operand[] operands = null, Variable storeVariable = null)
         {
             Call(address, operands, storeVariable);
         }

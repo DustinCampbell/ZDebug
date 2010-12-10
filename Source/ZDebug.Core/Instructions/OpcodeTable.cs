@@ -37,7 +37,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x17, "div", OpcodeFlags.Store, OpcodeRoutines.div);
             AddOpcode(OpcodeKind.TwoOp, 0x18, "mod", OpcodeFlags.Store, OpcodeRoutines.mod);
             AddOpcode(OpcodeKind.TwoOp, 0x19, "call_2s", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_2s, fromVersion: 4);
-            AddOpcode(OpcodeKind.TwoOp, 0x1a, "call_2n", OpcodeFlags.Call, fromVersion: 5);
+            AddOpcode(OpcodeKind.TwoOp, 0x1a, "call_2n", OpcodeFlags.Call, OpcodeRoutines.call_2n, fromVersion: 5);
             AddOpcode(OpcodeKind.TwoOp, 0x1b, "set_color", fromVersion: 5, toVersion: 5);
             AddOpcode(OpcodeKind.TwoOp, 0x1b, "set_color", fromVersion: 6);
             AddOpcode(OpcodeKind.TwoOp, 0x1c, "throw", fromVersion: 5);
@@ -51,7 +51,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x05, "inc", OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef);
             AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");
-            AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, fromVersion: 4);
+            AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_1s, fromVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
             AddOpcode(OpcodeKind.OneOp, 0x0a, "print_obj");
             AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return, OpcodeRoutines.ret);
@@ -59,7 +59,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr");
             AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store, OpcodeRoutines.load);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, toVersion: 4);
-            AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
+            AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, OpcodeRoutines.call_1n, fromVersion: 5);
 
             // zero-operand opcodes
             AddOpcode(OpcodeKind.ZeroOp, 0x00, "rtrue", OpcodeFlags.Return);
@@ -116,7 +116,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x16, "sound_effect", OpcodeFlags.Store, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x17, "scan_table", OpcodeFlags.Store | OpcodeFlags.Branch, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x18, "not", OpcodeFlags.Store, fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, OpcodeRoutines.call_vn, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1b, "tokenize", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1c, "encode_text", fromVersion: 5);

@@ -118,6 +118,39 @@ namespace ZDebug.Core.Instructions
         // Call routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine call_1n = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            context.Call(address);
+        };
+
+        public static readonly OpcodeRoutine call_1s = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            context.Call(address, storeVariable: i.StoreVariable);
+        };
+
+        public static readonly OpcodeRoutine call_2n = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            var args = i.Operands.Skip(1).ToArray();
+
+            context.Call(address, args);
+        };
+
         public static readonly OpcodeRoutine call_2s = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
@@ -129,6 +162,18 @@ namespace ZDebug.Core.Instructions
             var args = i.Operands.Skip(1).ToArray();
 
             context.Call(address, args, i.StoreVariable);
+        };
+
+        public static readonly OpcodeRoutine call_vn = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 4);
+
+            var addressOpValue = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+
+            var args = i.Operands.Skip(1).ToArray();
+
+            context.Call(address, args);
         };
 
         public static readonly OpcodeRoutine call_vs = (i, context) =>

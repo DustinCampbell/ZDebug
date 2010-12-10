@@ -160,6 +160,7 @@ namespace ZDebug.UI.Services
 
                     if (breakpoints.Contains(story.Processor.PC))
                     {
+                        ChangeState(DebuggerState.Stopped);
                         done = true;
                     }
                 }
@@ -167,10 +168,9 @@ namespace ZDebug.UI.Services
                 {
                     currentException = ex;
                     ChangeState(DebuggerState.StoppedAtError);
+                    done = true;
                 }
             }
-
-            ChangeState(DebuggerState.Stopped);
         }
 
         public static bool CanStepNext

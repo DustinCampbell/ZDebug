@@ -17,7 +17,7 @@ namespace ZDebug.Core.Execution
         void WriteVariableIndirectly(Variable variable, Value value);
         void WriteWord(int address, ushort value);
 
-        void Call(int address, Operand[] args, Variable storeVariable);
+        void Call(int address, Operand[] args = null, Variable storeVariable = null);
 
         void Jump(short offset);
         void Jump(Branch branch);
