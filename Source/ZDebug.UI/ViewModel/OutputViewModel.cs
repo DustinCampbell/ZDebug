@@ -1,24 +1,26 @@
-﻿using System.Text;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using ZDebug.Core.Execution;
+using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
-        private readonly StringBuilder builder;
+        private ZTextScreen screen;
 
         public OutputViewModel()
             : base("OutputView")
         {
-            builder = new StringBuilder();
         }
 
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+
+            screen = this.View.FindName<ZTextScreen>("screen");
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
@@ -28,40 +30,27 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
-            builder.Clear();
-            PropertyChanged("Text");
-        }
-
-        public string Text
-        {
-            get { return builder.ToString(); }
+            screen.ClearAll(unsplit: true);
         }
 
         void IOutputStream.Print(string text)
         {
-            builder.Append(text);
-            PropertyChanged("Text");
+            screen.Print(text);
         }
 
         void IOutputStream.Print(char ch)
         {
-            builder.Append(ch);
-            PropertyChanged("Text");
+            screen.Print(ch);
         }
 
         void IScreen.Clear(int window)
         {
-            if (window == 0) // lower window
-            {
-                builder.Clear();
-                PropertyChanged("Text");
-            }
+            screen.Clear(window);
         }
 
         void IScreen.ClearAll(bool unsplit)
         {
-            builder.Clear();
-            PropertyChanged("Text");
+            screen.ClearAll(unsplit);
         }
     }
 }
