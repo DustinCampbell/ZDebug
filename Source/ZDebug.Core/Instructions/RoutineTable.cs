@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ZDebug.Core.Basics;
@@ -46,6 +47,12 @@ namespace ZDebug.Core.Instructions
 
             routines.Add(address, routine);
 
+            var handler = RoutineAdded;
+            if (handler != null)
+            {
+                handler(this, new RoutineAddedEventArgs(routine));
+            }
+
             foreach (var i in routine.Instructions.Where(i => IsAnalyzableCall(i)))
             {
                 Add(UnpackCallAddress(i));
@@ -81,5 +88,7 @@ namespace ZDebug.Core.Instructions
         {
             return GetEnumerator();
         }
+
+        public event EventHandler<RoutineAddedEventArgs> RoutineAdded;
     }
 }

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Instructions;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -31,8 +32,6 @@ namespace ZDebug.UI.ViewModel
         {
             var reader = e.Story.Memory.CreateReader(0);
 
-            var blank = new DisassemblyBlankLineViewModel();
-
             DisassemblyLineViewModel ipLine;
 
             lines.BeginBulkOperation();
@@ -44,7 +43,7 @@ namespace ZDebug.UI.ViewModel
                 {
                     if (rIndex > 0)
                     {
-                        lines.Add(blank);
+                        lines.Add(DisassemblyBlankLineViewModel.Instance);
                     }
 
                     var routine = routineTable[rIndex];
@@ -53,7 +52,7 @@ namespace ZDebug.UI.ViewModel
                     lines.Add(routineHeaderLine);
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
 
-                    lines.Add(blank);
+                    lines.Add(DisassemblyBlankLineViewModel.Instance);
 
                     foreach (var i in routine.Instructions)
                     {
@@ -80,6 +79,7 @@ namespace ZDebug.UI.ViewModel
             e.Story.Processor.Stepped += Processor_Stepped;
             e.Story.Processor.EnterFrame += Processor_EnterFrame;
             e.Story.Processor.ExitFrame += Processor_ExitFrame;
+            e.Story.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
         }
 
         private void BringLineIntoView(DisassemblyLineViewModel line)
@@ -116,6 +116,64 @@ namespace ZDebug.UI.ViewModel
             var returnLine = GetLineByAddress(e.OldFrame.ReturnAddress);
             returnLine.IsNextInstruction = false;
             returnLine.ToolTip = false;
+        }
+
+        private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)
+        {
+            lines.BeginBulkOperation();
+            try
+            {
+                // FInd routine header line that would follow this routine
+                int insertionPoint = -1;
+                bool atEnd = false;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var headerLine = lines[i] as DisassemblyRoutineHeaderLineViewModel;
+                    if (headerLine == null)
+                    {
+                        continue;
+                    }
+
+                    if (headerLine.Address > e.Routine.Address)
+                    {
+                        insertionPoint = i;
+                        break;
+                    }
+                }
+
+                // If no routine header found, insert at the end of the list.
+                if (insertionPoint == -1)
+                {
+                    insertionPoint = lines.Count;
+                    atEnd = true;
+                }
+
+                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+                lines.Insert(insertionPoint++, routineHeaderLine);
+                addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
+
+                lines.Add(DisassemblyBlankLineViewModel.Instance);
+
+                foreach (var i in e.Routine.Instructions)
+                {
+                    var instructionLine = new DisassemblyInstructionLineViewModel(i);
+                    if (DebuggerService.BreakpointExists(i.Address))
+                    {
+                        instructionLine.HasBreakpoint = true;
+                    }
+                    lines.Insert(insertionPoint++, instructionLine);
+                    addressToLineMap.Add(i.Address, instructionLine);
+                }
+
+                if (!atEnd)
+                {
+                    lines.Insert(insertionPoint, DisassemblyBlankLineViewModel.Instance);
+                }
+            }
+            finally
+            {
+                lines.EndBulkOperation();
+            }
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)

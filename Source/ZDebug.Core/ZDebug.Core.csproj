@@ -78,6 +78,7 @@
     <Compile Include="Instructions\Operand.cs" />
     <Compile Include="Instructions\OperandKind.cs" />
     <Compile Include="Instructions\Routine.cs" />
+    <Compile Include="Instructions\RoutineAddedEventArgs.cs" />
     <Compile Include="Instructions\RoutineTable.cs" />
     <Compile Include="Instructions\Strict.cs" />
     <Compile Include="Instructions\StrictException.cs" />
