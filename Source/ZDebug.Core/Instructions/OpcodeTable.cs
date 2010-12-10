@@ -27,7 +27,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x0d, "store", OpcodeFlags.FirstOpByRef, OpcodeRoutines.store);
             AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj");
             AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store, OpcodeRoutines.loadw);
-            AddOpcode(OpcodeKind.TwoOp, 0x10, "loadb", OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.TwoOp, 0x10, "loadb", OpcodeFlags.Store, OpcodeRoutines.loadb);
             AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x12, "get_prop_addr", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.TwoOp, 0x13, "get_next_prop", OpcodeFlags.Store);
@@ -57,7 +57,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return, OpcodeRoutines.ret);
             AddOpcode(OpcodeKind.OneOp, 0x0c, "jump", routine: OpcodeRoutines.jump);
             AddOpcode(OpcodeKind.OneOp, 0x0d, "print_paddr");
-            AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store);
+            AddOpcode(OpcodeKind.OneOp, 0x0e, "load", OpcodeFlags.FirstOpByRef | OpcodeFlags.Store, OpcodeRoutines.load);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "not", OpcodeFlags.Store, toVersion: 4);
             AddOpcode(OpcodeKind.OneOp, 0x0f, "call_1n", OpcodeFlags.Call, fromVersion: 5);
 
@@ -85,7 +85,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x00, "call", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_vs, toVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x00, "call_vs", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_vs, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x01, "storew", routine: OpcodeRoutines.storew);
-            AddOpcode(OpcodeKind.VarOp, 0x02, "storeb");
+            AddOpcode(OpcodeKind.VarOp, 0x02, "storeb", routine: OpcodeRoutines.storeb);
             AddOpcode(OpcodeKind.VarOp, 0x03, "put_prop", routine: OpcodeRoutines.put_prop);
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", toVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", fromVersion: 4, toVersion: 4);

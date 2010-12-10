@@ -148,6 +148,35 @@ namespace ZDebug.Core.Instructions
         // Load/Store routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine load = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var variable = Variable.FromByte((byte)varIdx);
+
+            var value = context.ReadVariableIndirectly(variable);
+
+            context.WriteVariable(i.StoreVariable, value);
+        };
+
+        public static readonly OpcodeRoutine loadb = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasStoreVariable(i);
+
+            var array = (ushort)context.GetOperandValue(i.Operands[0]);
+            var byteIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            var address = array + byteIndex;
+            var value = context.ReadByte(address);
+
+            context.WriteVariable(i.StoreVariable, value);
+        };
+
         public static readonly OpcodeRoutine loadw = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
@@ -173,6 +202,20 @@ namespace ZDebug.Core.Instructions
             var value = context.GetOperandValue(i.Operands[1]);
 
             context.WriteVariableIndirectly(variable, value);
+        };
+
+        public static readonly OpcodeRoutine storeb = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 3);
+
+            var array = (ushort)context.GetOperandValue(i.Operands[0]);
+            var byteIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+            Strict.IsByte(i, value);
+
+            var address = array + byteIndex;
+
+            context.WriteByte(address, (byte)value);
         };
 
         public static readonly OpcodeRoutine storew = (i, context) =>

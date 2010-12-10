@@ -6,8 +6,12 @@ namespace ZDebug.Core.Execution
     {
         Value GetOperandValue(Operand operand);
 
+        Value ReadByte(int address);
+        Value ReadVariable(Variable variable);
+        Value ReadVariableIndirectly(Variable variable);
         Value ReadWord(int address);
 
+        void WriteByte(int address, byte value);
         void WriteProperty(int objNum, int propNum, ushort value);
         void WriteVariable(Variable variable, Value value);
         void WriteVariableIndirectly(Variable variable, Value value);

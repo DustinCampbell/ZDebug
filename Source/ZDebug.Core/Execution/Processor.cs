@@ -308,9 +308,29 @@ namespace ZDebug.Core.Execution
             return GetOperandValue(operand);
         }
 
+        Value IExecutionContext.ReadByte(int address)
+        {
+            return Value.Number(story.Memory.ReadByte(address));
+        }
+
+        Value IExecutionContext.ReadVariable(Variable variable)
+        {
+            return ReadVariable(variable);
+        }
+
+        Value IExecutionContext.ReadVariableIndirectly(Variable variable)
+        {
+            return ReadVariable(variable, indirect: true);
+        }
+
         Value IExecutionContext.ReadWord(int address)
         {
             return Value.Number(story.Memory.ReadWord(address));
+        }
+
+        void IExecutionContext.WriteByte(int address, byte value)
+        {
+            story.Memory.WriteByte(address, value);
         }
 
         void IExecutionContext.WriteProperty(int objNum, int propNum, ushort value)
