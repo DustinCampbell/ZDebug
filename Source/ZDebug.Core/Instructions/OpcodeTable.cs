@@ -16,7 +16,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x02, "jl", OpcodeFlags.Branch, OpcodeRoutines.jl);
             AddOpcode(OpcodeKind.TwoOp, 0x03, "jg", OpcodeFlags.Branch, OpcodeRoutines.jg);
             AddOpcode(OpcodeKind.TwoOp, 0x04, "dec_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
-            AddOpcode(OpcodeKind.TwoOp, 0x05, "inc_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef);
+            AddOpcode(OpcodeKind.TwoOp, 0x05, "inc_chk", OpcodeFlags.Branch | OpcodeFlags.FirstOpByRef, OpcodeRoutines.inc_chk);
             AddOpcode(OpcodeKind.TwoOp, 0x06, "jin", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x07, "test", OpcodeFlags.Branch);
             AddOpcode(OpcodeKind.TwoOp, 0x08, "or", OpcodeFlags.Store, OpcodeRoutines.or);
@@ -90,8 +90,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", toVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", fromVersion: 4, toVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x04, "aread", OpcodeFlags.Store, fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x05, "print_char");
-            AddOpcode(OpcodeKind.VarOp, 0x06, "print_num");
+            AddOpcode(OpcodeKind.VarOp, 0x05, "print_char", routine: OpcodeRoutines.print_char);
+            AddOpcode(OpcodeKind.VarOp, 0x06, "print_num", routine: OpcodeRoutines.print_num);
             AddOpcode(OpcodeKind.VarOp, 0x07, "random", OpcodeFlags.Store);
             AddOpcode(OpcodeKind.VarOp, 0x08, "push");
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, toVersion: 5);

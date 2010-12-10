@@ -104,6 +104,32 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // Increment/decrement routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine inc_chk = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+            Strict.HasBranch(i);
+
+            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            Strict.IsByte(i, varIdx);
+
+            var test = (short)context.GetOperandValue(i.Operands[1]);
+
+            var variable = Variable.FromByte((byte)varIdx);
+
+            var value = (short)context.ReadVariableIndirectly(variable);
+            value += 1;
+            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+
+            if ((value > test) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Jump routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -396,6 +422,22 @@ namespace ZDebug.Core.Instructions
 
             var ztext = context.ParseZWords(i.ZText);
             context.Print(ztext);
+        };
+
+        public static readonly OpcodeRoutine print_char = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var ch = (char)(ushort)context.GetOperandValue(i.Operands[0]);
+            context.Print(ch);
+        };
+
+        public static readonly OpcodeRoutine print_num = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var number = (short)context.GetOperandValue(i.Operands[0]);
+            context.Print(number.ToString());
         };
     }
 }
