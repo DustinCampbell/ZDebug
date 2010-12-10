@@ -18,11 +18,17 @@ namespace ZDebug.UI.ViewModel
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
+            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
             e.Story.Processor.OutputStreams.RegisterScreen(this);
+        }
+
+        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        {
+            builder.Clear();
         }
 
         public string Text

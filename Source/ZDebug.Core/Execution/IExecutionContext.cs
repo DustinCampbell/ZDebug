@@ -20,6 +20,8 @@ namespace ZDebug.Core.Execution
 
         void Call(int address, Operand[] args = null, Variable storeVariable = null);
 
+        int GetArgumentCount();
+
         void Jump(short offset);
         void Jump(Branch branch);
 

@@ -122,7 +122,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x1c, "encode_text", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1d, "copy_table", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1e, "print_table", fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x1f, "check_arg_count", OpcodeFlags.Branch, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x1f, "check_arg_count", OpcodeFlags.Branch, OpcodeRoutines.check_arg_count, fromVersion: 5);
 
             // extended opcodes
             AddOpcode(OpcodeKind.Ext, 0x00, "save", OpcodeFlags.Store, fromVersion: 5);

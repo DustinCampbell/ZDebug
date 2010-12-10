@@ -113,7 +113,7 @@ namespace ZDebug.Core.Instructions
 
         public static Value One
         {
-            get { return zero; }
+            get { return one; }
         }
     }
 }

@@ -516,5 +516,23 @@ namespace ZDebug.Core.Instructions
 
             context.Print(ztext);
         };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Miscellaneous routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine check_arg_count = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasBranch(i);
+
+            var argNumber = (ushort)context.GetOperandValue(i.Operands[0]);
+            var argCount = context.GetArgumentCount();
+
+            if ((argNumber <= argCount) == i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
     }
 }

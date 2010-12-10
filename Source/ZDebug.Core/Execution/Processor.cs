@@ -368,6 +368,11 @@ namespace ZDebug.Core.Execution
             Call(address, operands, storeVariable);
         }
 
+        int IExecutionContext.GetArgumentCount()
+        {
+            return CurrentFrame.Arguments.Count;
+        }
+
         void IExecutionContext.Jump(short offset)
         {
             Jump(offset);
