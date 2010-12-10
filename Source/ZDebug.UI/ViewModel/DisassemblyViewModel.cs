@@ -58,6 +58,10 @@ namespace ZDebug.UI.ViewModel
                     foreach (var i in routine.Instructions)
                     {
                         var instructionLine = new DisassemblyInstructionLineViewModel(i);
+                        if (DebuggerService.BreakpointExists(i.Address))
+                        {
+                            instructionLine.HasBreakpoint = true;
+                        }
                         lines.Add(instructionLine);
                         addressToLineMap.Add(i.Address, instructionLine);
                     }
@@ -88,6 +92,11 @@ namespace ZDebug.UI.ViewModel
         {
             var oldLine = GetLineByAddress(e.OldPC);
             oldLine.HasIP = false;
+
+            if (DebuggerService.State == DebuggerState.Running)
+            {
+                return;
+            }
 
             var newLine = GetLineByAddress(e.NewPC);
             newLine.HasIP = true;
@@ -122,6 +131,12 @@ namespace ZDebug.UI.ViewModel
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
                 line.State = DisassemblyLineState.Blocked;
                 line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
+                BringLineIntoView(line);
+            }
+            else if (e.OldState == DebuggerState.Running && e.NewState == DebuggerState.Stopped)
+            {
+                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                line.HasIP = true;
                 BringLineIntoView(line);
             }
         }

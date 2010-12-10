@@ -86,11 +86,12 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanStartDebuggingExecute()
         {
-            return false;
+            return DebuggerService.CanStartDebugging;
         }
 
         private void StartDebuggingExecuted()
         {
+            DebuggerService.StartDebugging();
         }
 
         private bool CanStepNextExecute()

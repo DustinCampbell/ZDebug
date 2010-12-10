@@ -137,6 +137,42 @@ namespace ZDebug.UI.Services
             }
         }
 
+        public static bool BreakpointExists(int address)
+        {
+            return breakpoints.Contains(address);
+        }
+
+        public static bool CanStartDebugging
+        {
+            get { return state == DebuggerState.Stopped; }
+        }
+
+        public static void StartDebugging()
+        {
+            ChangeState(DebuggerState.Running);
+
+            bool done = false;
+            while (!done)
+            {
+                try
+                {
+                    story.Processor.Step();
+
+                    if (breakpoints.Contains(story.Processor.PC))
+                    {
+                        done = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    currentException = ex;
+                    ChangeState(DebuggerState.StoppedAtError);
+                }
+            }
+
+            ChangeState(DebuggerState.Stopped);
+        }
+
         public static bool CanStepNext
         {
             get { return state == DebuggerState.Stopped; }
