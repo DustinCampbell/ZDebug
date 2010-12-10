@@ -465,5 +465,72 @@ namespace ZDebug.Core.Basics
 
             return props;
         }
+
+        public static int? TryReadLeftSiblingNumberByObjectNumber(this Memory memory, int objNum)
+        {
+            var parentNum = memory.ReadParentNumberByObjectNumber(objNum);
+            if (parentNum == 0)
+            {
+                return null;
+            }
+
+            var parentChildNum = memory.ReadChildNumberByObjectNumber(parentNum);
+            if (parentChildNum == objNum)
+            {
+                return null;
+            }
+
+            var next = parentChildNum;
+            while (next != 0)
+            {
+                var siblingNum = memory.ReadSiblingNumberByObjectNumber(next);
+                if (siblingNum == objNum)
+                {
+                    return next;
+                }
+                else
+                {
+                    next = siblingNum;
+                }
+            }
+
+            return null;
+        }
+
+        public static void RemoveObjectFromParentByNumber(this Memory memory, int objNum)
+        {
+            var leftSiblingNum = memory.TryReadLeftSiblingNumberByObjectNumber(objNum);
+            var rightSiblingNum = memory.ReadSiblingNumberByObjectNumber(objNum);
+            if (leftSiblingNum.HasValue)
+            {
+                memory.WriteSiblingNumberByObjectNumber(leftSiblingNum.Value, rightSiblingNum);
+            }
+
+            var parentNum = memory.ReadParentNumberByObjectNumber(objNum);
+            if (parentNum != 0)
+            {
+                var parentChildNum = memory.ReadChildNumberByObjectNumber(parentNum);
+                if (parentChildNum == objNum)
+                {
+                    memory.WriteChildNumberByObjectNumber(parentNum, rightSiblingNum);
+                }
+            }
+
+            memory.WriteParentNumberByObjectNumber(objNum, 0);
+            memory.WriteSiblingNumberByObjectNumber(objNum, 0);
+        }
+
+        public static void MoveObjectToDestinationByNumber(this Memory memory, int objNum, int destNum)
+        {
+            memory.RemoveObjectFromParentByNumber(objNum);
+
+            if (destNum != 0)
+            {
+                memory.WriteParentNumberByObjectNumber(objNum, destNum);
+                var parentChildNum = memory.ReadChildNumberByObjectNumber(destNum);
+                memory.WriteSiblingNumberByObjectNumber(objNum, parentChildNum);
+                memory.WriteChildNumberByObjectNumber(destNum, objNum);
+            }
+        }
     }
 }

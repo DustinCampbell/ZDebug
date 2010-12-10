@@ -523,6 +523,16 @@ namespace ZDebug.Core.Execution
             obj.SetAttribute(attrNum);
         }
 
+        void IExecutionContext.RemoveFromParent(int objNum)
+        {
+            story.Memory.RemoveObjectFromParentByNumber(objNum);
+        }
+
+        void IExecutionContext.MoveTo(int objNum, int destNum)
+        {
+            story.Memory.MoveObjectToDestinationByNumber(objNum, destNum);
+        }
+
         ushort[] IExecutionContext.ReadZWords(int address)
         {
             var reader = story.Memory.CreateReader(address);

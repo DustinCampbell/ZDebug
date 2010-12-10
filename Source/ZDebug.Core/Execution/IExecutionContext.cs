@@ -41,6 +41,8 @@ namespace ZDebug.Core.Execution
         bool HasAttribute(int objNum, int attrNum);
         void ClearAttribute(int objNum, int attrNum);
         void SetAttribute(int objNum, int attrNum);
+        void RemoveFromParent(int objNum);
+        void MoveTo(int objNum, int destNum);
 
         ushort[] ReadZWords(int address);
         string ParseZWords(IList<ushort> zwords);

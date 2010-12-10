@@ -665,6 +665,16 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine insert_obj = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var destNum = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            context.MoveTo(objNum, destNum);
+        };
+
         public static readonly OpcodeRoutine put_prop = (i, context) =>
         {
             Strict.OperandCountIs(i, 3);
@@ -674,6 +684,15 @@ namespace ZDebug.Core.Instructions
             var value = (ushort)context.GetOperandValue(i.Operands[2]);
 
             context.WriteProperty(objNum, propNum, value);
+        };
+
+        public static readonly OpcodeRoutine remove_obj = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            context.RemoveFromParent(objNum);
         };
 
         public static readonly OpcodeRoutine set_attr = (i, context) =>

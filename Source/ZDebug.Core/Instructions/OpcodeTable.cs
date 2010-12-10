@@ -25,7 +25,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.TwoOp, 0x0b, "set_attr", routine: OpcodeRoutines.set_attr);
             AddOpcode(OpcodeKind.TwoOp, 0x0c, "clear_attr", routine: OpcodeRoutines.clear_attr);
             AddOpcode(OpcodeKind.TwoOp, 0x0d, "store", OpcodeFlags.FirstOpByRef, OpcodeRoutines.store);
-            AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj");
+            AddOpcode(OpcodeKind.TwoOp, 0x0e, "insert_obj", routine: OpcodeRoutines.insert_obj);
             AddOpcode(OpcodeKind.TwoOp, 0x0f, "loadw", OpcodeFlags.Store, OpcodeRoutines.loadw);
             AddOpcode(OpcodeKind.TwoOp, 0x10, "loadb", OpcodeFlags.Store, OpcodeRoutines.loadb);
             AddOpcode(OpcodeKind.TwoOp, 0x11, "get_prop", OpcodeFlags.Store, OpcodeRoutines.get_prop);
@@ -52,7 +52,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.OneOp, 0x06, "dec", OpcodeFlags.FirstOpByRef, OpcodeRoutines.dec);
             AddOpcode(OpcodeKind.OneOp, 0x07, "print_addr");
             AddOpcode(OpcodeKind.OneOp, 0x08, "call_1s", OpcodeFlags.Call | OpcodeFlags.Store, OpcodeRoutines.call_1s, fromVersion: 4);
-            AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj");
+            AddOpcode(OpcodeKind.OneOp, 0x09, "remove_obj", routine: OpcodeRoutines.remove_obj);
             AddOpcode(OpcodeKind.OneOp, 0x0a, "print_obj", routine: OpcodeRoutines.print_obj);
             AddOpcode(OpcodeKind.OneOp, 0x0b, "ret", OpcodeFlags.Return, OpcodeRoutines.ret);
             AddOpcode(OpcodeKind.OneOp, 0x0c, "jump", routine: OpcodeRoutines.jump);
