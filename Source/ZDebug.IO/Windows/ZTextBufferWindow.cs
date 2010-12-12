@@ -44,12 +44,12 @@ namespace ZDebug.IO.Windows
             this.paragraph.Inlines.Clear();
         }
 
-        public override void Print(string text)
+        public override void PutString(string text)
         {
             this.paragraph.Inlines.Add(new Run(text));
         }
 
-        public override void Print(char ch)
+        public override void PutChar(char ch)
         {
             this.paragraph.Inlines.Add(new Run(ch.ToString()));
         }

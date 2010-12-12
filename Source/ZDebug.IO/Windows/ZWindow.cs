@@ -35,8 +35,8 @@ namespace ZDebug.IO.Windows
 
         public abstract void Clear();
 
-        public abstract void Print(string text);
-        public abstract void Print(char ch);
+        public abstract void PutChar(char ch);
+        public abstract void PutString(string s);
 
         public abstract int RowHeight { get; }
         public abstract int ColumnWidth { get; }

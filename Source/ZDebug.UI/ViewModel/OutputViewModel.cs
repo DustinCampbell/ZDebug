@@ -41,12 +41,12 @@ namespace ZDebug.UI.ViewModel
 
         void IOutputStream.Print(string text)
         {
-            lowerWindow.Print(text);
+            lowerWindow.PutString(text);
         }
 
         void IOutputStream.Print(char ch)
         {
-            lowerWindow.Print(ch);
+            lowerWindow.PutChar(ch);
         }
 
         void IScreen.Clear(int window)

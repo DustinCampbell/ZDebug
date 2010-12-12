@@ -27,11 +27,11 @@ namespace ZDebug.IO.Windows
         {
         }
 
-        public override void Print(string text)
+        public override void PutString(string text)
         {
         }
 
-        public override void Print(char ch)
+        public override void PutChar(char ch)
         {
         }
 
