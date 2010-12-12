@@ -91,6 +91,36 @@ namespace ZDebug.IO.Windows
             }
         }
 
+        public void Close(ZWindow window)
+        {
+            if (window == null)
+            {
+                throw new ArgumentNullException("window");
+            }
+
+            var parent = window.WindowParent;
+            if (parent == null) // root window...
+            {
+                root = null;
+            }
+            else
+            {
+                ZWindow sibling = parent.Child1 == window
+                    ? parent.Child2
+                    : parent.Child1;
+
+                var grandParent = parent.WindowParent;
+                if (grandParent == null) // root window...
+                {
+                    root = sibling;
+                }
+                else
+                {
+                    grandParent.Replace(parent, sibling);
+                }
+            }
+        }
+
         public ZWindow Root
         {
             get { return root; }

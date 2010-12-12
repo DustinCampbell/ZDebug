@@ -28,6 +28,11 @@ namespace ZDebug.IO.Windows
             get { return windowParent; }
         }
 
+        public void Close()
+        {
+            manager.Close(this);
+        }
+
         public abstract void Clear();
 
         public abstract void Print(string text);
