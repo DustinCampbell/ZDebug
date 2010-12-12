@@ -1,14 +1,15 @@
 ﻿using System.Windows.Controls;
 using ZDebug.Core.Execution;
-using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
+using ZDebug.UI.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
-        private ZTextScreen screen;
+        private ZWindowManager windowManager;
+        private ZTextBufferWindow lowerWindow;
 
         public OutputViewModel()
             : base("OutputView")
@@ -20,7 +21,12 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
 
-            screen = this.View.FindName<ZTextScreen>("screen");
+            windowManager = new ZWindowManager();
+            var textBufferWindow = windowManager.Open(ZWindowType.TextBuffer) as ZTextBufferWindow;
+            var windowContainer = this.View.FindName<Grid>("windowContainer");
+            windowContainer.Children.Add(textBufferWindow);
+
+            lowerWindow = textBufferWindow;
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
@@ -30,27 +36,25 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
-            screen.ClearAll(unsplit: true);
+            lowerWindow.Clear();
         }
 
         void IOutputStream.Print(string text)
         {
-            screen.Print(text);
+            lowerWindow.Print(text);
         }
 
         void IOutputStream.Print(char ch)
         {
-            screen.Print(ch);
+            lowerWindow.Print(ch);
         }
 
         void IScreen.Clear(int window)
         {
-            screen.Clear(window);
         }
 
         void IScreen.ClearAll(bool unsplit)
         {
-            screen.ClearAll(unsplit);
         }
     }
 }

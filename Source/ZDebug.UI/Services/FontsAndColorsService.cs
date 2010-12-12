@@ -1,9 +1,58 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Media;
 
 namespace ZDebug.UI.Services
 {
     internal static class FontsAndColorsService
     {
+        private static readonly FontFamily normalFontFamily = new FontFamily("Segoe UI");
+        private static readonly FontFamily fixedFontFamily = new FontFamily("Consolas");
+        private static readonly double fontSize = 14.0;
+
+        private static Typeface normalTypeface;
+        private static Typeface fixedTypeface;
+
+        public static FontFamily NormalFontFamily
+        {
+            get { return normalFontFamily; }
+        }
+
+        public static FontFamily FixedFontFamily
+        {
+            get { return fixedFontFamily; }
+        }
+
+        public static double FontSize
+        {
+            get { return fontSize; }
+        }
+
+        public static Typeface NormalTypeface
+        {
+            get
+            {
+                if (normalTypeface == null)
+                {
+                    normalTypeface = new Typeface(normalFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+                }
+
+                return normalTypeface;
+            }
+        }
+
+        public static Typeface FixedTypeface
+        {
+            get
+            {
+                if (fixedTypeface == null)
+                {
+                    fixedTypeface = new Typeface(fixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+                }
+
+                return fixedTypeface;
+            }
+        }
+
         private static readonly FontAndColorSetting defaultSetting =
             new FontAndColorSetting(new FontFamily("Consolas"), 15.0, background: Brushes.Transparent);
         private static readonly FontAndColorSetting addressSetting =

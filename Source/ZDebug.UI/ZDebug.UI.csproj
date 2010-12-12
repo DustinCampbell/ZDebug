@@ -55,6 +55,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Windows\ZBlankWindow.cs" />
+    <Compile Include="Windows\ZPairWindow.cs" />
+    <Compile Include="Windows\ZTextBufferWindow.cs" />
+    <Compile Include="Windows\ZTextGridWindow.cs" />
+    <Compile Include="Windows\ZWindow.cs" />
+    <Compile Include="Windows\ZWindowManager.cs" />
+    <Compile Include="Windows\ZWindowPosition.cs" />
+    <Compile Include="Windows\ZWindowSizeType.cs" />
+    <Compile Include="Windows\ZWindowType.cs" />
     <Page Include="Views\CallStackView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -106,10 +115,6 @@
     <Compile Include="Controls\AutoDisableImage.cs" />
     <Compile Include="Controls\CallToolTip.cs" />
     <Compile Include="Controls\ExceptionToolTip.cs" />
-    <Compile Include="Controls\ZTextScreen.cs" />
-    <Compile Include="Controls\ZTextScreen.FormattedSpan.cs" />
-    <Compile Include="Controls\ZTextScreen.ZTextParagraphProperties.cs" />
-    <Compile Include="Controls\ZTextScreen.ZTextSource.cs" />
     <Compile Include="Services\BreakpointEventArgs.cs" />
     <Compile Include="Services\DebuggerState.cs" />
     <Compile Include="Services\DebuggerStateChangedEventArgs.cs" />
@@ -172,7 +177,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <Compile Include="Controls\ZTextScreen.ZTextRunProperties.cs" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
