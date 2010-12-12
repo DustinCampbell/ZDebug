@@ -1,7 +1,6 @@
-﻿
-namespace ZDebug.UI.Windows
+﻿namespace ZDebug.IO.Windows
 {
-    internal enum ZWindowType
+    public enum ZWindowType
     {
         Blank,
         Pair,

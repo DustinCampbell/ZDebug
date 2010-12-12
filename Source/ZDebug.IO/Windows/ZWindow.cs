@@ -1,8 +1,8 @@
 ﻿using System.Windows.Controls;
 
-namespace ZDebug.UI.Windows
+namespace ZDebug.IO.Windows
 {
-    internal abstract class ZWindow : Grid
+    public abstract class ZWindow : Grid
     {
         private ZPairWindow windowParent;
 
@@ -16,12 +16,15 @@ namespace ZDebug.UI.Windows
             this.windowParent = windowParent;
         }
 
-        public ZPairWindow WindowParent
+        internal ZPairWindow WindowParent
         {
             get { return windowParent; }
         }
 
         public abstract void Clear();
+
+        public abstract void Print(string text);
+        public abstract void Print(char ch);
 
         public abstract int RowHeight { get; }
         public abstract int ColumnWidth { get; }

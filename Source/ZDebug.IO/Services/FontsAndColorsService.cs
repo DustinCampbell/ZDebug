@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.IO.Services
 {
-    internal static class FontsAndColorsService
+    public static class FontsAndColorsService
     {
         private static readonly FontFamily normalFontFamily = new FontFamily("Segoe UI");
         private static readonly FontFamily fixedFontFamily = new FontFamily("Consolas");

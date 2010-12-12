@@ -1,15 +1,15 @@
 ﻿using System.Windows.Controls;
 using ZDebug.Core.Execution;
+using ZDebug.IO.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
-using ZDebug.UI.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
         private ZWindowManager windowManager;
-        private ZTextBufferWindow lowerWindow;
+        private ZWindow lowerWindow;
 
         public OutputViewModel()
             : base("OutputView")
@@ -22,7 +22,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
 
             windowManager = new ZWindowManager();
-            var textBufferWindow = windowManager.Open(ZWindowType.TextBuffer) as ZTextBufferWindow;
+            var textBufferWindow = windowManager.Open(ZWindowType.TextBuffer);
             var windowContainer = this.View.FindName<Grid>("windowContainer");
             windowContainer.Children.Add(textBufferWindow);
 

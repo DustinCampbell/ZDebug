@@ -55,15 +55,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Windows\ZBlankWindow.cs" />
-    <Compile Include="Windows\ZPairWindow.cs" />
-    <Compile Include="Windows\ZTextBufferWindow.cs" />
-    <Compile Include="Windows\ZTextGridWindow.cs" />
-    <Compile Include="Windows\ZWindow.cs" />
-    <Compile Include="Windows\ZWindowManager.cs" />
-    <Compile Include="Windows\ZWindowPosition.cs" />
-    <Compile Include="Windows\ZWindowSizeType.cs" />
-    <Compile Include="Windows\ZWindowType.cs" />
     <Page Include="Views\CallStackView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -118,14 +109,12 @@
     <Compile Include="Services\BreakpointEventArgs.cs" />
     <Compile Include="Services\DebuggerState.cs" />
     <Compile Include="Services\DebuggerStateChangedEventArgs.cs" />
-    <Compile Include="Services\FontAndColorSetting.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.SimpleTextParagraphProperties.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.SimpleTextRunProperties.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextSource.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
-    <Compile Include="Services\FontsAndColorsService.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />
@@ -188,6 +177,10 @@
     <ProjectReference Include="..\ZDebug.Core\ZDebug.Core.csproj">
       <Project>{9484E092-64EF-4BA7-A495-77D19E04D7D2}</Project>
       <Name>ZDebug.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ZDebug.IO\ZDebug.IO.csproj">
+      <Project>{FC9F549C-C2F5-4C80-A899-D08610181448}</Project>
+      <Name>ZDebug.IO</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

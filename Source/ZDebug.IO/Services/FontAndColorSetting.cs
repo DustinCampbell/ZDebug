@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.IO.Services
 {
-    internal sealed partial class FontAndColorSetting
+    public sealed class FontAndColorSetting
     {
         private readonly FontAndColorSetting baseSetting;
         private readonly FontFamily fontFamily;

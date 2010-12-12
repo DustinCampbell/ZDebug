@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ZDebug.UI.Windows
+namespace ZDebug.IO.Windows
 {
     internal sealed class ZPairWindow : ZWindow
     {
@@ -109,6 +109,14 @@ namespace ZDebug.UI.Windows
         }
 
         public override void Clear()
+        {
+        }
+
+        public override void Print(string text)
+        {
+        }
+
+        public override void Print(char ch)
         {
         }
 

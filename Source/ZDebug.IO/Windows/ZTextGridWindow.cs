@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
-using ZDebug.UI.Services;
+using ZDebug.IO.Services;
 
-namespace ZDebug.UI.Windows
+namespace ZDebug.IO.Windows
 {
     internal sealed class ZTextGridWindow : ZWindow
     {
@@ -23,6 +23,14 @@ namespace ZDebug.UI.Windows
         }
 
         public override void Clear()
+        {
+        }
+
+        public override void Print(string text)
+        {
+        }
+
+        public override void Print(char ch)
         {
         }
 

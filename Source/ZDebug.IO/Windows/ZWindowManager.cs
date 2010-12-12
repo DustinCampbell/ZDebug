@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows;
 
-namespace ZDebug.UI.Windows
+namespace ZDebug.IO.Windows
 {
-    internal sealed class ZWindowManager
+    public sealed class ZWindowManager
     {
         private ZWindow root;
 

@@ -3,9 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using ZDebug.UI.Services;
+using ZDebug.IO.Services;
 
-namespace ZDebug.UI.Windows
+namespace ZDebug.IO.Windows
 {
     internal sealed class ZTextBufferWindow : ZWindow
     {
@@ -43,12 +43,12 @@ namespace ZDebug.UI.Windows
             this.paragraph.Inlines.Clear();
         }
 
-        public void Print(string text)
+        public override void Print(string text)
         {
             this.paragraph.Inlines.Add(new Run(text));
         }
 
-        public void Print(char ch)
+        public override void Print(char ch)
         {
             this.paragraph.Inlines.Add(new Run(ch.ToString()));
         }

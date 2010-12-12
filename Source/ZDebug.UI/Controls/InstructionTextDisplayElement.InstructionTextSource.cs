@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Windows.Media.TextFormatting;
-using ZDebug.UI.Services;
+using ZDebug.IO.Services;
 
 namespace ZDebug.UI.Controls
 {
