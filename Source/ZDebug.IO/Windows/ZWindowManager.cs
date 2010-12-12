@@ -6,6 +6,7 @@ namespace ZDebug.IO.Windows
     public sealed class ZWindowManager
     {
         private ZWindow root;
+        private ZWindow activeWindow;
 
         private ZWindow CreateNewWindow(ZWindowType windowType)
         {
@@ -121,9 +122,24 @@ namespace ZDebug.IO.Windows
             }
         }
 
+        public void Activate(ZWindow window)
+        {
+            if (window == null)
+            {
+                throw new ArgumentNullException("window");
+            }
+
+            activeWindow = window;
+        }
+
         public ZWindow Root
         {
             get { return root; }
+        }
+
+        public ZWindow ActiveWindow
+        {
+            get { return activeWindow; }
         }
     }
 }

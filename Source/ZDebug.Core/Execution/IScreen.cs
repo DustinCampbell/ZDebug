@@ -4,5 +4,7 @@
     {
         void Clear(int window);
         void ClearAll(bool unsplit = false);
+
+        void SetTextStyle(ZTextStyle style);
     }
 }

@@ -13,6 +13,12 @@ namespace ZDebug.IO.Windows
         private readonly Paragraph paragraph;
         private readonly Size fontCharSize;
 
+        private bool bold;
+        private bool italic;
+        private bool fixedPitch;
+
+        private Typeface typeface;
+
         internal ZTextBufferWindow(ZWindowManager manager)
             : base(manager)
         {
@@ -32,11 +38,33 @@ namespace ZDebug.IO.Windows
                 textToFormat: "0",
                 culture: CultureInfo.InstalledUICulture,
                 flowDirection: FlowDirection.LeftToRight,
-                typeface: FontsAndColorsService.NormalTypeface,
+                typeface: new Typeface(FontsAndColorsService.NormalFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
                 foreground: Brushes.Black);
 
             fontCharSize = new Size(zero.Width, zero.Height);
+        }
+
+        private Run GetFormattedRun(string text)
+        {
+            var run = new Run(text);
+
+            if (bold)
+            {
+                run.FontWeight = FontWeights.Bold;
+            }
+
+            if (italic)
+            {
+                run.FontStyle = FontStyles.Italic;
+            }
+
+            if (fixedPitch)
+            {
+                run.FontFamily = FontsAndColorsService.FixedFontFamily;
+            }
+
+            return run;
         }
 
         public override void Clear()
@@ -46,12 +74,27 @@ namespace ZDebug.IO.Windows
 
         public override void PutString(string text)
         {
-            this.paragraph.Inlines.Add(new Run(text));
+            this.paragraph.Inlines.Add(GetFormattedRun(text));
         }
 
         public override void PutChar(char ch)
         {
-            this.paragraph.Inlines.Add(new Run(ch.ToString()));
+            this.paragraph.Inlines.Add(GetFormattedRun(ch.ToString()));
+        }
+
+        public override void SetBold(bool value)
+        {
+            bold = value;
+        }
+
+        public override void SetItalic(bool value)
+        {
+            italic = value;
+        }
+
+        public override void SetFixedPitch(bool value)
+        {
+            fixedPitch = value;
         }
 
         public override int RowHeight

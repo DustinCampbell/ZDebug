@@ -15,6 +15,7 @@ namespace ZDebug.IO.Windows
                 throw new ArgumentNullException("manager");
             }
 
+            this.manager = manager;
             this.ShowGridLines = true;
         }
 
@@ -28,6 +29,11 @@ namespace ZDebug.IO.Windows
             get { return windowParent; }
         }
 
+        public void Activate()
+        {
+            manager.Activate(this);
+        }
+
         public void Close()
         {
             manager.Close(this);
@@ -37,6 +43,18 @@ namespace ZDebug.IO.Windows
 
         public abstract void PutChar(char ch);
         public abstract void PutString(string s);
+
+        public virtual void SetBold(bool value)
+        {
+        }
+
+        public virtual void SetItalic(bool value)
+        {
+        }
+
+        public virtual void SetFixedPitch(bool value)
+        {
+        }
 
         public abstract int RowHeight { get; }
         public abstract int ColumnWidth { get; }

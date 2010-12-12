@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.Core.Instructions
 {
@@ -837,6 +838,15 @@ namespace ZDebug.Core.Instructions
             {
                 context.Screen.Clear(window);
             }
+        };
+
+        public static readonly OpcodeRoutine set_text_style = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var textStyle = (ZTextStyle)(ushort)context.GetOperandValue(i.Operands[0]);
+
+            context.Screen.SetTextStyle(textStyle);
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////

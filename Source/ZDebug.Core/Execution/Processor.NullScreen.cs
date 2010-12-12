@@ -12,6 +12,10 @@
             {
             }
 
+            public void SetTextStyle(ZTextStyle style)
+            {
+            }
+
             public void Print(string text)
             {
             }

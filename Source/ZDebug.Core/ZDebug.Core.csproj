@@ -47,6 +47,7 @@
     <Compile Include="Execution\OutputStreams.NullStream.cs" />
     <Compile Include="Execution\Processor.NullScreen.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
+    <Compile Include="Execution\ZTextStyle.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Text.cs" />
