@@ -1,13 +1,20 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 
 namespace ZDebug.IO.Windows
 {
     public abstract class ZWindow : Grid
     {
+        protected readonly ZWindowManager manager;
         private ZPairWindow windowParent;
 
-        public ZWindow()
+        internal ZWindow(ZWindowManager manager)
         {
+            if (manager == null)
+            {
+                throw new ArgumentNullException("manager");
+            }
+
             this.ShowGridLines = true;
         }
 

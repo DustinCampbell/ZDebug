@@ -5,7 +5,8 @@ namespace ZDebug.IO.Windows
 {
     internal sealed class ZBlankWindow : ZWindow
     {
-        public ZBlankWindow()
+        internal ZBlankWindow(ZWindowManager manager)
+            : base(manager)
         {
             var rect = new Rectangle()
             {

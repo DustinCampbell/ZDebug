@@ -13,7 +13,8 @@ namespace ZDebug.IO.Windows
         private readonly Paragraph paragraph;
         private readonly Size fontCharSize;
 
-        public ZTextBufferWindow()
+        internal ZTextBufferWindow(ZWindowManager manager)
+            : base(manager)
         {
             this.document = new FlowDocument();
             this.document.FontFamily = FontsAndColorsService.NormalFontFamily;

@@ -9,7 +9,8 @@ namespace ZDebug.IO.Windows
     {
         private readonly Size fontCharSize;
 
-        public ZTextGridWindow()
+        internal ZTextGridWindow(ZWindowManager manager)
+            : base(manager)
         {
             var zero = new FormattedText(
                 textToFormat: "0",

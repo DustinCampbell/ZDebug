@@ -12,13 +12,13 @@ namespace ZDebug.IO.Windows
             switch (windowType)
             {
                 case ZWindowType.Blank:
-                    return new ZBlankWindow();
+                    return new ZBlankWindow(this);
 
                 case ZWindowType.TextBuffer:
-                    return new ZTextBufferWindow();
+                    return new ZTextBufferWindow(this);
 
                 case ZWindowType.TextGrid:
-                    return new ZTextGridWindow();
+                    return new ZTextGridWindow(this);
 
                 default:
                     throw new ArgumentException("Invalid ZWindowType: " + windowType, "windowType");
@@ -76,7 +76,7 @@ namespace ZDebug.IO.Windows
                         throw new ArgumentException("Invalid ZWindowSizeType: " + sizeType, "sizeType");
                 }
 
-                var newPair = new ZPairWindow(split, newWindow, position, splitSize);
+                var newPair = new ZPairWindow(this, split, newWindow, position, splitSize);
 
                 if (parent != null)
                 {

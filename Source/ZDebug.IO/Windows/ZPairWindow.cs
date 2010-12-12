@@ -9,7 +9,8 @@ namespace ZDebug.IO.Windows
         private ZWindow child1;
         private ZWindow child2;
 
-        public ZPairWindow(ZWindow child1, ZWindow child2, ZWindowPosition child2Position, GridLength child2Size)
+        internal ZPairWindow(ZWindowManager manager, ZWindow child1, ZWindow child2, ZWindowPosition child2Position, GridLength child2Size)
+            : base(manager)
         {
             if (child1 == null)
             {
