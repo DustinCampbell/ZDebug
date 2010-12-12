@@ -1,6 +1,6 @@
 ﻿namespace ZDebug.Core.Execution
 {
-    internal sealed partial class OutputStreams
+    public sealed partial class Processor
     {
         private class NullStream : IOutputStream
         {

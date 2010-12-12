@@ -1,5 +1,10 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using ZDebug.Core.Execution;
+using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -43,17 +48,28 @@ namespace ZDebug.UI.ViewModel
             windowManager.Root.Close();
         }
 
-        void IOutputStream.Print(string text)
+        private FormattedText GetFixedFontMeasureText()
+        {
+            return new FormattedText(
+                textToFormat: "0",
+                culture: CultureInfo.CurrentUICulture,
+                flowDirection: FlowDirection.LeftToRight,
+                typeface: new Typeface(FontsAndColorsService.FixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+                emSize: FontsAndColorsService.FontSize,
+                foreground: Brushes.Black);
+        }
+
+        public void Print(string text)
         {
             windowManager.ActiveWindow.PutString(text);
         }
 
-        void IOutputStream.Print(char ch)
+        public void Print(char ch)
         {
             windowManager.ActiveWindow.PutChar(ch);
         }
 
-        void IScreen.Clear(int window)
+        public void Clear(int window)
         {
             if (window == 0)
             {
@@ -61,16 +77,48 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        void IScreen.ClearAll(bool unsplit)
+        public void ClearAll(bool unsplit)
         {
             mainWindow.Clear();
         }
 
-        void IScreen.SetTextStyle(ZTextStyle style)
+        public void SetTextStyle(ZTextStyle style)
         {
             windowManager.ActiveWindow.SetBold(style.HasFlag(ZTextStyle.Bold));
             windowManager.ActiveWindow.SetItalic(style.HasFlag(ZTextStyle.Italic));
             windowManager.ActiveWindow.SetFixedPitch(style.HasFlag(ZTextStyle.FixedPitch));
         }
+
+        public byte ScreenHeightInLines
+        {
+            get { return (byte)(ScreenHeightInUnits / FontHeightInUnits); }
+        }
+
+        public byte ScreenWidthInColumns
+        {
+            get { return (byte)(ScreenWidthInUnits / FontWidthInUnits); }
+        }
+
+        public ushort ScreenHeightInUnits
+        {
+            get { return (ushort)windowContainer.ActualHeight; }
+        }
+
+        public ushort ScreenWidthInUnits
+        {
+            get { return (ushort)windowContainer.ActualWidth; }
+        }
+
+        public byte FontHeightInUnits
+        {
+            get { return (byte)GetFixedFontMeasureText().Height; }
+        }
+
+        public byte FontWidthInUnits
+        {
+            get { return (byte)GetFixedFontMeasureText().Width; }
+        }
+
+        public event EventHandler DimensionsChanged;
     }
 }

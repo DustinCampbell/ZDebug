@@ -43,8 +43,8 @@
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
     <Compile Include="Execution\LocalVariableChangedEventArgs.cs" />
-    <Compile Include="Execution\OutputStreams.cs" />
-    <Compile Include="Execution\OutputStreams.NullStream.cs" />
+    <Compile Include="Execution\Processor.OutputStreams.cs" />
+    <Compile Include="Execution\Processor.NullStream.cs" />
     <Compile Include="Execution\Processor.NullScreen.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="Execution\ZTextStyle.cs" />

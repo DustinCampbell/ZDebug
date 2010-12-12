@@ -214,6 +214,50 @@ namespace ZDebug.Core.Basics
             return memory.ReadAsciiString(InformVersionNumberIndex, 4);
         }
 
+        public static void WriteScreenHeightInLines(this Memory memory, byte screenHeight)
+        {
+            memory.WriteByte(0x20, screenHeight);
+        }
+
+        public static void WriteScreenWidthInColumns(this Memory memory, byte screenWidth)
+        {
+            memory.WriteByte(0x21, screenWidth);
+        }
+
+        public static void WriteScreenHeightInUnits(this Memory memory, ushort screenHeight)
+        {
+            memory.WriteWord(0x24, screenHeight);
+        }
+
+        public static void WriteScreenWidthInUnits(this Memory memory, ushort screenWidth)
+        {
+            memory.WriteWord(0x22, screenWidth);
+        }
+
+        public static void WriteFontHeightInUnits(this Memory memory, byte fontHeight)
+        {
+            if (memory.ReadVersion() == 6)
+            {
+                memory.WriteByte(0x26, fontHeight);
+            }
+            else
+            {
+                memory.WriteByte(0x27, fontHeight);
+            }
+        }
+
+        public static void WriteFontWidthInUnits(this Memory memory, byte fontWidth)
+        {
+            if (memory.ReadVersion() == 6)
+            {
+                memory.WriteByte(0x27, fontWidth);
+            }
+            else
+            {
+                memory.WriteByte(0x26, fontWidth);
+            }
+        }
+
         public static int UnpackRoutineAddress(this Memory memory, ushort byteAddress)
         {
             var version = memory.ReadVersion();

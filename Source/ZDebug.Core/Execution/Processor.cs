@@ -14,7 +14,7 @@ namespace ZDebug.Core.Execution
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
         private readonly OutputStreams outputStreams;
-        private IScreen screen = new NullScreen();
+        private IScreen screen;
         private Random random = new Random();
 
         private Instruction executingInstruction;
@@ -25,6 +25,7 @@ namespace ZDebug.Core.Execution
 
             this.callStack = new Stack<StackFrame>();
             this.outputStreams = new OutputStreams(story);
+            RegisterScreen(NullScreen.Instance);
 
             // create "call" to main routine
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
@@ -239,6 +240,28 @@ namespace ZDebug.Core.Execution
             executingInstruction = null;
         }
 
+        private void Screen_DimensionsChanged(object sender, EventArgs e)
+        {
+            SetScreenDimensions();
+        }
+
+        private void SetScreenDimensions()
+        {
+            if (story.Version >= 4)
+            {
+                story.Memory.WriteScreenHeightInLines(screen.ScreenHeightInLines);
+                story.Memory.WriteScreenWidthInColumns(screen.ScreenWidthInColumns);
+            }
+
+            if (story.Version >= 5)
+            {
+                story.Memory.WriteScreenHeightInUnits(screen.ScreenHeightInUnits);
+                story.Memory.WriteScreenWidthInUnits(screen.ScreenWidthInUnits);
+                story.Memory.WriteFontHeightInUnits(screen.FontHeightInUnits);
+                story.Memory.WriteFontWidthInUnits(screen.FontWidthInUnits);
+            }
+        }
+
         public void RegisterScreen(IScreen screen)
         {
             if (screen == null)
@@ -246,7 +269,15 @@ namespace ZDebug.Core.Execution
                 throw new ArgumentNullException("screen");
             }
 
+            if (this.screen != null)
+            {
+                this.screen.DimensionsChanged -= Screen_DimensionsChanged;
+            }
+
             this.screen = screen;
+            this.screen.DimensionsChanged += Screen_DimensionsChanged;
+            SetScreenDimensions();
+
             this.outputStreams.RegisterScreen(screen);
         }
 
