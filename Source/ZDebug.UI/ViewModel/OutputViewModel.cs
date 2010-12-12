@@ -51,10 +51,15 @@ namespace ZDebug.UI.ViewModel
 
         void IScreen.Clear(int window)
         {
+            if (window == 0)
+            {
+                lowerWindow.Clear();
+            }
         }
 
         void IScreen.ClearAll(bool unsplit)
         {
+            lowerWindow.Clear();
         }
     }
 }
