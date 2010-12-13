@@ -109,6 +109,11 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        public void SetCursor(int line, int column)
+        {
+            windowManager.ActiveWindow.SetCursor(column, line);
+        }
+
         public void SetTextStyle(ZTextStyle style)
         {
             windowManager.ActiveWindow.SetBold(style.HasFlag(ZTextStyle.Bold));

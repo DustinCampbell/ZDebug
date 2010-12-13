@@ -103,8 +103,9 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x0d, "erase_window", routine: OpcodeRoutines.erase_window, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x0e, "erase_line", fromVersion: 4, toVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x0e, "erase_line", fromVersion: 6);
-            AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", fromVersion: 4, toVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", fromVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", routine: OpcodeRoutines.set_cursor, fromVersion: 4, toVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", fromVersion: 6, toVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", routine: OpcodeRoutines.set_cursor, fromVersion: 7);
             AddOpcode(OpcodeKind.VarOp, 0x10, "get_cursor", fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x11, "set_text_style", routine: OpcodeRoutines.set_text_style, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x12, "buffer_mode", fromVersion: 4);

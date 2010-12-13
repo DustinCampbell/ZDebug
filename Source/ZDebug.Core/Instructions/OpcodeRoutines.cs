@@ -840,6 +840,16 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine set_cursor = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var line = (ushort)context.GetOperandValue(i.Operands[0]);
+            var column = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            context.Screen.SetCursor(line - 1, column - 1);
+        };
+
         public static readonly OpcodeRoutine set_text_style = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

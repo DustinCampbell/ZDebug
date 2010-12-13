@@ -44,6 +44,10 @@ namespace ZDebug.IO.Windows
         public abstract void PutChar(char ch);
         public abstract void PutString(string s);
 
+        public virtual void SetCursor(int x, int y)
+        {
+        }
+
         public virtual void SetBold(bool value)
         {
         }

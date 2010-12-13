@@ -30,6 +30,10 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void SetCursor(int line, int column)
+            {
+            }
+
             public void SetTextStyle(ZTextStyle style)
             {
             }
