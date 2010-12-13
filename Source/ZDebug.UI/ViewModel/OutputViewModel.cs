@@ -17,6 +17,7 @@ namespace ZDebug.UI.ViewModel
         private Grid windowContainer;
 
         private ZWindow mainWindow;
+        private ZWindow upperWindow;
 
         public OutputViewModel()
             : base("OutputView")
@@ -80,6 +81,20 @@ namespace ZDebug.UI.ViewModel
         public void ClearAll(bool unsplit)
         {
             mainWindow.Clear();
+        }
+
+        public void Split(int height)
+        {
+            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, height);
+        }
+
+        public void Unsplit()
+        {
+            if (upperWindow != null)
+            {
+                upperWindow.Close();
+                upperWindow = null;
+            }
         }
 
         public void SetTextStyle(ZTextStyle style)

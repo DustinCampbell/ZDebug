@@ -849,6 +849,22 @@ namespace ZDebug.Core.Instructions
             context.Screen.SetTextStyle(textStyle);
         };
 
+        public static readonly OpcodeRoutine split_window = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var height = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            if (height > 0)
+            {
+                context.Screen.Split(height);
+            }
+            else
+            {
+                context.Screen.Unsplit();
+            }
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Miscellaneous routines
         ///////////////////////////////////////////////////////////////////////////////////////////

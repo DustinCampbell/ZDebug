@@ -18,6 +18,14 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void Split(int height)
+            {
+            }
+
+            public void Unsplit()
+            {
+            }
+
             public void SetTextStyle(ZTextStyle style)
             {
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ZDebug.IO.Windows
 {
@@ -76,6 +77,9 @@ namespace ZDebug.IO.Windows
                     default:
                         throw new ArgumentException("Invalid ZWindowSizeType: " + sizeType, "sizeType");
                 }
+
+                var parentGrid = (Grid)split.Parent;
+                parentGrid.Children.Remove(split);
 
                 var newPair = new ZPairWindow(this, split, newWindow, position, splitSize);
 
