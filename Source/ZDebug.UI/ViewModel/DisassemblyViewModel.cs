@@ -94,6 +94,7 @@ namespace ZDebug.UI.ViewModel
             oldLine.HasIP = false;
 
             if (DebuggerService.State == DebuggerState.Running ||
+                DebuggerService.State == DebuggerState.AwaitingInput ||
                 DebuggerService.State == DebuggerState.Done)
             {
                 return;
@@ -185,6 +186,11 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
+            if (e.NewState == DebuggerState.Unavailable)
+            {
+                return;
+            }
+
             if (e.NewState == DebuggerState.StoppedAtError)
             {
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
@@ -203,6 +209,17 @@ namespace ZDebug.UI.ViewModel
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
                 line.State = DisassemblyLineState.Stopped;
                 BringLineIntoView(line);
+            }
+            else if (e.NewState == DebuggerState.AwaitingInput)
+            {
+                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
+                line.State = DisassemblyLineState.Paused;
+                BringLineIntoView(line);
+            }
+            else if (e.OldState == DebuggerState.AwaitingInput)
+            {
+                var ipLine = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                ipLine.HasIP = true;
             }
         }
 

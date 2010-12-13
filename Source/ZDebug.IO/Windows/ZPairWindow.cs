@@ -79,6 +79,9 @@ namespace ZDebug.IO.Windows
                     throw new ArgumentException("Invalid ZWindowPosition: " + child2Position, "child2Position");
             }
 
+            child1.SetWindowParent(this);
+            child2.SetWindowParent(this);
+
             this.Children.Add(child1);
             this.Children.Add(child2);
         }

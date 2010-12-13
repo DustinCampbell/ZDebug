@@ -609,6 +609,11 @@ namespace ZDebug.Core.Execution
             outputStreams.Print(ch);
         }
 
+        void IExecutionContext.ReadChar(Action<char> callback)
+        {
+            screen.ReadChar(callback);
+        }
+
         void IExecutionContext.Randomize(int seed)
         {
             random = new Random(seed);

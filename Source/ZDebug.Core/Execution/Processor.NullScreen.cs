@@ -46,6 +46,11 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void ReadChar(Action<char> callback)
+            {
+                callback('\0');
+            }
+
             public byte ScreenHeightInLines
             {
                 get { return 0; }

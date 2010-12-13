@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Core.Execution
@@ -48,8 +49,11 @@ namespace ZDebug.Core.Execution
         string ParseZWords(IList<ushort> zwords);
 
         void SelectOutputStream(int number, bool value);
+
         void Print(string text);
         void Print(char ch);
+
+        void ReadChar(Action<char> callback);
 
         void Randomize(int seed);
         int NextRandom(int range);

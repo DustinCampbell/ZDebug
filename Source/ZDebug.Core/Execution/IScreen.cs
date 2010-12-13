@@ -2,7 +2,7 @@
 
 namespace ZDebug.Core.Execution
 {
-    public interface IScreen : IOutputStream
+    public interface IScreen : IOutputStream, IInputStream
     {
         void Clear(int window);
         void ClearAll(bool unsplit = false);

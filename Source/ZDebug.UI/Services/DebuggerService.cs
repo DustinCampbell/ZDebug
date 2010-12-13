@@ -16,6 +16,8 @@ namespace ZDebug.UI.Services
         private static Exception currentException;
         private static SortedSet<int> breakpoints = new SortedSet<int>();
 
+        private static DebuggerState priorState;
+
         private static void ChangeState(DebuggerState newState)
         {
             var oldState = state;
@@ -192,6 +194,41 @@ namespace ZDebug.UI.Services
             {
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
+            }
+        }
+
+        public static void BeginAwaitingInput()
+        {
+            if (state == DebuggerState.AwaitingInput)
+            {
+                throw new InvalidOperationException("Already awaiting input");
+            }
+
+            priorState = state;
+            ChangeState(DebuggerState.AwaitingInput);
+        }
+
+        public static void EndAwaitingInput()
+        {
+            if (state != DebuggerState.AwaitingInput)
+            {
+                throw new InvalidOperationException("Not awaiting input");
+            }
+
+            if (priorState == DebuggerState.Running)
+            {
+                if (breakpoints.Contains(story.Processor.PC))
+                {
+                    ChangeState(DebuggerState.Stopped);
+                }
+                else
+                {
+                    StartDebugging();
+                }
+            }
+            else
+            {
+                ChangeState(priorState);
             }
         }
 

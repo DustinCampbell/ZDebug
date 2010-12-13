@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using ZDebug.Core.Execution;
 using ZDebug.IO.Services;
@@ -45,7 +46,6 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
-            windowContainer.Children.Clear();
             windowManager.Root.Close();
 
             mainWindow = null;
@@ -97,17 +97,51 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        public void ReadChar(Action<char> callback)
+        {
+            DebuggerService.BeginAwaitingInput();
+
+            TextCompositionEventHandler handler = null;
+            handler = (s, e) =>
+            {
+                mainWindow.Children[0].TextInput -= handler;
+                callback(e.Text[0]);
+
+                DebuggerService.EndAwaitingInput();
+            };
+
+            mainWindow.Children[0].TextInput += handler;
+            Keyboard.Focus(mainWindow.Children[0]);
+        }
+
         public void Clear(int window)
         {
             if (window == 0)
             {
                 mainWindow.Clear();
             }
+            else if (window == 1 && upperWindow != null)
+            {
+                upperWindow.Clear();
+            }
         }
 
         public void ClearAll(bool unsplit)
         {
             mainWindow.Clear();
+
+            if (upperWindow != null)
+            {
+                if (unsplit)
+                {
+                    upperWindow.Close();
+                    upperWindow = null;
+                }
+                else
+                {
+                    upperWindow.Clear();
+                }
+            }
         }
 
         public void Split(int height)

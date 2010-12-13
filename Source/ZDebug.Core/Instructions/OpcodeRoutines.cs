@@ -740,7 +740,7 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        // Printing routines
+        // Output routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
         public static readonly OpcodeRoutine buffer_mode = (i, context) =>
@@ -874,6 +874,37 @@ namespace ZDebug.Core.Instructions
             var textStyle = (ZTextStyle)(ushort)context.GetOperandValue(i.Operands[0]);
 
             context.Screen.SetTextStyle(textStyle);
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Input routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine read_char = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 3);
+            Strict.HasStoreVariable(i);
+
+            var inputStream = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            if (i.Operands.Count > 1)
+            {
+                // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
+                context.GetOperandValue(i.Operands[1]);
+            }
+
+            if (i.Operands.Count > 2)
+            {
+                // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
+                context.GetOperandValue(i.Operands[2]);
+            }
+
+            Action<char> callback = ch =>
+            {
+                context.WriteVariable(i.StoreVariable, Value.Number((ushort)ch));
+            };
+
+            context.ReadChar(callback);
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////

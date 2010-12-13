@@ -105,6 +105,9 @@ namespace ZDebug.IO.Windows
                 throw new ArgumentNullException("window");
             }
 
+            var parentGrid = (Grid)window.Parent;
+            parentGrid.Children.Remove(window);
+
             var parent = window.WindowParent;
             if (parent == null) // root window...
             {
@@ -116,15 +119,23 @@ namespace ZDebug.IO.Windows
                     ? parent.Child2
                     : parent.Child1;
 
+                parentGrid.Children.Remove(sibling);
+
+                var grandparentGrid = (Grid)parent.Parent;
+                grandparentGrid.Children.Remove(parent);
+
                 var grandParent = parent.WindowParent;
                 if (grandParent == null) // root window...
                 {
                     root = sibling;
+                    sibling.SetWindowParent(null);
                 }
                 else
                 {
                     grandParent.Replace(parent, sibling);
                 }
+
+                grandparentGrid.Children.Add(sibling);
             }
         }
 
