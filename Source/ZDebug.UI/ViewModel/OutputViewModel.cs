@@ -143,16 +143,17 @@ namespace ZDebug.UI.ViewModel
             windowManager.ActiveWindow.SetBold(style.HasFlag(ZTextStyle.Bold));
             windowManager.ActiveWindow.SetItalic(style.HasFlag(ZTextStyle.Italic));
             windowManager.ActiveWindow.SetFixedPitch(style.HasFlag(ZTextStyle.FixedPitch));
+            windowManager.ActiveWindow.SetReverse(style.HasFlag(ZTextStyle.Reverse));
         }
 
         public byte ScreenHeightInLines
         {
-            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height - 1); }
+            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height); }
         }
 
         public byte ScreenWidthInColumns
         {
-            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width - 1); }
+            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width); }
         }
 
         public ushort ScreenHeightInUnits

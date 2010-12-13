@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace ZDebug.IO.Windows
 {
@@ -16,7 +17,11 @@ namespace ZDebug.IO.Windows
             }
 
             this.manager = manager;
-            this.ShowGridLines = true;
+
+            this.UseLayoutRounding = true;
+            this.SnapsToDevicePixels = true;
+            TextOptions.SetTextFormattingMode(this, TextFormattingMode.Display);
+            TextOptions.SetTextRenderingMode(this, TextRenderingMode.Auto);
         }
 
         internal void SetWindowParent(ZPairWindow windowParent)
@@ -46,6 +51,11 @@ namespace ZDebug.IO.Windows
 
         public virtual void SetCursor(int x, int y)
         {
+        }
+
+        public virtual bool SetReverse(bool value)
+        {
+            return false;
         }
 
         public virtual bool SetBold(bool value)

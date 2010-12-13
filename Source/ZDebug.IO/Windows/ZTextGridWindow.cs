@@ -15,12 +15,14 @@ namespace ZDebug.IO.Windows
         private struct FormattedChar
         {
             public readonly char Value;
+            public readonly bool Reverse;
             public readonly bool Bold;
             public readonly bool Italic;
 
-            public FormattedChar(char value, bool bold, bool italic)
+            public FormattedChar(char value, bool reverse, bool bold, bool italic)
             {
                 this.Value = value;
+                this.Reverse = reverse;
                 this.Bold = bold;
                 this.Italic = italic;
             }
@@ -33,6 +35,7 @@ namespace ZDebug.IO.Windows
         private readonly List<List<FormattedChar>> lines;
         private int cursorX;
         private int cursorY;
+        private bool reverse;
         private bool bold;
         private bool italic;
 
@@ -60,6 +63,7 @@ namespace ZDebug.IO.Windows
 
         private void BuildInlines()
         {
+            bool currentReverse = false;
             bool currentBold = false;
             bool currentItalic = false;
 
@@ -68,11 +72,13 @@ namespace ZDebug.IO.Windows
 
             Action addInline = () =>
             {
-                var inline = new Run()
+                Inline inline = new Run()
                 {
                     Text = chars.ToString(),
                     FontWeight = currentBold ? FontWeights.Bold : FontWeights.Normal,
-                    FontStyle = currentItalic ? FontStyles.Italic : FontStyles.Normal
+                    FontStyle = currentItalic ? FontStyles.Italic : FontStyles.Normal,
+                    Foreground = currentReverse ? FontsAndColorsService.Background : FontsAndColorsService.Foreground,
+                    Background = currentReverse ? FontsAndColorsService.Foreground : FontsAndColorsService.Background
                 };
 
                 inlines.Add(inline);
@@ -92,16 +98,16 @@ namespace ZDebug.IO.Windows
 
                 foreach (var ch in line)
                 {
-                    if (currentBold == ch.Bold && currentItalic == ch.Italic)
-                    {
-                        chars.Append(ch.Value);
-                    }
-                    else
+                    if (currentReverse != ch.Reverse || currentBold != ch.Bold || currentItalic != ch.Italic)
                     {
                         addInline();
+
+                        currentReverse = ch.Reverse;
                         currentBold = ch.Bold;
                         currentItalic = ch.Italic;
                     }
+
+                    chars.Append(ch.Value);
                 }
 
                 addInline();
@@ -149,17 +155,18 @@ namespace ZDebug.IO.Windows
             {
                 for (int i = 0; i < cursorX - lineLength + 1; i++)
                 {
-                    line.Add(new FormattedChar(' ', bold, italic));
+                    line.Add(new FormattedChar(' ', false, false, false));
                 }
             }
 
             if (ch == '\n')
             {
                 cursorY++;
+                cursorX = 0;
             }
             else
             {
-                line[cursorX] = new FormattedChar(ch, bold, italic);
+                line[cursorX] = new FormattedChar(ch, reverse, bold, italic);
                 cursorX++;
             }
 
@@ -170,6 +177,13 @@ namespace ZDebug.IO.Windows
         {
             cursorX = x;
             cursorY = y;
+        }
+
+        public override bool SetReverse(bool value)
+        {
+            var oldValue = reverse;
+            reverse = value;
+            return oldValue;
         }
 
         public override bool SetBold(bool value)

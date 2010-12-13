@@ -52,6 +52,7 @@
     <Compile Include="Windows\ZBlankWindow.cs" />
     <Compile Include="Windows\ZPairWindow.cs" />
     <Compile Include="Windows\ZTextBufferWindow.cs" />
+    <Compile Include="Windows\ZTextGrid.cs" />
     <Compile Include="Windows\ZTextGridWindow.cs" />
     <Compile Include="Windows\ZWindow.cs" />
     <Compile Include="Windows\ZWindowManager.cs" />
