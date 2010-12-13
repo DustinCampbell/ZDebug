@@ -109,9 +109,10 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x10, "get_cursor", fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x11, "set_text_style", routine: OpcodeRoutines.set_text_style, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x12, "buffer_mode", routine: OpcodeRoutines.buffer_mode, fromVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 3, toVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 5, toVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", routine: OpcodeRoutines.output_stream1, fromVersion: 3, toVersion: 4);
+            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", routine: OpcodeRoutines.output_stream2, fromVersion: 5, toVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 6, toVersion: 6);
+            AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", routine: OpcodeRoutines.output_stream2, fromVersion: 7);
             AddOpcode(OpcodeKind.VarOp, 0x14, "input_stream", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x15, "sound_effect", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x16, "sound_effect", OpcodeFlags.Store, fromVersion: 4);

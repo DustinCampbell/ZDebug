@@ -743,11 +743,58 @@ namespace ZDebug.Core.Instructions
         // Printing routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine buffer_mode = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var flag = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            // TODO: What should we do with buffer_mode? Does it have any meaning?
+        };
+
         public static readonly OpcodeRoutine new_line = (i, context) =>
         {
             Strict.OperandCountIs(i, 0);
 
             context.Print('\n');
+        };
+
+        public static readonly OpcodeRoutine output_stream1 = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var number = (short)context.GetOperandValue(i.Operands[0]);
+
+            if (number > 0)
+            {
+                context.SelectOutputStream(number, true);
+            }
+            else if (number < 0)
+            {
+                context.SelectOutputStream(-number, false);
+            }
+        };
+
+        public static readonly OpcodeRoutine output_stream2 = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 2);
+
+            var number = (short)context.GetOperandValue(i.Operands[0]);
+
+            if (i.Operands.Count > 1)
+            {
+                // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
+                context.GetOperandValue(i.Operands[1]);
+            }
+
+            if (number > 0)
+            {
+                context.SelectOutputStream(number, true);
+            }
+            else if (number < 0)
+            {
+                context.SelectOutputStream(-number, false);
+            }
         };
 
         public static readonly OpcodeRoutine print = (i, context) =>
@@ -820,18 +867,18 @@ namespace ZDebug.Core.Instructions
             context.Return(Value.One);
         };
 
-        ///////////////////////////////////////////////////////////////////////////////////////////
-        // Window routines
-        ///////////////////////////////////////////////////////////////////////////////////////////
-
-        public static readonly OpcodeRoutine buffer_mode = (i, context) =>
+        public static readonly OpcodeRoutine set_text_style = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
 
-            var flag = (ushort)context.GetOperandValue(i.Operands[0]);
+            var textStyle = (ZTextStyle)(ushort)context.GetOperandValue(i.Operands[0]);
 
-            // TODO: What should we do with buffer_mode? Does it have any meaning?
+            context.Screen.SetTextStyle(textStyle);
         };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Window routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
 
         public static readonly OpcodeRoutine erase_window = (i, context) =>
         {
@@ -857,15 +904,6 @@ namespace ZDebug.Core.Instructions
             var column = (ushort)context.GetOperandValue(i.Operands[1]);
 
             context.Screen.SetCursor(line - 1, column - 1);
-        };
-
-        public static readonly OpcodeRoutine set_text_style = (i, context) =>
-        {
-            Strict.OperandCountIs(i, 1);
-
-            var textStyle = (ZTextStyle)(ushort)context.GetOperandValue(i.Operands[0]);
-
-            context.Screen.SetTextStyle(textStyle);
         };
 
         public static readonly OpcodeRoutine set_window = (i, context) =>

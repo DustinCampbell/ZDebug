@@ -594,6 +594,11 @@ namespace ZDebug.Core.Execution
             return ZText.ZWordsAsString(zwords, ZTextFlags.All, story.Memory);
         }
 
+        void IExecutionContext.SelectOutputStream(int number, bool value)
+        {
+            outputStreams.SelectStream(number, value);
+        }
+
         void IExecutionContext.Print(string text)
         {
             outputStreams.Print(text);
