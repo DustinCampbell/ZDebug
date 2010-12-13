@@ -108,7 +108,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x0f, "set_cursor", routine: OpcodeRoutines.set_cursor, fromVersion: 7);
             AddOpcode(OpcodeKind.VarOp, 0x10, "get_cursor", fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x11, "set_text_style", routine: OpcodeRoutines.set_text_style, fromVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x12, "buffer_mode", fromVersion: 4);
+            AddOpcode(OpcodeKind.VarOp, 0x12, "buffer_mode", routine: OpcodeRoutines.buffer_mode, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 3, toVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 5, toVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x13, "output_stream", fromVersion: 6);

@@ -824,6 +824,15 @@ namespace ZDebug.Core.Instructions
         // Window routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        public static readonly OpcodeRoutine buffer_mode = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var flag = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            // TODO: What should we do with buffer_mode? Does it have any meaning?
+        };
+
         public static readonly OpcodeRoutine erase_window = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

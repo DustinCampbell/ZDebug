@@ -47,6 +47,9 @@ namespace ZDebug.UI.ViewModel
         {
             windowContainer.Children.Clear();
             windowManager.Root.Close();
+
+            mainWindow = null;
+            upperWindow = null;
         }
 
         private FormattedText GetFixedFontMeasureText()
@@ -109,7 +112,12 @@ namespace ZDebug.UI.ViewModel
 
         public void Split(int height)
         {
-            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, height);
+            // TODO: If upperWindow exists, we should resize it if height is larger than the current height.
+
+            if (upperWindow == null)
+            {
+                upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, height);
+            }
         }
 
         public void Unsplit()
