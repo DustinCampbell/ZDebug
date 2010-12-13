@@ -60,14 +60,38 @@ namespace ZDebug.UI.ViewModel
                 foreground: Brushes.Black);
         }
 
+        private bool ForceFixedWidthFont()
+        {
+            // TODO: Move into appropriate API
+            return (DebuggerService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
+        }
+
         public void Print(string text)
         {
-            windowManager.ActiveWindow.PutString(text);
+            if (ForceFixedWidthFont())
+            {
+                bool oldValue = windowManager.ActiveWindow.SetFixedPitch(true);
+                windowManager.ActiveWindow.PutString(text);
+                windowManager.ActiveWindow.SetFixedPitch(oldValue);
+            }
+            else
+            {
+                windowManager.ActiveWindow.PutString(text);
+            }
         }
 
         public void Print(char ch)
         {
-            windowManager.ActiveWindow.PutChar(ch);
+            if (ForceFixedWidthFont())
+            {
+                bool oldValue = windowManager.ActiveWindow.SetFixedPitch(true);
+                windowManager.ActiveWindow.PutChar(ch);
+                windowManager.ActiveWindow.SetFixedPitch(oldValue);
+            }
+            else
+            {
+                windowManager.ActiveWindow.PutChar(ch);
+            }
         }
 
         public void Clear(int window)
@@ -123,12 +147,12 @@ namespace ZDebug.UI.ViewModel
 
         public byte ScreenHeightInLines
         {
-            get { return (byte)(ScreenHeightInUnits / FontHeightInUnits); }
+            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height - 1); }
         }
 
         public byte ScreenWidthInColumns
         {
-            get { return (byte)(ScreenWidthInUnits / FontWidthInUnits); }
+            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width - 1); }
         }
 
         public ushort ScreenHeightInUnits

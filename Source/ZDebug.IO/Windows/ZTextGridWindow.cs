@@ -172,14 +172,18 @@ namespace ZDebug.IO.Windows
             cursorY = y;
         }
 
-        public override void SetBold(bool value)
+        public override bool SetBold(bool value)
         {
+            var oldValue = bold;
             bold = value;
+            return oldValue;
         }
 
-        public override void SetItalic(bool value)
+        public override bool SetItalic(bool value)
         {
+            var oldValue = italic;
             italic = value;
+            return oldValue;
         }
 
         public override int RowHeight

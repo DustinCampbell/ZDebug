@@ -48,16 +48,19 @@ namespace ZDebug.IO.Windows
         {
         }
 
-        public virtual void SetBold(bool value)
+        public virtual bool SetBold(bool value)
         {
+            return false;
         }
 
-        public virtual void SetItalic(bool value)
+        public virtual bool SetItalic(bool value)
         {
+            return false;
         }
 
-        public virtual void SetFixedPitch(bool value)
+        public virtual bool SetFixedPitch(bool value)
         {
+            return false;
         }
 
         public abstract int RowHeight { get; }

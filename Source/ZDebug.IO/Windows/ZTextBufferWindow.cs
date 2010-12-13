@@ -82,19 +82,25 @@ namespace ZDebug.IO.Windows
             this.paragraph.Inlines.Add(GetFormattedRun(ch.ToString()));
         }
 
-        public override void SetBold(bool value)
+        public override bool SetBold(bool value)
         {
+            var oldValue = bold;
             bold = value;
+            return oldValue;
         }
 
-        public override void SetItalic(bool value)
+        public override bool SetItalic(bool value)
         {
+            var oldValue = italic;
             italic = value;
+            return oldValue;
         }
 
-        public override void SetFixedPitch(bool value)
+        public override bool SetFixedPitch(bool value)
         {
+            var oldValue = fixedPitch;
             fixedPitch = value;
+            return oldValue;
         }
 
         public override int RowHeight
