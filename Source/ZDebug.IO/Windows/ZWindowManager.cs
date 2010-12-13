@@ -92,6 +92,8 @@ namespace ZDebug.IO.Windows
                     root = newPair;
                 }
 
+                parentGrid.Children.Add(newPair);
+
                 return newWindow;
             }
         }

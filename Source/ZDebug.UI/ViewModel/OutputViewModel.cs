@@ -97,6 +97,18 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        public void SetWindow(int window)
+        {
+            if (window == 0)
+            {
+                mainWindow.Activate();
+            }
+            else if (window == 1)
+            {
+                upperWindow.Activate();
+            }
+        }
+
         public void SetTextStyle(ZTextStyle style)
         {
             windowManager.ActiveWindow.SetBold(style.HasFlag(ZTextStyle.Bold));

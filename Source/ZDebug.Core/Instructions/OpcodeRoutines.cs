@@ -849,6 +849,15 @@ namespace ZDebug.Core.Instructions
             context.Screen.SetTextStyle(textStyle);
         };
 
+        public static readonly OpcodeRoutine set_window = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+
+            var window = (ushort)context.GetOperandValue(i.Operands[0]);
+
+            context.Screen.SetWindow(window);
+        };
+
         public static readonly OpcodeRoutine split_window = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

@@ -26,6 +26,10 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void SetWindow(int window)
+            {
+            }
+
             public void SetTextStyle(ZTextStyle style)
             {
             }

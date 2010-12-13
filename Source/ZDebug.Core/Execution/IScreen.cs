@@ -10,6 +10,8 @@ namespace ZDebug.Core.Execution
         void Split(int height);
         void Unsplit();
 
+        void SetWindow(int window);
+
         void SetTextStyle(ZTextStyle style);
 
         byte ScreenHeightInLines { get; }

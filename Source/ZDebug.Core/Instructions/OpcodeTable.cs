@@ -98,7 +98,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.Store, fromVersion: 6, toVersion: 6);
             AddOpcode(OpcodeKind.VarOp, 0x09, "pull", OpcodeFlags.FirstOpByRef, OpcodeRoutines.pull, fromVersion: 7, toVersion: 8);
             AddOpcode(OpcodeKind.VarOp, 0x0a, "split_window", routine: OpcodeRoutines.split_window, fromVersion: 3);
-            AddOpcode(OpcodeKind.VarOp, 0x0b, "set_window", fromVersion: 3);
+            AddOpcode(OpcodeKind.VarOp, 0x0b, "set_window", routine: OpcodeRoutines.set_window, fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x0c, "call_vs2", OpcodeFlags.Call | OpcodeFlags.Store | OpcodeFlags.DoubleVar, OpcodeRoutines.call_vs2, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x0d, "erase_window", routine: OpcodeRoutines.erase_window, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x0e, "erase_line", fromVersion: 4, toVersion: 5);
