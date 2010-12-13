@@ -15,8 +15,6 @@ namespace ZDebug.IO.Windows
         private readonly GuidelineSet guidelineSet;
         private int cursorX;
         private int cursorY;
-        private int knownColumns;
-        private int knownLines;
 
         private Typeface typeface;
         private bool bold;
@@ -71,21 +69,28 @@ namespace ZDebug.IO.Windows
             }
             else
             {
-                var visual = new DrawingVisual();
-                var context = visual.RenderOpen();
+                var backgroundVisual = new DrawingVisual();
+                var backgroundContext = backgroundVisual.RenderOpen();
 
                 var x = fontCharSize.Width * cursorX;
                 var y = fontCharSize.Height * cursorY;
 
                 var backgroundRect = new Rect(
-                    x,
-                    y,
+                    Math.Floor(x),
+                    Math.Floor(y),
                     Math.Ceiling(fontCharSize.Width + .5),
                     Math.Ceiling(fontCharSize.Height));
 
-                context.DrawRectangle(background, null, backgroundRect);
+                backgroundContext.DrawRectangle(background, null, backgroundRect);
 
-                context.DrawText(
+                backgroundContext.Close();
+
+                visuals.Insert(0, backgroundVisual);
+
+                var textVisual = new DrawingVisual();
+                var textContext = textVisual.RenderOpen();
+
+                textContext.DrawText(
                     new FormattedText(
                         ch.ToString(),
                         CultureInfo.CurrentUICulture,
@@ -97,9 +102,9 @@ namespace ZDebug.IO.Windows
                         TextFormattingMode.Display),
                     new Point(x, y));
 
-                context.Close();
+                textContext.Close();
 
-                visuals.Add(visual);
+                visuals.Add(textVisual);
 
                 cursorX++;
             }
