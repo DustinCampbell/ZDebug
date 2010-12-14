@@ -89,9 +89,14 @@
         <ad:DockingManager Name="dockManager" Grid.Row="2">
             <ad:ResizingPanel Orientation="Vertical">
                 <ad:ResizingPanel Orientation="Horizontal">
-                    <ad:DockablePane ad:ResizingPanel.ResizeWidth="150">
-                        <ad:DockableContent Title="Story Info" Name="storyInfoContent"/>
-                    </ad:DockablePane>
+                    <ad:ResizingPanel Orientation="Vertical" ad:ResizingPanel.ResizeWidth="300">
+                        <ad:DockablePane>
+                            <ad:DockableContent Title="Story Info" Name="storyInfoContent"/>
+                        </ad:DockablePane>
+                        <ad:DockablePane>
+                            <ad:DockableContent Title="Memory Map" Name="memoryMapContent"/>
+                        </ad:DockablePane>
+                    </ad:ResizingPanel>
                     <ad:ResizingPanel Orientation="Vertical">
                         <ad:DocumentPane SelectedIndex="0">
                             <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>

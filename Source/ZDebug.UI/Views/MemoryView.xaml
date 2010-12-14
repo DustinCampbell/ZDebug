@@ -15,17 +15,6 @@
             </Style>
         </Grid.Style>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <Border Grid.Column="0"
-                x:Name="memoryMapContainer"
-                Padding="8,2,8,2"
-                BorderBrush="Silver"
-                BorderThickness="0,0,1,0"/>
-
         <ItemsControl Grid.Column="1"
                       FontFamily="Consolas"
                       FontSize="14"

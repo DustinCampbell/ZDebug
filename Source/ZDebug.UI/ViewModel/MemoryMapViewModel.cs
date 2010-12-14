@@ -26,6 +26,7 @@ namespace ZDebug.UI.ViewModel
             regions = new ReadOnlyCollection<MemoryMapRegionViewModel>(list);
 
             PropertyChanged("Regions");
+            PropertyChanged("HasStory");
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
@@ -33,6 +34,7 @@ namespace ZDebug.UI.ViewModel
             regions = null;
 
             PropertyChanged("Regions");
+            PropertyChanged("HasStory");
         }
 
         protected internal override void Initialize()
@@ -44,6 +46,11 @@ namespace ZDebug.UI.ViewModel
         public ReadOnlyCollection<MemoryMapRegionViewModel> Regions
         {
             get { return regions; }
+        }
+
+        public bool HasStory
+        {
+            get { return DebuggerService.HasStory; }
         }
     }
 }
