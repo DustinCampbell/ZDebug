@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using ZDebug.Core.Basics;
+
 namespace ZDebug.Core.Execution
 {
     public sealed partial class Processor
@@ -6,65 +9,118 @@ namespace ZDebug.Core.Execution
         private class OutputStreams
         {
             private readonly Story story;
-            private readonly Tuple<bool, IOutputStream>[] streams;
+
+            private bool screenActive;
+            private IOutputStream screenStream;
+
+            private bool transcriptActive;
+            private IOutputStream transcriptStream;
+
+            private readonly Stack<MemoryOutputStream> memoryStreams;
 
             internal OutputStreams(Story story)
             {
                 this.story = story;
-                this.streams = new Tuple<bool, IOutputStream>[4];
+                this.memoryStreams = new Stack<MemoryOutputStream>();
 
-                this.streams[0] = Tuple.Create(true, (IOutputStream)NullScreen.Instance);
-                this.streams[1] = Tuple.Create(false, NullStream.Instance);
-                this.streams[2] = Tuple.Create(false, NullStream.Instance);
-                this.streams[3] = Tuple.Create(false, NullStream.Instance);
+                screenActive = true;
+                screenStream = NullScreen.Instance;
+                transcriptStream = NullOutputStream.Instance;
             }
 
             public void RegisterTranscript(IOutputStream stream)
             {
-                if (streams[1].Item2 == NullStream.Instance)
+                if (stream == null)
                 {
-                    streams[1] = Tuple.Create(streams[1].Item1, stream);
+                    throw new ArgumentNullException("stream");
                 }
+
+                transcriptStream = stream;
             }
 
             public void RegisterScreen(IOutputStream stream)
             {
-                if (streams[0].Item2 == NullScreen.Instance)
+                if (stream == null)
                 {
-                    streams[0] = Tuple.Create(streams[0].Item1, stream);
+                    throw new ArgumentNullException("stream");
                 }
+
+                screenStream = stream;
             }
 
-            public void SelectStream(int number, bool value)
+            public void SelectScreenStream()
             {
-                if (number == 3 || number == 4)
+                screenActive = true;
+            }
+
+            public void DeselectScreenStream()
+            {
+                screenActive = false;
+            }
+
+            public void SelectTranscriptStream()
+            {
+                transcriptActive = true;
+            }
+
+            public void DeselectTranscriptStream()
+            {
+                transcriptActive = false;
+            }
+
+            public void SelectMemoryStream(Memory memory, int address)
+            {
+                if (memoryStreams.Count == 16)
                 {
-                    throw new NotSupportedException("Stream " + number + " not supported yet");
+                    throw new InvalidOperationException("Cannot create more than 16 memory output streams.");
                 }
 
-                streams[number - 1] = Tuple.Create(value, streams[number - 1].Item2);
+                memoryStreams.Push(new MemoryOutputStream(memory, address));
+            }
+
+            public void DeselectMemoryStream()
+            {
+                memoryStreams.Pop();
             }
 
             public void Print(string text)
             {
-                for (int i = 0; i < 4; i++)
+                if (memoryStreams.Count > 0)
                 {
-                    var pair = streams[i];
-                    if (pair.Item1)
+                    // If stream 3 is active, only print to that
+                    memoryStreams.Peek().Print(text);
+                }
+                else
+                {
+                    if (screenActive)
                     {
-                        pair.Item2.Print(text);
+                        screenStream.Print(text);
+                    }
+
+                    if (transcriptActive)
+                    {
+                        transcriptStream.Print(text);
                     }
                 }
             }
 
             public void Print(char ch)
             {
-                for (int i = 0; i < 4; i++)
+                if (memoryStreams.Count > 0)
                 {
-                    var pair = streams[i];
-                    if (pair.Item1)
+                    // If stream 3 is active, only print to that
+                    memoryStreams.Peek().Print(ch);
+                }
+                else
+                {
+                    if (screenActive)
                     {
-                        pair.Item2.Print(ch);
+                        screenStream.Print(ch);
+                    }
+
+                    if (transcriptActive)
+                    {
+                        transcriptStream.Print(ch);
                     }
                 }
             }

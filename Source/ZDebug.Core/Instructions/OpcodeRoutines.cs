@@ -789,41 +789,43 @@ namespace ZDebug.Core.Instructions
             context.Print('\n');
         };
 
-        public static readonly OpcodeRoutine output_stream1 = (i, context) =>
-        {
-            Strict.OperandCountIs(i, 1);
-
-            var number = (short)context.GetOperandValue(i.Operands[0]);
-
-            if (number > 0)
-            {
-                context.SelectOutputStream(number, true);
-            }
-            else if (number < 0)
-            {
-                context.SelectOutputStream(-number, false);
-            }
-        };
-
-        public static readonly OpcodeRoutine output_stream2 = (i, context) =>
+        public static readonly OpcodeRoutine output_stream = (i, context) =>
         {
             Strict.OperandCountInRange(i, 1, 2);
 
             var number = (short)context.GetOperandValue(i.Operands[0]);
 
-            if (i.Operands.Count > 1)
+            switch (number)
             {
-                // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
-                context.GetOperandValue(i.Operands[1]);
-            }
+                case 1:
+                    context.SelectScreenStream();
+                    break;
 
-            if (number > 0)
-            {
-                context.SelectOutputStream(number, true);
-            }
-            else if (number < 0)
-            {
-                context.SelectOutputStream(-number, false);
+                case 2:
+                    context.SelectTranscriptStream();
+                    break;
+
+                case 3:
+                    var address = (ushort)context.GetOperandValue(i.Operands[1]);
+                    context.SelectMemoryStream(address);
+                    break;
+
+                case -1:
+                    context.DeselectScreenStream();
+                    break;
+
+                case -2:
+                    context.DeselectTranscriptStream();
+                    break;
+
+                case -3:
+                    context.DeselectMemoryStream();
+                    break;
+
+                case 4:
+                case -4:
+                    context.MessageLog.SendError(i, "stream 4 is non supported");
+                    break;
             }
         };
 

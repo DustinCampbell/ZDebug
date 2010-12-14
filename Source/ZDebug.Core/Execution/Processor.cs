@@ -606,9 +606,34 @@ namespace ZDebug.Core.Execution
             return ZText.ZWordsAsString(zwords, ZTextFlags.All, story.Memory);
         }
 
-        void IExecutionContext.SelectOutputStream(int number, bool value)
+        void IExecutionContext.SelectScreenStream()
         {
-            outputStreams.SelectStream(number, value);
+            outputStreams.SelectScreenStream();
+        }
+
+        void IExecutionContext.DeselectScreenStream()
+        {
+            outputStreams.DeselectScreenStream();
+        }
+
+        void IExecutionContext.SelectTranscriptStream()
+        {
+            outputStreams.SelectTranscriptStream();
+        }
+
+        void IExecutionContext.DeselectTranscriptStream()
+        {
+            outputStreams.DeselectTranscriptStream();
+        }
+
+        void IExecutionContext.SelectMemoryStream(int address)
+        {
+            outputStreams.SelectMemoryStream(story.Memory, address);
+        }
+
+        void IExecutionContext.DeselectMemoryStream()
+        {
+            outputStreams.DeselectMemoryStream();
         }
 
         void IExecutionContext.Print(string text)

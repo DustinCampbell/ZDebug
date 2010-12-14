@@ -2,9 +2,9 @@
 {
     public sealed partial class Processor
     {
-        private class NullStream : IOutputStream
+        private class NullOutputStream : IOutputStream
         {
-            private NullStream()
+            private NullOutputStream()
             {
             }
 
@@ -16,7 +16,7 @@
             {
             }
 
-            public static readonly IOutputStream Instance = new NullStream();
+            public static readonly IOutputStream Instance = new NullOutputStream();
         }
     }
 }

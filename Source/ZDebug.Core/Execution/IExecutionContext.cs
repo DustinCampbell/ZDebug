@@ -48,7 +48,14 @@ namespace ZDebug.Core.Execution
         ushort[] ReadZWords(int address);
         string ParseZWords(IList<ushort> zwords);
 
-        void SelectOutputStream(int number, bool value);
+        void SelectScreenStream();
+        void DeselectScreenStream();
+
+        void SelectTranscriptStream();
+        void DeselectTranscriptStream();
+
+        void SelectMemoryStream(int address);
+        void DeselectMemoryStream();
 
         void Print(string text);
         void Print(char ch);

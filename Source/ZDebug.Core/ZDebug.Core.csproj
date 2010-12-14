@@ -48,7 +48,7 @@
     <Compile Include="Execution\MessageLogExtensions.cs" />
     <Compile Include="Execution\Processor.NullMessageLog.cs" />
     <Compile Include="Execution\Processor.OutputStreams.cs" />
-    <Compile Include="Execution\Processor.NullStream.cs" />
+    <Compile Include="Execution\Processor.NullOutputStream.cs" />
     <Compile Include="Execution\Processor.NullScreen.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="Execution\ZTextStyle.cs" />
@@ -113,7 +113,9 @@
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Execution\Processor.MemoryOutputStream.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

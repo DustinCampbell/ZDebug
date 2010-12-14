@@ -43,6 +43,11 @@ namespace ZDebug.Core.Utilities
             return Array.ConvertAll(array, converter);
         }
 
+        public static T[] FindAll<T>(this T[] array, Predicate<T> predicate)
+        {
+            return Array.FindAll(array, predicate);
+        }
+
         private static T[] ShallowCopyCore<T>(T[] array, int index, int length)
         {
             var result = new T[length];
