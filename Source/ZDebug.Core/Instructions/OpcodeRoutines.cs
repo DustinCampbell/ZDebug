@@ -918,6 +918,17 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine set_font = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 1);
+            Strict.HasStoreVariable(i);
+
+            var font = (ZFont)(ushort)context.GetOperandValue(i.Operands[0]);
+
+            var oldFont = context.Screen.SetFont(font);
+            context.WriteVariable(i.StoreVariable, Value.Number((ushort)oldFont));
+        };
+
         public static readonly OpcodeRoutine set_text_style = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);

@@ -39,7 +39,7 @@ namespace ZDebug.Core
             // write interpreter number
             if (version >= 4)
             {
-                memory.WriteByte(0x1e, 6);
+                memory.WriteByte(0x1e, 6); // MS-DOS
                 memory.WriteByte(0x1f, 65); // A
             }
 

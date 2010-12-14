@@ -16,6 +16,7 @@ namespace ZDebug.Core.Execution
         void SetTextStyle(ZTextStyle style);
         void SetForegroundColor(ZColor color);
         void SetBackgroundColor(ZColor color);
+        ZFont SetFont(ZFont font);
 
         void ShowStatus();
 

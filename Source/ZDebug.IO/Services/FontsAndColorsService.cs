@@ -9,6 +9,8 @@ namespace ZDebug.IO.Services
         private static readonly FontFamily fixedFontFamily = new FontFamily("Consolas");
         private static readonly double fontSize = 14.0;
 
+        private static FontFamily fontFamily = normalFontFamily;
+
         private static readonly Brush defaultForeground = Brushes.Black;
         private static readonly Brush defaultBackground = Brushes.White;
 
@@ -31,6 +33,12 @@ namespace ZDebug.IO.Services
         public static double FontSize
         {
             get { return fontSize; }
+        }
+
+        public static FontFamily FontFamily
+        {
+            get { return fontFamily; }
+            set { fontFamily = value; }
         }
 
         public static Brush DefaultForeground

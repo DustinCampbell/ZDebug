@@ -63,6 +63,10 @@ namespace ZDebug.IO.Windows
             {
                 run.FontFamily = FontsAndColorsService.FixedFontFamily;
             }
+            else
+            {
+                run.FontFamily = FontsAndColorsService.FontFamily;
+            }
 
             if (reverse)
             {

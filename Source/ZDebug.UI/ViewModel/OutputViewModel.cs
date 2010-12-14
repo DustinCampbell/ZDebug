@@ -20,6 +20,8 @@ namespace ZDebug.UI.ViewModel
         private ZWindow mainWindow;
         private ZWindow upperWindow;
 
+        private ZFont font;
+
         public OutputViewModel()
             : base("OutputView")
         {
@@ -203,6 +205,26 @@ namespace ZDebug.UI.ViewModel
             windowManager.ActiveWindow.SetItalic(style.HasFlag(ZTextStyle.Italic));
             windowManager.ActiveWindow.SetFixedPitch(style.HasFlag(ZTextStyle.FixedPitch));
             windowManager.ActiveWindow.SetReverse(style.HasFlag(ZTextStyle.Reverse));
+        }
+
+        public ZFont SetFont(ZFont font)
+        {
+            if (font == ZFont.Normal)
+            {
+                FontsAndColorsService.FontFamily = FontsAndColorsService.NormalFontFamily;
+            }
+            else if (font == ZFont.Fixed)
+            {
+                FontsAndColorsService.FontFamily = FontsAndColorsService.FixedFontFamily;
+            }
+            else
+            {
+                return 0;
+            }
+
+            var oldFont = this.font;
+            this.font = font;
+            return oldFont;
         }
 
         private Brush GetZColorBrush(ZColor color)

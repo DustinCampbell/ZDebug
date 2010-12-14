@@ -46,6 +46,11 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public ZFont SetFont(ZFont font)
+            {
+                return 0;
+            }
+
             public void ShowStatus()
             {
             }

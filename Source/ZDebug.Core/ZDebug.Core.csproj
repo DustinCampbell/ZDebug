@@ -53,6 +53,7 @@
     <Compile Include="Execution\Processor.NullScreen.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="Execution\ZColor.cs" />
+    <Compile Include="Execution\ZFont.cs" />
     <Compile Include="Execution\ZTextStyle.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
     <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
