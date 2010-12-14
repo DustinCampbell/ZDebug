@@ -124,10 +124,10 @@ namespace ZDebug.UI.ViewModel
 
         private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)
         {
-            lines.BeginBulkOperation();
-            try
-            {
-                // FInd routine header line that would follow this routine
+            //lines.BeginBulkOperation();
+            //try
+            //{
+            // FInd routine header line that would follow this routine
                 int insertionPoint = -1;
                 bool atEnd = false;
                 for (int i = 0; i < lines.Count; i++)
@@ -173,11 +173,11 @@ namespace ZDebug.UI.ViewModel
                 {
                     lines.Insert(insertionPoint, DisassemblyBlankLineViewModel.Instance);
                 }
-            }
-            finally
-            {
-                lines.EndBulkOperation();
-            }
+            //}
+            //finally
+            //{
+            //    lines.EndBulkOperation();
+            //}
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)

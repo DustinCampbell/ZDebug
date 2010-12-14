@@ -1,17 +1,27 @@
 ﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
 
     <Grid>
-        <ItemsControl ItemsSource="{Binding Locals}"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      ScrollViewer.CanContentScroll="True">
-
+        
+        <ItemsControl ItemsSource="{Binding Locals}">
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate >
                     <StackPanel Orientation="Horizontal"
                                 TextElement.FontFamily="Consolas">
+
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Visible}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
                         <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Margin="0,0,8,0">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -24,6 +34,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+
                         <TextBlock Text="{Binding Value.RawValue, StringFormat=\{0:x4\}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -49,12 +60,6 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
 
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-
             <ItemsControl.Template>
                 <ControlTemplate>
                     <Border BorderThickness="{TemplateBinding Border.BorderThickness}"
@@ -69,7 +74,6 @@
                     </Border>
                 </ControlTemplate>
             </ItemsControl.Template>
-
         </ItemsControl>
     </Grid>
 </UserControl>

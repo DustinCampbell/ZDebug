@@ -1,35 +1,41 @@
 ﻿using System.Windows.Controls;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Instructions;
 using ZDebug.UI.Services;
-using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
     {
-        private readonly BulkObservableCollection<LocalVariableViewModel> locals;
+        private readonly LocalVariableViewModel[] locals;
 
         public LocalsViewModel()
             : base("LocalsView")
         {
-            locals = new BulkObservableCollection<LocalVariableViewModel>();
+            locals = new LocalVariableViewModel[15];
+
+            for (int i = 0; i < 15; i++)
+            {
+                locals[i] = new LocalVariableViewModel(i, Value.Zero);
+            }
         }
 
         private void Update(StackFrame frame)
         {
-            locals.BeginBulkOperation();
-            try
-            {
-                locals.Clear();
+            var localCount = frame.Locals.Count;
 
-                for (int i = 0; i < frame.Locals.Count; i++)
-                {
-                    locals.Add(new LocalVariableViewModel(i, frame.Locals[i]));
-                }
-            }
-            finally
+            for (int i = 0; i < 15; i++)
             {
-                locals.EndBulkOperation();
+                var local = locals[i];
+
+                var current = i < localCount;
+                if (current)
+                {
+                    local.Value = frame.Locals[i];
+                }
+
+                local.Visible = current;
+                local.IsModified = false;
             }
         }
 
@@ -73,7 +79,10 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
-            locals.Clear();
+            for (int i = 0; i < locals.Length; i++)
+            {
+                locals[i].Visible = false;
+            }
 
             e.Story.Processor.EnterFrame -= Processor_EnterFrame;
             e.Story.Processor.ExitFrame -= Processor_ExitFrame;
@@ -107,7 +116,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
-        public BulkObservableCollection<LocalVariableViewModel> Locals
+        public LocalVariableViewModel[] Locals
         {
             get { return locals; }
         }

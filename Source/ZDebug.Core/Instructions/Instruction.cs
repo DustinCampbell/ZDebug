@@ -8,7 +8,7 @@ namespace ZDebug.Core.Instructions
         private readonly int address;
         private readonly int length;
         private readonly Opcode opcode;
-        private readonly ReadOnlyCollection<Operand> operands;
+        private readonly Operand[] operands;
         private readonly Variable storeVariable;
         private readonly Branch? branch;
         private readonly ReadOnlyCollection<ushort> ztext;
@@ -25,7 +25,7 @@ namespace ZDebug.Core.Instructions
             this.address = address;
             this.length = length;
             this.opcode = opcode;
-            this.operands = operands.AsReadOnly();
+            this.operands = operands;
             this.storeVariable = storeVariable;
             this.branch = branch;
             this.ztext = ztext != null ? ztext.AsReadOnly() : null;
@@ -46,7 +46,7 @@ namespace ZDebug.Core.Instructions
             get { return opcode; }
         }
 
-        public ReadOnlyCollection<Operand> Operands
+        public Operand[] Operands
         {
             get { return operands; }
         }

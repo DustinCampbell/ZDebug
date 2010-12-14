@@ -32,7 +32,7 @@ namespace ZDebug.Core.Tests
             Assert.That(i.Length, Is.EqualTo(3), "length check");
             Assert.That(i.Opcode.Kind, Is.EqualTo(OpcodeKind.OneOp), "opcode kind check");
             Assert.That(i.Opcode.Number, Is.EqualTo(0x0f), "opcode number check");
-            Assert.That(i.Operands.Count, Is.EqualTo(1), "operand count check");
+            Assert.That(i.Operands.Length, Is.EqualTo(1), "operand count check");
             Assert.That(i.Operands[0].Kind, Is.EqualTo(OperandKind.LargeConstant), "operand kind check");
             Assert.That(i.Operands[0].RawValue, Is.EqualTo(0x34ce), "operand value check");
             Assert.That(i.HasStoreVariable, Is.False, "store variable check");

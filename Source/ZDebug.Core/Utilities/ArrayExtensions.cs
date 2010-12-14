@@ -193,5 +193,20 @@ namespace ZDebug.Core.Utilities
 
             return result;
         }
+
+        public static T[] Skip<T>(this T[] array, int count)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            if (count < 0 || array.Length < count)
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
+
+            return ShallowCopyCore(array, count, array.Length - count);
+        }
     }
 }

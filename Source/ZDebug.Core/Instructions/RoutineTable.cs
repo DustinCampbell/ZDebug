@@ -26,7 +26,7 @@ namespace ZDebug.Core.Instructions
         private static bool IsAnalyzableCall(Instruction i)
         {
             return i.Opcode.IsCall &&
-                i.Operands.Count > 0 &&
+                i.Operands.Length > 0 &&
                 i.Operands[0].Kind != OperandKind.Variable;
         }
 

@@ -9,11 +9,28 @@ namespace ZDebug.UI.ViewModel
         private bool isModified;
         private bool isFrozen;
         private Value frozenValue;
+        private bool visible;
 
         public LocalVariableViewModel(int index, Value value)
         {
             this.index = index;
             this.value = value;
+        }
+
+        public bool Visible
+        {
+            get { return visible; }
+            set
+            {
+                if (visible != value)
+                {
+                    visible = value;
+                    if (!isFrozen)
+                    {
+                        PropertyChanged("Visible");
+                    }
+                }
+            }
         }
 
         public int Index

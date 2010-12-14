@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
@@ -356,7 +357,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args);
         };
@@ -369,7 +370,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args, i.StoreVariable);
         };
@@ -381,7 +382,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args);
         };
@@ -394,7 +395,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args, i.StoreVariable);
         };
@@ -406,7 +407,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args);
         };
@@ -419,7 +420,7 @@ namespace ZDebug.Core.Instructions
             var addressOpValue = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
 
-            var args = i.Operands.Skip(1).ToArray();
+            var args = i.Operands.Skip(1);
 
             context.Call(address, args, i.StoreVariable);
         };
@@ -919,13 +920,13 @@ namespace ZDebug.Core.Instructions
 
             var inputStream = (ushort)context.GetOperandValue(i.Operands[0]);
 
-            if (i.Operands.Count > 1)
+            if (i.Operands.Length > 1)
             {
                 // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
                 context.GetOperandValue(i.Operands[1]);
             }
 
-            if (i.Operands.Count > 2)
+            if (i.Operands.Length > 2)
             {
                 // TODO: Unsupported for the moment, but we need to read the operand to keep the stack consistent.
                 context.GetOperandValue(i.Operands[2]);
