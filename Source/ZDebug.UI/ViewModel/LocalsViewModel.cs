@@ -70,16 +70,16 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.State != DebuggerState.Running)
             {
-                foreach (var local in locals)
+                for (int i = 0; i < 15; i++)
                 {
-                    local.IsModified = false;
+                    locals[i].IsModified = false;
                 }
             }
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
-            for (int i = 0; i < locals.Length; i++)
+            for (int i = 0; i < 15; i++)
             {
                 locals[i].Visible = false;
             }
@@ -94,17 +94,18 @@ namespace ZDebug.UI.ViewModel
         {
             if (e.NewState == DebuggerState.Running)
             {
-                foreach (var local in locals)
+                for (int i = 0; i < 15; i++)
                 {
+                    var local = locals[i];
                     local.IsModified = false;
                     local.IsFrozen = true;
                 }
             }
             else
             {
-                foreach (var local in locals)
+                for (int i = 0; i < 15; i++)
                 {
-                    local.IsFrozen = false;
+                    locals[i].IsFrozen = false;
                 }
             }
         }

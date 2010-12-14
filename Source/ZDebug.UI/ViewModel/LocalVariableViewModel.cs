@@ -88,9 +88,16 @@ namespace ZDebug.UI.ViewModel
                 if (isFrozen != value)
                 {
                     isFrozen = value;
-                    frozenValue = this.value;
                     PropertyChanged("IsFrozen");
-                    PropertyChanged("Value");
+
+                    if (isFrozen)
+                    {
+                        frozenValue = this.value;
+                    }
+                    else
+                    {
+                        AllPropertiesChanged();
+                    }
                 }
             }
         }

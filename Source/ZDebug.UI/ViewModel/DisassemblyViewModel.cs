@@ -13,8 +13,21 @@ namespace ZDebug.UI.ViewModel
 {
     internal sealed class DisassemblyViewModel : ViewModelWithViewBase<UserControl>
     {
+        private struct AddressAndIndex
+        {
+            public readonly int Address;
+            public readonly int Index;
+
+            public AddressAndIndex(int address, int index)
+            {
+                this.Address = address;
+                this.Index = index;
+            }
+        }
+
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly Dictionary<int, DisassemblyLineViewModel> addressToLineMap;
+        private readonly List<AddressAndIndex> routineAddressAndIndexList;
 
         private DisassemblyLineViewModel inputLine;
 
@@ -23,6 +36,7 @@ namespace ZDebug.UI.ViewModel
         {
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new Dictionary<int, DisassemblyLineViewModel>();
+            routineAddressAndIndexList = new List<AddressAndIndex>();
         }
 
         private DisassemblyLineViewModel GetLineByAddress(int address)
@@ -51,6 +65,7 @@ namespace ZDebug.UI.ViewModel
                     var routine = routineTable[rIndex];
 
                     var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine);
+                    routineAddressAndIndexList.Add(new AddressAndIndex(routineHeaderLine.Address, lines.Count));
                     lines.Add(routineHeaderLine);
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
 
@@ -124,66 +139,72 @@ namespace ZDebug.UI.ViewModel
 
         private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)
         {
-            //lines.BeginBulkOperation();
-            //try
-            //{
             // FInd routine header line that would follow this routine
-                int insertionPoint = -1;
-                bool atEnd = false;
-                for (int i = 0; i < lines.Count; i++)
+            int nextRoutineIndex = -1;
+            int insertionPoint = -1;
+            for (int i = 0; i < routineAddressAndIndexList.Count; i++)
+            {
+                var addressAndIndex = routineAddressAndIndexList[i];
+                if (addressAndIndex.Address > e.Routine.Address)
                 {
-                    var headerLine = lines[i] as DisassemblyRoutineHeaderLineViewModel;
-                    if (headerLine == null)
-                    {
-                        continue;
-                    }
+                    nextRoutineIndex = i;
+                    insertionPoint = addressAndIndex.Index;
+                    break;
+                }
+            }
 
-                    if (headerLine.Address > e.Routine.Address)
-                    {
-                        insertionPoint = i;
-                        break;
-                    }
+            // If no routine header found, insert at the end of the list.
+            if (nextRoutineIndex == -1)
+            {
+                insertionPoint = lines.Count;
+            }
+
+            var count = 0;
+            var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+            lines.Insert(insertionPoint, routineHeaderLine);
+            count++;
+            addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
+
+            lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
+            count++;
+
+            foreach (var i in e.Routine.Instructions)
+            {
+                var instructionLine = new DisassemblyInstructionLineViewModel(i);
+                if (DebuggerService.BreakpointExists(i.Address))
+                {
+                    instructionLine.HasBreakpoint = true;
+                }
+                lines.Insert(insertionPoint + count, instructionLine);
+                count++;
+                addressToLineMap.Add(i.Address, instructionLine);
+            }
+
+            if (nextRoutineIndex >= 0)
+            {
+                lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
+                count++;
+
+                // fix up routine indeces...
+                for (int i = nextRoutineIndex; i < routineAddressAndIndexList.Count; i++)
+                {
+                    var addressAndIndex = routineAddressAndIndexList[i];
+                    routineAddressAndIndexList[i] = new AddressAndIndex(addressAndIndex.Address, addressAndIndex.Index + count);
                 }
 
-                // If no routine header found, insert at the end of the list.
-                if (insertionPoint == -1)
-                {
-                    insertionPoint = lines.Count;
-                    atEnd = true;
-                }
-
-                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
-                lines.Insert(insertionPoint++, routineHeaderLine);
-                addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
-
-                lines.Add(DisassemblyBlankLineViewModel.Instance);
-
-                foreach (var i in e.Routine.Instructions)
-                {
-                    var instructionLine = new DisassemblyInstructionLineViewModel(i);
-                    if (DebuggerService.BreakpointExists(i.Address))
-                    {
-                        instructionLine.HasBreakpoint = true;
-                    }
-                    lines.Insert(insertionPoint++, instructionLine);
-                    addressToLineMap.Add(i.Address, instructionLine);
-                }
-
-                if (!atEnd)
-                {
-                    lines.Insert(insertionPoint, DisassemblyBlankLineViewModel.Instance);
-                }
-            //}
-            //finally
-            //{
-            //    lines.EndBulkOperation();
-            //}
+                routineAddressAndIndexList.Insert(nextRoutineIndex, new AddressAndIndex(e.Routine.Address, insertionPoint));
+            }
+            else
+            {
+                routineAddressAndIndexList.Add(new AddressAndIndex(e.Routine.Address, insertionPoint));
+            }
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             lines.Clear();
             addressToLineMap.Clear();
+            routineAddressAndIndexList.Clear();
         }
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
