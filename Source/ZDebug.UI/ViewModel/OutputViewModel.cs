@@ -69,6 +69,23 @@ namespace ZDebug.UI.ViewModel
             return (DebuggerService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
         }
 
+        private bool IsScoreGame()
+        {
+            // TODO: Move into appropriate API
+            var story = DebuggerService.Story;
+            if (story.Version > 3)
+            {
+                throw new InvalidOperationException("status line should only be drawn be V1- V3");
+            }
+
+            if (story.Version < 3)
+            {
+                return true;
+            }
+
+            return (DebuggerService.Story.Memory.ReadByte(0x01) & 0x01) == 0x00;
+        }
+
         public void Print(string text)
         {
             if (ForceFixedWidthFont())
@@ -186,6 +203,66 @@ namespace ZDebug.UI.ViewModel
             windowManager.ActiveWindow.SetItalic(style.HasFlag(ZTextStyle.Italic));
             windowManager.ActiveWindow.SetFixedPitch(style.HasFlag(ZTextStyle.FixedPitch));
             windowManager.ActiveWindow.SetReverse(style.HasFlag(ZTextStyle.Reverse));
+        }
+
+        public void ShowStatus()
+        {
+            var story = DebuggerService.Story;
+            if (story.Version > 3)
+            {
+                return;
+            }
+
+            if (upperWindow == null)
+            {
+                upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
+            }
+
+            var charWidth = ScreenWidthInColumns;
+            var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0].RawValue).ShortName;
+
+            upperWindow.SetReverse(true);
+
+            if (charWidth < 5)
+            {
+                upperWindow.PutString(new string(' ', charWidth));
+                return;
+            }
+
+            if (locationText.Length > charWidth)
+            {
+                locationText = locationText.Substring(0, charWidth - 3) + "...";
+                upperWindow.PutString(locationText);
+                return;
+            }
+
+            upperWindow.PutString(locationText);
+
+            string rightText;
+            if (IsScoreGame())
+            {
+                int score = (short)story.GlobalVariablesTable[1];
+                int moves = (ushort)story.GlobalVariablesTable[2];
+                rightText = string.Format("Score: {0,-8} Moves: {1,-6} ", score, moves);
+            }
+            else
+            {
+                int hours = (ushort)story.GlobalVariablesTable[1];
+                int minutes = (ushort)story.GlobalVariablesTable[2];
+                var pm = (hours / 12) > 0;
+                if (pm)
+                {
+                    hours = hours % 12;
+                }
+
+                rightText = string.Format("{0}:{1:n2} {2}", hours, minutes, (pm ? "pm" : "am"));
+            }
+
+            if (rightText.Length < charWidth - locationText.Length - 1)
+            {
+                upperWindow.PutString(new string(' ', charWidth - locationText.Length - rightText.Length));
+                upperWindow.PutString(rightText);
+            }
         }
 
         public byte ScreenHeightInLines

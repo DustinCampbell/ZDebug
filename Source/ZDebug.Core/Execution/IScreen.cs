@@ -15,6 +15,8 @@ namespace ZDebug.Core.Execution
         void SetCursor(int line, int column);
         void SetTextStyle(ZTextStyle style);
 
+        void ShowStatus();
+
         byte ScreenHeightInLines { get; }
         byte ScreenWidthInColumns { get; }
         ushort ScreenHeightInUnits { get; }

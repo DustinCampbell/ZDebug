@@ -937,6 +937,18 @@ namespace ZDebug.Core.Instructions
             context.ReadChar(callback);
         };
 
+        public static readonly OpcodeRoutine sread1 = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var textBuffer = (ushort)context.GetOperandValue(i.Operands[0]);
+            var parseBuffer = (ushort)context.GetOperandValue(i.Operands[1]);
+
+            context.Screen.ShowStatus();
+
+            throw new NotImplementedException();
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Window routines
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1045,6 +1057,13 @@ namespace ZDebug.Core.Instructions
             {
                 context.Randomize((int)DateTime.Now.Ticks);
             }
+        };
+
+        public static readonly OpcodeRoutine show_status = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+
+            context.Screen.ShowStatus();
         };
 
         public static readonly OpcodeRoutine verify = (i, context) =>

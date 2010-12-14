@@ -37,6 +37,9 @@ namespace ZDebug.IO.Windows
             fontCharSize = new Size(zero.Width, zero.Height);
 
             Clear();
+
+            foreground = FontsAndColorsService.Foreground;
+            background = FontsAndColorsService.Background;
         }
 
         private Typeface GetTypeface()

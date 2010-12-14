@@ -38,6 +38,10 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void ShowStatus()
+            {
+            }
+
             public void Print(string text)
             {
             }

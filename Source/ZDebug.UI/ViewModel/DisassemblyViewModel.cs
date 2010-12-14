@@ -16,6 +16,8 @@ namespace ZDebug.UI.ViewModel
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly Dictionary<int, DisassemblyLineViewModel> addressToLineMap;
 
+        private DisassemblyLineViewModel inputLine;
+
         public DisassemblyViewModel()
             : base("DisassemblyView")
         {
@@ -212,12 +214,15 @@ namespace ZDebug.UI.ViewModel
             }
             else if (e.NewState == DebuggerState.AwaitingInput)
             {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
-                line.State = DisassemblyLineState.Paused;
-                BringLineIntoView(line);
+                inputLine = GetLineByAddress(DebuggerService.Story.Processor.ExecutingInstruction.Address);
+                inputLine.State = DisassemblyLineState.Paused;
+                BringLineIntoView(inputLine);
             }
             else if (e.OldState == DebuggerState.AwaitingInput)
             {
+                inputLine.State = DisassemblyLineState.None;
+                inputLine = null;
+
                 var ipLine = GetLineByAddress(DebuggerService.Story.Processor.PC);
                 ipLine.HasIP = true;
             }
