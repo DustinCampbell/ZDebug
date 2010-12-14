@@ -35,6 +35,17 @@ namespace ZDebug.Core
             this.routineTable = new RoutineTable(memory);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.processor = new Processor(this);
+
+            // write interpreter number
+            if (version >= 4)
+            {
+                memory.WriteByte(0x1e, 6);
+                memory.WriteByte(0x1f, 65); // A
+            }
+
+            // write standard revision number
+            memory.WriteByte(0x32, 1);
+            memory.WriteByte(0x33, 0);
         }
 
         private Story(byte[] bytes)
