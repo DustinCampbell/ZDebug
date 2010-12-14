@@ -14,8 +14,9 @@ namespace ZDebug.Core.Execution
         private readonly InstructionReader instructions;
         private readonly Stack<StackFrame> callStack;
         private readonly OutputStreams outputStreams;
-        private IScreen screen;
         private Random random = new Random();
+        private IScreen screen;
+        private IMessageLog messageLog;
 
         private Instruction executingInstruction;
 
@@ -26,6 +27,7 @@ namespace ZDebug.Core.Execution
             this.callStack = new Stack<StackFrame>();
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
+            RegisterMessageLog(NullMessageLog.Instance);
 
             // create "call" to main routine
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
@@ -279,6 +281,16 @@ namespace ZDebug.Core.Execution
             SetScreenDimensions();
 
             this.outputStreams.RegisterScreen(screen);
+        }
+
+        public void RegisterMessageLog(IMessageLog messageLog)
+        {
+            if (messageLog == null)
+            {
+                throw new ArgumentNullException("messageLog");
+            }
+
+            this.messageLog = messageLog;
         }
 
         public StackFrame CurrentFrame
@@ -640,6 +652,11 @@ namespace ZDebug.Core.Execution
         IScreen IExecutionContext.Screen
         {
             get { return screen; }
+        }
+
+        IMessageLog IExecutionContext.MessageLog
+        {
+            get { return messageLog; }
         }
     }
 }

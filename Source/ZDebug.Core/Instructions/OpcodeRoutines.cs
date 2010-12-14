@@ -594,7 +594,17 @@ namespace ZDebug.Core.Instructions
             Strict.HasStoreVariable(i);
 
             var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var childNum = context.GetChild(objNum);
+
+            int childNum;
+            if (objNum > 0)
+            {
+                childNum = context.GetChild(objNum);
+            }
+            else
+            {
+                context.MessageLog.SendWarning(i, "called with object 0");
+                childNum = 0;
+            }
 
             context.WriteVariable(i.StoreVariable, Value.Number((ushort)childNum));
 
@@ -623,7 +633,17 @@ namespace ZDebug.Core.Instructions
             Strict.HasStoreVariable(i);
 
             var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var parentNum = context.GetParent(objNum);
+
+            int parentNum;
+            if (objNum > 0)
+            {
+                parentNum = context.GetParent(objNum);
+            }
+            else
+            {
+                context.MessageLog.SendWarning(i, "called with object 0");
+                parentNum = 0;
+            }
 
             context.WriteVariable(i.StoreVariable, Value.Number((ushort)parentNum));
         };
@@ -673,7 +693,17 @@ namespace ZDebug.Core.Instructions
             Strict.HasStoreVariable(i);
 
             var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var siblingNum = context.GetSibling(objNum);
+
+            int siblingNum;
+            if (objNum > 0)
+            {
+                siblingNum = context.GetSibling(objNum);
+            }
+            else
+            {
+                context.MessageLog.SendWarning(i, "called with object 0");
+                siblingNum = 0;
+            }
 
             context.WriteVariable(i.StoreVariable, Value.Number((ushort)siblingNum));
 

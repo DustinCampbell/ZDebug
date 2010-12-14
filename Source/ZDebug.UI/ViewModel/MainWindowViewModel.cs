@@ -182,6 +182,9 @@ namespace ZDebug.UI.ViewModel
             var outputContent = this.View.FindName<DockableContent>("outputContent");
             outputContent.Content = ViewModelWithView.Create<OutputViewModel, UserControl>();
 
+            var messagesContent = this.View.FindName<DockableContent>("messagesContent");
+            messagesContent.Content = ViewModelWithView.Create<MessageLogViewModel, UserControl>();
+
             this.View.SourceInitialized += (s, e) =>
             {
                 Storage.RestoreWindowLayout(this.View);

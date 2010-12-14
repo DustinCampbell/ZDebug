@@ -62,5 +62,6 @@ namespace ZDebug.Core.Execution
         bool VerifyChecksum();
 
         IScreen Screen { get; }
+        IMessageLog MessageLog { get; }
     }
 }

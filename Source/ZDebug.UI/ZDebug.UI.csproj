@@ -75,6 +75,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\MessageLogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ObjectsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -132,6 +136,8 @@
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\LocalVariableViewModel.cs" />
+    <Compile Include="ViewModel\MessageLogViewModel.cs" />
+    <Compile Include="ViewModel\MessageViewModel.cs" />
     <Compile Include="ViewModel\OutputViewModel.cs" />
     <Compile Include="ViewModel\StackFrameViewModel.cs" />
     <Compile Include="ViewModel\StoryInfoViewModel.cs" />

@@ -107,9 +107,14 @@
                             </ad:DockablePane>
                         </ad:ResizingPanel>
                     </ad:ResizingPanel>
-                    <ad:DockablePane>
-                        <ad:DockableContent Title="Output" Name="outputContent"/>
-                    </ad:DockablePane>
+                    <ad:ResizingPanel Orientation="Vertical">
+                        <ad:DockablePane>
+                            <ad:DockableContent Title="Output" Name="outputContent"/>
+                        </ad:DockablePane>
+                        <ad:DockablePane ad:ResizingPanel.ResizeHeight="150">
+                            <ad:DockableContent Title="Messages" Name="messagesContent"/>
+                        </ad:DockablePane>
+                    </ad:ResizingPanel>
                 </ad:ResizingPanel>
             </ad:ResizingPanel>
         </ad:DockingManager>

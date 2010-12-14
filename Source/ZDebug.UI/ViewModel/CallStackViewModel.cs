@@ -33,6 +33,14 @@ namespace ZDebug.UI.ViewModel
             e.Story.Processor.ExitFrame += Processor_ExitFrame;
         }
 
+        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        {
+            stackFrames.Clear();
+
+            e.Story.Processor.EnterFrame -= Processor_EnterFrame;
+            e.Story.Processor.ExitFrame -= Processor_ExitFrame;
+        }
+
         private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
         {
             stackFrames.RemoveAt(0);
@@ -45,14 +53,6 @@ namespace ZDebug.UI.ViewModel
             var newFrame = new StackFrameViewModel(e.NewFrame, callAddress: DebuggerService.Story.Processor.ExecutingInstruction.Address);
             newFrame.IsCurrent = true;
             stackFrames.Insert(0, newFrame);
-        }
-
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
-        {
-            stackFrames.Clear();
-
-            e.Story.Processor.EnterFrame -= Processor_EnterFrame;
-            e.Story.Processor.ExitFrame -= Processor_ExitFrame;
         }
 
         protected internal override void Initialize()

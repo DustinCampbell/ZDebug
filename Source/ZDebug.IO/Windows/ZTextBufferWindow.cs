@@ -30,6 +30,7 @@ namespace ZDebug.IO.Windows
             this.document.Blocks.Add(paragraph);
 
             var scrollViewer = new FlowDocumentScrollViewer();
+            scrollViewer.FocusVisualStyle = null;
             scrollViewer.Document = this.document;
 
             this.Children.Add(scrollViewer);
