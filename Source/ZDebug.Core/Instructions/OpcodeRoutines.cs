@@ -896,8 +896,26 @@ namespace ZDebug.Core.Instructions
             Strict.HasZText(i);
 
             var ztext = context.ParseZWords(i.ZText);
-            context.Print(ztext);
+            context.Print(ztext + "\n");
             context.Return(Value.One);
+        };
+
+        public static readonly OpcodeRoutine set_color = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 2);
+
+            var foreground = (ZColor)(ushort)context.GetOperandValue(i.Operands[0]);
+            var background = (ZColor)(ushort)context.GetOperandValue(i.Operands[1]);
+
+            if (foreground != 0)
+            {
+                context.Screen.SetForegroundColor(foreground);
+            }
+
+            if (background != 0)
+            {
+                context.Screen.SetBackgroundColor(background);
+            }
         };
 
         public static readonly OpcodeRoutine set_text_style = (i, context) =>

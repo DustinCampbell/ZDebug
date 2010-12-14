@@ -14,6 +14,8 @@ namespace ZDebug.Core.Execution
 
         void SetCursor(int line, int column);
         void SetTextStyle(ZTextStyle style);
+        void SetForegroundColor(ZColor color);
+        void SetBackgroundColor(ZColor color);
 
         void ShowStatus();
 
@@ -25,5 +27,13 @@ namespace ZDebug.Core.Execution
         byte FontWidthInUnits { get; }
 
         event EventHandler DimensionsChanged;
+
+        bool SupportsColors { get; }
+        bool SupportsBold { get; }
+        bool SupportsItalic { get; }
+        bool SupportsFixedFont { get; }
+
+        ZColor DefaultBackgroundColor { get; }
+        ZColor DefaultForegroundColor { get; }
     }
 }

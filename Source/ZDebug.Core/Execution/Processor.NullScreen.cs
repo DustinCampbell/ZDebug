@@ -38,6 +38,14 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public void SetForegroundColor(ZColor color)
+            {
+            }
+
+            public void SetBackgroundColor(ZColor color)
+            {
+            }
+
             public void ShowStatus()
             {
             }
@@ -88,6 +96,37 @@ namespace ZDebug.Core.Execution
             public event EventHandler DimensionsChanged;
 
             public static readonly IScreen Instance = new NullScreen();
+
+
+            public bool SupportsColors
+            {
+                get { return false; }
+            }
+
+            public bool SupportsBold
+            {
+                get { return false; }
+            }
+
+            public bool SupportsItalic
+            {
+                get { return false; }
+            }
+
+            public bool SupportsFixedFont
+            {
+                get { return false; }
+            }
+
+            public ZColor DefaultBackgroundColor
+            {
+                get { return ZColor.White; }
+            }
+
+            public ZColor DefaultForegroundColor
+            {
+                get { return ZColor.Black; }
+            }
         }
     }
 }

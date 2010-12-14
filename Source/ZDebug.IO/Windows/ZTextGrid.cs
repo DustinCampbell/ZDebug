@@ -12,15 +12,13 @@ namespace ZDebug.IO.Windows
 
         private readonly Size fontCharSize;
 
-        private readonly GuidelineSet guidelineSet;
         private int cursorX;
         private int cursorY;
 
         private Typeface typeface;
         private bool bold;
         private bool italic;
-        private Brush foreground;
-        private Brush background;
+        private bool reverse;
 
         public ZTextGrid()
         {
@@ -32,14 +30,11 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: GetTypeface(),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: FontsAndColorsService.DefaultForeground);
 
             fontCharSize = new Size(zero.Width, zero.Height);
 
             Clear();
-
-            foreground = FontsAndColorsService.Foreground;
-            background = FontsAndColorsService.Background;
         }
 
         private Typeface GetTypeface()
@@ -78,13 +73,25 @@ namespace ZDebug.IO.Windows
                 var x = fontCharSize.Width * cursorX;
                 var y = fontCharSize.Height * cursorY;
 
+                Brush fg, bg;
+                if (reverse)
+                {
+                    fg = FontsAndColorsService.Background;
+                    bg = FontsAndColorsService.Foreground;
+                }
+                else
+                {
+                    fg = FontsAndColorsService.Foreground;
+                    bg = FontsAndColorsService.Background;
+                }
+
                 var backgroundRect = new Rect(
                     Math.Floor(x),
                     Math.Floor(y),
                     Math.Ceiling(fontCharSize.Width + .5),
                     Math.Ceiling(fontCharSize.Height));
 
-                backgroundContext.DrawRectangle(background, null, backgroundRect);
+                backgroundContext.DrawRectangle(bg, null, backgroundRect);
 
                 backgroundContext.Close();
 
@@ -100,7 +107,7 @@ namespace ZDebug.IO.Windows
                         FlowDirection.LeftToRight,
                         GetTypeface(),
                         FontsAndColorsService.FontSize,
-                        foreground,
+                        fg,
                         new NumberSubstitution(NumberCultureSource.User, CultureInfo.CurrentUICulture, NumberSubstitutionMethod.AsCulture),
                         TextFormattingMode.Display),
                     new Point(x, y));
@@ -131,14 +138,9 @@ namespace ZDebug.IO.Windows
             typeface = null;
         }
 
-        public void SetForeground(Brush value)
+        public void SetReverse(bool value)
         {
-            foreground = value;
-        }
-
-        public void SetBackground(Brush value)
-        {
-            background = value;
+            reverse = value;
         }
 
         protected override Visual GetVisualChild(int index)

@@ -205,6 +205,52 @@ namespace ZDebug.UI.ViewModel
             windowManager.ActiveWindow.SetReverse(style.HasFlag(ZTextStyle.Reverse));
         }
 
+        private Brush GetZColorBrush(ZColor color)
+        {
+            switch (color)
+            {
+                case ZColor.Black:
+                    return Brushes.Black;
+                case ZColor.Red:
+                    return Brushes.Red;
+                case ZColor.Green:
+                    return Brushes.Green;
+                case ZColor.Yellow:
+                    return Brushes.Yellow;
+                case ZColor.Blue:
+                    return Brushes.Blue;
+                case ZColor.Magenta:
+                    return Brushes.Magenta;
+                case ZColor.Cyan:
+                    return Brushes.Cyan;
+                case ZColor.White:
+                    return Brushes.White;
+                case ZColor.Gray:
+                    return Brushes.Gray;
+
+                default:
+                    throw new ArgumentException("Unexpected color: " + color, "color");
+            }
+        }
+
+        public void SetForegroundColor(ZColor color)
+        {
+            var brush = color == ZColor.Default
+                ? FontsAndColorsService.DefaultForeground
+                : GetZColorBrush(color);
+
+            FontsAndColorsService.Foreground = brush;
+        }
+
+        public void SetBackgroundColor(ZColor color)
+        {
+            var brush = color == ZColor.Default
+                ? FontsAndColorsService.DefaultBackground
+                : GetZColorBrush(color);
+
+            FontsAndColorsService.Background = brush;
+        }
+
         public void ShowStatus()
         {
             var story = DebuggerService.Story;
@@ -296,5 +342,36 @@ namespace ZDebug.UI.ViewModel
         }
 
         public event EventHandler DimensionsChanged;
+
+
+        public bool SupportsColors
+        {
+            get { return true; }
+        }
+
+        public bool SupportsBold
+        {
+            get { return true; }
+        }
+
+        public bool SupportsItalic
+        {
+            get { return true; }
+        }
+
+        public bool SupportsFixedFont
+        {
+            get { return true; }
+        }
+
+        public ZColor DefaultBackgroundColor
+        {
+            get { return ZColor.White; }
+        }
+
+        public ZColor DefaultForegroundColor
+        {
+            get { return ZColor.Black; }
+        }
     }
 }

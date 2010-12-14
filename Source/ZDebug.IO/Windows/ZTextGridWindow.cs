@@ -59,18 +59,7 @@ namespace ZDebug.IO.Windows
         {
             var oldValue = reverse;
             reverse = value;
-
-            if (reverse)
-            {
-                textGrid.SetBackground(FontsAndColorsService.Foreground);
-                textGrid.SetForeground(FontsAndColorsService.Background);
-            }
-            else
-            {
-                textGrid.SetBackground(FontsAndColorsService.Background);
-                textGrid.SetForeground(FontsAndColorsService.Foreground);
-            }
-
+            textGrid.SetReverse(value);
             return oldValue;
         }
 

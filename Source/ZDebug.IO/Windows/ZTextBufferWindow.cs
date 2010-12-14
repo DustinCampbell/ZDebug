@@ -16,8 +16,7 @@ namespace ZDebug.IO.Windows
         private bool bold;
         private bool italic;
         private bool fixedPitch;
-
-        private Typeface typeface;
+        private bool reverse;
 
         internal ZTextBufferWindow(ZWindowManager manager)
             : base(manager)
@@ -41,7 +40,7 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: new Typeface(FontsAndColorsService.NormalFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: FontsAndColorsService.DefaultForeground);
 
             fontCharSize = new Size(zero.Width, zero.Height);
         }
@@ -63,6 +62,17 @@ namespace ZDebug.IO.Windows
             if (fixedPitch)
             {
                 run.FontFamily = FontsAndColorsService.FixedFontFamily;
+            }
+
+            if (reverse)
+            {
+                run.Background = FontsAndColorsService.Foreground;
+                run.Foreground = FontsAndColorsService.Background;
+            }
+            else
+            {
+                run.Background = FontsAndColorsService.Background;
+                run.Foreground = FontsAndColorsService.Foreground;
             }
 
             return run;
@@ -101,6 +111,13 @@ namespace ZDebug.IO.Windows
         {
             var oldValue = fixedPitch;
             fixedPitch = value;
+            return oldValue;
+        }
+
+        public override bool SetReverse(bool value)
+        {
+            var oldValue = reverse;
+            reverse = value;
             return oldValue;
         }
 
