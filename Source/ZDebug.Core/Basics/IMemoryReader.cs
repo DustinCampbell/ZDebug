@@ -6,6 +6,8 @@
         byte[] NextBytes(int length);
         ushort NextWord();
         ushort[] NextWords(int length);
+        uint NextDWord();
+        uint[] NextDWords(int length);
 
         void Skip(int length);
 

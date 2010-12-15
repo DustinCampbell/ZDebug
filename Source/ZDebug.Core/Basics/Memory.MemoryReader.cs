@@ -74,6 +74,35 @@ namespace ZDebug.Core.Basics
                 return result;
             }
 
+            public uint NextDWord()
+            {
+                if (address + 4 > memory.Size)
+                {
+                    throw new InvalidOperationException("Attempted to read past end of memory");
+                }
+
+                var result = memory.ReadDWord(address);
+                address += 4;
+                return result;
+            }
+
+            public uint[] NextDWords(int length)
+            {
+                if (length == 0)
+                {
+                    return ArrayEx.Empty<uint>();
+                }
+
+                if (address + (length * 4) > memory.Size)
+                {
+                    throw new InvalidOperationException("Attempted to read past end of memory");
+                }
+
+                var result = memory.ReadDWords(address, length);
+                address += (length * 4);
+                return result;
+            }
+
             public void Skip(int length)
             {
                 if (length < 0 || address + length > memory.Size)
