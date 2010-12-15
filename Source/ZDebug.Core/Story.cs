@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Dictionary;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
@@ -20,6 +21,7 @@ namespace ZDebug.Core
         private readonly ZObjectTable objectTable;
         private readonly RoutineTable routineTable;
         private readonly GlobalVariablesTable globalVariablesTable;
+        private readonly ZDictionary dictionary;
         private readonly Processor processor;
 
         private Story(Memory memory)
@@ -34,6 +36,7 @@ namespace ZDebug.Core
             this.objectTable = new ZObjectTable(memory);
             this.routineTable = new RoutineTable(memory);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
+            this.dictionary = new ZDictionary(this);
             this.processor = new Processor(this);
 
             // write interpreter number
@@ -121,6 +124,11 @@ namespace ZDebug.Core
         public GlobalVariablesTable GlobalVariablesTable
         {
             get { return globalVariablesTable; }
+        }
+
+        public ZDictionary Dictionary
+        {
+            get { return dictionary; }
         }
 
         public Processor Processor

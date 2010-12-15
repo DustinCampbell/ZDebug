@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dictionary\ZDictionary.cs" />
+    <Compile Include="Dictionary\ZDictionaryEntry.cs" />
     <Compile Include="Execution\IInputStream.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
