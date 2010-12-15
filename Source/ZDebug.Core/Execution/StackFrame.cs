@@ -8,14 +8,14 @@ namespace ZDebug.Core.Execution
     {
         private const int stackSize = 1024;
 
-        public readonly int Address;
-        public readonly Value[] Arguments;
-        public readonly Value[] InitialLocalValues;
-        public readonly Value[] Locals;
-        private readonly int? returnAddress;
-        private readonly Variable storeVariable;
+        private int address;
+        private Value[] arguments;
+        private Value[] initialLocalValues;
+        private Value[] locals;
+        private int? returnAddress;
+        private Variable storeVariable;
 
-        private readonly Value[] stack;
+        private Value[] stack;
         private int sp;
 
         internal StackFrame(
@@ -25,14 +25,25 @@ namespace ZDebug.Core.Execution
             int? returnAddress,
             Variable storeVariable)
         {
-            this.Address = address;
-            this.Arguments = arguments;
-            this.InitialLocalValues = locals.ShallowCopy();
-            this.Locals = locals;
-            this.stack = new Value[stackSize];
-            sp = stackSize;
+            Initialize(address, arguments, locals, returnAddress, storeVariable);
+        }
+
+        internal void Initialize(
+            int address,
+            Value[] arguments,
+            Value[] locals,
+            int? returnAddress,
+            Variable storeVariable)
+        {
+            this.address = address;
+            this.arguments = arguments;
+            this.initialLocalValues = locals.ShallowCopy();
+            this.locals = locals;
             this.returnAddress = returnAddress;
             this.storeVariable = storeVariable;
+
+            this.stack = new Value[stackSize];
+            sp = stackSize;
         }
 
         public Value PopValue()
@@ -67,7 +78,24 @@ namespace ZDebug.Core.Execution
 
         public void SetLocal(int index, Value value)
         {
-            Locals[index] = value;
+            locals[index] = value;
+        }
+
+        public int Address
+        {
+            get { return address; }
+        }
+        public Value[] Arguments
+        {
+            get { return arguments; }
+        }
+        public Value[] InitialLocalValues
+        {
+            get { return initialLocalValues; }
+        }
+        public Value[] Locals
+        {
+            get { return locals; }
         }
 
         public bool HasReturnAddress

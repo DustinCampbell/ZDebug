@@ -196,9 +196,16 @@ namespace ZDebug.Core.Execution
                 Array.Copy(argValues, 0, locals, 0, numberToCopy);
 
                 var oldFrame = callStack[sp];
-                var newFrame = new StackFrame(address, argValues, locals, returnAddress, storeVariable);
-
-                callStack[--sp] = newFrame;
+                var newFrame = callStack[--sp];
+                if (newFrame != null)
+                {
+                    newFrame.Initialize(address, argValues, locals, returnAddress, storeVariable);
+                }
+                else
+                {
+                    newFrame = new StackFrame(address, argValues, locals, returnAddress, storeVariable);
+                    callStack[sp] = newFrame;
+                }
 
                 OnEnterFrame(oldFrame, newFrame);
             }
