@@ -5,11 +5,11 @@ namespace ZDebug.Core.Instructions
 {
     internal sealed class InstructionReader
     {
-        private readonly IMemoryReader reader;
+        private readonly MemoryReader reader;
         private readonly byte version;
         private readonly InstructionCache cache;
 
-        internal InstructionReader(IMemoryReader reader, byte version, InstructionCache cache)
+        internal InstructionReader(MemoryReader reader, byte version, InstructionCache cache)
         {
             this.reader = reader;
             this.version = version;

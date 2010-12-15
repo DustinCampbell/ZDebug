@@ -9,7 +9,10 @@ namespace ZDebug.PerfHarness
 {
     class Program
     {
+        const string BRONZE = @"..\..\ZCode\bronze\bronze.z8";
+        const string DREAMHOLD = @"..\..\ZCode\dreamhold\dreamhold.z8";
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
+        const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
         static byte[] ReadStoryBytes(string path)
         {

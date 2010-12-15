@@ -5,7 +5,7 @@ namespace ZDebug.Core.Basics
 {
     public static class IMemoryReader_Instructions
     {
-        internal static InstructionReader AsInstructionReader(this IMemoryReader reader, byte version, InstructionCache cache = null)
+        internal static InstructionReader AsInstructionReader(this MemoryReader reader, byte version, InstructionCache cache = null)
         {
             if (reader == null)
             {

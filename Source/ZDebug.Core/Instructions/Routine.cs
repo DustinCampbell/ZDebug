@@ -50,7 +50,7 @@ namespace ZDebug.Core.Instructions
             get { return instructions; }
         }
 
-        internal static Routine Parse(IMemoryReader reader, byte version, InstructionCache cache)
+        internal static Routine Parse(MemoryReader reader, byte version, InstructionCache cache)
         {
             var address = reader.Address;
             var localCount = reader.NextByte();

@@ -5,7 +5,7 @@ namespace ZDebug.Core.Basics
 {
     internal static partial class IMemoryReaderExtensions
     {
-        private static ZProperty NextProperty_V1(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
+        private static ZProperty NextProperty_V1(this MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
         {
             var address = reader.Address - 1;
             var number = sizeByte % 32;
@@ -16,7 +16,7 @@ namespace ZDebug.Core.Basics
             return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
         }
 
-        private static ZProperty NextProperty_V4(this IMemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
+        private static ZProperty NextProperty_V4(this MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
         {
             var address = reader.Address - 1;
             var number = sizeByte & 0x3f; // number is in the bottom 6 bites
@@ -42,7 +42,7 @@ namespace ZDebug.Core.Basics
             return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
         }
 
-        public static ZProperty NextProperty(this IMemoryReader reader, int version, ZPropertyTable propertyTable, int index)
+        public static ZProperty NextProperty(this MemoryReader reader, int version, ZPropertyTable propertyTable, int index)
         {
             var sizeByte = reader.NextByte();
             if (sizeByte == 0)
@@ -64,13 +64,13 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static void SkipShortName(this IMemoryReader reader)
+        public static void SkipShortName(this MemoryReader reader)
         {
             var length = reader.NextByte();
             reader.Skip(length * 2);
         }
 
-        public static void SkipProperties(this IMemoryReader reader, int version)
+        public static void SkipProperties(this MemoryReader reader, int version)
         {
             while (true)
             {

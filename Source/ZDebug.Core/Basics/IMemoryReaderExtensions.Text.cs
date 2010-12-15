@@ -4,7 +4,7 @@ namespace ZDebug.Core.Basics
 {
     internal static partial class IMemoryReaderExtensions
     {
-        public static ushort[] NextZWords(this IMemoryReader reader)
+        public static ushort[] NextZWords(this MemoryReader reader)
         {
             var list = new List<ushort>();
 

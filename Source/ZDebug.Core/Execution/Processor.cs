@@ -12,7 +12,7 @@ namespace ZDebug.Core.Execution
         private const int stackSize = 1024;
 
         private readonly Story story;
-        private readonly IMemoryReader reader;
+        private readonly MemoryReader reader;
         private readonly InstructionReader instructions;
 
         private readonly StackFrame[] callStack;
@@ -207,7 +207,11 @@ namespace ZDebug.Core.Execution
                     callStack[sp] = newFrame;
                 }
 
-                OnEnterFrame(oldFrame, newFrame);
+                var enterFrameHandler = EnterFrame;
+                if (enterFrameHandler != null)
+                {
+                    enterFrameHandler(this, new StackFrameEventArgs(oldFrame, newFrame));
+                }
             }
 
             callCount++;
@@ -241,8 +245,13 @@ namespace ZDebug.Core.Execution
         private void Return(Value value)
         {
             var oldFrame = callStack[sp++];
+            var newFrame = callStack[sp];
 
-            OnExitFrame(oldFrame, callStack[sp]);
+            var exitFrameHandler = ExitFrame;
+            if (exitFrameHandler != null)
+            {
+                exitFrameHandler(this, new StackFrameEventArgs(oldFrame, newFrame));
+            }
 
             reader.Address = oldFrame.ReturnAddress;
 
@@ -282,12 +291,23 @@ namespace ZDebug.Core.Execution
             var i = instructions.NextInstruction(); ;
 
             executingInstruction = i;
-            OnStepping(oldPC);
+
+            var steppingHandler = Stepping;
+            if (steppingHandler != null)
+            {
+                steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
+            }
 
             i.Opcode.Execute(i, this);
 
             var newPC = reader.Address;
-            OnStepped(oldPC, newPC);
+
+            var steppedHandler = Stepped;
+            if (steppedHandler != null)
+            {
+                steppedHandler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
+            }
+
             executingInstruction = null;
 
             instructionCount++;
@@ -401,42 +421,6 @@ namespace ZDebug.Core.Execution
         public Instruction ExecutingInstruction
         {
             get { return executingInstruction; }
-        }
-
-        private void OnStepping(int oldPC)
-        {
-            var handler = Stepping;
-            if (handler != null)
-            {
-                handler(this, new ProcessorSteppingEventArgs(oldPC));
-            }
-        }
-
-        private void OnStepped(int oldPC, int newPC)
-        {
-            var handler = Stepped;
-            if (handler != null)
-            {
-                handler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
-            }
-        }
-
-        private void OnEnterFrame(StackFrame oldFrame, StackFrame newFrame)
-        {
-            var handler = EnterFrame;
-            if (handler != null)
-            {
-                handler(this, new StackFrameEventArgs(oldFrame, newFrame));
-            }
-        }
-
-        private void OnExitFrame(StackFrame oldFrame, StackFrame newFrame)
-        {
-            var handler = ExitFrame;
-            if (handler != null)
-            {
-                handler(this, new StackFrameEventArgs(oldFrame, newFrame));
-            }
         }
 
         private void OnLocalVariableChanged(int index, Value oldValue, Value newValue)

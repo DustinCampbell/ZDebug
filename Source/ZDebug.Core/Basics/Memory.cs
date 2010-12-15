@@ -325,7 +325,7 @@ namespace ZDebug.Core.Basics
                 newValues: newValues);
         }
 
-        public IMemoryReader CreateReader(int address)
+        public MemoryReader CreateReader(int address)
         {
             if (address < 0 || address >= bytes.Length)
             {
