@@ -9,23 +9,32 @@ namespace ZDebug.Core.Execution
 {
     public sealed partial class Processor : IExecutionContext
     {
+        private const int stackSize = 1024;
+
         private readonly Story story;
         private readonly IMemoryReader reader;
         private readonly InstructionReader instructions;
-        private readonly Stack<StackFrame> callStack;
+
+        private readonly StackFrame[] callStack;
+        private int sp;
+
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
         private IScreen screen;
         private IMessageLog messageLog;
-        private int calls;
 
-        private Instruction? executingInstruction;
+        private int instructionCount;
+        private int callCount;
+
+        private Instruction executingInstruction;
 
         internal Processor(Story story, InstructionCache cache)
         {
             this.story = story;
 
-            this.callStack = new Stack<StackFrame>();
+            this.callStack = new StackFrame[stackSize];
+            this.sp = stackSize;
+
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
@@ -38,13 +47,13 @@ namespace ZDebug.Core.Execution
             var localCount = reader.NextByte();
             var locals = ArrayEx.Create(localCount, i => Value.Zero);
 
-            callStack.Push(
+            callStack[--sp] =
                 new StackFrame(
                     mainRoutineAddress,
-                    arguments: ArrayEx.Empty<Value>(),
+                    arguments: new Value[0],
                     locals: locals,
                     returnAddress: null,
-                    storeVariable: null));
+                    storeVariable: null);
         }
 
         private Value ReadVariable(Variable variable, bool indirect = false)
@@ -54,15 +63,15 @@ namespace ZDebug.Core.Execution
                 case VariableKind.Stack:
                     if (indirect)
                     {
-                        return CurrentFrame.PeekValue();
+                        return callStack[sp].PeekValue();
                     }
                     else
                     {
-                        return CurrentFrame.PopValue();
+                        return callStack[sp].PopValue();
                     }
 
                 case VariableKind.Local:
-                    return CurrentFrame.Locals[variable.Index];
+                    return callStack[sp].Locals[variable.Index];
 
                 case VariableKind.Global:
                     return story.GlobalVariablesTable[variable.Index];
@@ -79,15 +88,15 @@ namespace ZDebug.Core.Execution
                 case VariableKind.Stack:
                     if (indirect)
                     {
-                        CurrentFrame.PopValue();
+                        callStack[sp].PopValue();
                     }
 
-                    CurrentFrame.PushValue(value);
+                    callStack[sp].PushValue(value);
                     break;
 
                 case VariableKind.Local:
-                    var oldValue = CurrentFrame.Locals[variable.Index];
-                    CurrentFrame.SetLocal(variable.Index, value);
+                    var oldValue = callStack[sp].Locals[variable.Index];
+                    callStack[sp].SetLocal(variable.Index, value);
                     OnLocalVariableChanged(variable.Index, oldValue, value);
                     break;
 
@@ -131,9 +140,19 @@ namespace ZDebug.Core.Execution
             }
 
             // NOTE: argument values must be retrieved in case they manipulate the stack
-            var argValues = operands != null
-                ? operands.Select(GetOperandValue)
-                : ArrayEx.Empty<Value>();
+            Value[] argValues;
+            if (operands != null)
+            {
+                argValues = new Value[operands.Length];
+                for (int i = 0; i < operands.Length; i++)
+                {
+                    argValues[i] = GetOperandValue(operands[i]);
+                }
+            }
+            else
+            {
+                argValues = new Value[0];
+            }
 
             if (address == 0)
             {
@@ -145,6 +164,11 @@ namespace ZDebug.Core.Execution
             }
             else
             {
+                if (sp == 0)
+                {
+                    throw new InvalidOperationException("Stack underflow");
+                }
+
                 story.RoutineTable.Add(address);
 
                 var returnAddress = reader.Address;
@@ -152,22 +176,34 @@ namespace ZDebug.Core.Execution
 
                 // read locals
                 var localCount = reader.NextByte();
-                var locals = story.Version <= 4
-                    ? ArrayEx.Create(localCount, _ => Value.Number(reader.NextWord()))
-                    : ArrayEx.Create(localCount, _ => Value.Zero);
+                var locals = new Value[localCount];
+                if (story.Version <= 4)
+                {
+                    for (int i = 0; i < localCount; i++)
+                    {
+                        locals[i] = Value.Number(reader.NextWord());
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < localCount; i++)
+                    {
+                        locals[i] = Value.Zero;
+                    }
+                }
 
                 var numberToCopy = Math.Min(argValues.Length, locals.Length);
                 Array.Copy(argValues, 0, locals, 0, numberToCopy);
 
-                var oldFrame = CurrentFrame;
+                var oldFrame = callStack[sp];
                 var newFrame = new StackFrame(address, argValues, locals, returnAddress, storeVariable);
 
-                callStack.Push(newFrame);
+                callStack[--sp] = newFrame;
 
                 OnEnterFrame(oldFrame, newFrame);
             }
 
-            calls++;
+            callCount++;
         }
 
         private void Jump(short offset)
@@ -197,9 +233,9 @@ namespace ZDebug.Core.Execution
 
         private void Return(Value value)
         {
-            var oldFrame = callStack.Pop();
+            var oldFrame = callStack[sp++];
 
-            OnExitFrame(oldFrame, CurrentFrame);
+            OnExitFrame(oldFrame, callStack[sp]);
 
             reader.Address = oldFrame.ReturnAddress;
 
@@ -246,6 +282,8 @@ namespace ZDebug.Core.Execution
             var newPC = reader.Address;
             OnStepped(oldPC, newPC);
             executingInstruction = null;
+
+            instructionCount++;
         }
 
         private void Screen_DimensionsChanged(object sender, EventArgs e)
@@ -332,7 +370,7 @@ namespace ZDebug.Core.Execution
 
         public StackFrame CurrentFrame
         {
-            get { return callStack.Peek(); }
+            get { return callStack[sp]; }
         }
 
         public int PC
@@ -340,9 +378,14 @@ namespace ZDebug.Core.Execution
             get { return reader.Address; }
         }
 
-        public int Calls
+        public int InstructionCount
         {
-            get { return calls; }
+            get { return instructionCount; }
+        }
+
+        public int CallCount
+        {
+            get { return callCount; }
         }
 
         /// <summary>
@@ -350,7 +393,7 @@ namespace ZDebug.Core.Execution
         /// </summary>
         public Instruction ExecutingInstruction
         {
-            get { return executingInstruction.Value; }
+            get { return executingInstruction; }
         }
 
         private void OnStepping(int oldPC)
@@ -467,14 +510,14 @@ namespace ZDebug.Core.Execution
             story.Memory.WriteWord(address, value);
         }
 
-        void IExecutionContext.Call(int address, Operand[] operands = null, Variable storeVariable = null)
+        void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
         {
             Call(address, operands, storeVariable);
         }
 
         int IExecutionContext.GetArgumentCount()
         {
-            return CurrentFrame.Arguments.Count;
+            return callStack[sp].Arguments.Length;
         }
 
         void IExecutionContext.Jump(short offset)

@@ -152,7 +152,7 @@ namespace ZDebug.Core.Instructions
             Instruction i;
             if (cache.TryGet(address, out i))
             {
-                reader.Skip(i.Length);
+                reader.Address += i.Length;
                 return i;
             }
 

@@ -3,63 +3,53 @@ namespace ZDebug.Core.Instructions
 {
     public struct Operand
     {
-        private readonly OperandKind kind;
-        private readonly ushort rawValue;
+        public readonly OperandKind Kind;
+        public readonly ushort RawValue;
 
         public Operand(OperandKind kind, ushort rawValue)
         {
-            this.kind = kind;
-            this.rawValue = rawValue;
-        }
-
-        public OperandKind Kind
-        {
-            get { return kind; }
-        }
-
-        public ushort RawValue
-        {
-            get { return rawValue; }
+            this.Kind = kind;
+            this.RawValue = rawValue;
         }
 
         public Value AsLargeConstant()
         {
-            if (kind != OperandKind.LargeConstant)
+            if (Kind != OperandKind.LargeConstant)
             {
                 throw new InvalidOperationException();
             }
 
-            return Value.Number(rawValue);
+            return Value.Number(RawValue);
         }
 
         public Value AsSmallConstant()
         {
-            if (kind != OperandKind.SmallConstant)
+            if (Kind != OperandKind.SmallConstant)
             {
                 throw new InvalidOperationException();
             }
 
-            if (rawValue > 255)
+            if (RawValue > 255)
             {
                 throw new InvalidOperationException();
             }
 
-            return Value.Number((byte)rawValue);
+            return Value.Number((byte)RawValue);
         }
 
         public Variable AsVariable()
         {
-            if (kind != OperandKind.Variable)
+            if (Kind != OperandKind.Variable)
             {
                 throw new InvalidOperationException();
             }
 
-            if (rawValue > 255)
+            if (RawValue > 255)
             {
                 throw new InvalidOperationException();
             }
 
-            return Variable.FromByte((byte)rawValue);
+            return Variable.FromByte((byte)RawValue);
         }
     }
 }

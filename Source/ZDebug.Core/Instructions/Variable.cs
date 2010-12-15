@@ -1,65 +1,49 @@
-﻿using System.Collections.ObjectModel;
-using ZDebug.Core.Utilities;
-
+﻿
 namespace ZDebug.Core.Instructions
 {
     public sealed class Variable
     {
-        private readonly VariableKind kind;
-        private readonly byte index;
+        public readonly VariableKind Kind;
+        public readonly byte Index;
 
         public static readonly Variable Stack;
-        public static readonly ReadOnlyCollection<Variable> Locals;
-        public static readonly ReadOnlyCollection<Variable> Globals;
+        private static readonly Variable[] locals;
+        private static readonly Variable[] globals;
 
         static Variable()
         {
             Stack = new Variable(VariableKind.Stack, 0);
 
-            var locals = new Variable[15];
+            locals = new Variable[15];
             for (byte i = 0; i < 15; i++)
             {
                 locals[i] = new Variable(VariableKind.Local, i);
             }
 
-            Locals = locals.AsReadOnly();
-
-            var globals = new Variable[240];
+            globals = new Variable[240];
             for (byte i = 0; i < 240; i++)
             {
                 globals[i] = new Variable(VariableKind.Global, i);
             }
-
-            Globals = globals.AsReadOnly();
         }
 
         private Variable(VariableKind kind, byte index)
         {
-            this.kind = kind;
-            this.index = index;
+            this.Kind = kind;
+            this.Index = index;
         }
 
         public override string ToString()
         {
-            switch (kind)
+            switch (Kind)
             {
                 case VariableKind.Stack:
                     return "SP";
                 case VariableKind.Local:
-                    return "L" + index.ToString("x2");
+                    return "L" + Index.ToString("x2");
                 default: // VariableKind.Global:
-                    return "G" + index.ToString("x2");
+                    return "G" + Index.ToString("x2");
             }
-        }
-
-        public VariableKind Kind
-        {
-            get { return kind; }
-        }
-
-        public byte Index
-        {
-            get { return index; }
         }
 
         public static Variable FromByte(byte b)
@@ -70,11 +54,11 @@ namespace ZDebug.Core.Instructions
             }
             else if (b >= 0x01 && b <= 0x0f)
             {
-                return Variable.Locals[b - 0x01];
+                return Variable.locals[b - 0x01];
             }
             else // b >= 0x10 && b <= 0xff
             {
-                return Variable.Globals[b - 0x10];
+                return Variable.globals[b - 0x10];
             }
         }
     }

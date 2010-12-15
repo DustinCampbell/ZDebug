@@ -4,13 +4,13 @@ namespace ZDebug.Core.Instructions
 {
     public struct Value : IEquatable<Value>, IComparable, IComparable<Value>
     {
-        private readonly ValueKind kind;
-        private readonly ushort rawValue;
+        public readonly ValueKind Kind;
+        public readonly ushort RawValue;
 
         public Value(ValueKind kind, ushort rawValue)
         {
-            this.kind = kind;
-            this.rawValue = rawValue;
+            this.Kind = kind;
+            this.RawValue = rawValue;
         }
 
         public int CompareTo(object obj)
@@ -25,16 +25,16 @@ namespace ZDebug.Core.Instructions
 
         public int CompareTo(Value other)
         {
-            if (this.kind < other.kind)
+            if (this.Kind < other.Kind)
             {
                 return -1;
             }
-            else if (this.kind > other.kind)
+            else if (this.Kind > other.Kind)
             {
                 return 1;
             }
 
-            return this.rawValue.CompareTo(other.rawValue);
+            return this.RawValue.CompareTo(other.RawValue);
         }
 
         public override bool Equals(object obj)
@@ -49,22 +49,22 @@ namespace ZDebug.Core.Instructions
 
         public bool Equals(Value other)
         {
-            return this.kind == other.kind && this.rawValue == other.rawValue;
+            return this.Kind == other.Kind && this.RawValue == other.RawValue;
         }
 
         public override int GetHashCode()
         {
-            return (int)kind ^ (int)rawValue;
+            return (int)Kind ^ (int)RawValue;
         }
 
         public override string ToString()
         {
-            switch (kind)
+            switch (Kind)
             {
                 case ValueKind.Number:
-                    return rawValue.ToString("x4");
+                    return RawValue.ToString("x4");
                 default:
-                    throw new InvalidOperationException("Invalid kind: " + kind);
+                    throw new InvalidOperationException("Invalid kind: " + Kind);
             }
         }
 
@@ -76,16 +76,6 @@ namespace ZDebug.Core.Instructions
         public static bool operator !=(Value value1, Value value2)
         {
             return !value1.Equals(value2);
-        }
-
-        public ValueKind Kind
-        {
-            get { return kind; }
-        }
-
-        public ushort RawValue
-        {
-            get { return rawValue; }
         }
 
         public static explicit operator ushort(Value value)
@@ -103,17 +93,7 @@ namespace ZDebug.Core.Instructions
             return new Value(ValueKind.Number, value);
         }
 
-        private static readonly Value zero = Value.Number(0);
-        private static readonly Value one = Value.Number(1);
-
-        public static Value Zero
-        {
-            get { return zero; }
-        }
-
-        public static Value One
-        {
-            get { return one; }
-        }
+        public static readonly Value Zero = Value.Number(0);
+        public static readonly Value One = Value.Number(1);
     }
 }

@@ -3,7 +3,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
-    public struct Instruction
+    public sealed class Instruction
     {
         public readonly int Address;
         public readonly int Length;
@@ -16,7 +16,7 @@ namespace ZDebug.Core.Instructions
         public readonly bool HasZText;
         public readonly ReadOnlyCollection<ushort> ZText;
 
-        public Instruction(
+        internal Instruction(
             int address,
             int length,
             Opcode opcode,

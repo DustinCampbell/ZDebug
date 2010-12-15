@@ -22,7 +22,7 @@ namespace ZDebug.UI.ViewModel
 
         private void Update(StackFrame frame)
         {
-            var localCount = frame.Locals.Count;
+            var localCount = frame.Locals.Length;
 
             for (int i = 0; i < 15; i++)
             {

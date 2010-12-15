@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 
@@ -30,12 +29,29 @@ namespace ZDebug.Core.Objects
 
         public bool Contains(int propNum)
         {
-            return properties.Any(p => p.Number == propNum);
+            for (int i = 0; i < properties.Count; i++)
+            {
+                if (properties[i].Number == propNum)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public ZProperty GetByNumber(int propNum)
         {
-            return properties.Where(p => p.Number == propNum).SingleOrDefault();
+            for (int i = 0; i < properties.Count; i++)
+            {
+                var p = properties[i];
+                if (p.Number == propNum)
+                {
+                    return p;
+                }
+            }
+
+            return null;
         }
 
         public int Address

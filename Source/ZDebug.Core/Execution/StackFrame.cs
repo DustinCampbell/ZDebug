@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
@@ -8,14 +6,17 @@ namespace ZDebug.Core.Execution
 {
     public sealed class StackFrame
     {
-        private readonly int address;
-        private readonly ReadOnlyCollection<Value> arguments;
-        private readonly ReadOnlyCollection<Value> initialLocalValues;
-        private readonly Value[] locals;
-        private readonly ReadOnlyCollection<Value> readOnlyLocals;
-        private readonly Stack<Value> stack;
+        private const int stackSize = 1024;
+
+        public readonly int Address;
+        public readonly Value[] Arguments;
+        public readonly Value[] InitialLocalValues;
+        public readonly Value[] Locals;
         private readonly int? returnAddress;
         private readonly Variable storeVariable;
+
+        private readonly Value[] stack;
+        private int sp;
 
         internal StackFrame(
             int address,
@@ -24,64 +25,49 @@ namespace ZDebug.Core.Execution
             int? returnAddress,
             Variable storeVariable)
         {
-            this.address = address;
-            this.arguments = arguments.AsReadOnly();
-            this.initialLocalValues = locals.ShallowCopy().AsReadOnly();
-            this.locals = locals;
-            this.readOnlyLocals = this.locals.AsReadOnly();
-            this.stack = new Stack<Value>();
+            this.Address = address;
+            this.Arguments = arguments;
+            this.InitialLocalValues = locals.ShallowCopy();
+            this.Locals = locals;
+            this.stack = new Value[stackSize];
+            sp = stackSize;
             this.returnAddress = returnAddress;
             this.storeVariable = storeVariable;
         }
 
         public Value PopValue()
         {
-            if (stack.Count == 0)
+            if (sp == stackSize)
             {
                 throw new InvalidOperationException("Stack is empty.");
             }
 
-            return stack.Pop();
+            return stack[sp++];
         }
 
         public Value PeekValue()
         {
-            if (stack.Count == 0)
+            if (sp == stackSize)
             {
                 throw new InvalidOperationException("Stack is empty.");
             }
 
-            return stack.Peek();
+            return stack[sp];
         }
 
         public void PushValue(Value value)
         {
-            stack.Push(value);
-        }
+            if (sp == 0)
+            {
+                throw new InvalidOperationException("Stack underflow");
+            }
 
-        public int Address
-        {
-            get { return this.address; }
-        }
-
-        public ReadOnlyCollection<Value> Arguments
-        {
-            get { return this.arguments; }
-        }
-
-        public ReadOnlyCollection<Value> InitialLocalValues
-        {
-            get { return this.initialLocalValues; }
-        }
-
-        public ReadOnlyCollection<Value> Locals
-        {
-            get { return this.readOnlyLocals; }
+            stack[--sp] = value;
         }
 
         public void SetLocal(int index, Value value)
         {
-            locals[index] = value;
+            Locals[index] = value;
         }
 
         public bool HasReturnAddress

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Utilities;
 
@@ -249,8 +248,19 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountInRange(i, 2, 4);
             Strict.HasBranch(i);
 
-            var x = (ushort)context.GetOperandValue(i.Operands[0]);
-            var result = i.Operands.Skip(1).Any(op => x == (ushort)context.GetOperandValue(op));
+            var ops = i.Operands;
+
+            var x = (ushort)context.GetOperandValue(ops[0]);
+
+            bool result = false;
+            for (int j = 1; j < ops.Length; j++)
+            {
+                if (x == (ushort)context.GetOperandValue(ops[j]))
+                {
+                    result = true;
+                    break;
+                }
+            }
 
             if (result == i.Branch.Condition)
             {
