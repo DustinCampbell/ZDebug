@@ -1,0 +1,10 @@
+﻿<Window x:Class="ZDebug.PerfHarness.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    
+        <StackPanel>
+            <Button Click="Button_Click">Open...</Button>
+        </StackPanel>
+
+</Window>
