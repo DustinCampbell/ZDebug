@@ -3,15 +3,17 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
-    public sealed class InstructionReader
+    internal sealed class InstructionReader
     {
         private readonly IMemoryReader reader;
         private readonly byte version;
+        private readonly InstructionCache cache;
 
-        public InstructionReader(IMemoryReader reader, byte version)
+        internal InstructionReader(IMemoryReader reader, byte version, InstructionCache cache)
         {
             this.reader = reader;
             this.version = version;
+            this.cache = cache != null ? cache : new InstructionCache();
         }
 
         private OperandKind[] ReadOperandKinds()
@@ -147,6 +149,13 @@ namespace ZDebug.Core.Instructions
         {
             var address = reader.Address;
 
+            Instruction i;
+            if (cache.TryGet(address, out i))
+            {
+                reader.Skip(i.Length);
+                return i;
+            }
+
             var opByte = reader.NextByte();
 
             Opcode opcode;
@@ -235,7 +244,9 @@ namespace ZDebug.Core.Instructions
 
             var length = reader.Address - address;
 
-            return new Instruction(address, length, opcode, operands, storeVariable, branch, ztext);
+            i = new Instruction(address, length, opcode, operands, storeVariable, branch, ztext);
+            cache.Add(address, i);
+            return i;
         }
     }
 }

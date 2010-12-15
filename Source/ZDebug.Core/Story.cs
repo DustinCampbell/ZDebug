@@ -15,6 +15,8 @@ namespace ZDebug.Core
         private readonly ushort releaseNumber;
         private readonly ushort actualChecksum;
 
+        private readonly InstructionCache instructionCache;
+
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
@@ -29,12 +31,13 @@ namespace ZDebug.Core
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
             this.actualChecksum = memory.CalculateChecksum();
+            this.instructionCache = new InstructionCache();
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap);
             this.objectTable = new ZObjectTable(memory);
-            this.routineTable = new RoutineTable(memory);
+            this.routineTable = new RoutineTable(memory, instructionCache);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
-            this.processor = new Processor(this);
+            this.processor = new Processor(this, instructionCache);
 
             // write interpreter number
             if (version >= 4)

@@ -1,10 +1,10 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
 using ZDebug.UI.Services;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.UI.Controls
 {
@@ -16,7 +16,7 @@ namespace ZDebug.UI.Controls
         public static readonly DependencyProperty InstructionProperty =
             DependencyProperty.Register(
                 "Instruction",
-                typeof(Instruction),
+                typeof(Instruction?),
                 typeof(InstructionTextDisplayElement),
                 new FrameworkPropertyMetadata(
                     defaultValue: null,
@@ -54,11 +54,13 @@ namespace ZDebug.UI.Controls
         {
             builder.Clear();
 
-            var instruction = Instruction;
-            if (instruction == null)
+            var i = Instruction;
+            if (i == null)
             {
                 return;
             }
+
+            var instruction = i.Value;
 
             if (instruction.Operands.Length > 0)
             {
@@ -176,9 +178,9 @@ namespace ZDebug.UI.Controls
             update = false;
         }
 
-        public Instruction Instruction
+        public Instruction? Instruction
         {
-            get { return (Instruction)GetValue(InstructionProperty); }
+            get { return (Instruction?)GetValue(InstructionProperty); }
             set { SetValue(InstructionProperty, value); }
         }
     }

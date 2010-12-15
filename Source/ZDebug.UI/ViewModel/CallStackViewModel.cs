@@ -41,6 +41,18 @@ namespace ZDebug.UI.ViewModel
             e.Story.Processor.ExitFrame -= Processor_ExitFrame;
         }
 
+        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+        {
+            if (e.NewState == DebuggerState.Running)
+            {
+                this.View.DataContext = null;
+            }
+            else if (e.OldState == DebuggerState.Running)
+            {
+                this.View.DataContext = this;
+            }
+        }
+
         private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
         {
             stackFrames.RemoveAt(0);
@@ -59,6 +71,7 @@ namespace ZDebug.UI.ViewModel
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
         public BulkObservableCollection<StackFrameViewModel> StackFrames

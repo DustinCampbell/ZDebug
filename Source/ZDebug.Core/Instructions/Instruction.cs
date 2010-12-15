@@ -3,15 +3,18 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
-    public sealed class Instruction
+    public struct Instruction
     {
-        private readonly int address;
-        private readonly int length;
-        private readonly Opcode opcode;
-        private readonly Operand[] operands;
-        private readonly Variable storeVariable;
-        private readonly Branch? branch;
-        private readonly ReadOnlyCollection<ushort> ztext;
+        public readonly int Address;
+        public readonly int Length;
+        public readonly Opcode Opcode;
+        public readonly Operand[] Operands;
+        public readonly bool HasStoreVariable;
+        public readonly Variable StoreVariable;
+        public readonly bool HasBranch;
+        public readonly Branch Branch;
+        public readonly bool HasZText;
+        public readonly ReadOnlyCollection<ushort> ZText;
 
         public Instruction(
             int address,
@@ -22,63 +25,43 @@ namespace ZDebug.Core.Instructions
             Branch? branch = null,
             ushort[] ztext = null)
         {
-            this.address = address;
-            this.length = length;
-            this.opcode = opcode;
-            this.operands = operands;
-            this.storeVariable = storeVariable;
-            this.branch = branch;
-            this.ztext = ztext != null ? ztext.AsReadOnly() : null;
-        }
+            this.Address = address;
+            this.Length = length;
+            this.Opcode = opcode;
+            this.Operands = operands;
 
-        public int Address
-        {
-            get { return address; }
-        }
+            if (storeVariable != null)
+            {
+                this.StoreVariable = storeVariable;
+                this.HasStoreVariable = true;
+            }
+            else
+            {
+                this.StoreVariable = null;
+                this.HasStoreVariable = false;
+            }
 
-        public int Length
-        {
-            get { return length; }
-        }
+            if (branch != null)
+            {
+                this.Branch = branch.Value;
+                this.HasBranch = true;
+            }
+            else
+            {
+                this.Branch = default(Branch);
+                this.HasBranch = false;
+            }
 
-        public Opcode Opcode
-        {
-            get { return opcode; }
-        }
-
-        public Operand[] Operands
-        {
-            get { return operands; }
-        }
-
-        public bool HasStoreVariable
-        {
-            get { return storeVariable != null; }
-        }
-
-        public Variable StoreVariable
-        {
-            get { return storeVariable; }
-        }
-
-        public bool HasBranch
-        {
-            get { return branch.HasValue; }
-        }
-
-        public Branch Branch
-        {
-            get { return branch.Value; }
-        }
-
-        public bool HasZText
-        {
-            get { return ztext != null; }
-        }
-
-        public ReadOnlyCollection<ushort> ZText
-        {
-            get { return ztext; }
+            if (ztext != null)
+            {
+                this.ZText = ztext.AsReadOnly();
+                this.HasZText = true;
+            }
+            else
+            {
+                this.ZText = null;
+                this.HasZText = false;
+            }
         }
     }
 }

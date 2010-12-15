@@ -50,7 +50,7 @@ namespace ZDebug.Core.Instructions
             get { return instructions; }
         }
 
-        public static Routine Parse(IMemoryReader reader, byte version)
+        internal static Routine Parse(IMemoryReader reader, byte version, InstructionCache cache)
         {
             var address = reader.Address;
             var localCount = reader.NextByte();
@@ -58,7 +58,7 @@ namespace ZDebug.Core.Instructions
                 ? ArrayEx.Create(localCount, _ => new Value(ValueKind.Number, reader.NextWord()))
                 : ArrayEx.Create(localCount, _ => new Value(ValueKind.Number, 0));
 
-            var ireader = reader.AsInstructionReader(version);
+            var ireader = reader.AsInstructionReader(version, cache);
 
             var instructions = new List<Instruction>();
             var lastAddressKnown = reader.Address;

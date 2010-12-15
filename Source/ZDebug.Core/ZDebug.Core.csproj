@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Execution\IInputStream.cs" />
+    <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
     <Compile Include="Execution\LocalVariableChangedEventArgs.cs" />

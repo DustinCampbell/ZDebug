@@ -139,64 +139,72 @@ namespace ZDebug.UI.ViewModel
 
         private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)
         {
-            // FInd routine header line that would follow this routine
-            int nextRoutineIndex = -1;
-            int insertionPoint = -1;
-            for (int i = 0; i < routineAddressAndIndexList.Count; i++)
+            lines.BeginBulkOperation();
+            try
             {
-                var addressAndIndex = routineAddressAndIndexList[i];
-                if (addressAndIndex.Address > e.Routine.Address)
+                // FInd routine header line that would follow this routine
+                int nextRoutineIndex = -1;
+                int insertionPoint = -1;
+                for (int i = 0; i < routineAddressAndIndexList.Count; i++)
                 {
-                    nextRoutineIndex = i;
-                    insertionPoint = addressAndIndex.Index;
-                    break;
+                    var addressAndIndex = routineAddressAndIndexList[i];
+                    if (addressAndIndex.Address > e.Routine.Address)
+                    {
+                        nextRoutineIndex = i;
+                        insertionPoint = addressAndIndex.Index;
+                        break;
+                    }
                 }
-            }
 
-            // If no routine header found, insert at the end of the list.
-            if (nextRoutineIndex == -1)
-            {
-                insertionPoint = lines.Count;
-            }
-
-            var count = 0;
-            var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
-            lines.Insert(insertionPoint, routineHeaderLine);
-            count++;
-            addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
-
-            lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
-            count++;
-
-            foreach (var i in e.Routine.Instructions)
-            {
-                var instructionLine = new DisassemblyInstructionLineViewModel(i);
-                if (DebuggerService.BreakpointExists(i.Address))
+                // If no routine header found, insert at the end of the list.
+                if (nextRoutineIndex == -1)
                 {
-                    instructionLine.HasBreakpoint = true;
+                    insertionPoint = lines.Count;
                 }
-                lines.Insert(insertionPoint + count, instructionLine);
+
+                var count = 0;
+                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+                lines.Insert(insertionPoint, routineHeaderLine);
                 count++;
-                addressToLineMap.Add(i.Address, instructionLine);
-            }
+                addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
 
-            if (nextRoutineIndex >= 0)
-            {
                 lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
                 count++;
 
-                // fix up routine indeces...
-                for (int i = nextRoutineIndex; i < routineAddressAndIndexList.Count; i++)
+                foreach (var i in e.Routine.Instructions)
                 {
-                    var addressAndIndex = routineAddressAndIndexList[i];
-                    routineAddressAndIndexList[i] = new AddressAndIndex(addressAndIndex.Address, addressAndIndex.Index + count);
+                    var instructionLine = new DisassemblyInstructionLineViewModel(i);
+                    if (DebuggerService.BreakpointExists(i.Address))
+                    {
+                        instructionLine.HasBreakpoint = true;
+                    }
+                    lines.Insert(insertionPoint + count, instructionLine);
+                    count++;
+                    addressToLineMap.Add(i.Address, instructionLine);
                 }
 
-                routineAddressAndIndexList.Insert(nextRoutineIndex, new AddressAndIndex(e.Routine.Address, insertionPoint));
+                if (nextRoutineIndex >= 0)
+                {
+                    lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
+                    count++;
+
+                    // fix up routine indeces...
+                    for (int i = nextRoutineIndex; i < routineAddressAndIndexList.Count; i++)
+                    {
+                        var addressAndIndex = routineAddressAndIndexList[i];
+                        routineAddressAndIndexList[i] = new AddressAndIndex(addressAndIndex.Address, addressAndIndex.Index + count);
+                    }
+
+                    routineAddressAndIndexList.Insert(nextRoutineIndex, new AddressAndIndex(e.Routine.Address, insertionPoint));
+                }
+                else
+                {
+                    routineAddressAndIndexList.Add(new AddressAndIndex(e.Routine.Address, insertionPoint));
+                }
             }
-            else
+            finally
             {
-                routineAddressAndIndexList.Add(new AddressAndIndex(e.Routine.Address, insertionPoint));
+                lines.EndBulkOperation();
             }
         }
 
@@ -209,6 +217,15 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
+            if (e.NewState == DebuggerState.Running)
+            {
+                this.View.DataContext = null;
+            }
+            else if (e.OldState == DebuggerState.Running)
+            {
+                this.View.DataContext = this;
+            }
+
             if (e.NewState == DebuggerState.Unavailable)
             {
                 return;

@@ -5,14 +5,14 @@ namespace ZDebug.Core.Basics
 {
     public static class IMemoryReader_Instructions
     {
-        public static InstructionReader AsInstructionReader(this IMemoryReader reader, byte version)
+        internal static InstructionReader AsInstructionReader(this IMemoryReader reader, byte version, InstructionCache cache = null)
         {
             if (reader == null)
             {
                 throw new ArgumentNullException("reader");
             }
 
-            return new InstructionReader(reader, version);
+            return new InstructionReader(reader, version, cache);
         }
     }
 }

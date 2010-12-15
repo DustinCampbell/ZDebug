@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace ZDebug.Core.Utilities
 {
-    internal static class ArrayExtensions
+    public static class ArrayExtensions
     {
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] array)
         {

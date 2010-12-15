@@ -17,10 +17,11 @@ namespace ZDebug.Core.Execution
         private Random random = new Random();
         private IScreen screen;
         private IMessageLog messageLog;
+        private int calls;
 
-        private Instruction executingInstruction;
+        private Instruction? executingInstruction;
 
-        internal Processor(Story story)
+        internal Processor(Story story, InstructionCache cache)
         {
             this.story = story;
 
@@ -32,7 +33,7 @@ namespace ZDebug.Core.Execution
             // create "call" to main routine
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
             this.reader = story.Memory.CreateReader(mainRoutineAddress);
-            this.instructions = reader.AsInstructionReader(story.Version);
+            this.instructions = reader.AsInstructionReader(story.Version, cache);
 
             var localCount = reader.NextByte();
             var locals = ArrayEx.Create(localCount, i => Value.Zero);
@@ -165,6 +166,8 @@ namespace ZDebug.Core.Execution
 
                 OnEnterFrame(oldFrame, newFrame);
             }
+
+            calls++;
         }
 
         private void Jump(short offset)
@@ -232,10 +235,13 @@ namespace ZDebug.Core.Execution
         public void Step()
         {
             var oldPC = reader.Address;
-            executingInstruction = instructions.NextInstruction();
+
+            var i = instructions.NextInstruction(); ;
+
+            executingInstruction = i;
             OnStepping(oldPC);
 
-            executingInstruction.Opcode.Execute(executingInstruction, this);
+            i.Opcode.Execute(i, this);
 
             var newPC = reader.Address;
             OnStepped(oldPC, newPC);
@@ -334,12 +340,17 @@ namespace ZDebug.Core.Execution
             get { return reader.Address; }
         }
 
+        public int Calls
+        {
+            get { return calls; }
+        }
+
         /// <summary>
         /// The Instruction that is being executed (only valid during a step).
         /// </summary>
         public Instruction ExecutingInstruction
         {
-            get { return executingInstruction; }
+            get { return executingInstruction.Value; }
         }
 
         private void OnStepping(int oldPC)

@@ -1,15 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace ZDebug.Core.Instructions
 {
     public static class OpcodeTable
     {
-        private static readonly Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode> opcodeMap;
+        private static readonly Opcode[][][] opcodes;
 
         static OpcodeTable()
         {
-            opcodeMap = new Dictionary<Tuple<OpcodeKind, byte, byte>, Opcode>();
+            opcodes = new Opcode[8][][];
+            for (int i = 0; i < 8; i++)
+            {
+                opcodes[i] = new Opcode[5][];
+
+                for (int j = 0; j < 5; j++)
+                {
+                    opcodes[i][j] = new Opcode[32];
+                }
+            }
 
             // two-operand opcodes
             AddOpcode(OpcodeKind.TwoOp, 0x01, "je", OpcodeFlags.Branch, OpcodeRoutines.je);
@@ -156,11 +164,6 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.Ext, 0x1c, "picture_table", fromVersion: 6);
         }
 
-        private static Tuple<OpcodeKind, byte, byte> CreateKey(OpcodeKind kind, byte number, byte version)
-        {
-            return Tuple.Create(kind, number, version);
-        }
-
         private static void AddOpcode(
             OpcodeKind kind,
             byte number,
@@ -174,17 +177,15 @@ namespace ZDebug.Core.Instructions
 
             for (byte v = fromVersion; v <= toVersion; v++)
             {
-                var key = CreateKey(kind, number, v);
-                opcodeMap.Add(key, opcode);
+                opcodes[v - 1][(int)kind][number] = opcode;
             }
         }
 
-        public static Opcode GetOpcode(OpcodeKind kind, byte number, byte version)
+        internal static Opcode GetOpcode(OpcodeKind kind, byte number, byte version)
         {
-            var key = CreateKey(kind, number, version);
+            var opcode = opcodes[version - 1][(int)kind][number];
 
-            Opcode opcode;
-            if (!opcodeMap.TryGetValue(key, out opcode))
+            if (opcode == null)
             {
                 throw new InvalidOperationException(
                     string.Format(

@@ -11,12 +11,14 @@ namespace ZDebug.Core.Instructions
     {
         private readonly Memory memory;
         private readonly byte version;
+        private readonly InstructionCache cache;
         private readonly SortedList<int, Routine> routines;
 
-        internal RoutineTable(Memory memory)
+        internal RoutineTable(Memory memory, InstructionCache cache)
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
+            this.cache = cache;
             this.routines = new SortedList<int, Routine>();
 
             var mainRoutineAddress = memory.ReadMainRoutineAddress();
@@ -43,7 +45,7 @@ namespace ZDebug.Core.Instructions
             }
 
             var reader = memory.CreateReader(address);
-            var routine = Routine.Parse(reader, version);
+            var routine = Routine.Parse(reader, version, cache);
 
             routines.Add(address, routine);
 

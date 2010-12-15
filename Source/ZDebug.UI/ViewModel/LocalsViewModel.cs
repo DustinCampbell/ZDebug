@@ -94,6 +94,15 @@ namespace ZDebug.UI.ViewModel
         {
             if (e.NewState == DebuggerState.Running)
             {
+                this.View.DataContext = null;
+            }
+            else if (e.OldState == DebuggerState.Running)
+            {
+                this.View.DataContext = this;
+            }
+
+            if (e.NewState == DebuggerState.Running)
+            {
                 for (int i = 0; i < 15; i++)
                 {
                     var local = locals[i];

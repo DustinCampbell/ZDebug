@@ -98,10 +98,23 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
+        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+        {
+            if (e.NewState == DebuggerState.Running)
+            {
+                this.View.DataContext = null;
+            }
+            else
+            {
+                this.View.DataContext = this;
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
         public bool HasStory
