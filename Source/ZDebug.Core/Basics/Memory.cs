@@ -137,10 +137,10 @@ namespace ZDebug.Core.Basics
             uint[] result = new uint[length];
             for (int i = 0; i < length; i++)
             {
-                var b1 = bytes[address + (i * 2)];
-                var b2 = bytes[address + (i * 2) + 1];
-                var b3 = bytes[address + (i * 2) + 2];
-                var b4 = bytes[address + (i * 2) + 3];
+                var b1 = bytes[address + (i * 4)];
+                var b2 = bytes[address + (i * 4) + 1];
+                var b3 = bytes[address + (i * 4) + 2];
+                var b4 = bytes[address + (i * 4) + 3];
 
                 result[i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
             }

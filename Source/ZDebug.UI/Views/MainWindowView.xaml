@@ -36,7 +36,7 @@
 
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
-                <MenuItem Command="{Binding OpenStoryCommand}" Header="_Open...">
+                <MenuItem Command="{Binding OpenStoryCommand}" Header="_Open Story File...">
                     <MenuItem.Icon>
                         <c:AutoDisableImage Source="{StaticResource openImage}"/>
                     </MenuItem.Icon>

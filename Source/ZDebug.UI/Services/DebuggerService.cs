@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using ZDebug.Core;
+using ZDebug.Core.Blorb;
 using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Services
@@ -88,7 +89,21 @@ namespace ZDebug.UI.Services
         {
             CloseStory();
 
-            var bytes = File.ReadAllBytes(fileName);
+            byte[] bytes;
+
+            if (Path.GetExtension(fileName) == ".zblorb")
+            {
+                using (var stream = File.OpenRead(fileName))
+                {
+                    var blorb = new BlorbFile(stream);
+                    bytes = blorb.GetZCode();
+                }
+            }
+            else
+            {
+                bytes = File.ReadAllBytes(fileName);
+            }
+
             DebuggerService.story = Story.FromBytes(bytes);
             DebuggerService.fileName = fileName;
 
