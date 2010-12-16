@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blorb\BlorbFile.cs" />
+    <Compile Include="Dictionary\ZDictionary.cs" />
+    <Compile Include="Dictionary\ZDictionaryEntry.cs" />
     <Compile Include="Execution\IInputStream.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
