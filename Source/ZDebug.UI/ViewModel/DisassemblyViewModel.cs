@@ -94,8 +94,8 @@ namespace ZDebug.UI.ViewModel
             BringLineIntoView(ipLine);
 
             e.Story.Processor.Stepped += Processor_Stepped;
-            e.Story.Processor.EnterFrame += Processor_EnterFrame;
-            e.Story.Processor.ExitFrame += Processor_ExitFrame;
+            e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
+            e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
             e.Story.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
         }
 
@@ -125,16 +125,17 @@ namespace ZDebug.UI.ViewModel
 
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
         {
-            var returnLine = GetLineByAddress(e.NewFrame.ReturnAddress);
+            var returnLine = GetLineByAddress(e.PreviousAddress);
             returnLine.IsNextInstruction = true;
-            returnLine.ToolTip = new CallToolTip(e.NewFrame);
+
+            returnLine.ToolTip = "Execution will return here when " + e.Address.ToString("x4") + " returns.";
         }
 
         private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
         {
-            var returnLine = GetLineByAddress(e.OldFrame.ReturnAddress);
+            var returnLine = GetLineByAddress(e.Address);
             returnLine.IsNextInstruction = false;
-            returnLine.ToolTip = false;
+            returnLine.ToolTip = null;
         }
 
         private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)

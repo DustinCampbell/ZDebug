@@ -74,7 +74,6 @@
     <Compile Include="Basics\ObjectHelpers.cs" />
     <Compile Include="Execution\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Execution\ProcessorSteppingEventArgs.cs" />
-    <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Inform\InformData.cs" />
     <Compile Include="Instructions\Branch.cs" />
     <Compile Include="Instructions\BranchKind.cs" />
@@ -93,8 +92,6 @@
     <Compile Include="Instructions\RoutineTable.cs" />
     <Compile Include="Instructions\Strict.cs" />
     <Compile Include="Instructions\StrictException.cs" />
-    <Compile Include="Instructions\Value.cs" />
-    <Compile Include="Instructions\ValueKind.cs" />
     <Compile Include="Instructions\Variable.cs" />
     <Compile Include="Instructions\VariableKind.cs" />
     <Compile Include="Objects\ZObject.cs">

@@ -4,23 +4,23 @@ namespace ZDebug.Core.Execution
 {
     public sealed class StackFrameEventArgs : EventArgs
     {
-        private readonly StackFrame oldFrame;
-        private readonly StackFrame newFrame;
+        private readonly int address;
+        private readonly int previousAddress;
 
-        public StackFrameEventArgs(StackFrame oldFrame, StackFrame newFrame)
+        public StackFrameEventArgs(int address, int previousAddress)
         {
-            this.oldFrame = oldFrame;
-            this.newFrame = newFrame;
+            this.address = address;
+            this.previousAddress = previousAddress;
         }
 
-        public StackFrame OldFrame
+        public int Address
         {
-            get { return oldFrame; }
+            get { return address; }
         }
 
-        public StackFrame NewFrame
+        public int PreviousAddress
         {
-            get { return newFrame; }
+            get { return previousAddress; }
         }
     }
 }

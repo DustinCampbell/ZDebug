@@ -1,15 +1,14 @@
 ﻿using System;
-using ZDebug.Core.Instructions;
 
 namespace ZDebug.Core.Execution
 {
     public sealed class LocalVariableChangedEventArgs : EventArgs
     {
         private readonly int index;
-        private readonly Value oldValue;
-        private readonly Value newValue;
+        private readonly ushort oldValue;
+        private readonly ushort newValue;
 
-        public LocalVariableChangedEventArgs(int index, Value oldValue, Value newValue)
+        public LocalVariableChangedEventArgs(int index, ushort oldValue, ushort newValue)
         {
             this.index = index;
             this.oldValue = oldValue;
@@ -21,12 +20,12 @@ namespace ZDebug.Core.Execution
             get { return index; }
         }
 
-        public Value OldValue
+        public ushort OldValue
         {
             get { return oldValue; }
         }
 
-        public Value NewValue
+        public ushort NewValue
         {
             get { return newValue; }
         }

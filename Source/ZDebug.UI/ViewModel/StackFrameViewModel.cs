@@ -1,22 +1,20 @@
-﻿using ZDebug.Core.Execution;
-
-namespace ZDebug.UI.ViewModel
+﻿namespace ZDebug.UI.ViewModel
 {
     internal sealed class StackFrameViewModel : ViewModelBase
     {
-        private readonly StackFrame currentFrame;
+        private readonly int address;
         private readonly int? callAddress;
         private bool isCurrent;
 
-        public StackFrameViewModel(StackFrame currentFrame, int? callAddress)
+        public StackFrameViewModel(int address, int? callAddress)
         {
-            this.currentFrame = currentFrame;
+            this.address = address;
             this.callAddress = callAddress;
         }
 
         public int Address
         {
-            get { return currentFrame.Address; }
+            get { return address; }
         }
 
         public string CallAddressText

@@ -9,10 +9,10 @@ namespace ZDebug.Core.Instructions
     public sealed class Routine
     {
         private readonly int address;
-        private readonly ReadOnlyCollection<Value> locals;
+        private readonly ReadOnlyCollection<ushort> locals;
         private readonly ReadOnlyCollection<Instruction> instructions;
 
-        private Routine(int address, ReadOnlyCollection<Value> locals, ReadOnlyCollection<Instruction> instructions)
+        private Routine(int address, ReadOnlyCollection<ushort> locals, ReadOnlyCollection<Instruction> instructions)
         {
             this.address = address;
             this.locals = locals;
@@ -40,7 +40,7 @@ namespace ZDebug.Core.Instructions
             }
         }
 
-        public ReadOnlyCollection<Value> Locals
+        public ReadOnlyCollection<ushort> Locals
         {
             get { return locals; }
         }
@@ -53,10 +53,14 @@ namespace ZDebug.Core.Instructions
         internal static Routine Parse(MemoryReader reader, byte version, InstructionCache cache)
         {
             var address = reader.Address;
+
+            // read locals
             var localCount = reader.NextByte();
-            var locals = version < 5
-                ? ArrayEx.Create(localCount, _ => new Value(ValueKind.Number, reader.NextWord()))
-                : ArrayEx.Create(localCount, _ => new Value(ValueKind.Number, 0));
+            var locals = new ushort[localCount];
+            if (version <= 4)
+            {
+                locals = reader.NextWords(localCount);
+            }
 
             var ireader = reader.AsInstructionReader(version, cache);
 

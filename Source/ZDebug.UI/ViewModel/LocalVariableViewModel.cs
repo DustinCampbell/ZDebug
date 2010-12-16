@@ -1,17 +1,15 @@
-﻿using ZDebug.Core.Instructions;
-
-namespace ZDebug.UI.ViewModel
+﻿namespace ZDebug.UI.ViewModel
 {
     internal sealed class LocalVariableViewModel : ViewModelBase
     {
         private readonly int index;
-        private Value value;
+        private ushort value;
         private bool isModified;
         private bool isFrozen;
-        private Value frozenValue;
+        private ushort frozenValue;
         private bool visible;
 
-        public LocalVariableViewModel(int index, Value value)
+        public LocalVariableViewModel(int index, ushort value)
         {
             this.index = index;
             this.value = value;
@@ -38,7 +36,7 @@ namespace ZDebug.UI.ViewModel
             get { return index; }
         }
 
-        public Value Value
+        public ushort Value
         {
             get
             {

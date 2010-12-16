@@ -6,17 +6,17 @@ namespace ZDebug.Core.Execution
 {
     public interface IExecutionContext
     {
-        Value GetOperandValue(Operand operand);
+        ushort GetOperandValue(Operand operand);
 
-        Value ReadByte(int address);
-        Value ReadVariable(Variable variable);
-        Value ReadVariableIndirectly(Variable variable);
-        Value ReadWord(int address);
+        byte ReadByte(int address);
+        ushort ReadVariable(Variable variable);
+        ushort ReadVariableIndirectly(Variable variable);
+        ushort ReadWord(int address);
 
         void WriteByte(int address, byte value);
         void WriteProperty(int objNum, int propNum, ushort value);
-        void WriteVariable(Variable variable, Value value);
-        void WriteVariableIndirectly(Variable variable, Value value);
+        void WriteVariable(Variable variable, ushort value);
+        void WriteVariableIndirectly(Variable variable, ushort value);
         void WriteWord(int address, ushort value);
 
         void Call(int address, Operand[] args = null, Variable storeVariable = null);
@@ -26,7 +26,7 @@ namespace ZDebug.Core.Execution
         void Jump(short offset);
         void Jump(Branch branch);
 
-        void Return(Value value);
+        void Return(ushort value);
 
         int UnpackRoutineAddress(ushort byteAddress);
         int UnpackStringAddress(ushort byteAddress);

@@ -35,7 +35,7 @@
                             </TextBlock.Style>
                         </TextBlock>
 
-                        <TextBlock Text="{Binding Value.RawValue, StringFormat=\{0:x4\}}">
+                        <TextBlock Text="{Binding Value, StringFormat=\{0:x4\}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="Black"/>

@@ -287,7 +287,7 @@ namespace ZDebug.UI.ViewModel
             }
 
             var charWidth = ScreenWidthInColumns;
-            var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0].RawValue).ShortName;
+            var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
 
             upperWindow.SetReverse(true);
 

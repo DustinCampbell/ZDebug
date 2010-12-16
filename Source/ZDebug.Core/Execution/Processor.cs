@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -15,8 +14,14 @@ namespace ZDebug.Core.Execution
         private readonly MemoryReader reader;
         private readonly InstructionReader instructions;
 
-        private readonly StackFrame[] callStack;
-        private int sp;
+        // stack and routine call state
+        private readonly int[] stack = new int[stackSize];
+        private int stackPointer = -1;
+        private readonly ushort[] locals = new ushort[15];
+        private int localCount;
+        private int localStackSize = 0;
+        private int argumentCount = 0;
+        private Variable storeVariable;
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -32,46 +37,97 @@ namespace ZDebug.Core.Execution
         {
             this.story = story;
 
-            this.callStack = new StackFrame[stackSize];
-            this.sp = stackSize;
-
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
 
-            // create "call" to main routine
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
             this.reader = story.Memory.CreateReader(mainRoutineAddress);
             this.instructions = reader.AsInstructionReader(story.Version, cache);
 
-            var localCount = reader.NextByte();
-            var locals = ArrayEx.Create(localCount, i => Value.Zero);
-
-            callStack[--sp] =
-                new StackFrame(
-                    mainRoutineAddress,
-                    arguments: new Value[0],
-                    locals: locals,
-                    returnAddress: null,
-                    storeVariable: null);
+            localCount = reader.NextByte();
         }
 
-        private Value ReadVariable(Variable variable, bool indirect = false)
+        /// <summary>
+        /// Push values of current frame to the stack. They are pushed in the following order:
+        /// 
+        /// * argument count
+        /// * local stack size
+        /// * local variable values (in reverse order)
+        /// * local variable count
+        /// * return address
+        /// * store variable (encoded as byte; -1 for no variable)
+        /// </summary>
+        private void PushFrame()
+        {
+            stack[++stackPointer] = argumentCount;
+            stack[++stackPointer] = localStackSize;
+
+            for (int i = localCount - 1; i >= 0; i--)
+            {
+                stack[++stackPointer] = locals[i];
+            }
+
+            stack[++stackPointer] = localCount;
+            stack[++stackPointer] = reader.Address;
+            stack[++stackPointer] = storeVariable != null ? storeVariable.ToByte() : -1;
+        }
+
+        /// <summary>
+        /// Pop values from the stack to set up the current frame. They are popped in the following order:
+        /// 
+        /// * store variable (encoded as byte; -1 for no variable)
+        /// * return address
+        /// * local variable count
+        /// * local variable values
+        /// * local stack size
+        /// * argument count
+        /// </summary>
+        private void PopFrame()
+        {
+            // First, throw away any existing local stack
+            while (localStackSize-- > 0)
+            {
+                stackPointer--;
+            }
+
+            var variableIndex = stack[stackPointer--];
+            storeVariable = variableIndex >= 0 ? Variable.FromByte((byte)variableIndex) : null;
+
+            reader.Address = stack[stackPointer--];
+            localCount = stack[stackPointer--];
+
+            for (int i = 0; i < localCount; i++)
+            {
+                locals[i] = (ushort)stack[stackPointer--];
+            }
+
+            localStackSize = stack[stackPointer--];
+            argumentCount = stack[stackPointer--];
+        }
+
+        private ushort ReadVariable(Variable variable, bool indirect = false)
         {
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
+                    if (localStackSize == 0)
+                    {
+                        throw new InvalidOperationException("Local stack is empty.");
+                    }
+
                     if (indirect)
                     {
-                        return callStack[sp].PeekValue();
+                        return (ushort)stack[stackPointer];
                     }
                     else
                     {
-                        return callStack[sp].PopValue();
+                        localStackSize--;
+                        return (ushort)stack[stackPointer--];
                     }
 
                 case VariableKind.Local:
-                    return callStack[sp].Locals[variable.Index];
+                    return locals[variable.Index];
 
                 case VariableKind.Global:
                     return story.GlobalVariablesTable[variable.Index];
@@ -81,23 +137,39 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void WriteVariable(Variable variable, Value value, bool indirect = false)
+        private void WriteVariable(Variable variable, ushort value, bool indirect = false)
         {
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
                     if (indirect)
                     {
-                        callStack[sp].PopValue();
+                        if (localStackSize == 0)
+                        {
+                            throw new InvalidOperationException("Stack is empty.");
+                        }
+
+                        stack[stackPointer] = value;
+                    }
+                    else
+                    {
+                        localStackSize++;
+                        stack[++stackPointer] = value;
                     }
 
-                    callStack[sp].PushValue(value);
                     break;
 
                 case VariableKind.Local:
-                    var oldValue = callStack[sp].Locals[variable.Index];
-                    callStack[sp].SetLocal(variable.Index, value);
-                    OnLocalVariableChanged(variable.Index, oldValue, value);
+                    var index = variable.Index;
+                    var oldValue = locals[index];
+                    locals[index] = value;
+
+                    var handler = LocalVariableChanged;
+                    if (handler != null)
+                    {
+                        handler(this, new LocalVariableChangedEventArgs(index, oldValue, value));
+                    }
+
                     break;
 
                 case VariableKind.Global:
@@ -109,30 +181,30 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private Value GetOperandValue(Operand operand)
+        private ushort GetOperandValue(Operand operand)
         {
             switch (operand.Kind)
             {
                 case OperandKind.LargeConstant:
-                    return operand.AsLargeConstant();
+                    return operand.RawValue;
                 case OperandKind.SmallConstant:
-                    return operand.AsSmallConstant();
+                    return (byte)operand.RawValue;
                 case OperandKind.Variable:
-                    return ReadVariable(operand.AsVariable());
+                    return ReadVariable(Variable.FromByte((byte)operand.RawValue));
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        private void WriteStoreVariable(Variable storeVariable, Value value)
+        private void WriteStoreVariable(Variable storeVar, ushort value)
         {
-            if (storeVariable != null)
+            if (storeVar != null)
             {
-                WriteVariable(storeVariable, value);
+                WriteVariable(storeVar, value);
             }
         }
 
-        private void Call(int address, Operand[] operands, Variable storeVariable)
+        private void Call(int address, Operand[] operands, Variable storeVar)
         {
             if (address < 0)
             {
@@ -140,10 +212,10 @@ namespace ZDebug.Core.Execution
             }
 
             // NOTE: argument values must be retrieved in case they manipulate the stack
-            Value[] argValues;
+            ushort[] argValues;
             if (operands != null)
             {
-                argValues = new Value[operands.Length];
+                argValues = new ushort[operands.Length];
                 for (int i = 0; i < operands.Length; i++)
                 {
                     argValues[i] = GetOperandValue(operands[i]);
@@ -151,7 +223,7 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                argValues = new Value[0];
+                argValues = new ushort[0];
             }
 
             if (address == 0)
@@ -160,57 +232,46 @@ namespace ZDebug.Core.Execution
                 // illegal to call a packed address where no routine is present.
 
                 // If there is a store variable, write 0 to it.
-                WriteStoreVariable(storeVariable, Value.Zero);
+                WriteStoreVariable(storeVar, 0);
             }
             else
             {
-                if (sp == 0)
-                {
-                    throw new InvalidOperationException("Stack underflow");
-                }
-
                 story.RoutineTable.Add(address);
+
+                PushFrame();
 
                 var returnAddress = reader.Address;
                 reader.Address = address;
 
+                argumentCount = argValues.Length;
+
                 // read locals
-                var localCount = reader.NextByte();
-                var locals = new Value[localCount];
+                localCount = reader.NextByte();
                 if (story.Version <= 4)
                 {
                     for (int i = 0; i < localCount; i++)
                     {
-                        locals[i] = Value.Number(reader.NextWord());
+                        locals[i] = reader.NextWord();
                     }
                 }
                 else
                 {
                     for (int i = 0; i < localCount; i++)
                     {
-                        locals[i] = Value.Zero;
+                        locals[i] = 0;
                     }
                 }
 
                 var numberToCopy = Math.Min(argValues.Length, locals.Length);
                 Array.Copy(argValues, 0, locals, 0, numberToCopy);
 
-                var oldFrame = callStack[sp];
-                var newFrame = callStack[--sp];
-                if (newFrame != null)
-                {
-                    newFrame.Initialize(address, argValues, locals, returnAddress, storeVariable);
-                }
-                else
-                {
-                    newFrame = new StackFrame(address, argValues, locals, returnAddress, storeVariable);
-                    callStack[sp] = newFrame;
-                }
+                storeVariable = storeVar;
+                localStackSize = 0;
 
-                var enterFrameHandler = EnterFrame;
-                if (enterFrameHandler != null)
+                var handler = EnterStackFrame;
+                if (handler != null)
                 {
-                    enterFrameHandler(this, new StackFrameEventArgs(oldFrame, newFrame));
+                    handler(this, new StackFrameEventArgs(address, returnAddress));
                 }
             }
 
@@ -230,11 +291,11 @@ namespace ZDebug.Core.Execution
             }
             else if (branch.Kind == BranchKind.RFalse)
             {
-                Return(Value.Zero);
+                Return(0);
             }
             else if (branch.Kind == BranchKind.RTrue)
             {
-                Return(Value.One);
+                Return(1);
             }
             else
             {
@@ -242,20 +303,20 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void Return(Value value)
+        private void Return(ushort value)
         {
-            var oldFrame = callStack[sp++];
-            var newFrame = callStack[sp];
+            var storeVar = storeVariable;
+            var oldAddress = reader.Address;
 
-            var exitFrameHandler = ExitFrame;
-            if (exitFrameHandler != null)
+            PopFrame();
+
+            WriteStoreVariable(storeVar, value);
+
+            var handler = ExitStackFrame;
+            if (handler != null)
             {
-                exitFrameHandler(this, new StackFrameEventArgs(oldFrame, newFrame));
+                handler(this, new StackFrameEventArgs(reader.Address, oldAddress));
             }
-
-            reader.Address = oldFrame.ReturnAddress;
-
-            WriteStoreVariable(oldFrame.StoreVariable, value);
         }
 
         private void WriteProperty(int objNum, int propNum, ushort value)
@@ -284,7 +345,7 @@ namespace ZDebug.Core.Execution
             return obj.HasAttribute(attrNum);
         }
 
-        public void Step()
+        public int Step()
         {
             var oldPC = reader.Address;
 
@@ -311,6 +372,8 @@ namespace ZDebug.Core.Execution
             executingInstruction = null;
 
             instructionCount++;
+
+            return newPC;
         }
 
         private void Screen_DimensionsChanged(object sender, EventArgs e)
@@ -395,14 +458,19 @@ namespace ZDebug.Core.Execution
             this.messageLog = messageLog;
         }
 
-        public StackFrame CurrentFrame
-        {
-            get { return callStack[sp]; }
-        }
-
         public int PC
         {
             get { return reader.Address; }
+        }
+
+        public ushort[] Locals
+        {
+            get { return locals; }
+        }
+
+        public int LocalCount
+        {
+            get { return localCount; }
         }
 
         public int InstructionCount
@@ -423,57 +491,39 @@ namespace ZDebug.Core.Execution
             get { return executingInstruction; }
         }
 
-        private void OnLocalVariableChanged(int index, Value oldValue, Value newValue)
-        {
-            var handler = LocalVariableChanged;
-            if (handler != null)
-            {
-                handler(this, new LocalVariableChangedEventArgs(index, oldValue, newValue));
-            }
-        }
-
-        private void OnQuit()
-        {
-            var handler = Quit;
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
-        }
-
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;
         public event EventHandler<ProcessorSteppedEventArgs> Stepped;
 
-        public event EventHandler<StackFrameEventArgs> EnterFrame;
-        public event EventHandler<StackFrameEventArgs> ExitFrame;
+        public event EventHandler<StackFrameEventArgs> EnterStackFrame;
+        public event EventHandler<StackFrameEventArgs> ExitStackFrame;
 
         public event EventHandler<LocalVariableChangedEventArgs> LocalVariableChanged;
 
         public event EventHandler Quit;
 
-        Value IExecutionContext.GetOperandValue(Operand operand)
+        ushort IExecutionContext.GetOperandValue(Operand operand)
         {
             return GetOperandValue(operand);
         }
 
-        Value IExecutionContext.ReadByte(int address)
+        byte IExecutionContext.ReadByte(int address)
         {
-            return Value.Number(story.Memory.ReadByte(address));
+            return story.Memory.ReadByte(address);
         }
 
-        Value IExecutionContext.ReadVariable(Variable variable)
+        ushort IExecutionContext.ReadVariable(Variable variable)
         {
             return ReadVariable(variable);
         }
 
-        Value IExecutionContext.ReadVariableIndirectly(Variable variable)
+        ushort IExecutionContext.ReadVariableIndirectly(Variable variable)
         {
             return ReadVariable(variable, indirect: true);
         }
 
-        Value IExecutionContext.ReadWord(int address)
+        ushort IExecutionContext.ReadWord(int address)
         {
-            return Value.Number(story.Memory.ReadWord(address));
+            return story.Memory.ReadWord(address);
         }
 
         void IExecutionContext.WriteByte(int address, byte value)
@@ -486,12 +536,12 @@ namespace ZDebug.Core.Execution
             WriteProperty(objNum, propNum, value);
         }
 
-        void IExecutionContext.WriteVariable(Variable variable, Value value)
+        void IExecutionContext.WriteVariable(Variable variable, ushort value)
         {
             WriteVariable(variable, value);
         }
 
-        void IExecutionContext.WriteVariableIndirectly(Variable variable, Value value)
+        void IExecutionContext.WriteVariableIndirectly(Variable variable, ushort value)
         {
             WriteVariable(variable, value, indirect: true);
         }
@@ -508,7 +558,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetArgumentCount()
         {
-            return callStack[sp].Arguments.Length;
+            return argumentCount;
         }
 
         void IExecutionContext.Jump(short offset)
@@ -521,7 +571,7 @@ namespace ZDebug.Core.Execution
             Jump(branch);
         }
 
-        void IExecutionContext.Return(Value value)
+        void IExecutionContext.Return(ushort value)
         {
             Return(value);
         }
@@ -742,7 +792,11 @@ namespace ZDebug.Core.Execution
 
         void IExecutionContext.Quit()
         {
-            OnQuit();
+            var handler = Quit;
+            if (handler != null)
+            {
+                handler(this, EventArgs.Empty);
+            }
         }
 
         bool IExecutionContext.VerifyChecksum()

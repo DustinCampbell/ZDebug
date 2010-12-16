@@ -33,6 +33,19 @@ namespace ZDebug.Core.Instructions
             this.Index = index;
         }
 
+        public byte ToByte()
+        {
+            switch (Kind)
+            {
+                case VariableKind.Stack:
+                    return 0;
+                case VariableKind.Local:
+                    return (byte)(Index + 0x01);
+                default: // VariableKind.Global
+                    return (byte)(Index + 0x10);
+            }
+        }
+
         public override string ToString()
         {
             switch (Kind)

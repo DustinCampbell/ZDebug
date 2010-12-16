@@ -18,7 +18,7 @@ namespace ZDebug.Core.Instructions
             var x = (short)context.GetOperandValue(i.Operands[0]);
             var y = (short)context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x + y));
+            var result = (ushort)(x + y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -31,7 +31,7 @@ namespace ZDebug.Core.Instructions
             var x = (short)context.GetOperandValue(i.Operands[0]);
             var y = (short)context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x / y));
+            var result = (ushort)(x / y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -44,7 +44,7 @@ namespace ZDebug.Core.Instructions
             var x = (short)context.GetOperandValue(i.Operands[0]);
             var y = (short)context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x % y));
+            var result = (ushort)(x % y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -57,7 +57,7 @@ namespace ZDebug.Core.Instructions
             var x = (short)context.GetOperandValue(i.Operands[0]);
             var y = (short)context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x * y));
+            var result = (ushort)(x * y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -70,7 +70,7 @@ namespace ZDebug.Core.Instructions
             var x = (short)context.GetOperandValue(i.Operands[0]);
             var y = (short)context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x - y));
+            var result = (ushort)(x - y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -84,10 +84,10 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var x = (ushort)context.GetOperandValue(i.Operands[0]);
-            var y = (ushort)context.GetOperandValue(i.Operands[1]);
+            var x = context.GetOperandValue(i.Operands[0]);
+            var y = context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x & y));
+            var result = (ushort)(x & y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -104,7 +104,7 @@ namespace ZDebug.Core.Instructions
                 ? number << places
                 : number >> -places;
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+            context.WriteVariable(i.StoreVariable, (ushort)result);
         };
 
         public static readonly OpcodeRoutine log_shift = (i, context) =>
@@ -112,14 +112,14 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var number = (ushort)context.GetOperandValue(i.Operands[0]);
+            var number = context.GetOperandValue(i.Operands[0]);
             var places = (int)(short)context.GetOperandValue(i.Operands[1]);
 
             var result = places > 0
                 ? number << places
                 : number >> -places;
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+            context.WriteVariable(i.StoreVariable, (ushort)result);
         };
 
         public static readonly OpcodeRoutine not = (i, context) =>
@@ -127,9 +127,9 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var x = context.GetOperandValue(i.Operands[0]);
 
-            var result = Value.Number((ushort)(~x));
+            var result = (ushort)(~x);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -139,10 +139,10 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var x = (ushort)context.GetOperandValue(i.Operands[0]);
-            var y = (ushort)context.GetOperandValue(i.Operands[1]);
+            var x = context.GetOperandValue(i.Operands[0]);
+            var y = context.GetOperandValue(i.Operands[1]);
 
-            var result = Value.Number((ushort)(x | y));
+            var result = (ushort)(x | y);
 
             context.WriteVariable(i.StoreVariable, result);
         };
@@ -152,8 +152,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasBranch(i);
 
-            var bitmap = (ushort)context.GetOperandValue(i.Operands[0]);
-            var flags = (ushort)context.GetOperandValue(i.Operands[1]);
+            var bitmap = context.GetOperandValue(i.Operands[0]);
+            var flags = context.GetOperandValue(i.Operands[1]);
 
             var result = (bitmap & flags) == flags;
 
@@ -171,14 +171,14 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var variable = Variable.FromByte((byte)varIdx);
 
             var value = (short)context.ReadVariableIndirectly(variable);
             value -= 1;
-            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+            context.WriteVariableIndirectly(variable, (ushort)value);
         };
 
         public static readonly OpcodeRoutine dec_chk = (i, context) =>
@@ -186,7 +186,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasBranch(i);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var test = (short)context.GetOperandValue(i.Operands[1]);
@@ -195,7 +195,7 @@ namespace ZDebug.Core.Instructions
 
             var value = (short)context.ReadVariableIndirectly(variable);
             value -= 1;
-            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+            context.WriteVariableIndirectly(variable, (ushort)value);
 
             if ((value < test) == i.Branch.Condition)
             {
@@ -207,14 +207,14 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var variable = Variable.FromByte((byte)varIdx);
 
             var value = (short)context.ReadVariableIndirectly(variable);
             value += 1;
-            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+            context.WriteVariableIndirectly(variable, (ushort)value);
         };
 
         public static readonly OpcodeRoutine inc_chk = (i, context) =>
@@ -222,7 +222,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasBranch(i);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var test = (short)context.GetOperandValue(i.Operands[1]);
@@ -231,7 +231,7 @@ namespace ZDebug.Core.Instructions
 
             var value = (short)context.ReadVariableIndirectly(variable);
             value += 1;
-            context.WriteVariableIndirectly(variable, Value.Number((ushort)value));
+            context.WriteVariableIndirectly(variable, (ushort)value);
 
             if ((value > test) == i.Branch.Condition)
             {
@@ -250,12 +250,12 @@ namespace ZDebug.Core.Instructions
 
             var ops = i.Operands;
 
-            var x = (ushort)context.GetOperandValue(ops[0]);
+            var x = context.GetOperandValue(ops[0]);
 
             bool result = false;
             for (int j = 1; j < ops.Length; j++)
             {
-                if (x == (ushort)context.GetOperandValue(ops[j]))
+                if (x == context.GetOperandValue(ops[j]))
                 {
                     result = true;
                     break;
@@ -287,8 +287,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasBranch(i);
 
-            var obj1 = (ushort)context.GetOperandValue(i.Operands[0]);
-            var obj2 = (ushort)context.GetOperandValue(i.Operands[1]);
+            var obj1 = context.GetOperandValue(i.Operands[0]);
+            var obj2 = context.GetOperandValue(i.Operands[1]);
 
             var obj1Parent = context.GetParent(obj1);
 
@@ -326,7 +326,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasBranch(i);
 
-            var x = (ushort)context.GetOperandValue(i.Operands[0]);
+            var x = context.GetOperandValue(i.Operands[0]);
             var result = x == 0;
 
             if (result == i.Branch.Condition)
@@ -343,8 +343,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             context.Call(address);
         };
@@ -354,8 +354,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             context.Call(address, storeVariable: i.StoreVariable);
         };
@@ -364,8 +364,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -377,8 +377,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -389,8 +389,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountInRange(i, 1, 4);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -402,8 +402,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountInRange(i, 1, 4);
             Strict.HasStoreVariable(i);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -414,8 +414,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountInRange(i, 1, 8);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -427,8 +427,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountInRange(i, 1, 8);
             Strict.HasStoreVariable(i);
 
-            var addressOpValue = context.GetOperandValue(i.Operands[0]);
-            var address = context.UnpackRoutineAddress(addressOpValue.RawValue);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
+            var address = context.UnpackRoutineAddress(byteAddress);
 
             var args = i.Operands.Skip(1);
 
@@ -461,14 +461,14 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 0);
 
-            context.Return(Value.Zero);
+            context.Return(0);
         };
 
         public static readonly OpcodeRoutine rtrue = (i, context) =>
         {
             Strict.OperandCountIs(i, 0);
 
-            context.Return(Value.One);
+            context.Return(1);
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -480,7 +480,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var variable = Variable.FromByte((byte)varIdx);
@@ -495,8 +495,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var array = (ushort)context.GetOperandValue(i.Operands[0]);
-            var byteIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+            var array = context.GetOperandValue(i.Operands[0]);
+            var byteIndex = context.GetOperandValue(i.Operands[1]);
 
             var address = array + byteIndex;
             var value = context.ReadByte(address);
@@ -509,8 +509,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var array = (ushort)context.GetOperandValue(i.Operands[0]);
-            var wordIndex = (ushort)context.GetOperandValue(i.Operands[1]);
+            var array = context.GetOperandValue(i.Operands[0]);
+            var wordIndex = context.GetOperandValue(i.Operands[1]);
 
             var address = array + (wordIndex * 2);
             var value = context.ReadWord(address);
@@ -522,7 +522,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var variable = Variable.FromByte((byte)varIdx);
@@ -535,9 +535,9 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 3);
 
-            var array = (ushort)context.GetOperandValue(i.Operands[0]);
-            var byteIndex = (ushort)context.GetOperandValue(i.Operands[1]);
-            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+            var array = context.GetOperandValue(i.Operands[0]);
+            var byteIndex = context.GetOperandValue(i.Operands[1]);
+            var value = context.GetOperandValue(i.Operands[2]);
             Strict.IsByte(i, value);
 
             var address = array + byteIndex;
@@ -549,9 +549,9 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 3);
 
-            var array = (ushort)context.GetOperandValue(i.Operands[0]);
-            var wordIndex = (ushort)context.GetOperandValue(i.Operands[1]);
-            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+            var array = context.GetOperandValue(i.Operands[0]);
+            var wordIndex = context.GetOperandValue(i.Operands[1]);
+            var value = context.GetOperandValue(i.Operands[2]);
 
             var address = array + (wordIndex * 2);
 
@@ -566,7 +566,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var varIdx = (ushort)context.GetOperandValue(i.Operands[0]);
+            var varIdx = context.GetOperandValue(i.Operands[0]);
             Strict.IsByte(i, varIdx);
 
             var variable = Variable.FromByte((byte)varIdx);
@@ -592,8 +592,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var attrNum = context.GetOperandValue(i.Operands[1]);
 
             context.ClearAttribute(objNum, attrNum);
         };
@@ -604,7 +604,7 @@ namespace ZDebug.Core.Instructions
             Strict.HasBranch(i);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
 
             int childNum;
             if (objNum > 0)
@@ -617,7 +617,7 @@ namespace ZDebug.Core.Instructions
                 childNum = 0;
             }
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)childNum));
+            context.WriteVariable(i.StoreVariable, (ushort)childNum);
 
             if ((childNum > 0) == i.Branch.Condition)
             {
@@ -630,12 +630,12 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var propNum = context.GetOperandValue(i.Operands[1]);
 
             var nextPropNum = context.GetNextProperty(objNum, propNum);
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)nextPropNum));
+            context.WriteVariable(i.StoreVariable, (ushort)nextPropNum);
         };
 
         public static readonly OpcodeRoutine get_parent = (i, context) =>
@@ -643,7 +643,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
 
             int parentNum;
             if (objNum > 0)
@@ -656,7 +656,7 @@ namespace ZDebug.Core.Instructions
                 parentNum = 0;
             }
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)parentNum));
+            context.WriteVariable(i.StoreVariable, (ushort)parentNum);
         };
 
         public static readonly OpcodeRoutine get_prop = (i, context) =>
@@ -664,12 +664,12 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var propNum = context.GetOperandValue(i.Operands[1]);
 
             var value = context.GetPropertyData(objNum, propNum);
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)value));
+            context.WriteVariable(i.StoreVariable, (ushort)value);
         };
 
         public static readonly OpcodeRoutine get_prop_addr = (i, context) =>
@@ -677,12 +677,12 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var propNum = context.GetOperandValue(i.Operands[1]);
 
             var propAddress = context.GetPropertyDataAddress(objNum, propNum);
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)propAddress));
+            context.WriteVariable(i.StoreVariable, (ushort)propAddress);
         };
 
         public static readonly OpcodeRoutine get_prop_len = (i, context) =>
@@ -690,11 +690,11 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var dataAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+            var dataAddress = context.GetOperandValue(i.Operands[0]);
 
             var propLen = context.GetPropertyDataLength(dataAddress);
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)propLen));
+            context.WriteVariable(i.StoreVariable, (ushort)propLen);
         };
 
         public static readonly OpcodeRoutine get_sibling = (i, context) =>
@@ -703,7 +703,7 @@ namespace ZDebug.Core.Instructions
             Strict.HasBranch(i);
             Strict.HasStoreVariable(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
 
             int siblingNum;
             if (objNum > 0)
@@ -716,7 +716,7 @@ namespace ZDebug.Core.Instructions
                 siblingNum = 0;
             }
 
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)siblingNum));
+            context.WriteVariable(i.StoreVariable, (ushort)siblingNum);
 
             if ((siblingNum > 0) == i.Branch.Condition)
             {
@@ -728,8 +728,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var destNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var destNum = context.GetOperandValue(i.Operands[1]);
 
             context.MoveTo(objNum, destNum);
         };
@@ -738,9 +738,9 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 3);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var propNum = (ushort)context.GetOperandValue(i.Operands[1]);
-            var value = (ushort)context.GetOperandValue(i.Operands[2]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var propNum = context.GetOperandValue(i.Operands[1]);
+            var value = context.GetOperandValue(i.Operands[2]);
 
             context.WriteProperty(objNum, propNum, value);
         };
@@ -749,7 +749,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
 
             context.RemoveFromParent(objNum);
         };
@@ -758,8 +758,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var attrNum = context.GetOperandValue(i.Operands[1]);
 
             context.SetAttribute(objNum, attrNum);
         };
@@ -769,8 +769,8 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 2);
             Strict.HasBranch(i);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
-            var attrNum = (ushort)context.GetOperandValue(i.Operands[1]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
+            var attrNum = context.GetOperandValue(i.Operands[1]);
 
             var result = context.HasAttribute(objNum, attrNum);
 
@@ -788,7 +788,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var flag = (ushort)context.GetOperandValue(i.Operands[0]);
+            var flag = context.GetOperandValue(i.Operands[0]);
 
             // TODO: What should we do with buffer_mode? Does it have any meaning?
         };
@@ -817,7 +817,7 @@ namespace ZDebug.Core.Instructions
                     break;
 
                 case 3:
-                    var address = (ushort)context.GetOperandValue(i.Operands[1]);
+                    var address = context.GetOperandValue(i.Operands[1]);
                     context.SelectMemoryStream(address);
                     break;
 
@@ -853,7 +853,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var byteAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
 
             var zwords = context.ReadZWords(byteAddress);
             var ztext = context.ParseZWords(zwords);
@@ -865,7 +865,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var ch = (char)(ushort)context.GetOperandValue(i.Operands[0]);
+            var ch = (char)context.GetOperandValue(i.Operands[0]);
             context.Print(ch);
         };
 
@@ -881,7 +881,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var objNum = (ushort)context.GetOperandValue(i.Operands[0]);
+            var objNum = context.GetOperandValue(i.Operands[0]);
 
             var shortName = context.GetShortName(objNum);
             context.Print(shortName);
@@ -891,7 +891,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var byteAddress = (ushort)context.GetOperandValue(i.Operands[0]);
+            var byteAddress = context.GetOperandValue(i.Operands[0]);
             var address = context.UnpackStringAddress(byteAddress);
 
             var zwords = context.ReadZWords(address);
@@ -907,15 +907,15 @@ namespace ZDebug.Core.Instructions
 
             var ztext = context.ParseZWords(i.ZText);
             context.Print(ztext + "\n");
-            context.Return(Value.One);
+            context.Return(1);
         };
 
         public static readonly OpcodeRoutine set_color = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
 
-            var foreground = (ZColor)(ushort)context.GetOperandValue(i.Operands[0]);
-            var background = (ZColor)(ushort)context.GetOperandValue(i.Operands[1]);
+            var foreground = (ZColor)context.GetOperandValue(i.Operands[0]);
+            var background = (ZColor)context.GetOperandValue(i.Operands[1]);
 
             if (foreground != 0)
             {
@@ -933,17 +933,17 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasStoreVariable(i);
 
-            var font = (ZFont)(ushort)context.GetOperandValue(i.Operands[0]);
+            var font = (ZFont)context.GetOperandValue(i.Operands[0]);
 
             var oldFont = context.Screen.SetFont(font);
-            context.WriteVariable(i.StoreVariable, Value.Number((ushort)oldFont));
+            context.WriteVariable(i.StoreVariable, (ushort)oldFont);
         };
 
         public static readonly OpcodeRoutine set_text_style = (i, context) =>
         {
             Strict.OperandCountIs(i, 1);
 
-            var textStyle = (ZTextStyle)(ushort)context.GetOperandValue(i.Operands[0]);
+            var textStyle = (ZTextStyle)context.GetOperandValue(i.Operands[0]);
 
             context.Screen.SetTextStyle(textStyle);
         };
@@ -957,7 +957,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountInRange(i, 1, 3);
             Strict.HasStoreVariable(i);
 
-            var inputStream = (ushort)context.GetOperandValue(i.Operands[0]);
+            var inputStream = context.GetOperandValue(i.Operands[0]);
 
             if (i.Operands.Length > 1)
             {
@@ -973,7 +973,7 @@ namespace ZDebug.Core.Instructions
 
             Action<char> callback = ch =>
             {
-                context.WriteVariable(i.StoreVariable, Value.Number((ushort)ch));
+                context.WriteVariable(i.StoreVariable, (ushort)ch);
             };
 
             context.ReadChar(callback);
@@ -983,8 +983,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var textBuffer = (ushort)context.GetOperandValue(i.Operands[0]);
-            var parseBuffer = (ushort)context.GetOperandValue(i.Operands[1]);
+            var textBuffer = context.GetOperandValue(i.Operands[0]);
+            var parseBuffer = context.GetOperandValue(i.Operands[1]);
 
             context.Screen.ShowStatus();
 
@@ -1015,8 +1015,8 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 2);
 
-            var line = (ushort)context.GetOperandValue(i.Operands[0]);
-            var column = (ushort)context.GetOperandValue(i.Operands[1]);
+            var line = context.GetOperandValue(i.Operands[0]);
+            var column = context.GetOperandValue(i.Operands[1]);
 
             context.Screen.SetCursor(line - 1, column - 1);
         };
@@ -1025,7 +1025,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var window = (ushort)context.GetOperandValue(i.Operands[0]);
+            var window = context.GetOperandValue(i.Operands[0]);
 
             context.Screen.SetWindow(window);
         };
@@ -1034,7 +1034,7 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountIs(i, 1);
 
-            var height = (ushort)context.GetOperandValue(i.Operands[0]);
+            var height = context.GetOperandValue(i.Operands[0]);
 
             if (height > 0)
             {
@@ -1055,7 +1055,7 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 1);
             Strict.HasBranch(i);
 
-            var argNumber = (ushort)context.GetOperandValue(i.Operands[0]);
+            var argNumber = context.GetOperandValue(i.Operands[0]);
             var argCount = context.GetArgumentCount();
 
             if ((argNumber <= argCount) == i.Branch.Condition)
@@ -1089,7 +1089,7 @@ namespace ZDebug.Core.Instructions
             if (range > 0)
             {
                 var result = context.NextRandom(range);
-                context.WriteVariable(i.StoreVariable, Value.Number((ushort)result));
+                context.WriteVariable(i.StoreVariable, (ushort)result);
             }
             else if (range < 0)
             {

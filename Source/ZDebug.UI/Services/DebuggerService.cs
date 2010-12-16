@@ -19,6 +19,8 @@ namespace ZDebug.UI.Services
 
         private static DebuggerState priorState;
 
+        private static int markId = 1000;
+
         private static void ChangeState(DebuggerState newState)
         {
             var oldState = state;
@@ -175,22 +177,24 @@ namespace ZDebug.UI.Services
         {
             ChangeState(DebuggerState.Running);
 
-            while (state == DebuggerState.Running)
-            {
-                try
-                {
-                    story.Processor.Step();
+            var processor = story.Processor;
 
-                    if (state == DebuggerState.Running && breakpoints.Contains(story.Processor.PC))
+            try
+            {
+                while (state == DebuggerState.Running)
+                {
+                    var newPC = processor.Step();
+
+                    if (state == DebuggerState.Running && breakpoints.Contains(newPC))
                     {
                         ChangeState(DebuggerState.Stopped);
                     }
                 }
-                catch (Exception ex)
-                {
-                    currentException = ex;
-                    ChangeState(DebuggerState.StoppedAtError);
-                }
+            }
+            catch (Exception ex)
+            {
+                currentException = ex;
+                ChangeState(DebuggerState.StoppedAtError);
             }
         }
 

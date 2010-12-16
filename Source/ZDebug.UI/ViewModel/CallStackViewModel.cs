@@ -20,7 +20,7 @@ namespace ZDebug.UI.ViewModel
             stackFrames.BeginBulkOperation();
             try
             {
-                var mainFrame = new StackFrameViewModel(e.Story.Processor.CurrentFrame, callAddress: null);
+                var mainFrame = new StackFrameViewModel(e.Story.Processor.PC - 1, callAddress: null);
                 mainFrame.IsCurrent = true;
                 stackFrames.Add(mainFrame);
             }
@@ -29,16 +29,16 @@ namespace ZDebug.UI.ViewModel
                 stackFrames.EndBulkOperation();
             }
 
-            e.Story.Processor.EnterFrame += Processor_EnterFrame;
-            e.Story.Processor.ExitFrame += Processor_ExitFrame;
+            e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
+            e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             stackFrames.Clear();
 
-            e.Story.Processor.EnterFrame -= Processor_EnterFrame;
-            e.Story.Processor.ExitFrame -= Processor_ExitFrame;
+            e.Story.Processor.EnterStackFrame -= Processor_EnterFrame;
+            e.Story.Processor.ExitStackFrame -= Processor_ExitFrame;
         }
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
@@ -46,9 +46,11 @@ namespace ZDebug.UI.ViewModel
             if (e.NewState == DebuggerState.Running)
             {
                 this.View.DataContext = null;
+                stackFrames.BeginBulkOperation();
             }
             else if (e.OldState == DebuggerState.Running)
             {
+                stackFrames.EndBulkOperation();
                 this.View.DataContext = this;
             }
         }
@@ -62,7 +64,7 @@ namespace ZDebug.UI.ViewModel
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
         {
             stackFrames[0].IsCurrent = false;
-            var newFrame = new StackFrameViewModel(e.NewFrame, callAddress: DebuggerService.Story.Processor.ExecutingInstruction.Address);
+            var newFrame = new StackFrameViewModel(e.Address, callAddress: DebuggerService.Story.Processor.ExecutingInstruction.Address);
             newFrame.IsCurrent = true;
             stackFrames.Insert(0, newFrame);
         }

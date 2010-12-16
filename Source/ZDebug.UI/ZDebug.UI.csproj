@@ -108,7 +108,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AutoDisableImage.cs" />
-    <Compile Include="Controls\CallToolTip.cs" />
     <Compile Include="Controls\ExceptionToolTip.cs" />
     <Compile Include="Services\BreakpointEventArgs.cs" />
     <Compile Include="Services\DebuggerState.cs" />

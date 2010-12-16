@@ -1,6 +1,5 @@
 ﻿using System.Windows.Controls;
 using ZDebug.Core.Execution;
-using ZDebug.Core.Instructions;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -16,47 +15,58 @@ namespace ZDebug.UI.ViewModel
 
             for (int i = 0; i < 15; i++)
             {
-                locals[i] = new LocalVariableViewModel(i, Value.Zero);
+                locals[i] = new LocalVariableViewModel(i, 0);
             }
         }
 
-        private void Update(StackFrame frame)
+        private void Update()
         {
-            var localCount = frame.Locals.Length;
-
-            for (int i = 0; i < 15; i++)
+            if (DebuggerService.State == DebuggerState.Running)
             {
-                var local = locals[i];
-
-                var current = i < localCount;
-                if (current)
+                for (int i = 0; i < 15; i++)
                 {
-                    local.Value = frame.Locals[i];
+                    locals[i].IsModified = false;
                 }
+            }
+            else
+            {
+                var processor = DebuggerService.Story.Processor;
+                var localCount = processor.LocalCount;
 
-                local.Visible = current;
-                local.IsModified = false;
+                for (int i = 0; i < 15; i++)
+                {
+                    var local = locals[i];
+
+                    var current = i < localCount;
+                    if (current)
+                    {
+                        local.Value = processor.Locals[i];
+                    }
+
+                    local.Visible = current;
+                    local.IsModified = false;
+                }
             }
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
-            Update(e.Story.Processor.CurrentFrame);
+            Update();
 
-            e.Story.Processor.EnterFrame += Processor_EnterFrame;
-            e.Story.Processor.ExitFrame += Processor_ExitFrame;
+            e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
+            e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
             e.Story.Processor.LocalVariableChanged += Processor_LocalVariableChanged;
             e.Story.Processor.Stepping += Processor_Stepping;
         }
 
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
         {
-            Update(e.NewFrame);
+            Update();
         }
 
         private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
         {
-            Update(e.NewFrame);
+            Update();
         }
 
         private void Processor_LocalVariableChanged(object sender, LocalVariableChangedEventArgs e)
@@ -84,8 +94,8 @@ namespace ZDebug.UI.ViewModel
                 locals[i].Visible = false;
             }
 
-            e.Story.Processor.EnterFrame -= Processor_EnterFrame;
-            e.Story.Processor.ExitFrame -= Processor_ExitFrame;
+            e.Story.Processor.EnterStackFrame -= Processor_EnterFrame;
+            e.Story.Processor.ExitStackFrame -= Processor_ExitFrame;
             e.Story.Processor.LocalVariableChanged -= Processor_LocalVariableChanged;
             e.Story.Processor.Stepping -= Processor_Stepping;
         }
