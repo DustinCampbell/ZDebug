@@ -11,10 +11,31 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         
-        <StackPanel Grid.Row="0">
-            <TextBlock FontWeight="Bold" Text="{Binding Title}"/>
-        </StackPanel>
-        
-        <Button Grid.Row ="1" Content="OK" IsDefault="True" IsCancel="True" vm:DialogBehaviors.IsAccept="True"/>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="1" Width="300" Margin="8">
+                <TextBlock FontWeight="Bold">
+                <Run Text="{Binding Title, Mode=OneWay}"/><LineBreak/>
+                <Run Text="{Binding Headline, Mode=OneWay}"/><LineBreak/>
+                <Run Text="{Binding Author, Mode=OneWay}"/>
+                <Run Text="{Binding FirstPublished, Mode=OneWay, StringFormat=(\{0\})}"/><LineBreak/>
+                </TextBlock>
+
+                <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
+            </StackPanel>
+        </Grid>
+
+        <Button Grid.Row="1"
+                Content="OK"
+                Width="100"
+                Margin="8"
+                HorizontalAlignment="Center"
+                IsDefault="True"
+                IsCancel="True"
+                vm:DialogBehaviors.IsAccept="True"/>
     </Grid>
 </Window>
