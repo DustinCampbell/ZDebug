@@ -11,6 +11,7 @@ namespace ZDebug.PerfHarness
     {
         const string BRONZE = @"..\..\ZCode\bronze\bronze.z8";
         const string DREAMHOLD = @"..\..\ZCode\dreamhold\dreamhold.z8";
+        const string SANDDANC = @"..\..\ZCode\sanddanc\sanddanc.z5";
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
