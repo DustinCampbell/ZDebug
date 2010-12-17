@@ -63,6 +63,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\GameInfoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LocalsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -118,6 +122,7 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextSource.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
+    <Compile Include="Services\GameInfo.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />
@@ -126,6 +131,7 @@
     <Compile Include="Utilities\Storage.cs" />
     <Compile Include="Utilities\Storage.WindowPlacement.cs" />
     <Compile Include="ViewModel\CallStackViewModel.cs" />
+    <Compile Include="ViewModel\DialogBehaviors.cs" />
     <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyLineBehaviors.cs" />
@@ -133,6 +139,7 @@
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
+    <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\LocalVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />

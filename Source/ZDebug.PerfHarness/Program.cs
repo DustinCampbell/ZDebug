@@ -14,19 +14,19 @@ namespace ZDebug.PerfHarness
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
-        static byte[] ReadStoryBytes(string path)
+        static Story ReadStory(string path)
         {
             if (Path.GetExtension(path) == ".zblorb")
             {
                 using (var stream = File.OpenRead(path))
                 {
                     var blorb = new BlorbFile(stream);
-                    return blorb.GetZCode();
+                    return blorb.LoadStory();
                 }
             }
             else
             {
-                return File.ReadAllBytes(path);
+                return Story.FromBytes(File.ReadAllBytes(path));
             }
         }
 
@@ -42,13 +42,9 @@ namespace ZDebug.PerfHarness
         {
             string path = ROTA;
 
-            Mark("Reading " + Path.GetFileName(path) + " bytes...");
+            Mark("Reading story");
 
-            var bytes = ReadStoryBytes(path);
-
-            Mark("Creating story");
-
-            var story = Story.FromBytes(bytes);
+            var story = ReadStory(path);
 
             Mark("Stepping...");
 

@@ -53,6 +53,12 @@ namespace ZDebug.UI.ViewModel
                 name: "Reset Window Layout",
                 executed: ResetWindowLayoutExecuted,
                 canExecute: CanResetWindowLayoutExecute);
+
+            this.AboutGameCommand = RegisterCommand(
+                text: "AboutGame",
+                name: "About Game",
+                executed: AboutGameExecuted,
+                canExecute: CanAboutGameExecute);
         }
 
         private bool CanOpenStoryExecute()
@@ -65,7 +71,10 @@ namespace ZDebug.UI.ViewModel
             var dialog = new OpenFileDialog
             {
                 Title = "Open Story File",
-                Filter = "Z-Code Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8|Blorb Files (*.zblorb)|*.zblorb|All Files (*.*)|*.*"
+                Filter = "Supported Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8,*.zblorb)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8;*.zblorb|" +
+                         "Z-Code Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8|" +
+                         "Blorb Files (*.zblorb)|*.zblorb|" +
+                         "All Files (*.*)|*.*"
             };
 
             if (dialog.ShowDialog(this.View) == true)
@@ -124,12 +133,25 @@ namespace ZDebug.UI.ViewModel
             Storage.RestoreDockingLayout(dockManager, "original");
         }
 
+        private bool CanAboutGameExecute()
+        {
+            return DebuggerService.HasGameInfo;
+        }
+
+        private void AboutGameExecuted()
+        {
+            var gameInfoDialog = ViewModelWithView.Create<GameInfoViewModel, Window>();
+            gameInfoDialog.Owner = this.View;
+            gameInfoDialog.ShowDialog();
+        }
+
         public ICommand OpenStoryCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
         public ICommand ResetWindowLayoutCommand { get; private set; }
+        public ICommand AboutGameCommand { get; private set; }
 
         public string Title
         {

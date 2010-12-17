@@ -83,6 +83,10 @@
                 <Button Command="{Binding ResetSessionCommand}" ToolTip="Reset Debugging Session">
                     <c:AutoDisableImage Source="{StaticResource resetImage}"/>
                 </Button>
+                <Separator/>
+                <Button Command="{Binding AboutGameCommand}" ToolTip="About Game">
+                    <c:AutoDisableImage Source="{StaticResource infoBigImage}"/>
+                </Button>
             </ToolBar>
         </ToolBarTray>
 

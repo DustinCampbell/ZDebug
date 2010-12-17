@@ -13,6 +13,7 @@ namespace ZDebug.UI.Services
     {
         private static DebuggerState state;
         private static Story story;
+        private static GameInfo gameInfo;
         private static string fileName;
         private static Exception currentException;
         private static SortedSet<int> breakpoints = new SortedSet<int>();
@@ -74,6 +75,7 @@ namespace ZDebug.UI.Services
             var oldStory = story;
 
             story = null;
+            gameInfo = null;
             fileName = null;
 
             breakpoints.Clear();
@@ -91,22 +93,20 @@ namespace ZDebug.UI.Services
         {
             CloseStory();
 
-            byte[] bytes;
-
             if (Path.GetExtension(fileName) == ".zblorb")
             {
                 using (var stream = File.OpenRead(fileName))
                 {
                     var blorb = new BlorbFile(stream);
-                    bytes = blorb.GetZCode();
+                    gameInfo = new GameInfo(blorb.LoadMetadata());
+                    DebuggerService.story = blorb.LoadStory();
                 }
             }
             else
             {
-                bytes = File.ReadAllBytes(fileName);
+                DebuggerService.story = Story.FromBytes(File.ReadAllBytes(fileName));
             }
 
-            DebuggerService.story = Story.FromBytes(bytes);
             DebuggerService.fileName = fileName;
 
             LoadSettings(story);
@@ -264,6 +264,16 @@ namespace ZDebug.UI.Services
         public static bool HasStory
         {
             get { return story != null; }
+        }
+
+        public static GameInfo GameInfo
+        {
+            get { return gameInfo; }
+        }
+
+        public static bool HasGameInfo
+        {
+            get { return gameInfo != null; }
         }
 
         public static string FileName

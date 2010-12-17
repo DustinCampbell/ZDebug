@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Linq;
 using ZDebug.Core.Basics;
 
 namespace ZDebug.Core.Blorb
@@ -13,36 +14,51 @@ namespace ZDebug.Core.Blorb
         private static string NameFromId(uint id)
         {
             var chars = new char[4];
-            chars[0] = (char)((id & 0xff000000) >> 24);
-            chars[1] = (char)((id & 0x00ff0000) >> 16);
-            chars[2] = (char)((id & 0x0000ff00) >> 8);
-            chars[3] = (char)(id & 0x000000ff);
+            chars[0] = (char)((id >> 24) & 0xff);
+            chars[1] = (char)((id >> 16) & 0xff);
+            chars[2] = (char)((id >> 8) & 0xff);
+            chars[3] = (char)(id & 0xff);
 
             return new string(chars);
         }
 
-        private static uint MakeId(char c1, char c2, char c3, char c4)
+        private static uint MakeId(string name)
         {
-            return ((uint)((byte)c1 << 24) | (uint)((byte)c2 << 16) | (uint)((byte)c3 << 8) | (byte)c4);
+            if (name.Length > 4)
+            {
+                throw new ArgumentException("ID names can contain at most 4 characters.", "name");
+            }
+
+            if (name.Length < 4)
+            {
+                name += new string(' ', 4 - name.Length);
+            }
+
+            var chars = name.ToCharArray();
+            return ((uint)((byte)chars[0] << 24) | 
+                (uint)((byte)chars[1] << 16) | 
+                (uint)((byte)chars[2] << 8) | 
+                (byte)chars[3]);
         }
 
-        private static readonly uint id_FORM = MakeId('F', 'O', 'R', 'M');
-        private static readonly uint id_IFRS = MakeId('I', 'F', 'R', 'S');
-        private static readonly uint id_RIdx = MakeId('R', 'I', 'd', 'x');
-        private static readonly uint id_IFhd = MakeId('I', 'F', 'h', 'd');
-        private static readonly uint id_Reso = MakeId('R', 'e', 's', 'o');
-        private static readonly uint id_Loop = MakeId('L', 'o', 'o', 'p');
-        private static readonly uint id_RelN = MakeId('R', 'e', 'l', 'N');
-        private static readonly uint id_Plte = MakeId('P', 'l', 't', 'e');
+        private static readonly uint id_FORM = MakeId("FORM");
+        private static readonly uint id_IFRS = MakeId("IFRS");
+        private static readonly uint id_RIdx = MakeId("RIdx");
+        private static readonly uint id_IFhd = MakeId("IFhd");
+        private static readonly uint id_Reso = MakeId("Reso");
+        private static readonly uint id_Loop = MakeId("Loop");
+        private static readonly uint id_RelN = MakeId("RelN");
+        private static readonly uint id_Plte = MakeId("Plte");
 
-        private static readonly uint id_Snd = MakeId('S', 'n', 'd', ' ');
-        private static readonly uint id_Exec = MakeId('E', 'x', 'e', 'c');
-        private static readonly uint id_Pict = MakeId('P', 'i', 'c', 't');
-        private static readonly uint id_Copyright = MakeId('(', 'c', ')', ' ');
-        private static readonly uint id_AUTH = MakeId('A', 'U', 'T', 'H');
-        private static readonly uint id_ANNO = MakeId('A', 'N', 'N', 'O');
+        private static readonly uint id_Snd = MakeId("Snd");
+        private static readonly uint id_Exec = MakeId("Exec");
+        private static readonly uint id_Pict = MakeId("Pict");
+        private static readonly uint id_Copyright = MakeId("(c)");
+        private static readonly uint id_AUTH = MakeId("AUTH");
+        private static readonly uint id_ANNO = MakeId("ANNO");
 
-        private static readonly uint id_ZCOD = MakeId('Z', 'C', 'O', 'D');
+        private static readonly uint id_ZCOD = MakeId("ZCOD");
+        private static readonly uint id_IFmd = MakeId("IFmd");
 
         private struct ChunkDescriptor
         {
@@ -219,17 +235,56 @@ namespace ZDebug.Core.Blorb
             }
         }
 
-        public byte[] GetZCode()
+        private ResourceDecriptor FindExecResource()
         {
-            foreach (var chunk in chunks)
+            var index = resources.FindIndex(res => res.Usage == id_Exec);
+
+            if (index < 0)
             {
-                if (chunk.Type == id_ZCOD)
-                {
-                    return memory.ReadBytes((int)chunk.DataAddress, (int)chunk.Length);
-                }
+                throw new BlorbFileException("Blorb file does not contain a resource with 'Exec' usage.");
             }
 
-            throw new InvalidOperationException();
+            return resources[index];
+        }
+
+        private ChunkDescriptor FindChunkByType(uint type)
+        {
+            var index = chunks.FindIndex(ch => ch.Type == type);
+
+            if (index < 0)
+            {
+                throw new BlorbFileException("Blorb file does not contain a chunk of type '" + NameFromId(type) + "'.");
+            }
+
+            return chunks[index];
+        }
+
+        private byte[] GetChunkData(ChunkDescriptor chunk)
+        {
+            return memory.ReadBytes((int)chunk.DataAddress, (int)chunk.Length);
+        }
+
+        public Story LoadStory()
+        {
+            var resource = FindExecResource();
+            var chunk = chunks[resource.ChunkNumber];
+
+            if (chunk.Type != id_ZCOD)
+            {
+                throw new BlorbFileException("Blorb file does not contain 'ZCOD' chunk");
+            }
+
+            return Story.FromBytes(GetChunkData(chunk));
+        }
+
+        public XElement LoadMetadata()
+        {
+            var chunk = FindChunkByType(id_IFmd);
+
+            using (var stream = new MemoryStream(GetChunkData(chunk)))
+            {
+                return XElement.Load(stream);
+            }
         }
 
         public int ReleaseNumber
