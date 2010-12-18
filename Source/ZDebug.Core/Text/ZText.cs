@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Text
 {
@@ -135,6 +136,47 @@ namespace ZDebug.Core.Text
             }
 
             return builder.ToString();
+        }
+
+        public static ZCommandToken[] TokenizeCommand(string commandText, char[] wordSeparators)
+        {
+            var tokens = new List<ZCommandToken>();
+
+            int start = -1;
+            for (int i = 0; i < commandText.Length; i++)
+            {
+                var ch = commandText[i];
+                if (start < 0)
+                {
+                    if (ch != ' ')
+                    {
+                        start = i;
+                    }
+                }
+                else if (ch == ' ')
+                {
+                    var length = i - start;
+                    tokens.Add(new ZCommandToken(start, length, commandText.Substring(start, length)));
+                    start = -1;
+                }
+                else if (wordSeparators.Any(sep => ch == sep))
+                {
+                    var length = i - start;
+                    tokens.Add(new ZCommandToken(start, length, commandText.Substring(start, length)));
+
+                    tokens.Add(new ZCommandToken(i, 1, ch.ToString()));
+
+                    start = -1;
+                }
+            }
+
+            if (start >= 0)
+            {
+                var length = commandText.Length - start;
+                tokens.Add(new ZCommandToken(start, length, commandText.Substring(start, length)));
+            }
+
+            return tokens.ToArray();
         }
     }
 }

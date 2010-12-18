@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using ZDebug.Core.Execution;
 using ZDebug.IO.Services;
@@ -120,17 +119,22 @@ namespace ZDebug.UI.ViewModel
         {
             DebuggerService.BeginAwaitingInput();
 
-            TextCompositionEventHandler handler = null;
-            handler = (s, e) =>
+            mainWindow.ReadChar(ch =>
             {
-                mainWindow.Children[0].TextInput -= handler;
-                callback(e.Text[0]);
-
+                callback(ch);
                 DebuggerService.EndAwaitingInput();
-            };
+            });
+        }
 
-            mainWindow.Children[0].TextInput += handler;
-            Keyboard.Focus(mainWindow.Children[0]);
+        public void ReadCommand(int maxChars, Action<string> callback)
+        {
+            DebuggerService.BeginAwaitingInput();
+
+            mainWindow.ReadCommand(maxChars, text =>
+            {
+                callback(text);
+                DebuggerService.EndAwaitingInput();
+            });
         }
 
         public void Clear(int window)

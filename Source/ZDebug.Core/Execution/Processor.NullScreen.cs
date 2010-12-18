@@ -78,6 +78,11 @@ namespace ZDebug.Core.Execution
                 callback('\0');
             }
 
+            public void ReadCommand(int maxChars, Action<string> callback)
+            {
+                callback(string.Empty);
+            }
+
             public byte ScreenHeightInLines
             {
                 get { return 0; }

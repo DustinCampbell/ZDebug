@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Dictionary;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -772,9 +774,14 @@ namespace ZDebug.Core.Execution
             outputStreams.Print(ch);
         }
 
-        void IExecutionContext.ReadChar(Action<char> callback)
+        ZCommandToken[] IExecutionContext.TokenizeCommand(string commandText)
         {
-            screen.ReadChar(callback);
+            return ZText.TokenizeCommand(commandText, story.Dictionary.WordSeparators.ToArray());
+        }
+
+        bool IExecutionContext.TryLookupWord(string word, out ZDictionaryEntry entry)
+        {
+            return story.Dictionary.TryLookupWord(word, out entry);
         }
 
         void IExecutionContext.Randomize(int seed)

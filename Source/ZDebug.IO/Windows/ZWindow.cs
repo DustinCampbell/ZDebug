@@ -63,6 +63,14 @@ namespace ZDebug.IO.Windows
         {
         }
 
+        public virtual void ReadChar(Action<char> callback)
+        {
+        }
+
+        public virtual void ReadCommand(int maxChars, Action<string> callback)
+        {
+        }
+
         public virtual bool SetReverse(bool value)
         {
             return false;

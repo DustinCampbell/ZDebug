@@ -1,4 +1,5 @@
 ﻿using System;
+using ZDebug.Core.Dictionary;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Utilities;
 
@@ -1066,7 +1067,7 @@ namespace ZDebug.Core.Instructions
                 context.WriteVariable(i.StoreVariable, (ushort)ch);
             };
 
-            context.ReadChar(callback);
+            context.Screen.ReadChar(callback);
         };
 
         public static readonly OpcodeRoutine sread1 = (i, context) =>
@@ -1078,7 +1079,44 @@ namespace ZDebug.Core.Instructions
 
             context.Screen.ShowStatus();
 
-            throw new NotImplementedException();
+            var maxChars = context.ReadByte(textBuffer);
+
+            context.Screen.ReadCommand(maxChars, s =>
+            {
+                var text = s.ToLower();
+
+                for (int j = 0; j < text.Length; j++)
+                {
+                    context.WriteByte(textBuffer + 1 + j, (byte)text[j]);
+                }
+
+                context.WriteByte(textBuffer + 1 + text.Length, 0);
+
+                var tokens = context.TokenizeCommand(text);
+
+                var maxWords = context.ReadByte(parseBuffer);
+                var parsedWords = Math.Min(maxWords, tokens.Length);
+
+                context.WriteByte(parseBuffer + 1, (byte)parsedWords);
+
+                for (int j = 0; j < parsedWords; j++)
+                {
+                    var token = tokens[j];
+
+                    ZDictionaryEntry entry;
+                    if (context.TryLookupWord(token.Text, out entry))
+                    {
+                        context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                    }
+                    else
+                    {
+                        context.WriteWord(parseBuffer + 2 + (j * 4), 0);
+                    }
+
+                    context.WriteByte(parseBuffer + 2 + (j * 4) + 2, (byte)token.Length);
+                    context.WriteByte(parseBuffer + 2 + (j * 4) + 3, (byte)(token.Start + 1));
+                }
+            });
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////

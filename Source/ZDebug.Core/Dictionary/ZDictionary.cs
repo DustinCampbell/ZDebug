@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Text;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Dictionary
@@ -32,7 +33,7 @@ namespace ZDebug.Core.Dictionary
             int entryCount = reader.NextWord();
 
             int zwordsSize = story.Version <= 3 ? 2 : 3;
-            int dataSize = entryLength - zwordsSize;
+            int dataSize = entryLength - (zwordsSize * 2);
 
             this.entries = new List<ZDictionaryEntry>(entryCount);
             for (int i = 0; i < entryCount; i++)
@@ -42,6 +43,23 @@ namespace ZDebug.Core.Dictionary
                 var entryData = reader.NextBytes(dataSize);
                 entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryData));
             }
+        }
+
+        public bool TryLookupWord(string word, out ZDictionaryEntry entry)
+        {
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                var e = entries[i];
+                var text = ZText.ZWordsAsString(e.ZWords, ZTextFlags.All, story.Memory);
+                if (word.StartsWith(text))
+                {
+                    entry = e;
+                    return true;
+                }
+            }
+
+            entry = default(ZDictionaryEntry);
+            return false;
         }
 
         public ReadOnlyCollection<char> WordSeparators
