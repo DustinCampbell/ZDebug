@@ -61,14 +61,11 @@ namespace ZDebug.UI.ViewModel
 
                     if (rIndex > 0)
                     {
-                        lines.Add(DisassemblyBlankLineViewModel.Instance);
-
                         var lastRoutine = routineTable[rIndex - 1];
                         if (lastRoutine.Address + lastRoutine.Length < routine.Address)
                         {
                             var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine);
                             lines.Add(addressGapLine);
-                            lines.Add(DisassemblyBlankLineViewModel.Instance);
                         }
                     }
 
@@ -77,17 +74,20 @@ namespace ZDebug.UI.ViewModel
                     lines.Add(routineHeaderLine);
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
 
-                    lines.Add(DisassemblyBlankLineViewModel.Instance);
-
-                    foreach (var i in routine.Instructions)
+                    var instructions = routine.Instructions;
+                    var lastIndex = instructions.Count - 1;
+                    for (int i = 0; i <= lastIndex; i++)
                     {
-                        var instructionLine = new DisassemblyInstructionLineViewModel(i);
-                        if (DebuggerService.BreakpointExists(i.Address))
+                        var instruction = instructions[i];
+                        var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
+
+                        if (DebuggerService.BreakpointExists(instruction.Address))
                         {
                             instructionLine.HasBreakpoint = true;
                         }
+
                         lines.Add(instructionLine);
-                        addressToLineMap.Add(i.Address, instructionLine);
+                        addressToLineMap.Add(instruction.Address, instructionLine);
                     }
                 }
 
@@ -177,26 +177,24 @@ namespace ZDebug.UI.ViewModel
                 count++;
                 addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
 
-                lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
-                count++;
-
-                foreach (var i in e.Routine.Instructions)
+                var instructions = e.Routine.Instructions;
+                var lastIndex = instructions.Count - 1;
+                for (int i = 0; i <= lastIndex; i++)
                 {
-                    var instructionLine = new DisassemblyInstructionLineViewModel(i);
-                    if (DebuggerService.BreakpointExists(i.Address))
+                    var instruction = instructions[i];
+                    var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
+
+                    if (DebuggerService.BreakpointExists(instruction.Address))
                     {
                         instructionLine.HasBreakpoint = true;
                     }
                     lines.Insert(insertionPoint + count, instructionLine);
                     count++;
-                    addressToLineMap.Add(i.Address, instructionLine);
+                    addressToLineMap.Add(instruction.Address, instructionLine);
                 }
 
                 if (nextRoutineIndex >= 0)
                 {
-                    lines.Insert(insertionPoint + count, DisassemblyBlankLineViewModel.Instance);
-                    count++;
-
                     // fix up routine indeces...
                     for (int i = nextRoutineIndex; i < routineAddressAndIndexList.Count; i++)
                     {

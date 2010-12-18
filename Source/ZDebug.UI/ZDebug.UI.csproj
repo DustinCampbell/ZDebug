@@ -133,7 +133,6 @@
     <Compile Include="ViewModel\CallStackViewModel.cs" />
     <Compile Include="ViewModel\DialogBehaviors.cs" />
     <Compile Include="ViewModel\DisassemblyAddressGapLineViewModel.cs" />
-    <Compile Include="ViewModel\DisassemblyBlankLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyLineBehaviors.cs" />
     <Compile Include="ViewModel\DisassemblyLineState.cs" />

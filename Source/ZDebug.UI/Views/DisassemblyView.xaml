@@ -251,26 +251,25 @@
                     </Grid>
                 </ControlTemplate>
 
-                <DataTemplate DataType="{x:Type vm:DisassemblyBlankLineViewModel}">
-                    <ContentControl Template="{StaticResource lineTemplate}">
-                        <TextBlock Text=" "/>
-                    </ContentControl>
-                </DataTemplate>
-
                 <DataTemplate DataType="{x:Type vm:DisassemblyAddressGapLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <TextBlock
-                            Margin="20,0,0,0"
-                            FontFamily="Segoe UI"
-                            FontStyle="Italic"
-                            Foreground="CornflowerBlue">
+                        <StackPanel>
+                            <TextBlock
+                                Margin="20,0,0,0"
+                                FontFamily="Segoe UI"
+                                FontStyle="Italic"
+                                Foreground="CornflowerBlue">
 
-                            <Run Text="----"/>
-                            <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                            <Run Text="to"/>
-                            <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                            <Run Text="----"/>
-                        </TextBlock>
+                                <Run Text="----"/>
+                                <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                <Run Text="to"/>
+                                <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                <Run Text="----"/>
+                            </TextBlock>
+
+                            <!-- blank line -->
+                            <TextBlock Text=" "/>
+                        </StackPanel>
                     </ContentControl>
                 </DataTemplate>
 
@@ -299,35 +298,54 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+
+                            <!-- blank line -->
+                            <TextBlock Text=" "/>
                         </StackPanel>
                     </ContentControl>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyInstructionLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <Grid>
+                        <StackPanel>
+                            <Grid>
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="{DynamicResource addressWidth}"/>
-                                <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{DynamicResource addressWidth}"/>
+                                    <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0">
-                            <Run Text="  "/><Run 
-                                 Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
-                                 Foreground="{StaticResource SeparatorForeground}" Text=":"/>
+                                <TextBlock Grid.Column="0">
+                                    <Run Text="  "/><Run 
+                                         Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
+                                         Foreground="{StaticResource SeparatorForeground}" Text=":"/>
+                                </TextBlock>
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding OpcodeName, Mode=OneWay}"
+                                    Foreground="{StaticResource OpcodeForeground}"/>
+
+                                <c:InstructionTextDisplayElement
+                                    Grid.Column="2"
+                                    Instruction="{Binding Instruction, Mode=OneWay}"/>
+                            </Grid>
+
+                            <!-- blank line -->
+                            <TextBlock Text=" ">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
                             </TextBlock>
-
-                            <TextBlock
-                                Grid.Column="1"
-                                Text="{Binding OpcodeName, Mode=OneWay}"
-                                Foreground="{StaticResource OpcodeForeground}"/>
-
-                            <c:InstructionTextDisplayElement
-                                Grid.Column="2"
-                                Instruction="{Binding Instruction, Mode=OneWay}"/>
-                        </Grid>
+                        </StackPanel>
                     </ContentControl>
                 </DataTemplate>
             </ItemsControl.Resources>
