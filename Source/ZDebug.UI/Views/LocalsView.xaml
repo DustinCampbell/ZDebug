@@ -5,7 +5,16 @@
 
     <Grid>
         
-        <ItemsControl ItemsSource="{Binding Locals}">
+        <Grid.Resources>
+            <SolidColorBrush x:Key="grayBrush" Color="#878787"/>
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <ItemsControl Grid.Column="0" ItemsSource="{Binding Locals}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate >
                     <StackPanel Orientation="Horizontal"
@@ -22,7 +31,7 @@
                             </Style>
                         </StackPanel.Style>
 
-                        <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Foreground="{StaticResource grayBrush}" Margin="0,0,8,0"/>
 
                         <TextBlock Text="{Binding Value, StringFormat=\{0:x4\}}">
                             <TextBlock.Style>
@@ -39,21 +48,54 @@
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
-
-            <ItemsControl.Template>
-                <ControlTemplate>
-                    <Border BorderThickness="{TemplateBinding Border.BorderThickness}"
-                            Padding="{TemplateBinding Control.Padding}"
-                            BorderBrush="{TemplateBinding Border.BorderBrush}"
-                            Background="{TemplateBinding Panel.Background}"
-                            SnapsToDevicePixels="True">
-                        <ScrollViewer Padding="8,2,2,2"
-                                      Focusable="False">
-                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                        </ScrollViewer>
-                    </Border>
-                </ControlTemplate>
-            </ItemsControl.Template>
         </ItemsControl>
+
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="Stack" Foreground="{StaticResource grayBrush}"/>
+            
+            <TextBlock Text="(empty)" Foreground="Silver">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LocalStack.Length}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            
+            <ItemsControl ItemsSource="{Binding LocalStack}">
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LocalStack.Length}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Value, StringFormat=\{0:x4\}}"
+                               FontFamily="Consolas">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsModified}" Value="True">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
     </Grid>
 </UserControl>

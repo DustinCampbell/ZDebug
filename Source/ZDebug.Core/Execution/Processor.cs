@@ -313,6 +313,22 @@ namespace ZDebug.Core.Execution
             callCount++;
         }
 
+        private void Return(ushort value)
+        {
+            var storeVar = storeVariable;
+            var oldAddress = reader.Address;
+
+            PopFrame();
+
+            WriteStoreVariable(storeVar, value);
+
+            var handler = ExitStackFrame;
+            if (handler != null)
+            {
+                handler(this, new StackFrameEventArgs(reader.Address, oldAddress));
+            }
+        }
+
         private void Jump(short offset)
         {
             reader.Address += offset - 2;
@@ -335,22 +351,6 @@ namespace ZDebug.Core.Execution
             else
             {
                 throw new NotSupportedException();
-            }
-        }
-
-        private void Return(ushort value)
-        {
-            var storeVar = storeVariable;
-            var oldAddress = reader.Address;
-
-            PopFrame();
-
-            WriteStoreVariable(storeVar, value);
-
-            var handler = ExitStackFrame;
-            if (handler != null)
-            {
-                handler(this, new StackFrameEventArgs(reader.Address, oldAddress));
             }
         }
 
@@ -506,6 +506,18 @@ namespace ZDebug.Core.Execution
         public int LocalCount
         {
             get { return localCount; }
+        }
+
+        public ushort[] GetStackValues()
+        {
+            var result = new ushort[localStackSize];
+
+            for (int i = localStackSize - 1; i >= 0; i--)
+            {
+                result[i] = (ushort)stack[stackPointer - i];
+            }
+
+            return result;
         }
 
         public int InstructionCount

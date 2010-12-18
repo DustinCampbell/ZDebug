@@ -172,6 +172,24 @@ namespace ZDebug.Core.Utilities
             return newArray;
         }
 
+        public static T[] Reverse<T>(this T[] array)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            var newArray = new T[array.Length];
+
+            int numItems = array.Length - 1;
+            for (int i = 0; i <= numItems; i++)
+            {
+                newArray[numItems - i] = array[i];
+            }
+
+            return newArray;
+        }
+
         public static TResult[] Select<T, TResult>(this T[] array, Func<T, TResult> selector)
         {
             if (array == null)

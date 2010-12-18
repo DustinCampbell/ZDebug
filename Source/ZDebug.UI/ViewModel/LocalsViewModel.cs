@@ -1,5 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Utilities;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -8,7 +10,8 @@ namespace ZDebug.UI.ViewModel
     {
         private readonly IndexedVariableViewModel[] locals;
 
-        private readonly VariableViewModel[] stack;
+        private VariableViewModel[] stack;
+        private VariableViewModel[] reversedStack;
 
         public LocalsViewModel()
             : base("LocalsView")
@@ -19,6 +22,9 @@ namespace ZDebug.UI.ViewModel
             {
                 locals[i] = new IndexedVariableViewModel(i, 0);
             }
+
+            stack = new VariableViewModel[0];
+            reversedStack = new VariableViewModel[0];
         }
 
         private void Update()
@@ -27,8 +33,9 @@ namespace ZDebug.UI.ViewModel
                 DebuggerService.State != DebuggerState.Unavailable)
             {
                 var processor = DebuggerService.Story.Processor;
-                var localCount = processor.LocalCount;
 
+                // Update locals...
+                var localCount = processor.LocalCount;
                 for (int i = 0; i < 15; i++)
                 {
                     var local = locals[i];
@@ -36,7 +43,7 @@ namespace ZDebug.UI.ViewModel
                     var visible = i < localCount;
                     if (visible)
                     {
-                        local.IsModified = local.Value != processor.Locals[i];
+                        local.IsModified = local.Value != processor.Locals[i] && local.Visible == visible;
                         local.Value = processor.Locals[i];
                     }
 
@@ -47,14 +54,31 @@ namespace ZDebug.UI.ViewModel
                         local.IsModified = false;
                     }
                 }
+
+                // Update stack...
+                var stackValues = processor.GetStackValues();
+                Array.Resize(ref stack, stackValues.Length);
+                var numItems = stackValues.Length - 1;
+                for (int i = numItems; i >= 0; i--)
+                {
+                    int index = numItems - i;
+                    if (stack[index] == null)
+                    {
+                        var stackValue = new VariableViewModel(stackValues[i]);
+                        stackValue.IsModified = true;
+                        stack[index] = stackValue;
+                    }
+                    else
+                    {
+                        var stackValue = stack[index];
+                        stackValue.IsModified = stackValue.Value != stackValues[i];
+                        stackValue.Value = stackValues[i];
+                    }
+                }
+
+                reversedStack = stack.Reverse();
+                PropertyChanged("LocalStack");
             }
-        }
-
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
-        {
-            Update();
-
-            e.Story.Processor.Stepped += Processor_Stepped;
         }
 
         private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
@@ -65,7 +89,8 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
             // When input is wrapped up, we need to update as if the processor had stepped.
-            if (e.OldState == DebuggerState.AwaitingInput)
+            if (e.OldState == DebuggerState.AwaitingInput ||
+                e.OldState == DebuggerState.Running)
             {
                 Update();
             }
@@ -81,6 +106,13 @@ namespace ZDebug.UI.ViewModel
             e.Story.Processor.Stepped -= Processor_Stepped;
         }
 
+        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        {
+            Update();
+
+            e.Story.Processor.Stepped += Processor_Stepped;
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
@@ -91,6 +123,11 @@ namespace ZDebug.UI.ViewModel
         public IndexedVariableViewModel[] Locals
         {
             get { return locals; }
+        }
+
+        public VariableViewModel[] LocalStack
+        {
+            get { return reversedStack; }
         }
     }
 }
