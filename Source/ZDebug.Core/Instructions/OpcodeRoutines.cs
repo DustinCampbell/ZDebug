@@ -1041,12 +1041,12 @@ namespace ZDebug.Core.Instructions
 
                 if (inputStream != 1)
                 {
-                    context.MessageLog.SendWarning("expected first operand to be 1 but was " + inputStream);
+                    context.MessageLog.SendWarning(i, "expected first operand to be 1 but was " + inputStream);
                 }
             }
             else
             {
-                context.MessageLog.SendWarning("expected at least 1 operand.");
+                context.MessageLog.SendWarning(i, "expected at least 1 operand.");
             }
 
             if (i.Operands.Length > 1)
