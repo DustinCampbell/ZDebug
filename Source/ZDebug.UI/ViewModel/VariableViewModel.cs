@@ -5,55 +5,11 @@ namespace ZDebug.UI.ViewModel
     {
         private ushort value;
         private bool isModified;
-        private bool isFrozen;
-        private ushort frozenValue;
         private bool visible;
 
         public VariableViewModel(ushort value)
         {
             this.value = value;
-        }
-
-        public bool Visible
-        {
-            get { return visible; }
-            set
-            {
-                if (visible != value)
-                {
-                    visible = value;
-                    if (!isFrozen)
-                    {
-                        PropertyChanged("Visible");
-                    }
-                }
-            }
-        }
-
-        public ushort Value
-        {
-            get
-            {
-                if (isFrozen)
-                {
-                    return frozenValue;
-                }
-                else
-                {
-                    return value;
-                }
-            }
-            set
-            {
-                if (this.value != value)
-                {
-                    this.value = value;
-                    if (!isFrozen)
-                    {
-                        PropertyChanged("Value");
-                    }
-                }
-            }
         }
 
         public bool IsModified
@@ -64,32 +20,36 @@ namespace ZDebug.UI.ViewModel
                 if (isModified != value)
                 {
                     isModified = value;
-                    if (!isFrozen)
-                    {
-                        PropertyChanged("IsModified");
-                    }
+                    PropertyChanged("IsModified");
                 }
             }
         }
 
-        public bool IsFrozen
+        public ushort Value
         {
-            get { return isFrozen; }
+            get
+            {
+                return value;
+            }
             set
             {
-                if (isFrozen != value)
+                if (this.value != value)
                 {
-                    isFrozen = value;
-                    PropertyChanged("IsFrozen");
+                    this.value = value;
+                    PropertyChanged("Value");
+                }
+            }
+        }
 
-                    if (isFrozen)
-                    {
-                        frozenValue = this.value;
-                    }
-                    else
-                    {
-                        AllPropertiesChanged();
-                    }
+        public bool Visible
+        {
+            get { return visible; }
+            set
+            {
+                if (visible != value)
+                {
+                    visible = value;
+                    PropertyChanged("Visible");
                 }
             }
         }

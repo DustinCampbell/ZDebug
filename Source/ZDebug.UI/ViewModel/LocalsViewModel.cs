@@ -59,6 +59,14 @@ namespace ZDebug.UI.ViewModel
             Update();
         }
 
+        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+        {
+            if (e.OldState == DebuggerState.AwaitingInput)
+            {
+                Update();
+            }
+        }
+
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             for (int i = 0; i < 15; i++)
@@ -67,19 +75,6 @@ namespace ZDebug.UI.ViewModel
             }
 
             e.Story.Processor.Stepped -= Processor_Stepped;
-        }
-
-        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
-        {
-            if (e.NewState == DebuggerState.Running)
-            {
-                this.View.DataContext = null;
-            }
-            else if (e.OldState == DebuggerState.Running)
-            {
-                Update();
-                this.View.DataContext = this;
-            }
         }
 
         protected internal override void Initialize()
