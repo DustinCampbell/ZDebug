@@ -15,5 +15,26 @@ namespace ZDebug.UI.ViewModel
         {
             get { return routine.Address; }
         }
+
+        public bool HasLocals
+        {
+            get { return routine.Locals.Count > 0; }
+        }
+
+        public string LocalCountText
+        {
+            get
+            {
+                var localCount = routine.Locals.Count;
+                if (localCount == 1)
+                {
+                    return "1 local";
+                }
+                else
+                {
+                    return localCount + " locals";
+                }
+            }
+        }
     }
 }

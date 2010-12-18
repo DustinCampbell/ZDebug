@@ -5,6 +5,8 @@
     <SolidColorBrush x:Key="AddressForeground" Color="Gray"/>
     <SolidColorBrush x:Key="OpcodeForeground" Color="Navy"/>
     <SolidColorBrush x:Key="SeparatorForeground" Color="DarkGray"/>
+    
+    <SolidColorBrush x:Key="grayBrush" Color="#878787"/>
 
     <Style TargetType="{x:Type Image}" x:Key="smallImageStyle">
         <Setter Property="Height" Value="12"/>

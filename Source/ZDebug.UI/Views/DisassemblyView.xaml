@@ -259,10 +259,30 @@
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyRoutineHeaderLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <TextBlock
-                            Margin="4,0,0,0"
-                            FontWeight="Bold"
-                            Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                        <StackPanel>
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontWeight="Bold"
+                                Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+
+                            <TextBlock
+                                Margin="4,0,0,0"
+                                FontFamily="Segoe UI"
+                                FontStyle="Italic"
+                                Foreground="{StaticResource grayBrush}"
+                                Text="{Binding LocalCountText, Mode=OneWay}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasLocals}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
                     </ContentControl>
                 </DataTemplate>
 
