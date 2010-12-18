@@ -108,6 +108,7 @@ namespace ZDebug.UI.ViewModel
             }
             else if (e.OldState == DebuggerState.Running)
             {
+                Update();
                 this.View.DataContext = this;
             }
 
