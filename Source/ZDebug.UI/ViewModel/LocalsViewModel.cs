@@ -8,6 +8,8 @@ namespace ZDebug.UI.ViewModel
     {
         private readonly IndexedVariableViewModel[] locals;
 
+        private readonly VariableViewModel[] stack;
+
         public LocalsViewModel()
             : base("LocalsView")
         {
@@ -21,7 +23,8 @@ namespace ZDebug.UI.ViewModel
 
         private void Update()
         {
-            if (DebuggerService.State != DebuggerState.Running)
+            if (DebuggerService.State != DebuggerState.Running &&
+                DebuggerService.State != DebuggerState.Unavailable)
             {
                 var processor = DebuggerService.Story.Processor;
                 var localCount = processor.LocalCount;
@@ -61,6 +64,7 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
+            // When input is wrapped up, we need to update as if the processor had stepped.
             if (e.OldState == DebuggerState.AwaitingInput)
             {
                 Update();
