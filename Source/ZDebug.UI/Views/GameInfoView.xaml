@@ -16,8 +16,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
+            
+            <Image Grid.Column="0" Margin="8" Source="{Binding Cover, Mode=OneWay}"/>
 
-            <StackPanel Grid.Column="1" Width="300" Margin="8">
+            <StackPanel Grid.Column="1" Width="400" Margin="8">
                 <TextBlock FontWeight="Bold">
                 <Run Text="{Binding Title, Mode=OneWay}"/><LineBreak/>
                 <Run Text="{Binding Headline, Mode=OneWay}"/><LineBreak/>
@@ -25,7 +27,7 @@
                 <Run Text="{Binding FirstPublished, Mode=OneWay, StringFormat=(\{0\})}"/><LineBreak/>
                 </TextBlock>
 
-                <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
+                <TextBlock Text="{Binding Description, Mode=OneWay}" TextWrapping="WrapWithOverflow"/>
             </StackPanel>
         </Grid>
 

@@ -98,7 +98,7 @@ namespace ZDebug.UI.Services
                 using (var stream = File.OpenRead(fileName))
                 {
                     var blorb = new BlorbFile(stream);
-                    gameInfo = new GameInfo(blorb.LoadMetadata());
+                    gameInfo = new GameInfo(blorb);
                     DebuggerService.story = blorb.LoadStory();
                 }
             }

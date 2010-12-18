@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Blorb\BlorbFileException.cs" />
+    <Compile Include="Blorb\PictureKind.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
     <Compile Include="Execution\IInputStream.cs" />

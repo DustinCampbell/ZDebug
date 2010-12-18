@@ -35,9 +35,9 @@ namespace ZDebug.Core.Blorb
             }
 
             var chars = name.ToCharArray();
-            return ((uint)((byte)chars[0] << 24) | 
-                (uint)((byte)chars[1] << 16) | 
-                (uint)((byte)chars[2] << 8) | 
+            return ((uint)((byte)chars[0] << 24) |
+                (uint)((byte)chars[1] << 16) |
+                (uint)((byte)chars[2] << 8) |
                 (byte)chars[3]);
         }
 
@@ -59,6 +59,8 @@ namespace ZDebug.Core.Blorb
 
         private static readonly uint id_ZCOD = MakeId("ZCOD");
         private static readonly uint id_IFmd = MakeId("IFmd");
+        private static readonly uint id_PNG = MakeId("PNG");
+        private static readonly uint id_JPEG = MakeId("JPEG");
 
         private struct ChunkDescriptor
         {
@@ -285,6 +287,33 @@ namespace ZDebug.Core.Blorb
             {
                 return XElement.Load(stream);
             }
+        }
+
+        public PictureKind GetPictureKind(int resourceNumber)
+        {
+            var resource = resources[resourceNumber];
+            var chunk = chunks[resource.ChunkNumber];
+
+            if (chunk.Type == id_PNG)
+            {
+                return PictureKind.Png;
+            }
+            else if (chunk.Type == id_JPEG)
+            {
+                return PictureKind.Jpeg;
+            }
+            else
+            {
+                return PictureKind.Unknown;
+            }
+        }
+
+        public Stream LoadPictureStream(int resourceNumber)
+        {
+            var resource = resources[resourceNumber];
+            var chunk = chunks[resource.ChunkNumber];
+
+            return new MemoryStream(GetChunkData(chunk));
         }
 
         public int ReleaseNumber

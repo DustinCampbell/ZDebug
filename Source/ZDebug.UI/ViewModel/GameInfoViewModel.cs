@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media.Imaging;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -33,6 +34,11 @@ namespace ZDebug.UI.ViewModel
         public string Description
         {
             get { return DebuggerService.GameInfo.Description; }
+        }
+
+        public BitmapSource Cover
+        {
+            get { return DebuggerService.GameInfo.Cover; }
         }
     }
 }
