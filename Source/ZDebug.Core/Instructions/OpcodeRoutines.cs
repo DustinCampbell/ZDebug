@@ -1070,12 +1070,152 @@ namespace ZDebug.Core.Instructions
             context.Screen.ReadChar(callback);
         };
 
+        public static readonly OpcodeRoutine aread = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 1, 4);
+            Strict.HasStoreVariable(i);
+
+            int textBuffer = context.GetOperandValue(i.Operands[0]);
+
+            int parseBuffer = 0;
+            if (i.Operands.Length > 1)
+            {
+                parseBuffer = context.GetOperandValue(i.Operands[1]);
+            }
+
+            // TODO: Support timed input
+
+            if (i.Operands.Length > 2)
+            {
+                context.MessageLog.SendWarning(i, "timed input was attempted but it is unsupported");
+                var time = context.GetOperandValue(i.Operands[2]);
+            }
+
+            if (i.Operands.Length > 3)
+            {
+                var routine = context.GetOperandValue(i.Operands[3]);
+            }
+
+            context.Screen.ShowStatus();
+
+            var maxChars = context.ReadByte(textBuffer);
+
+            context.Screen.ReadCommand(maxChars, s =>
+            {
+                var text = s.ToLower();
+
+                var existingTextCount = context.ReadByte(textBuffer + 1);
+
+                context.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
+
+                for (int j = 0; j < text.Length; j++)
+                {
+                    context.WriteByte(textBuffer + existingTextCount + 2 + j, (byte)text[j]);
+                }
+
+                if (parseBuffer > 0)
+                {
+                    var tokens = context.TokenizeCommand(text);
+
+                    var maxWords = context.ReadByte(parseBuffer);
+                    var parsedWords = Math.Min(maxWords, tokens.Length);
+
+                    context.WriteByte(parseBuffer + 1, (byte)parsedWords);
+
+                    for (int j = 0; j < parsedWords; j++)
+                    {
+                        var token = tokens[j];
+
+                        ZDictionaryEntry entry;
+                        if (context.TryLookupWord(token.Text, out entry))
+                        {
+                            context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                        }
+                        else
+                        {
+                            context.WriteWord(parseBuffer + 2 + (j * 4), 0);
+                        }
+
+                        context.WriteByte(parseBuffer + 2 + (j * 4) + 2, (byte)token.Length);
+                        context.WriteByte(parseBuffer + 2 + (j * 4) + 3, (byte)(token.Start + 1));
+                    }
+                }
+
+                // TODO: Update this when timed input is supported
+                context.WriteVariable(i.StoreVariable, 10);
+            });
+        };
+
         public static readonly OpcodeRoutine sread1 = (i, context) =>
         {
             Strict.OperandCountIs(i, 2);
 
-            var textBuffer = context.GetOperandValue(i.Operands[0]);
-            var parseBuffer = context.GetOperandValue(i.Operands[1]);
+            int textBuffer = context.GetOperandValue(i.Operands[0]);
+            int parseBuffer = context.GetOperandValue(i.Operands[1]);
+
+            context.Screen.ShowStatus();
+
+            var maxChars = context.ReadByte(textBuffer);
+
+            context.Screen.ReadCommand(maxChars, s =>
+            {
+                var text = s.ToLower();
+
+                for (int j = 0; j < text.Length; j++)
+                {
+                    context.WriteByte(textBuffer + 1 + j, (byte)text[j]);
+                }
+
+                context.WriteByte(textBuffer + 1 + text.Length, 0);
+
+                var tokens = context.TokenizeCommand(text);
+
+                var maxWords = context.ReadByte(parseBuffer);
+                var parsedWords = Math.Min(maxWords, tokens.Length);
+
+                context.WriteByte(parseBuffer + 1, (byte)parsedWords);
+
+                for (int j = 0; j < parsedWords; j++)
+                {
+                    var token = tokens[j];
+
+                    ZDictionaryEntry entry;
+                    if (context.TryLookupWord(token.Text, out entry))
+                    {
+                        context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                    }
+                    else
+                    {
+                        context.WriteWord(parseBuffer + 2 + (j * 4), 0);
+                    }
+
+                    context.WriteByte(parseBuffer + 2 + (j * 4) + 2, (byte)token.Length);
+                    context.WriteByte(parseBuffer + 2 + (j * 4) + 3, (byte)(token.Start + 1));
+                }
+            });
+        };
+
+        public static readonly OpcodeRoutine sread2 = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 2, 4);
+
+            int textBuffer = context.GetOperandValue(i.Operands[0]);
+            int parseBuffer = context.GetOperandValue(i.Operands[1]);
+
+            // TODO: Support timed input
+
+            if (i.Operands.Length > 2)
+            {
+                context.MessageLog.SendWarning(i, "timed input was attempted but it is unsupported");
+                var time = context.GetOperandValue(i.Operands[2]);
+            }
+
+            if (i.Operands.Length > 3)
+            {
+                var routine = context.GetOperandValue(i.Operands[3]);
+            }
+
+            // TODO: Do something with time and routine operands if provided.
 
             context.Screen.ShowStatus();
 

@@ -97,8 +97,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x02, "storeb", routine: OpcodeRoutines.storeb);
             AddOpcode(OpcodeKind.VarOp, 0x03, "put_prop", routine: OpcodeRoutines.put_prop);
             AddOpcode(OpcodeKind.VarOp, 0x04, "sread", routine: OpcodeRoutines.sread1, toVersion: 3);
-            AddOpcode(OpcodeKind.VarOp, 0x04, "sread", fromVersion: 4, toVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x04, "aread", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x04, "sread", routine: OpcodeRoutines.sread2, fromVersion: 4, toVersion: 4);
+            AddOpcode(OpcodeKind.VarOp, 0x04, "aread", OpcodeFlags.Store, OpcodeRoutines.aread, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x05, "print_char", routine: OpcodeRoutines.print_char);
             AddOpcode(OpcodeKind.VarOp, 0x06, "print_num", routine: OpcodeRoutines.print_num);
             AddOpcode(OpcodeKind.VarOp, 0x07, "random", OpcodeFlags.Store, OpcodeRoutines.random);
