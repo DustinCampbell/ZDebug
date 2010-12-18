@@ -1,17 +1,16 @@
-﻿namespace ZDebug.UI.ViewModel
+﻿
+namespace ZDebug.UI.ViewModel
 {
-    internal sealed class LocalVariableViewModel : ViewModelBase
+    internal class VariableViewModel : ViewModelBase
     {
-        private readonly int index;
         private ushort value;
         private bool isModified;
         private bool isFrozen;
         private ushort frozenValue;
         private bool visible;
 
-        public LocalVariableViewModel(int index, ushort value)
+        public VariableViewModel(ushort value)
         {
-            this.index = index;
             this.value = value;
         }
 
@@ -29,11 +28,6 @@
                     }
                 }
             }
-        }
-
-        public int Index
-        {
-            get { return index; }
         }
 
         public ushort Value

@@ -141,7 +141,7 @@
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
-    <Compile Include="ViewModel\LocalVariableViewModel.cs" />
+    <Compile Include="ViewModel\IndexedVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />
     <Compile Include="ViewModel\MessageViewModel.cs" />
     <Compile Include="ViewModel\OutputViewModel.cs" />
@@ -155,6 +155,7 @@
     <Compile Include="ViewModel\ObjectsViewModel.cs" />
     <Compile Include="ViewModel\ObjectViewModel.cs" />
     <Compile Include="ViewModel\PropertyViewModel.cs" />
+    <Compile Include="ViewModel\VariableViewModel.cs" />
     <Compile Include="ViewModel\ViewModelWithView.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
     <Compile Include="ViewModel\ViewModelWithViewBase.cs" />

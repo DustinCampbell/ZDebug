@@ -22,35 +22,15 @@
                             </Style>
                         </StackPanel.Style>
 
-                        <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Margin="0,0,8,0">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="Black"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsFrozen}" Value="True">
-                                            <Setter Property="Foreground" Value="Silver"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                        <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Margin="0,0,8,0"/>
 
                         <TextBlock Text="{Binding Value, StringFormat=\{0:x4\}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="Black"/>
                                     <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=IsModified}" Value="True"/>
-                                                <Condition Binding="{Binding Path=IsFrozen}" Value="False"/>
-                                            </MultiDataTrigger.Conditions>
-
-                                            <Setter Property="Foreground" Value="Blue"/>
-                                        </MultiDataTrigger>
-
-                                        <DataTrigger Binding="{Binding Path=IsFrozen}" Value="True">
-                                            <Setter Property="Foreground" Value="Silver"/>
+                                        <DataTrigger Binding="{Binding Path=IsModified}" Value="True">
+                                            <Setter Property="Foreground" Value="Red"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

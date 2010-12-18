@@ -6,29 +6,22 @@ namespace ZDebug.UI.ViewModel
 {
     internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
     {
-        private readonly LocalVariableViewModel[] locals;
+        private readonly IndexedVariableViewModel[] locals;
 
         public LocalsViewModel()
             : base("LocalsView")
         {
-            locals = new LocalVariableViewModel[15];
+            locals = new IndexedVariableViewModel[15];
 
             for (int i = 0; i < 15; i++)
             {
-                locals[i] = new LocalVariableViewModel(i, 0);
+                locals[i] = new IndexedVariableViewModel(i, 0);
             }
         }
 
         private void Update()
         {
-            if (DebuggerService.State == DebuggerState.Running)
-            {
-                for (int i = 0; i < 15; i++)
-                {
-                    locals[i].IsModified = false;
-                }
-            }
-            else
+            if (DebuggerService.State != DebuggerState.Running)
             {
                 var processor = DebuggerService.Story.Processor;
                 var localCount = processor.LocalCount;
@@ -37,14 +30,19 @@ namespace ZDebug.UI.ViewModel
                 {
                     var local = locals[i];
 
-                    var current = i < localCount;
-                    if (current)
+                    var visible = i < localCount;
+                    if (visible)
                     {
+                        local.IsModified = local.Value != processor.Locals[i];
                         local.Value = processor.Locals[i];
                     }
 
-                    local.Visible = current;
-                    local.IsModified = false;
+                    local.Visible = visible;
+
+                    if (!visible)
+                    {
+                        local.IsModified = false;
+                    }
                 }
             }
         }
@@ -53,38 +51,12 @@ namespace ZDebug.UI.ViewModel
         {
             Update();
 
-            e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
-            e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
-            e.Story.Processor.LocalVariableChanged += Processor_LocalVariableChanged;
-            e.Story.Processor.Stepping += Processor_Stepping;
+            e.Story.Processor.Stepped += Processor_Stepped;
         }
 
-        private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
+        private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
         {
             Update();
-        }
-
-        private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
-        {
-            Update();
-        }
-
-        private void Processor_LocalVariableChanged(object sender, VariableChangedEventArgs e)
-        {
-            var viewModel = locals[e.Index];
-            viewModel.Value = e.NewValue;
-            viewModel.IsModified = true;
-        }
-
-        private void Processor_Stepping(object sender, ProcessorSteppingEventArgs e)
-        {
-            if (DebuggerService.State != DebuggerState.Running)
-            {
-                for (int i = 0; i < 15; i++)
-                {
-                    locals[i].IsModified = false;
-                }
-            }
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
@@ -94,10 +66,7 @@ namespace ZDebug.UI.ViewModel
                 locals[i].Visible = false;
             }
 
-            e.Story.Processor.EnterStackFrame -= Processor_EnterFrame;
-            e.Story.Processor.ExitStackFrame -= Processor_ExitFrame;
-            e.Story.Processor.LocalVariableChanged -= Processor_LocalVariableChanged;
-            e.Story.Processor.Stepping -= Processor_Stepping;
+            e.Story.Processor.Stepped -= Processor_Stepped;
         }
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
@@ -111,23 +80,6 @@ namespace ZDebug.UI.ViewModel
                 Update();
                 this.View.DataContext = this;
             }
-
-            if (e.NewState == DebuggerState.Running)
-            {
-                for (int i = 0; i < 15; i++)
-                {
-                    var local = locals[i];
-                    local.IsModified = false;
-                    local.IsFrozen = true;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 15; i++)
-                {
-                    locals[i].IsFrozen = false;
-                }
-            }
         }
 
         protected internal override void Initialize()
@@ -137,7 +89,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
-        public LocalVariableViewModel[] Locals
+        public IndexedVariableViewModel[] Locals
         {
             get { return locals; }
         }
