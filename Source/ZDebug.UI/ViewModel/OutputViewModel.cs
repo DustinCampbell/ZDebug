@@ -215,10 +215,31 @@ namespace ZDebug.UI.ViewModel
 
         public void SetTextStyle(ZTextStyle style)
         {
-            windowManager.ActiveWindow.SetBold(style.HasFlag(ZTextStyle.Bold));
-            windowManager.ActiveWindow.SetItalic(style.HasFlag(ZTextStyle.Italic));
-            windowManager.ActiveWindow.SetFixedPitch(style.HasFlag(ZTextStyle.FixedPitch));
-            windowManager.ActiveWindow.SetReverse(style.HasFlag(ZTextStyle.Reverse));
+            var activeWindow = windowManager.ActiveWindow;
+
+            if (style == ZTextStyle.Roman)
+            {
+                activeWindow.SetBold(false);
+                activeWindow.SetItalic(false);
+                activeWindow.SetFixedPitch(false);
+                activeWindow.SetReverse(false);
+            }
+            else if (style == ZTextStyle.Bold)
+            {
+                activeWindow.SetBold(true);
+            }
+            else if (style == ZTextStyle.Italic)
+            {
+                activeWindow.SetItalic(true);
+            }
+            else if (style == ZTextStyle.FixedPitch)
+            {
+                activeWindow.SetFixedPitch(true);
+            }
+            else if (style == ZTextStyle.Reverse)
+            {
+                activeWindow.SetReverse(true);
+            }
         }
 
         public ZFont SetFont(ZFont font)
