@@ -954,10 +954,22 @@ namespace ZDebug.Core.Instructions
 
         public static readonly OpcodeRoutine read_char = (i, context) =>
         {
-            Strict.OperandCountInRange(i, 1, 3);
+            Strict.OperandCountInRange(i, 0, 3);
             Strict.HasStoreVariable(i);
 
-            var inputStream = context.GetOperandValue(i.Operands[0]);
+            if (i.Operands.Length > 0)
+            {
+                var inputStream = context.GetOperandValue(i.Operands[0]);
+
+                if (inputStream != 1)
+                {
+                    context.MessageLog.SendWarning("expected first operand to be 1 but was " + inputStream);
+                }
+            }
+            else
+            {
+                context.MessageLog.SendWarning("expected at least 1 operand.");
+            }
 
             if (i.Operands.Length > 1)
             {
