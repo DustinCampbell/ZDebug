@@ -9,12 +9,25 @@ namespace ZDebug.Core.Basics
         {
             var result = new string[3];
 
+            Converter<byte, char> byteToChar = b =>
+            {
+                var ch = (char)b;
+                if (ch == '^')
+                {
+                    return '\n';
+                }
+                else
+                {
+                    return ch;
+                }
+            };
+
             var reader = memory.CreateReader(address);
-            result[0] = "??????" + reader.NextBytes(26).ConvertAll(b => (char)b).AsString();
-            result[1] = "??????" + reader.NextBytes(26).ConvertAll(b => (char)b).AsString();
+            result[0] = "??????" + reader.NextBytes(26).ConvertAll(byteToChar).AsString();
+            result[1] = "??????" + reader.NextBytes(26).ConvertAll(byteToChar).AsString();
 
             reader.Skip(1);
-            result[2] = "???????" + reader.NextBytes(25).ConvertAll(b => (char)b).AsString();
+            result[2] = "???????" + reader.NextBytes(25).ConvertAll(byteToChar).AsString();
 
             return result;
         }
