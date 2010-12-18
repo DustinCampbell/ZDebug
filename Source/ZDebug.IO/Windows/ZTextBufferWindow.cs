@@ -24,7 +24,7 @@ namespace ZDebug.IO.Windows
             this.document = new FlowDocument();
             this.document.FontFamily = FontsAndColorsService.NormalFontFamily;
             this.document.FontSize = FontsAndColorsService.FontSize;
-            this.document.PagePadding = new Thickness(4);
+            this.document.PagePadding = new Thickness(8);
             this.paragraph = new Paragraph();
             this.document.Blocks.Add(paragraph);
 
