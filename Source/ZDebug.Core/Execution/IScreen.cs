@@ -12,6 +12,8 @@ namespace ZDebug.Core.Execution
 
         void SetWindow(int window);
 
+        int GetCursorLine();
+        int GetCursorColumn();
         void SetCursor(int line, int column);
         void SetTextStyle(ZTextStyle style);
         void SetForegroundColor(ZColor color);

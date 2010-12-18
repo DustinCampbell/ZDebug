@@ -131,8 +131,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, OpcodeRoutines.call_vn2, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1b, "tokenize", fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1c, "encode_text", fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x1d, "copy_table", fromVersion: 5);
-            AddOpcode(OpcodeKind.VarOp, 0x1e, "print_table", fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x1d, "copy_table", routine: OpcodeRoutines.copy_table, fromVersion: 5);
+            AddOpcode(OpcodeKind.VarOp, 0x1e, "print_table", routine: OpcodeRoutines.print_table, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1f, "check_arg_count", OpcodeFlags.Branch, OpcodeRoutines.check_arg_count, fromVersion: 5);
 
             // extended opcodes

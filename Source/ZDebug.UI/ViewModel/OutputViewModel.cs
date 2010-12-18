@@ -194,6 +194,16 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        public int GetCursorLine()
+        {
+            return windowManager.ActiveWindow.GetCursorLine();
+        }
+
+        public int GetCursorColumn()
+        {
+            return windowManager.ActiveWindow.GetCursorColumn();
+        }
+
         public void SetCursor(int line, int column)
         {
             windowManager.ActiveWindow.SetCursor(column, line);

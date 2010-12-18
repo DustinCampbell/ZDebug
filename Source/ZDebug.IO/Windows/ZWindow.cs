@@ -49,6 +49,16 @@ namespace ZDebug.IO.Windows
         public abstract void PutChar(char ch);
         public abstract void PutString(string s);
 
+        public virtual int GetCursorLine()
+        {
+            return 0;
+        }
+
+        public virtual int GetCursorColumn()
+        {
+            return 0;
+        }
+
         public virtual void SetCursor(int x, int y)
         {
         }

@@ -559,6 +559,49 @@ namespace ZDebug.Core.Instructions
         };
 
         ///////////////////////////////////////////////////////////////////////////////////////////
+        // Table routines
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly OpcodeRoutine copy_table = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 3);
+
+            var first = context.GetOperandValue(i.Operands[0]);
+            var second = context.GetOperandValue(i.Operands[1]);
+            var size = context.GetOperandValue(i.Operands[2]);
+
+            if (second == 0) // zero out first table
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    context.WriteByte(first + j, 0);
+                }
+            }
+            else if ((short)size < 0 || first > second) // copy forwards
+            {
+                var copySize = size;
+                if ((short)copySize < 0)
+                {
+                    copySize = (ushort)(-((short)size));
+                }
+
+                for (int j = 0; j < copySize; j++)
+                {
+                    var value = context.ReadByte(first + j);
+                    context.WriteByte(second + j, value);
+                }
+            }
+            else // copy backwards
+            {
+                for (int j = size - 1; j >= 0; j--)
+                {
+                    var value = context.ReadByte(first + j);
+                    context.WriteByte(second + j, value);
+                }
+            }
+        };
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
         // Stack routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -908,6 +951,41 @@ namespace ZDebug.Core.Instructions
             var ztext = context.ParseZWords(i.ZText);
             context.Print(ztext + "\n");
             context.Return(1);
+        };
+
+        public static readonly OpcodeRoutine print_table = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 2, 4);
+
+            var address = context.GetOperandValue(i.Operands[0]);
+            var width = context.GetOperandValue(i.Operands[1]);
+            var height = i.Operands.Length > 2
+                ? (ushort)context.GetOperandValue(i.Operands[2])
+                : (ushort)1;
+            var skip = i.Operands.Length > 3
+                ? (ushort)context.GetOperandValue(i.Operands[3])
+                : (ushort)0;
+
+            var left = context.Screen.GetCursorColumn();
+
+            for (int j = 0; j < height; j++)
+            {
+                if (j != 0)
+                {
+                    var y = context.Screen.GetCursorLine() + 1;
+                    context.Screen.SetCursor(y, left);
+                }
+
+                for (int k = 0; k < width; k++)
+                {
+                    var ch = (char)context.ReadByte(address);
+                    address++;
+                    context.Screen.Print(ch);
+                }
+
+                address += skip;
+            }
+
         };
 
         public static readonly OpcodeRoutine set_color = (i, context) =>

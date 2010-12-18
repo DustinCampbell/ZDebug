@@ -50,6 +50,16 @@ namespace ZDebug.IO.Windows
             textGrid.PutChar(ch);
         }
 
+        public override int GetCursorColumn()
+        {
+            return textGrid.GetCursorX();
+        }
+
+        public override int GetCursorLine()
+        {
+            return textGrid.GetCursorY();
+        }
+
         public override void SetCursor(int x, int y)
         {
             textGrid.SetCursor(x, y);

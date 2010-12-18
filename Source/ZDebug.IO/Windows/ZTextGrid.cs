@@ -120,6 +120,16 @@ namespace ZDebug.IO.Windows
             }
         }
 
+        public int GetCursorX()
+        {
+            return cursorX;
+        }
+
+        public int GetCursorY()
+        {
+            return cursorY;
+        }
+
         public void SetCursor(int x, int y)
         {
             cursorX = x;

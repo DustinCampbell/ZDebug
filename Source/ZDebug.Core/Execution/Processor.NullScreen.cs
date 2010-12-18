@@ -30,6 +30,16 @@ namespace ZDebug.Core.Execution
             {
             }
 
+            public int GetCursorLine()
+            {
+                return 0;
+            }
+
+            public int GetCursorColumn()
+            {
+                return 0;
+            }
+
             public void SetCursor(int line, int column)
             {
             }
