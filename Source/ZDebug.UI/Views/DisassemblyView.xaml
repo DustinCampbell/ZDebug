@@ -257,6 +257,23 @@
                     </ContentControl>
                 </DataTemplate>
 
+                <DataTemplate DataType="{x:Type vm:DisassemblyAddressGapLineViewModel}">
+                    <ContentControl Template="{StaticResource lineTemplate}">
+                        <TextBlock
+                            Margin="20,0,0,0"
+                            FontFamily="Segoe UI"
+                            FontStyle="Italic"
+                            Foreground="CornflowerBlue">
+
+                            <Run Text="----"/>
+                            <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            <Run Text="to"/>
+                            <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            <Run Text="----"/>
+                        </TextBlock>
+                    </ContentControl>
+                </DataTemplate>
+
                 <DataTemplate DataType="{x:Type vm:DisassemblyRoutineHeaderLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
                         <StackPanel>

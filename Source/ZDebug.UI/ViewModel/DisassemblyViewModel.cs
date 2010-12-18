@@ -57,12 +57,20 @@ namespace ZDebug.UI.ViewModel
 
                 for (int rIndex = 0; rIndex < routineTable.Count; rIndex++)
                 {
+                    var routine = routineTable[rIndex];
+
                     if (rIndex > 0)
                     {
                         lines.Add(DisassemblyBlankLineViewModel.Instance);
-                    }
 
-                    var routine = routineTable[rIndex];
+                        var lastRoutine = routineTable[rIndex - 1];
+                        if (lastRoutine.Address + lastRoutine.Length < routine.Address)
+                        {
+                            var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine);
+                            lines.Add(addressGapLine);
+                            lines.Add(DisassemblyBlankLineViewModel.Instance);
+                        }
+                    }
 
                     var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine);
                     routineAddressAndIndexList.Add(new AddressAndIndex(routineHeaderLine.Address, lines.Count));
