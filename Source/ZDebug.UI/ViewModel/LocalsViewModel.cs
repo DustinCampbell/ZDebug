@@ -69,7 +69,7 @@ namespace ZDebug.UI.ViewModel
             Update();
         }
 
-        private void Processor_LocalVariableChanged(object sender, LocalVariableChangedEventArgs e)
+        private void Processor_LocalVariableChanged(object sender, VariableChangedEventArgs e)
         {
             var viewModel = locals[e.Index];
             viewModel.Value = e.NewValue;

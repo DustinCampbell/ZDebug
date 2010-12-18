@@ -2,13 +2,13 @@
 
 namespace ZDebug.Core.Execution
 {
-    public sealed class LocalVariableChangedEventArgs : EventArgs
+    public sealed class VariableChangedEventArgs : EventArgs
     {
         private readonly int index;
         private readonly ushort oldValue;
         private readonly ushort newValue;
 
-        public LocalVariableChangedEventArgs(int index, ushort oldValue, ushort newValue)
+        public VariableChangedEventArgs(int index, ushort oldValue, ushort newValue)
         {
             this.index = index;
             this.oldValue = oldValue;

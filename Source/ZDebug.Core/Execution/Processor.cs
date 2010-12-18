@@ -125,7 +125,15 @@ namespace ZDebug.Core.Execution
                     else
                     {
                         localStackSize--;
-                        return (ushort)stack[stackPointer--];
+                        var value = (ushort)stack[stackPointer--];
+
+                        var handler = StackPopped;
+                        if (handler != null)
+                        {
+                            handler(this, new StackEventArgs(value));
+                        }
+
+                        return value;
                     }
 
                 case VariableKind.Local:
@@ -152,30 +160,55 @@ namespace ZDebug.Core.Execution
                         }
 
                         stack[stackPointer] = value;
+
+                        var handler = StackWritten;
+                        if (handler != null)
+                        {
+                            handler(this, new StackEventArgs(value));
+                        }
                     }
                     else
                     {
                         localStackSize++;
                         stack[++stackPointer] = value;
+
+                        var handler = StackPushed;
+                        if (handler != null)
+                        {
+                            handler(this, new StackEventArgs(value));
+                        }
                     }
 
                     break;
 
                 case VariableKind.Local:
-                    var index = variable.Index;
-                    var oldValue = locals[index];
-                    locals[index] = value;
-
-                    var handler = LocalVariableChanged;
-                    if (handler != null)
                     {
-                        handler(this, new LocalVariableChangedEventArgs(index, oldValue, value));
+                        var index = variable.Index;
+                        var oldValue = locals[index];
+                        locals[index] = value;
+
+                        var handler = LocalVariableChanged;
+                        if (handler != null)
+                        {
+                            handler(this, new VariableChangedEventArgs(index, oldValue, value));
+                        }
                     }
 
                     break;
 
                 case VariableKind.Global:
-                    story.GlobalVariablesTable[variable.Index] = value;
+                    {
+                        var index = variable.Index;
+                        var oldValue = story.GlobalVariablesTable[index];
+                        story.GlobalVariablesTable[index] = value;
+
+                        var handler = GlobalVariableChanged;
+                        if (handler != null)
+                        {
+                            handler(this, new VariableChangedEventArgs(index, oldValue, value));
+                        }
+                    }
+
                     break;
 
                 default:
@@ -499,7 +532,30 @@ namespace ZDebug.Core.Execution
         public event EventHandler<StackFrameEventArgs> EnterStackFrame;
         public event EventHandler<StackFrameEventArgs> ExitStackFrame;
 
-        public event EventHandler<LocalVariableChangedEventArgs> LocalVariableChanged;
+        /// <summary>
+        /// Occurs when a local variable is written to.
+        /// </summary>
+        public event EventHandler<VariableChangedEventArgs> LocalVariableChanged;
+
+        /// <summary>
+        /// Occurs when a global variable is written to.
+        /// </summary>
+        public event EventHandler<VariableChangedEventArgs> GlobalVariableChanged;
+
+        /// <summary>
+        /// Occurs when a value is popped off of the local stack.
+        /// </summary>
+        public event EventHandler<StackEventArgs> StackPopped;
+
+        /// <summary>
+        /// Occurs when a value is pushed onto the local stack.
+        /// </summary>
+        public event EventHandler<StackEventArgs> StackPushed;
+
+        /// <summary>
+        /// Occurs when the top of the local stack is directly written to without popping or pushing.
+        /// </summary>
+        public event EventHandler<StackEventArgs> StackWritten;
 
         public event EventHandler Quit;
 
