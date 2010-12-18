@@ -25,12 +25,34 @@ namespace ZDebug.UI.ViewModel
 
         public int StartAddress
         {
-            get { return start.Address + start.Length; }
+            get { return start.Address + start.Length - 1; }
         }
 
         public int EndAddress
         {
-            get { return end.Address - 1; }
+            get { return end.Address; }
         }
+
+        public int Length
+        {
+            get { return EndAddress - StartAddress; }
+        }
+
+        public string LengthText
+        {
+            get
+            {
+                var length = EndAddress - StartAddress;
+                if (length == 1)
+                {
+                    return "1 byte";
+                }
+                else
+                {
+                    return length + " bytes";
+                }
+            }
+        }
+
     }
 }

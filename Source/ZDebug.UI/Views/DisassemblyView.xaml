@@ -260,11 +260,10 @@
                                 FontStyle="Italic"
                                 Foreground="CornflowerBlue">
 
-                                <Run Text="----"/>
+                                <Run Text="{Binding LengthText, StringFormat=\{0\}:, Mode=OneWay}"/>
                                 <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
                                 <Run Text="to"/>
                                 <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                                <Run Text="----"/>
                             </TextBlock>
 
                             <!-- blank line -->

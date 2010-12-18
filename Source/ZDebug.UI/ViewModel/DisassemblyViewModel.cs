@@ -172,14 +172,41 @@ namespace ZDebug.UI.ViewModel
                 }
 
                 var count = 0;
-                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
-                lines.Insert(insertionPoint, routineHeaderLine);
-                count++;
-                addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
+
+                // Is previous line an address gap? If so, we need to either remove it or update it in place.
+                if (insertionPoint > 0)
+                {
+                    var addressGap = lines[insertionPoint - 1] as DisassemblyAddressGapLineViewModel;
+                    if (addressGap != null)
+                    {
+                        var priorRoutine = addressGap.Start;
+                        var nextRoutine = addressGap.End;
+
+                        if (addressGap.StartAddress == e.Routine.Address)
+                        {
+                            // If the address gap starts at this routine, we need to remove it.
+                            lines.RemoveAt(--insertionPoint);
+                            count--;
+                        }
+                        else if (addressGap.StartAddress < e.Routine.Address)
+                        {
+                            // If the address gap starts before this routine, we need to update it in place.
+                            lines[insertionPoint - 1] = new DisassemblyAddressGapLineViewModel(priorRoutine, e.Routine);
+                        }
+
+                        if (nextRoutine.Address > e.Routine.Address + e.Routine.Length - 1)
+                        {
+                            // If there is a gap between this routine and the next one, we need to insert an address gap.
+                            var newAddressGap = new DisassemblyAddressGapLineViewModel(e.Routine, nextRoutine);
+                            lines.Insert(insertionPoint, newAddressGap);
+                            count++;
+                        }
+                    }
+                }
 
                 var instructions = e.Routine.Instructions;
                 var lastIndex = instructions.Count - 1;
-                for (int i = 0; i <= lastIndex; i++)
+                for (int i = lastIndex; i >= 0; i--)
                 {
                     var instruction = instructions[i];
                     var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
@@ -188,10 +215,16 @@ namespace ZDebug.UI.ViewModel
                     {
                         instructionLine.HasBreakpoint = true;
                     }
-                    lines.Insert(insertionPoint + count, instructionLine);
+
+                    lines.Insert(insertionPoint, instructionLine);
                     count++;
                     addressToLineMap.Add(instruction.Address, instructionLine);
                 }
+
+                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+                lines.Insert(insertionPoint, routineHeaderLine);
+                count++;
+                addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
 
                 if (nextRoutineIndex >= 0)
                 {
