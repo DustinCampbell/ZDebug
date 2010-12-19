@@ -17,10 +17,9 @@ namespace ZDebug.UI.Services
         private static string fileName;
         private static Exception currentException;
         private static SortedSet<int> breakpoints = new SortedSet<int>();
+        private static List<string> gameScript = new List<string>();
 
         private static DebuggerState priorState;
-
-        private static int markId = 1000;
 
         private static void ChangeState(DebuggerState newState)
         {
@@ -47,6 +46,15 @@ namespace ZDebug.UI.Services
                     breakpoints.Add((int)addAttr);
                 }
             }
+
+            var scriptElem = xml.Element("gamescript");
+            if (scriptElem != null)
+            {
+                foreach (var commandElem in scriptElem.Elements("command"))
+                {
+                    gameScript.Add(commandElem.Value);
+                }
+            }
         }
 
         private static void SaveSettings(Story story)
@@ -58,7 +66,9 @@ namespace ZDebug.UI.Services
                         new XAttribute("release", story.ReleaseNumber),
                         new XAttribute("version", story.Version)),
                     new XElement("breakpoints",
-                        breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))));
+                        breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))),
+                    new XElement("gamescript",
+                        gameScript.Select(c => new XElement("command", c))));
 
             Storage.SaveStorySettings(story, xml);
         }
@@ -295,6 +305,27 @@ namespace ZDebug.UI.Services
                     yield return address;
                 }
             }
+        }
+
+        public static void SetGameScriptCommands(IEnumerable<string> commands)
+        {
+            gameScript.Clear();
+            gameScript.AddRange(commands);
+        }
+
+        public static string GetGameScriptCommand(int index)
+        {
+            return gameScript[index];
+        }
+
+        public static string[] GetGameScriptCommands()
+        {
+            return gameScript.ToArray();
+        }
+
+        public static int GameScriptCommandCount
+        {
+            get { return gameScript.Count; }
         }
 
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;

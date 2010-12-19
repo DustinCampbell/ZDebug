@@ -10,15 +10,6 @@
         Height="600"
         vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Images.xaml"/>
-                <ResourceDictionary Source="Styles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <Grid>
         <Grid.Resources>
             <Style TargetType="{x:Type c:AutoDisableImage}">
@@ -61,6 +52,12 @@
                         <c:AutoDisableImage Source="{StaticResource resetImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <Separator/>
+                <MenuItem Command="{Binding EditGameScriptCommand}" Header="Edit Game _Script...">
+                    <MenuItem.Icon>
+                        <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="_Window">
                 <MenuItem Command="{Binding ResetWindowLayoutCommand}" Header="_Reset Window Layout"/>
@@ -82,6 +79,10 @@
                 <Separator/>
                 <Button Command="{Binding ResetSessionCommand}" ToolTip="Reset Debugging Session">
                     <c:AutoDisableImage Source="{StaticResource resetImage}"/>
+                </Button>
+                <Separator/>
+                <Button Command="{Binding EditGameScriptCommand}" ToolTip="Edit Game Script">
+                    <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                 </Button>
                 <Separator/>
                 <Button Command="{Binding AboutGameCommand}" ToolTip="About Game">

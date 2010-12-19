@@ -3,15 +3,6 @@
              xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Images.xaml"/>
-                <ResourceDictionary Source="Styles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto"
                       Margin="0,2">

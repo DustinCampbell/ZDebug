@@ -15,6 +15,7 @@
     <BitmapImage x:Key="playImage" UriSource="../Images/play.png"/>
     <BitmapImage x:Key="refreshImage" UriSource="../Images/refresh.png"/>
     <BitmapImage x:Key="resetImage" UriSource="../Images/reset.png"/>
+    <BitmapImage x:Key="scriptImage" UriSource="../Images/script.png"/>
     <BitmapImage x:Key="stepImage" UriSource="../Images/step.png"/>
     <BitmapImage x:Key="stoppedImage" UriSource="../Images/stopped.png"/>
     <BitmapImage x:Key="warningImage" UriSource="../Images/warning.png"/>

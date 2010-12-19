@@ -10,15 +10,6 @@
              UseLayoutRounding="True"
              TextOptions.TextFormattingMode="Display">
 
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Images.xaml"/>
-                <ResourceDictionary Source="Styles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
     <Grid>
         <ItemsControl Name="lines"
                       ItemsSource="{Binding Lines}"

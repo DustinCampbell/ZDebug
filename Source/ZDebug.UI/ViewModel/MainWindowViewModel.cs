@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,12 @@ namespace ZDebug.UI.ViewModel
                 executed: OpenStoryExecuted,
                 canExecute: CanOpenStoryExecute,
                 inputGestures: new KeyGesture(Key.O, ModifierKeys.Control));
+
+            this.EditGameScriptCommand = RegisterCommand(
+                text: "EditGameScript",
+                name: "Edit Game Script",
+                executed: EditGameScriptExecuted,
+                canExecute: CanEditGameScriptExecute);
 
             this.ExitCommand = RegisterCommand(
                 text: "Exit",
@@ -80,6 +87,22 @@ namespace ZDebug.UI.ViewModel
             if (dialog.ShowDialog(this.View) == true)
             {
                 DebuggerService.OpenStory(dialog.FileName);
+            }
+        }
+
+        private bool CanEditGameScriptExecute()
+        {
+            return DebuggerService.HasStory;
+        }
+
+        private void EditGameScriptExecuted()
+        {
+            var gameScriptDialog = ViewModelWithView.Create<GameScriptDialogViewModel, Window>();
+            gameScriptDialog.Owner = this.View;
+            if (gameScriptDialog.ShowDialog() == true)
+            {
+                var viewModel = (GameScriptDialogViewModel)gameScriptDialog.DataContext;
+                DebuggerService.SetGameScriptCommands(viewModel.Commands.Split(new char[] { '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries));
             }
         }
 
@@ -146,6 +169,7 @@ namespace ZDebug.UI.ViewModel
         }
 
         public ICommand OpenStoryCommand { get; private set; }
+        public ICommand EditGameScriptCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
