@@ -1369,6 +1369,26 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine restore_undo = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasStoreVariable(i);
+
+            context.MessageLog.SendWarning(i, "Undo is not supported.");
+
+            context.WriteVariable(i.StoreVariable, unchecked((ushort)-1));
+        };
+
+        public static readonly OpcodeRoutine save_undo = (i, context) =>
+        {
+            Strict.OperandCountIs(i, 0);
+            Strict.HasStoreVariable(i);
+
+            context.MessageLog.SendWarning(i, "Undo is not supported.");
+
+            context.WriteVariable(i.StoreVariable, unchecked((ushort)-1));
+        };
+
         public static readonly OpcodeRoutine show_status = (i, context) =>
         {
             Strict.OperandCountIs(i, 0);

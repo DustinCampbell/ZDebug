@@ -145,8 +145,8 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.Ext, 0x06, "picture_data", OpcodeFlags.Branch, fromVersion: 6);
             AddOpcode(OpcodeKind.Ext, 0x07, "erase_picture", fromVersion: 6);
             AddOpcode(OpcodeKind.Ext, 0x08, "set_margins", fromVersion: 6);
-            AddOpcode(OpcodeKind.Ext, 0x09, "save_undo", OpcodeFlags.Store, fromVersion: 5);
-            AddOpcode(OpcodeKind.Ext, 0x0a, "restore_undo", OpcodeFlags.Store, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x09, "save_undo", OpcodeFlags.Store, OpcodeRoutines.save_undo, fromVersion: 5);
+            AddOpcode(OpcodeKind.Ext, 0x0a, "restore_undo", OpcodeFlags.Store, OpcodeRoutines.restore_undo, fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x0b, "print_unicode", fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x0c, "check_unicode", fromVersion: 5);
             AddOpcode(OpcodeKind.Ext, 0x10, "move_window", fromVersion: 6);
