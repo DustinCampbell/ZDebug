@@ -427,15 +427,15 @@ namespace ZDebug.Core.Basics
             int dataLength;
             if (version <= 3)
             {
-                dataLength = ((sizeByte & 0xE0) >> 5) + 1;
+                dataLength = (sizeByte >> 5) + 1;
             }
             else if ((sizeByte & 0x80) == 0)
             {
-                dataLength = ((sizeByte & 0x40) >> 6) + 1;
+                dataLength = (sizeByte >> 6) + 1;
             }
             else
             {
-                dataLength = sizeByte & 0x7F;
+                dataLength = sizeByte & 0x3F;
             }
 
             if (dataLength == 0)
