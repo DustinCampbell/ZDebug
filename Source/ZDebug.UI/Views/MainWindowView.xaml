@@ -100,6 +100,9 @@
                         <ad:DockablePane>
                             <ad:DockableContent Title="Memory Map" Name="memoryMapContent"/>
                         </ad:DockablePane>
+                        <ad:DockablePane>
+                            <ad:DockableContent Title="Globals" Name="globalsContent"/>
+                        </ad:DockablePane>
                     </ad:ResizingPanel>
                     <ad:ResizingPanel Orientation="Vertical">
                         <ad:DocumentPane SelectedIndex="0">

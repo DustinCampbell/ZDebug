@@ -29,8 +29,7 @@ namespace ZDebug.UI.ViewModel
 
         private void Update()
         {
-            if (DebuggerService.State != DebuggerState.Running &&
-                DebuggerService.State != DebuggerState.Unavailable)
+            if (DebuggerService.State != DebuggerState.Running)
             {
                 var processor = DebuggerService.Story.Processor;
 
@@ -89,8 +88,9 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
             // When input is wrapped up, we need to update as if the processor had stepped.
-            if (e.OldState == DebuggerState.AwaitingInput ||
-                e.OldState == DebuggerState.Running)
+            if ((e.OldState == DebuggerState.AwaitingInput ||
+                e.OldState == DebuggerState.Running) &&
+                e.NewState != DebuggerState.Unavailable)
             {
                 Update();
             }

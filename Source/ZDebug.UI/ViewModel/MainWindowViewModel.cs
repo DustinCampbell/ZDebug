@@ -189,6 +189,9 @@ namespace ZDebug.UI.ViewModel
             var memoryMapContent = this.View.FindName<DockableContent>("memoryMapContent");
             memoryMapContent.Content = ViewModelWithView.Create<MemoryMapViewModel, UserControl>();
 
+            var globalsContent = this.View.FindName<DockableContent>("globalsContent");
+            globalsContent.Content = ViewModelWithView.Create<GlobalsViewModel, UserControl>();
+
             var disassemblyContent = this.View.FindName<DocumentContent>("disassemblyContent");
             disassemblyContent.Content = ViewModelWithView.Create<DisassemblyViewModel, UserControl>();
 

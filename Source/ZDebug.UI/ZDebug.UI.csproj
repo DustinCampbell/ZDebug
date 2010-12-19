@@ -67,6 +67,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\GlobalsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LocalsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -140,6 +144,7 @@
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\GameInfoViewModel.cs" />
+    <Compile Include="ViewModel\GlobalsViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\IndexedVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />
