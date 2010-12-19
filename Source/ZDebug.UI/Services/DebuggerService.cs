@@ -18,6 +18,7 @@ namespace ZDebug.UI.Services
         private static Exception currentException;
         private static SortedSet<int> breakpoints = new SortedSet<int>();
         private static List<string> gameScript = new List<string>();
+        private static int gameScriptCommandIndex;
 
         private static DebuggerState priorState;
 
@@ -89,6 +90,7 @@ namespace ZDebug.UI.Services
             fileName = null;
 
             breakpoints.Clear();
+            gameScript.Clear();
 
             var handler = StoryClosed;
             if (handler != null)
@@ -120,6 +122,8 @@ namespace ZDebug.UI.Services
             DebuggerService.fileName = fileName;
 
             LoadSettings(story);
+
+            gameScriptCommandIndex = gameScript.Count != 0 ? 0 : -1;
 
             story.Processor.Quit += Processor_Quit;
 
@@ -313,14 +317,24 @@ namespace ZDebug.UI.Services
             gameScript.AddRange(commands);
         }
 
-        public static string GetGameScriptCommand(int index)
-        {
-            return gameScript[index];
-        }
-
         public static string[] GetGameScriptCommands()
         {
             return gameScript.ToArray();
+        }
+
+        public static bool HasGameScriptCommand()
+        {
+            return gameScriptCommandIndex >= 0 && gameScriptCommandIndex < gameScript.Count;
+        }
+
+        public static string GetNextGameScriptCommand()
+        {
+            if (gameScriptCommandIndex < 0 || gameScriptCommandIndex >= gameScript.Count)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return gameScript[gameScriptCommandIndex++];
         }
 
         public static int GameScriptCommandCount

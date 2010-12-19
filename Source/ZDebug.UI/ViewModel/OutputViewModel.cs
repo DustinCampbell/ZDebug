@@ -128,13 +128,22 @@ namespace ZDebug.UI.ViewModel
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            DebuggerService.BeginAwaitingInput();
-
-            mainWindow.ReadCommand(maxChars, text =>
+            if (DebuggerService.HasGameScriptCommand())
             {
-                callback(text);
-                DebuggerService.EndAwaitingInput();
-            });
+                string command = DebuggerService.GetNextGameScriptCommand();
+                windowManager.ActiveWindow.PutString(command + "\r\n");
+                callback(command);
+            }
+            else
+            {
+                DebuggerService.BeginAwaitingInput();
+
+                mainWindow.ReadCommand(maxChars, text =>
+                {
+                    callback(text);
+                    DebuggerService.EndAwaitingInput();
+                });
+            }
         }
 
         public void Clear(int window)
