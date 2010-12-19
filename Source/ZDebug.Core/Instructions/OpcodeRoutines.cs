@@ -1129,7 +1129,7 @@ namespace ZDebug.Core.Instructions
                         ZDictionaryEntry entry;
                         if (context.TryLookupWord(token.Text, out entry))
                         {
-                            context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                            context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
                         }
                         else
                         {
@@ -1182,7 +1182,7 @@ namespace ZDebug.Core.Instructions
                     ZDictionaryEntry entry;
                     if (context.TryLookupWord(token.Text, out entry))
                     {
-                        context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                        context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
                     }
                     else
                     {
@@ -1246,7 +1246,7 @@ namespace ZDebug.Core.Instructions
                     ZDictionaryEntry entry;
                     if (context.TryLookupWord(token.Text, out entry))
                     {
-                        context.WriteWord(parseBuffer + 2 + (j * 4), (byte)entry.Address);
+                        context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
                     }
                     else
                     {
