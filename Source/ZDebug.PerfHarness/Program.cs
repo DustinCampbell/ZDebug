@@ -47,13 +47,17 @@ namespace ZDebug.PerfHarness
 
             var story = ReadStory(path);
 
+            var done = false;
+            var mockScreen = new MockScreen(() => done = true);
+            story.Processor.RegisterScreen(mockScreen);
+
             Mark("Stepping...");
 
             var sw = Stopwatch.StartNew();
 
             try
             {
-                while (true)
+                while (!done)
                 {
                     story.Processor.Step();
                 }
