@@ -633,6 +633,7 @@ namespace ZDebug.Core.Instructions
                         {
                             context.Jump(i.Branch);
                         }
+                        return;
                     }
                 }
                 else
@@ -646,6 +647,7 @@ namespace ZDebug.Core.Instructions
                         {
                             context.Jump(i.Branch);
                         }
+                        return;
                     }
                 }
 
