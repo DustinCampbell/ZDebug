@@ -602,6 +602,64 @@ namespace ZDebug.Core.Instructions
             }
         };
 
+        public static readonly OpcodeRoutine scan_table = (i, context) =>
+        {
+            Strict.OperandCountInRange(i, 3, 4);
+            Strict.HasStoreVariable(i);
+            Strict.HasBranch(i);
+
+            var x = context.GetOperandValue(i.Operands[0]);
+            var table = context.GetOperandValue(i.Operands[1]);
+            var len = context.GetOperandValue(i.Operands[2]);
+
+            var form = 0x82;
+            if (i.Operands.Length > 3)
+            {
+                form = context.GetOperandValue(i.Operands[3]);
+            }
+
+            ushort address = table;
+
+            for (int j = 0; j < len; j++)
+            {
+                if ((form & 0x80) != 0)
+                {
+                    var value = context.ReadWord(address);
+                    if (value == x)
+                    {
+                        context.WriteVariable(i.StoreVariable, address);
+
+                        if (i.Branch.Condition)
+                        {
+                            context.Jump(i.Branch);
+                        }
+                    }
+                }
+                else
+                {
+                    var value = context.ReadByte(address);
+                    if (value == x)
+                    {
+                        context.WriteVariable(i.StoreVariable, address);
+
+                        if (i.Branch.Condition)
+                        {
+                            context.Jump(i.Branch);
+                        }
+                    }
+                }
+
+                address += (ushort)(form & 0x7f);
+            }
+
+            context.WriteVariable(i.StoreVariable, 0);
+
+            if (!i.Branch.Condition)
+            {
+                context.Jump(i.Branch);
+            }
+        };
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Stack routines
         ///////////////////////////////////////////////////////////////////////////////////////////

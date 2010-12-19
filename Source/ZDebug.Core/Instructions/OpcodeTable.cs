@@ -125,7 +125,7 @@ namespace ZDebug.Core.Instructions
             AddOpcode(OpcodeKind.VarOp, 0x14, "input_stream", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x15, "sound_effect", fromVersion: 3);
             AddOpcode(OpcodeKind.VarOp, 0x16, "read_char", OpcodeFlags.Store, OpcodeRoutines.read_char, fromVersion: 4);
-            AddOpcode(OpcodeKind.VarOp, 0x17, "scan_table", OpcodeFlags.Store | OpcodeFlags.Branch, fromVersion: 4);
+            AddOpcode(OpcodeKind.VarOp, 0x17, "scan_table", OpcodeFlags.Store | OpcodeFlags.Branch, OpcodeRoutines.scan_table, fromVersion: 4);
             AddOpcode(OpcodeKind.VarOp, 0x18, "not", OpcodeFlags.Store, OpcodeRoutines.not, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x19, "call_vn", OpcodeFlags.Call, OpcodeRoutines.call_vn, fromVersion: 5);
             AddOpcode(OpcodeKind.VarOp, 0x1a, "call_vn2", OpcodeFlags.Call | OpcodeFlags.DoubleVar, OpcodeRoutines.call_vn2, fromVersion: 5);
