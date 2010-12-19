@@ -257,15 +257,6 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
-            if (e.NewState == DebuggerState.Running)
-            {
-                this.View.DataContext = null;
-            }
-            else if (e.OldState == DebuggerState.Running)
-            {
-                this.View.DataContext = this;
-            }
-
             if (e.NewState == DebuggerState.Unavailable)
             {
                 return;
