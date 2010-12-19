@@ -493,6 +493,11 @@ namespace ZDebug.Core.Execution
             this.messageLog = messageLog;
         }
 
+        public void SetRandomSeed(int seed)
+        {
+            this.random = new Random(seed);
+        }
+
         public int PC
         {
             get { return reader.Address; }

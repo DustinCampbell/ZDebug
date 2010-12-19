@@ -124,6 +124,7 @@ namespace ZDebug.UI.Services
             LoadSettings(story);
 
             gameScriptCommandIndex = gameScript.Count != 0 ? 0 : -1;
+            story.Processor.SetRandomSeed(42);
 
             story.Processor.Quit += Processor_Quit;
 
