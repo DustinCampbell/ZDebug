@@ -39,7 +39,7 @@
                                 </Style>
                             </StackPanel.Style>
 
-                            <TextBlock Text="{Binding Index, StringFormat=L\{0:x2\}:}" Foreground="{StaticResource grayBrush}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding Index, StringFormat=G\{0:x2\}:}" Foreground="{StaticResource grayBrush}" Margin="0,0,8,0"/>
 
                             <TextBlock Text="{Binding Value, StringFormat=\{0:x4\}}">
                                 <TextBlock.Style>
