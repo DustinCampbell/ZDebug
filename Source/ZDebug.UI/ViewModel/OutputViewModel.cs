@@ -321,6 +321,8 @@ namespace ZDebug.UI.ViewModel
                 upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
             }
 
+            upperWindow.Clear();
+
             var charWidth = ScreenWidthInColumns;
             var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
 
