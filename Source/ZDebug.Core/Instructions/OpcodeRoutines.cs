@@ -1197,7 +1197,7 @@ namespace ZDebug.Core.Instructions
                         }
 
                         context.WriteByte(parseBuffer + 2 + (j * 4) + 2, (byte)token.Length);
-                        context.WriteByte(parseBuffer + 2 + (j * 4) + 3, (byte)(token.Start + 1));
+                        context.WriteByte(parseBuffer + 2 + (j * 4) + 3, (byte)(token.Start + 2));
                     }
                 }
 
