@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -8,8 +9,56 @@ namespace ZDebug.IO.Windows
 {
     internal sealed class ZTextGrid : FrameworkElement
     {
-        private readonly VisualCollection visuals;
+        private struct CursorPos : IComparable<CursorPos>
+        {
+            public readonly int X;
+            public readonly int Y;
 
+            public CursorPos(int x, int y)
+            {
+                this.X = x;
+                this.Y = y;
+            }
+
+            public int CompareTo(CursorPos other)
+            {
+                if (this.Y < other.Y)
+                {
+                    return -1;
+                }
+                else if (this.Y > other.Y)
+                {
+                    return 1;
+                }
+                else if (this.X < other.X)
+                {
+                    return -1;
+                }
+                else if (this.X > other.X)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        private struct VisualPair
+        {
+            public readonly Visual Background;
+            public readonly Visual Character;
+
+            public VisualPair(Visual background, Visual character)
+            {
+                this.Background = background;
+                this.Character = character;
+            }
+        }
+
+        private readonly VisualCollection visuals;
+        private readonly SortedList<CursorPos, VisualPair> visualPairs;
         private readonly Size fontCharSize;
 
         private int cursorX;
@@ -23,6 +72,7 @@ namespace ZDebug.IO.Windows
         public ZTextGrid()
         {
             visuals = new VisualCollection(this);
+            visualPairs = new SortedList<CursorPos, VisualPair>();
 
             var zero = new FormattedText(
                 textToFormat: "0",
@@ -67,6 +117,16 @@ namespace ZDebug.IO.Windows
             }
             else
             {
+                // First, see if we've already inserted something at this position. If so, delete the old visuals.
+                var cursorPos = new CursorPos(cursorX, cursorY);
+                if (visualPairs.ContainsKey(cursorPos))
+                {
+                    var pair = visualPairs[cursorPos];
+                    visuals.Remove(pair.Background);
+                    visuals.Remove(pair.Character);
+                    visualPairs.Remove(cursorPos);
+                }
+
                 var backgroundVisual = new DrawingVisual();
                 var backgroundContext = backgroundVisual.RenderOpen();
 
@@ -115,6 +175,9 @@ namespace ZDebug.IO.Windows
                 textContext.Close();
 
                 visuals.Add(textVisual);
+
+                var newPair = new VisualPair(backgroundVisual, textVisual);
+                visualPairs.Add(cursorPos, newPair);
 
                 cursorX++;
             }
