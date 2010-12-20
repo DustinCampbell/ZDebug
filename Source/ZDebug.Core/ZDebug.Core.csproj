@@ -83,13 +83,16 @@
     <Compile Include="Instructions\BranchKind.cs" />
     <Compile Include="Instructions\Instruction.cs" />
     <Compile Include="Instructions\InstructionReader.cs" />
+    <Compile Include="Instructions\InstructionReaderException.cs" />
     <Compile Include="Instructions\MemoryReaderExtensions.cs" />
     <Compile Include="Instructions\Opcode.cs" />
+    <Compile Include="Instructions\OpcodeException.cs" />
     <Compile Include="Instructions\OpcodeFlags.cs" />
     <Compile Include="Instructions\OpcodeKind.cs" />
     <Compile Include="Instructions\OpcodeRoutine.cs" />
     <Compile Include="Instructions\OpcodeRoutines.cs" />
     <Compile Include="Instructions\OpcodeTable.cs" />
+    <Compile Include="Instructions\OpcodeTables.cs" />
     <Compile Include="Instructions\Operand.cs" />
     <Compile Include="Instructions\OperandKind.cs" />
     <Compile Include="Instructions\Routine.cs" />

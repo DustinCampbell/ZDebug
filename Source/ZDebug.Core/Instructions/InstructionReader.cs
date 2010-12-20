@@ -1,5 +1,4 @@
-﻿using System;
-using ZDebug.Core.Basics;
+﻿using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
@@ -12,16 +11,16 @@ namespace ZDebug.Core.Instructions
         private const byte opKind_Omitted = 3;
 
         private readonly MemoryReader reader;
-        private readonly byte version;
+        private readonly OpcodeTable opcodeTable;
         private readonly InstructionCache cache;
 
         // This is used in instruction parsing
         private byte[] operandKinds = new byte[8];
 
-        internal InstructionReader(MemoryReader reader, byte version, InstructionCache cache)
+        internal InstructionReader(MemoryReader reader, OpcodeTable opcodeTable, InstructionCache cache)
         {
             this.reader = reader;
-            this.version = version;
+            this.opcodeTable = opcodeTable;
             this.cache = cache != null ? cache : new InstructionCache();
         }
 
@@ -37,25 +36,18 @@ namespace ZDebug.Core.Instructions
 
         private Operand ReadOperand(byte kind)
         {
-            ushort rawValue;
-            if (kind == opKind_LargeConstant)
+            switch (kind)
             {
-                rawValue = reader.NextWord();
-            }
-            else if (kind == opKind_SmallConstant)
-            {
-                rawValue = reader.NextByte();
-            }
-            else if (kind == opKind_Variable)
-            {
-                rawValue = reader.NextByte();
-            }
-            else // omitted
-            {
-                throw new InvalidOperationException("Attempted to read omitted operand.");
-            }
+                case opKind_LargeConstant:
+                    return new Operand((OperandKind)kind, reader.NextWord());
 
-            return new Operand((OperandKind)kind, rawValue);
+                case opKind_SmallConstant:
+                case opKind_Variable:
+                    return new Operand((OperandKind)kind, reader.NextByte());
+
+                default:
+                    throw new InstructionReaderException("Attempted to read ommitted operand.");
+            }
         }
 
         private ReadOnlyArray<Operand> ReadOperands()
@@ -80,16 +72,6 @@ namespace ZDebug.Core.Instructions
             return result;
         }
 
-        private Variable ReadStoreVariable()
-        {
-            return Variable.FromByte(reader.NextByte());
-        }
-
-        private ushort[] ReadZText()
-        {
-            return reader.NextZWords();
-        }
-
         private static byte LongForm(byte opByte)
         {
             return (byte)(opByte & 0x1f);
@@ -103,11 +85,6 @@ namespace ZDebug.Core.Instructions
         private static byte VarForm(byte opByte)
         {
             return (byte)(opByte & 0x1f);
-        }
-
-        private Opcode GetOpcode(OpcodeKind kind, byte number)
-        {
-            return OpcodeTable.GetOpcode(kind, number, version);
         }
 
         public Instruction NextInstruction()
@@ -132,60 +109,60 @@ namespace ZDebug.Core.Instructions
 
             if (opByte >= 0x00 && opByte <= 0x1f)
             {
-                opcode = GetOpcode(OpcodeKind.TwoOp, LongForm(opByte));
+                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
                 operandKinds[0] = opKind_SmallConstant;
                 operandKinds[1] = opKind_SmallConstant;
             }
             else if (opByte >= 0x20 && opByte <= 0x3f)
             {
-                opcode = GetOpcode(OpcodeKind.TwoOp, LongForm(opByte));
+                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
                 operandKinds[0] = opKind_SmallConstant;
                 operandKinds[1] = opKind_Variable;
             }
             else if (opByte >= 0x40 && opByte <= 0x5f)
             {
-                opcode = GetOpcode(OpcodeKind.TwoOp, LongForm(opByte));
+                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
                 operandKinds[0] = opKind_Variable;
                 operandKinds[1] = opKind_SmallConstant;
             }
             else if (opByte >= 0x60 && opByte <= 0x7f)
             {
-                opcode = GetOpcode(OpcodeKind.TwoOp, LongForm(opByte));
+                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
                 operandKinds[0] = opKind_Variable;
                 operandKinds[1] = opKind_Variable;
             }
             else if (opByte >= 0x80 && opByte <= 0x8f)
             {
-                opcode = GetOpcode(OpcodeKind.OneOp, ShortForm(opByte));
+                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
                 operandKinds[0] = opKind_LargeConstant;
             }
             else if (opByte >= 0x90 && opByte <= 0x9f)
             {
-                opcode = GetOpcode(OpcodeKind.OneOp, ShortForm(opByte));
+                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
                 operandKinds[0] = opKind_SmallConstant;
             }
             else if (opByte >= 0xa0 && opByte <= 0xaf)
             {
-                opcode = GetOpcode(OpcodeKind.OneOp, ShortForm(opByte));
+                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
                 operandKinds[0] = opKind_Variable;
             }
             else if ((opByte >= 0xb0 && opByte <= 0xbd) || opByte == 0xbf)
             {
-                opcode = GetOpcode(OpcodeKind.ZeroOp, ShortForm(opByte));
+                opcode = opcodeTable[OpcodeKind.ZeroOp, ShortForm(opByte)];
             }
             else if (opByte == 0xbe)
             {
-                opcode = GetOpcode(OpcodeKind.Ext, reader.NextByte());
+                opcode = opcodeTable[OpcodeKind.Ext, reader.NextByte()];
                 ReadOperandKinds();
             }
             else if (opByte >= 0xc0 && opByte <= 0xdf)
             {
-                opcode = GetOpcode(OpcodeKind.TwoOp, VarForm(opByte));
+                opcode = opcodeTable[OpcodeKind.TwoOp, VarForm(opByte)];
                 ReadOperandKinds();
             }
             else // opByte >= 0xe0 && opByte <= 0xff
             {
-                opcode = GetOpcode(OpcodeKind.VarOp, VarForm(opByte));
+                opcode = opcodeTable[OpcodeKind.VarOp, VarForm(opByte)];
                 ReadOperandKinds();
             }
 
@@ -199,7 +176,7 @@ namespace ZDebug.Core.Instructions
             Variable storeVariable = null;
             if (opcode.HasStoreVariable)
             {
-                storeVariable = ReadStoreVariable();
+                storeVariable = reader.NextVariable();
             }
 
             Branch? branch = null;

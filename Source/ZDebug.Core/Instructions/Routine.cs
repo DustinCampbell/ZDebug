@@ -62,7 +62,7 @@ namespace ZDebug.Core.Instructions
                 locals = reader.NextWords(localCount);
             }
 
-            var ireader = new InstructionReader(reader, version, cache);
+            var ireader = new InstructionReader(reader, OpcodeTables.GetOpcodeTable(version), cache);
 
             var instructions = new List<Instruction>();
             var lastAddressKnown = reader.Address;
