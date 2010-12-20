@@ -1,1 +1,1 @@
-..\Tools\NUnit\nunit-console.exe .\ZDebug.nunit /nologo
+..\Tools\NUnit\nunit-console-x86.exe .\ZDebug.nunit /nologo
