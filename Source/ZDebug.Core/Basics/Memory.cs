@@ -38,6 +38,11 @@ namespace ZDebug.Core.Basics
             return bytes[address];
         }
 
+        internal byte ReadByte(ref int address)
+        {
+            return bytes[address++];
+        }
+
         public byte[] ReadBytes(int address, int length)
         {
             if (length < 0)
@@ -60,6 +65,19 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
+        internal byte[] ReadBytes(ref int address, int length)
+        {
+            if (length == 0)
+            {
+                return ArrayEx.Empty<byte>();
+            }
+
+            byte[] result = new byte[length];
+            Array.Copy(bytes, address, result, 0, length);
+            address += length;
+            return result;
+        }
+
         public ushort ReadWord(int address)
         {
             if (address < 0 || address > bytes.Length - 2)
@@ -69,6 +87,16 @@ namespace ZDebug.Core.Basics
 
             var b1 = bytes[address];
             var b2 = bytes[address + 1];
+
+            return (ushort)(b1 << 8 | b2);
+        }
+
+        internal ushort ReadWord(ref int address)
+        {
+            var b1 = bytes[address];
+            var b2 = bytes[address + 1];
+
+            address += 2;
 
             return (ushort)(b1 << 8 | b2);
         }
@@ -93,11 +121,34 @@ namespace ZDebug.Core.Basics
             ushort[] result = new ushort[length];
             for (int i = 0; i < length; i++)
             {
-                var b1 = bytes[address + (i * 2)];
-                var b2 = bytes[address + (i * 2) + 1];
+                var offset = i * 2;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
 
                 result[i] = (ushort)(b1 << 8 | b2);
             }
+
+            return result;
+        }
+
+        internal ushort[] ReadWords(ref int address, int length)
+        {
+            if (length == 0)
+            {
+                return ArrayEx.Empty<ushort>();
+            }
+
+            ushort[] result = new ushort[length];
+            for (int i = 0; i < length; i++)
+            {
+                var offset = i * 2;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
+
+                result[i] = (ushort)(b1 << 8 | b2);
+            }
+
+            address += length * 2;
 
             return result;
         }
@@ -113,6 +164,18 @@ namespace ZDebug.Core.Basics
             var b2 = bytes[address + 1];
             var b3 = bytes[address + 2];
             var b4 = bytes[address + 3];
+
+            return (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+        }
+
+        internal uint ReadDWord(ref int address)
+        {
+            var b1 = bytes[address];
+            var b2 = bytes[address + 1];
+            var b3 = bytes[address + 2];
+            var b4 = bytes[address + 3];
+
+            address += 4;
 
             return (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
         }
@@ -137,13 +200,38 @@ namespace ZDebug.Core.Basics
             uint[] result = new uint[length];
             for (int i = 0; i < length; i++)
             {
-                var b1 = bytes[address + (i * 4)];
-                var b2 = bytes[address + (i * 4) + 1];
-                var b3 = bytes[address + (i * 4) + 2];
-                var b4 = bytes[address + (i * 4) + 3];
+                var offset = i * 4;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
+                var b3 = bytes[address + offset + 2];
+                var b4 = bytes[address + offset + 3];
 
                 result[i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
             }
+
+            return result;
+        }
+
+        internal uint[] ReadDWords(ref int address, int length)
+        {
+            if (length == 0)
+            {
+                return ArrayEx.Empty<uint>();
+            }
+
+            uint[] result = new uint[length];
+            for (int i = 0; i < length; i++)
+            {
+                var offset = i * 4;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
+                var b3 = bytes[address + offset + 2];
+                var b4 = bytes[address + offset + 3];
+
+                result[i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+            }
+
+            address += length * 4;
 
             return result;
         }
@@ -231,8 +319,10 @@ namespace ZDebug.Core.Basics
 
             for (int i = 0; i < values.Length; i++)
             {
-                bytes[address + (i * 2)] = (byte)(values[i] >> 8);
-                bytes[address + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
+                var offset = i * 2;
+                var value = values[i];
+                bytes[address + offset] = (byte)(value >> 8);
+                bytes[address + offset + 1] = (byte)(value & 0x00ff);
             }
 
             var handler = MemoryChanged;
@@ -285,10 +375,12 @@ namespace ZDebug.Core.Basics
 
             for (int i = 0; i < values.Length; i++)
             {
-                bytes[address + (i * 4)] = (byte)(values[i] >> 24);
-                bytes[address + (i * 4) + 1] = (byte)((values[i] & 0x00ff0000) >> 16);
-                bytes[address + (i * 4) + 2] = (byte)((values[i] & 0x0000ff00) >> 8);
-                bytes[address + (i * 4) + 3] = (byte)(values[i] & 0x000000ff);
+                var offset = i * 4;
+                var value = values[i];
+                bytes[address + offset] = (byte)(value >> 24);
+                bytes[address + offset + 1] = (byte)((value & 0x00ff0000) >> 16);
+                bytes[address + offset + 2] = (byte)((value & 0x0000ff00) >> 8);
+                bytes[address + offset + 3] = (byte)(value & 0x000000ff);
             }
 
             var handler = MemoryChanged;

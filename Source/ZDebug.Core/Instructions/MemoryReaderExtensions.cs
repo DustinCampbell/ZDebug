@@ -8,6 +8,11 @@ namespace ZDebug.Core.Instructions
     /// </summary>
     internal static class MemoryReaderExtensions
     {
+        public static Variable NextVariable(this MemoryReader reader)
+        {
+            return Variable.FromByte(reader.NextByte());
+        }
+
         public static Branch NextBranch(this MemoryReader reader)
         {
             var b1 = reader.NextByte();
