@@ -50,26 +50,26 @@ namespace ZDebug.Core.Instructions
             get { return instructions; }
         }
 
-        internal static Routine Parse(MemoryReader reader, byte version, InstructionCache cache)
+        internal static Routine Parse(int address, Memory memory, OpcodeTable opcodeTable, InstructionCache cache)
         {
-            var address = reader.Address;
+            var routineAddress = address;
 
             // read locals
-            var localCount = reader.NextByte();
+            var localCount = memory.ReadByte(ref address);
             var locals = new ushort[localCount];
-            if (version <= 4)
+            if (opcodeTable.Version <= 4)
             {
-                locals = reader.NextWords(localCount);
+                locals = memory.ReadWords(ref address, localCount);
             }
 
-            var ireader = new InstructionReader(reader, OpcodeTables.GetOpcodeTable(version), cache);
+            var reader = new InstructionReader(address, memory, opcodeTable, cache);
 
             var instructions = new List<Instruction>();
-            var lastAddressKnown = reader.Address;
+            var lastAddressKnown = address;
 
             while (true)
             {
-                var i = ireader.NextInstruction();
+                var i = reader.NextInstruction();
 
                 instructions.Add(i);
 
@@ -101,7 +101,7 @@ namespace ZDebug.Core.Instructions
                 }
             }
 
-            return new Routine(address, locals.AsReadOnly(), instructions.AsReadOnly());
+            return new Routine(routineAddress, locals.AsReadOnly(), instructions.AsReadOnly());
         }
     }
 }

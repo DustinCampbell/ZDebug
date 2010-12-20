@@ -10,7 +10,7 @@ namespace ZDebug.Core.Instructions
             opcodeTables = new OpcodeTable[8];
             for (byte i = 0; i < 8; i++)
             {
-                opcodeTables[i] = new OpcodeTable(i);
+                opcodeTables[i] = new OpcodeTable((byte)(i + 1));
             }
 
             // two-operand opcodes

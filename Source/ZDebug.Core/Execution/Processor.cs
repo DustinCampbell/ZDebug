@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Dictionary;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -14,9 +13,11 @@ namespace ZDebug.Core.Execution
 
         private readonly Story story;
         private readonly Memory memory;
-        private readonly MemoryReader reader;
         private readonly InstructionReader instructions;
 
+        private int pc;
+
+        private readonly ZObjectTable objectTable;
         private readonly ushort globalVariableTableAddress;
 
         // stack and routine call state
@@ -45,17 +46,17 @@ namespace ZDebug.Core.Execution
         {
             this.story = story;
             this.memory = story.Memory;
-            this.globalVariableTableAddress = memory.ReadGlobalVariableTableAddress();
+            this.objectTable = story.ObjectTable;
+            this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
 
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
 
-            var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
-            this.reader = story.Memory.CreateReader(mainRoutineAddress);
-            this.instructions = new InstructionReader(reader, OpcodeTables.GetOpcodeTable(story.Version), cache);
+            this.pc = this.memory.ReadMainRoutineAddress();
+            this.instructions = new InstructionReader(pc, this.memory, OpcodeTables.GetOpcodeTable(story.Version), cache);
 
-            localCount = reader.NextByte();
+            this.localCount = memory.ReadByte(ref pc);
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace ZDebug.Core.Execution
             }
 
             stack[++stackPointer] = localCount;
-            stack[++stackPointer] = reader.Address;
+            stack[++stackPointer] = pc;
             stack[++stackPointer] = storeVariable != null ? storeVariable.ToByte() : -1;
         }
 
@@ -104,7 +105,7 @@ namespace ZDebug.Core.Execution
             var variableIndex = stack[stackPointer--];
             storeVariable = variableIndex >= 0 ? Variable.FromByte((byte)variableIndex) : null;
 
-            reader.Address = stack[stackPointer--];
+            pc = stack[stackPointer--];
             localCount = stack[stackPointer--];
 
             for (int i = 0; i < localCount; i++)
@@ -269,18 +270,18 @@ namespace ZDebug.Core.Execution
 
                 PushFrame();
 
-                var returnAddress = reader.Address;
-                reader.Address = address;
+                var returnAddress = pc;
+                pc = address;
 
                 argumentCount = opCount - 1;
 
                 // read locals
-                localCount = reader.NextByte();
+                localCount = memory.ReadByte(ref pc);
                 if (story.Version <= 4)
                 {
                     for (int i = 0; i < localCount; i++)
                     {
-                        locals[i] = reader.NextWord();
+                        locals[i] = memory.ReadWord(ref pc);
                     }
                 }
                 else
@@ -313,7 +314,7 @@ namespace ZDebug.Core.Execution
         private void Return(ushort value)
         {
             var storeVar = storeVariable;
-            var oldAddress = reader.Address;
+            var oldAddress = pc;
 
             PopFrame();
 
@@ -322,20 +323,20 @@ namespace ZDebug.Core.Execution
             var handler = ExitStackFrame;
             if (handler != null)
             {
-                handler(this, new StackFrameEventArgs(reader.Address, oldAddress));
+                handler(this, new StackFrameEventArgs(pc, oldAddress));
             }
         }
 
         private void Jump(short offset)
         {
-            reader.Address += offset - 2;
+            pc += offset - 2;
         }
 
         private void Jump(Branch branch)
         {
             if (branch.Kind == BranchKind.Address)
             {
-                reader.Address += branch.Offset - 2;
+                pc += branch.Offset - 2;
             }
             else if (branch.Kind == BranchKind.RFalse)
             {
@@ -353,7 +354,7 @@ namespace ZDebug.Core.Execution
 
         private void WriteProperty(int objNum, int propNum, ushort value)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             var prop = obj.PropertyTable.GetByNumber(propNum);
 
             if (prop.DataLength == 2)
@@ -372,16 +373,18 @@ namespace ZDebug.Core.Execution
 
         private bool HasAttribute(int objNum, int attrNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
 
             return obj.HasAttribute(attrNum);
         }
 
         public int Step()
         {
-            var oldPC = reader.Address;
+            var oldPC = pc;
 
+            instructions.Address = pc;
             var i = instructions.NextInstruction();
+            pc += i.Length;
 
             executingInstruction = i;
 
@@ -393,14 +396,14 @@ namespace ZDebug.Core.Execution
 
             var operands = i.Operands;
             operandCount = operands.Length;
-            for (int j = 0; j < i.Operands.Length; j++)
+            for (int j = 0; j < operandCount; j++)
             {
                 operandValues[j] = GetOperandValue(operands[j]);
             }
 
             i.Opcode.Execute(i, operandValues, operandCount, this);
 
-            var newPC = reader.Address;
+            var newPC = pc;
 
             var steppedHandler = Stepped;
             if (steppedHandler != null)
@@ -504,7 +507,7 @@ namespace ZDebug.Core.Execution
 
         public int PC
         {
-            get { return reader.Address; }
+            get { return pc; }
         }
 
         public ushort[] Locals
@@ -587,7 +590,7 @@ namespace ZDebug.Core.Execution
 
         byte IExecutionContext.ReadByte(int address)
         {
-            return story.Memory.ReadByte(address);
+            return memory.ReadByte(address);
         }
 
         ushort IExecutionContext.ReadVariable(Variable variable)
@@ -602,12 +605,12 @@ namespace ZDebug.Core.Execution
 
         ushort IExecutionContext.ReadWord(int address)
         {
-            return story.Memory.ReadWord(address);
+            return memory.ReadWord(address);
         }
 
         void IExecutionContext.WriteByte(int address, byte value)
         {
-            story.Memory.WriteByte(address, value);
+            memory.WriteByte(address, value);
         }
 
         void IExecutionContext.WriteProperty(int objNum, int propNum, ushort value)
@@ -627,7 +630,7 @@ namespace ZDebug.Core.Execution
 
         void IExecutionContext.WriteWord(int address, ushort value)
         {
-            story.Memory.WriteWord(address, value);
+            memory.WriteWord(address, value);
         }
 
         void IExecutionContext.Call(int address, ushort[] opValues, int opCount, Variable storeVariable)
@@ -667,7 +670,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetChild(int objNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             if (!obj.HasChild)
             {
                 return 0;
@@ -680,7 +683,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetParent(int objNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             if (!obj.HasParent)
             {
                 return 0;
@@ -693,7 +696,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetSibling(int objNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             if (!obj.HasSibling)
             {
                 return 0;
@@ -706,13 +709,13 @@ namespace ZDebug.Core.Execution
 
         string IExecutionContext.GetShortName(int objNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             return obj.ShortName;
         }
 
         int IExecutionContext.GetNextProperty(int objNum, int propNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
 
             int nextIndex = 0;
             if (propNum > 0)
@@ -736,21 +739,21 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetPropertyData(int objNum, int propNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             var prop = obj.PropertyTable.GetByNumber(propNum);
 
             if (prop == null)
             {
-                return story.ObjectTable.GetPropertyDefault(propNum);
+                return this.objectTable.GetPropertyDefault(propNum);
             }
 
             if (prop.DataLength == 1)
             {
-                return story.Memory.ReadByte(prop.DataAddress);
+                return memory.ReadByte(prop.DataAddress);
             }
             else if (prop.DataLength == 2)
             {
-                return story.Memory.ReadWord(prop.DataAddress);
+                return memory.ReadWord(prop.DataAddress);
             }
             else
             {
@@ -760,7 +763,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetPropertyDataAddress(int objNum, int propNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             var prop = obj.PropertyTable.GetByNumber(propNum);
 
             return prop != null
@@ -770,7 +773,7 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetPropertyDataLength(int dataAddress)
         {
-            return story.Memory.ReadPropertyDataLength(dataAddress);
+            return memory.ReadPropertyDataLength(dataAddress);
         }
 
         bool IExecutionContext.HasAttribute(int objNum, int attrNum)
@@ -780,29 +783,29 @@ namespace ZDebug.Core.Execution
 
         void IExecutionContext.ClearAttribute(int objNum, int attrNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             obj.ClearAttribute(attrNum);
         }
 
         void IExecutionContext.SetAttribute(int objNum, int attrNum)
         {
-            var obj = story.ObjectTable.GetByNumber(objNum);
+            var obj = this.objectTable.GetByNumber(objNum);
             obj.SetAttribute(attrNum);
         }
 
         void IExecutionContext.RemoveFromParent(int objNum)
         {
-            story.Memory.RemoveObjectFromParentByNumber(objNum);
+            memory.RemoveObjectFromParentByNumber(objNum);
         }
 
         void IExecutionContext.MoveTo(int objNum, int destNum)
         {
-            story.Memory.MoveObjectToDestinationByNumber(objNum, destNum);
+            memory.MoveObjectToDestinationByNumber(objNum, destNum);
         }
 
         ushort[] IExecutionContext.ReadZWords(int address)
         {
-            return story.Memory.ReadZWords(address);
+            return memory.ReadZWords(address);
         }
 
         string IExecutionContext.ParseZWords(IList<ushort> zwords)
@@ -850,14 +853,15 @@ namespace ZDebug.Core.Execution
             outputStreams.Print(ch);
         }
 
-        ZCommandToken[] IExecutionContext.TokenizeCommand(string commandText)
+        ZCommandToken[] IExecutionContext.TokenizeCommand(string commandText, int? dictionaryAddress)
         {
-            return ZText.TokenizeCommand(commandText, story.Dictionary.WordSeparators.ToArray());
+            return ZText.TokenizeCommand(commandText, memory, dictionaryAddress ?? memory.ReadDictionaryAddress());
         }
 
-        bool IExecutionContext.TryLookupWord(string word, out ZDictionaryEntry entry)
+        bool IExecutionContext.TryLookupWord(string word, int? dictionaryAddress, out ushort address)
         {
-            return story.Dictionary.TryLookupWord(word, out entry);
+            address = ZText.LookupWord(word, memory, dictionaryAddress ?? memory.ReadDictionaryAddress());
+            return address > 0;
         }
 
         void IExecutionContext.Randomize(int seed)

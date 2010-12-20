@@ -41,5 +41,10 @@
                 return opcode;
             }
         }
+
+        public byte Version
+        {
+            get { return version; }
+        }
     }
 }

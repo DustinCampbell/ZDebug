@@ -2,39 +2,27 @@
 {
     public struct Branch
     {
-        private readonly bool condition;
-        private readonly short offset;
+        public readonly BranchKind Kind;
+        public readonly bool Condition;
+        public readonly short Offset;
 
         public Branch(bool condition, short offset)
         {
-            this.condition = condition;
-            this.offset = offset;
-        }
+            this.Condition = condition;
+            this.Offset = offset;
 
-        public BranchKind Kind
-        {
-            get
+            if (offset == 0)
             {
-                switch (offset)
-                {
-                    case 0:
-                        return BranchKind.RFalse;
-                    case 1:
-                        return BranchKind.RTrue;
-                    default:
-                        return BranchKind.Address;
-                }
+                this.Kind = BranchKind.RFalse;
             }
-        }
-
-        public bool Condition
-        {
-            get { return condition; }
-        }
-
-        public short Offset
-        {
-            get { return offset; }
+            else if (offset == 1)
+            {
+                this.Kind = BranchKind.RTrue;
+            }
+            else
+            {
+                this.Kind = BranchKind.Address;
+            }
         }
     }
 }

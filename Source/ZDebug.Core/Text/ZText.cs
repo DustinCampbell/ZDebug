@@ -138,8 +138,11 @@ namespace ZDebug.Core.Text
             return builder.ToString();
         }
 
-        public static ZCommandToken[] TokenizeCommand(string commandText, char[] wordSeparators)
+        public static ZCommandToken[] TokenizeCommand(string commandText, Memory memory, int dictionaryAddress)
         {
+            var wordSepCount = memory.ReadByte(ref dictionaryAddress);
+            var wordSeps = memory.ReadBytes(ref dictionaryAddress, wordSepCount).ConvertAll(b => (char)b);
+
             var tokens = new List<ZCommandToken>();
 
             int start = -1;
@@ -159,7 +162,7 @@ namespace ZDebug.Core.Text
                     tokens.Add(new ZCommandToken(start, length, commandText.Substring(start, length)));
                     start = -1;
                 }
-                else if (wordSeparators.Any(sep => ch == sep))
+                else if (wordSeps.Contains(ch))
                 {
                     var length = i - start;
                     tokens.Add(new ZCommandToken(start, length, commandText.Substring(start, length)));
@@ -177,6 +180,74 @@ namespace ZDebug.Core.Text
             }
 
             return tokens.ToArray();
+        }
+
+        public static ushort LookupWord(string word, Memory memory, int dictionaryAddress)
+        {
+            byte version = memory.ReadVersion();
+            int zwordsSize = version <= 3 ? 2 : 3;
+
+            if (word.Length > zwordsSize * 3)
+            {
+                word = word.Substring(0, zwordsSize * 3);
+            }
+
+            byte wordSepCount = memory.ReadByte(ref dictionaryAddress);
+            dictionaryAddress += wordSepCount;
+
+            byte entryLength = memory.ReadByte(ref dictionaryAddress);
+            ushort entryCount = memory.ReadWord(ref dictionaryAddress);
+
+            bool sorted;
+            if ((short)entryCount < 0)
+            {
+                entryCount = (ushort)(-(short)entryCount);
+                sorted = false;
+            }
+            else
+            {
+                sorted = true;
+            }
+
+            ushort lower = 0;
+            ushort upper = (ushort)(entryCount - 1);
+
+            while (lower <= upper)
+            {
+                ushort entryNumber = sorted
+                    ? (ushort)((lower + upper) / 2)
+                    : lower;
+
+                ushort entryAddress = (ushort)(dictionaryAddress + (entryNumber * entryLength));
+
+                // TODO: Encode word and compare z-words directly
+
+                ushort[] entryZWords = memory.ReadWords(entryAddress, zwordsSize);
+                string entryText = ZText.ZWordsAsString(entryZWords, ZTextFlags.All, memory);
+
+                if (entryText == word)
+                {
+                    return entryAddress;
+                }
+
+                if (sorted)
+                {
+                    if (string.CompareOrdinal(word, entryText) > 0)
+                    {
+                        lower = (ushort)(entryNumber + 1);
+                    }
+                    else
+                    {
+                        upper = (ushort)(entryNumber - 1);
+                    }
+                }
+                else
+                {
+                    lower++;
+                }
+            }
+
+            return 0;
         }
     }
 }

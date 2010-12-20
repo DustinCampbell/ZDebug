@@ -5,12 +5,12 @@ namespace ZDebug.Core.Text
 {
     internal sealed class AlphabetTable
     {
-        private const string A0 = "??????abcdefghijklmnopqrstuvwxyz";
-        private const string A1 = "??????ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private const string A2 = "???????\n0123456789.,!?_#'\"/\\-:()";
-        private const string A3 = "???????0123456789.,!?_#'\"/\\<-:()";
+        private static readonly char[] A0 = "??????abcdefghijklmnopqrstuvwxyz".ToCharArray();
+        private static readonly char[] A1 = "??????ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+        private static readonly char[] A2 = "???????\n0123456789.,!?_#'\"/\\-:()".ToCharArray();
+        private static readonly char[] A3 = "???????0123456789.,!?_#'\"/\\<-:()".ToCharArray();
 
-        private readonly string[] alphabets;
+        private readonly char[][] alphabets;
 
         private int currentAlphabet;
         private int baseAlphabet;
@@ -20,18 +20,18 @@ namespace ZDebug.Core.Text
             var version = memory.ReadVersion();
             if (version == 1)
             {
-                alphabets = new string[] { A0, A1, A3 };
+                alphabets = new char[][] { A0, A1, A3 };
             }
             else if (version >= 2 && version <= 4)
             {
-                alphabets = new string[] { A0, A1, A2 };
+                alphabets = new char[][] { A0, A1, A2 };
             }
             else if (version >= 5 && version <= 8)
             {
                 var alphabetTableAddress = memory.ReadAlphabetTableAddress();
                 if (alphabetTableAddress == 0)
                 {
-                    alphabets = new string[] { A0, A1, A2 };
+                    alphabets = new char[][] { A0, A1, A2 };
                 }
                 else
                 {

@@ -5,9 +5,9 @@ namespace ZDebug.Core.Basics
 {
     internal static partial class MemoryExtensions
     {
-        public static string[] ReadCustomAlphabetTable(this Memory memory, int address)
+        public static char[][] ReadCustomAlphabetTable(this Memory memory, int address)
         {
-            var result = new string[3];
+            var result = new char[3][];
 
             Converter<byte, char> byteToChar = b =>
             {
@@ -23,11 +23,11 @@ namespace ZDebug.Core.Basics
             };
 
             var reader = memory.CreateReader(address);
-            result[0] = "??????" + reader.NextBytes(26).ConvertAll(byteToChar).AsString();
-            result[1] = "??????" + reader.NextBytes(26).ConvertAll(byteToChar).AsString();
+            result[0] = "??????".ToCharArray().Concat(reader.NextBytes(26).ConvertAll(byteToChar));
+            result[1] = "??????".ToCharArray().Concat(reader.NextBytes(26).ConvertAll(byteToChar));
 
             reader.Skip(1);
-            result[2] = "???????" + reader.NextBytes(25).ConvertAll(byteToChar).AsString();
+            result[2] = "???????".ToCharArray().Concat(reader.NextBytes(25).ConvertAll(byteToChar));
 
             return result;
         }

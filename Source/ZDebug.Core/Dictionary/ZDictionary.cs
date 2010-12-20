@@ -46,19 +46,19 @@ namespace ZDebug.Core.Dictionary
             }
         }
 
-        public bool TryLookupWord(string word, out ZDictionaryEntry entry)
+        public bool TryLookupWord(string word, out ushort address)
         {
             for (int i = entries.Count - 1; i >= 0; i--)
             {
                 var e = entries[i];
                 if (word.StartsWith(e.ZText))
                 {
-                    entry = e;
+                    address = (ushort)e.Address;
                     return true;
                 }
             }
 
-            entry = default(ZDictionaryEntry);
+            address = 0;
             return false;
         }
 

@@ -43,6 +43,11 @@ namespace ZDebug.Core.Utilities
             return newArray;
         }
 
+        public static bool Contains<T>(this T[] array, T value)
+        {
+            return Array.IndexOf(array, value) >= 0;
+        }
+
         public static TOutput[] ConvertAll<TInput, TOutput>(this TInput[] array, Converter<TInput, TOutput> converter)
         {
             return Array.ConvertAll(array, converter);

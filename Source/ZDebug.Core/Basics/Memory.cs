@@ -78,6 +78,36 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
+        public void Copy(int address, byte[] destinationArray, int destinationOffset, int length)
+        {
+            if (destinationArray == null)
+            {
+                throw new ArgumentNullException("destinationArray");
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            if (address < 0 || address > bytes.Length - length)
+            {
+                throw new ArgumentOutOfRangeException("address");
+            }
+
+            if (destinationOffset < 0 || destinationOffset > destinationArray.Length - length)
+            {
+                throw new ArgumentOutOfRangeException("destinationOffset");
+            }
+
+            Array.Copy(bytes, address, destinationArray, destinationOffset, length);
+        }
+
         public ushort ReadWord(int address)
         {
             if (address < 0 || address > bytes.Length - 2)
@@ -151,6 +181,43 @@ namespace ZDebug.Core.Basics
             address += length * 2;
 
             return result;
+        }
+
+        public void Copy(int address, ushort[] destinationArray, int destinationOffset, int length)
+        {
+            if (destinationArray == null)
+            {
+                throw new ArgumentNullException("destinationArray");
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            if (address < 0 || address > bytes.Length - (length * 2))
+            {
+                throw new ArgumentOutOfRangeException("address");
+            }
+
+            if (destinationOffset < 0 || destinationOffset > destinationArray.Length - length)
+            {
+                throw new ArgumentOutOfRangeException("destinationOffset");
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                var offset = i * 2;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
+
+                destinationArray[destinationOffset + i] = (ushort)(b1 << 8 | b2);
+            }
         }
 
         public uint ReadDWord(int address)
@@ -234,6 +301,45 @@ namespace ZDebug.Core.Basics
             address += length * 4;
 
             return result;
+        }
+
+        public void Copy(int address, uint[] destinationArray, int destinationOffset, int length)
+        {
+            if (destinationArray == null)
+            {
+                throw new ArgumentNullException("destinationArray");
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException("length");
+            }
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            if (address < 0 || address > bytes.Length - (length * 4))
+            {
+                throw new ArgumentOutOfRangeException("address");
+            }
+
+            if (destinationOffset < 0 || destinationOffset > destinationArray.Length - length)
+            {
+                throw new ArgumentOutOfRangeException("destinationOffset");
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                var offset = i * 4;
+                var b1 = bytes[address + offset];
+                var b2 = bytes[address + offset + 1];
+                var b3 = bytes[address + offset + 2];
+                var b4 = bytes[address + offset + 3];
+
+                destinationArray[destinationOffset + i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+            }
         }
 
         public void WriteByte(int address, byte value)

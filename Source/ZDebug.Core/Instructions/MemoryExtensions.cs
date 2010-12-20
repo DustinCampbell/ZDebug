@@ -1,21 +1,20 @@
-﻿using System.Collections.Generic;
-using ZDebug.Core.Basics;
+﻿using ZDebug.Core.Basics;
 
 namespace ZDebug.Core.Instructions
 {
     /// <summary>
     /// MemoryReader extension methods specific to instructions.
     /// </summary>
-    internal static class MemoryReaderExtensions
+    internal static class MemoryExtensions
     {
-        public static Variable NextVariable(this MemoryReader reader)
+        public static Variable ReadVariable(this Memory memory, ref int address)
         {
-            return Variable.FromByte(reader.NextByte());
+            return Variable.FromByte(memory.ReadByte(ref address));
         }
 
-        public static Branch NextBranch(this MemoryReader reader)
+        public static Branch ReadBranch(this Memory memory, ref int address)
         {
-            var b1 = reader.NextByte();
+            var b1 = memory.ReadByte(ref address);
 
             var condition = (b1 & 0x80) == 0x80;
 
@@ -29,7 +28,7 @@ namespace ZDebug.Core.Instructions
             {
                 // OR bottom 6 bits with the next byte
                 b1 = (byte)(b1 & 0x3f);
-                var b2 = reader.NextByte();
+                var b2 = memory.ReadByte(ref address);
                 var tmp = (ushort)((b1 << 8) | b2);
 
                 // if bit 13, set bits 14 and 15 as well to produce proper signed value.
@@ -44,22 +43,19 @@ namespace ZDebug.Core.Instructions
             return new Branch(condition, offset);
         }
 
-        public static ushort[] NextZWords(this MemoryReader reader)
+        public static ushort[] ReadZWords(this Memory memory, ref int address)
         {
-            var list = new List<ushort>();
-
+            int count = 0;
             while (true)
             {
-                var zword = reader.NextWord();
-                list.Add(zword);
-
-                if ((zword & 0x8000) == 0x8000)
+                var zword = memory.ReadWord(address + (count++ * 2));
+                if ((zword & 0x8000) != 0)
                 {
                     break;
                 }
             }
 
-            return list.ToArray();
+            return memory.ReadWords(ref address, count);
         }
     }
 }

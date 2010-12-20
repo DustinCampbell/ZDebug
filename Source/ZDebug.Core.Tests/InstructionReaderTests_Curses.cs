@@ -22,8 +22,7 @@ namespace ZDebug.Core.Tests
             var story = LoadStory();
             var initialPC = story.Memory.ReadInitialPC();
 
-            var reader = story.Memory.CreateReader(initialPC);
-            var ireader = new InstructionReader(reader, OpcodeTables.GetOpcodeTable(story.Version), null);
+            var ireader = new InstructionReader(initialPC, story.Memory, OpcodeTables.GetOpcodeTable(story.Version), null);
 
             var i = ireader.NextInstruction();
 

@@ -1,4 +1,4 @@
 echo off
 pushd Tests
-..\Tools\NUnit\nunit.exe .\ZDebug.nunit
+..\Tools\NUnit\nunit-x86.exe .\ZDebug.nunit
 popd

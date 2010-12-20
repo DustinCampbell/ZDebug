@@ -43,7 +43,7 @@ namespace ZDebug.PerfHarness
 
         static void Main(string[] args)
         {
-            string path = ROTA;
+            string path = ZORK1;
 
             Mark("Reading story");
 
@@ -52,9 +52,9 @@ namespace ZDebug.PerfHarness
             var processor = story.Processor;
 
             var done = false;
-            //var mockScreen = new MockScreen(ZORK1_SCRIPT);
-            var mockScreen = new MockScreen(() => { done = true; });
-            //processor.SetRandomSeed(42);
+            var mockScreen = new MockScreen(ZORK1_SCRIPT);
+            //var mockScreen = new MockScreen(() => { done = true; });
+            processor.SetRandomSeed(42);
             processor.RegisterScreen(mockScreen);
 
             processor.Quit += (s, e) => { done = true; };

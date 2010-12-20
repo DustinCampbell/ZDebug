@@ -10,14 +10,14 @@ namespace ZDebug.Core.Instructions
     public sealed class RoutineTable : IIndexedEnumerable<Routine>
     {
         private readonly Memory memory;
-        private readonly byte version;
+        private readonly OpcodeTable opcodeTable;
         private readonly InstructionCache cache;
         private readonly SortedList<int, Routine> routines;
 
         internal RoutineTable(Memory memory, InstructionCache cache)
         {
             this.memory = memory;
-            this.version = memory.ReadVersion();
+            this.opcodeTable = OpcodeTables.GetOpcodeTable(memory.ReadVersion());
             this.cache = cache;
             this.routines = new SortedList<int, Routine>();
 
@@ -44,8 +44,7 @@ namespace ZDebug.Core.Instructions
                 return;
             }
 
-            var reader = memory.CreateReader(address);
-            var routine = Routine.Parse(reader, version, cache);
+            var routine = Routine.Parse(address, memory, opcodeTable, cache);
 
             routines.Add(address, routine);
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using ZDebug.Core.Dictionary;
 using ZDebug.Core.Execution;
 
 namespace ZDebug.Core.Instructions
@@ -1159,10 +1158,10 @@ namespace ZDebug.Core.Instructions
                     {
                         var token = tokens[j];
 
-                        ZDictionaryEntry entry;
-                        if (context.TryLookupWord(token.Text, out entry))
+                        ushort address;
+                        if (context.TryLookupWord(token.Text, null, out address))
                         {
-                            context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
+                            context.WriteWord(parseBuffer + 2 + (j * 4), address);
                         }
                         else
                         {
@@ -1212,10 +1211,10 @@ namespace ZDebug.Core.Instructions
                 {
                     var token = tokens[j];
 
-                    ZDictionaryEntry entry;
-                    if (context.TryLookupWord(token.Text, out entry))
+                    ushort address;
+                    if (context.TryLookupWord(token.Text, null, out address))
                     {
-                        context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
+                        context.WriteWord(parseBuffer + 2 + (j * 4), address);
                     }
                     else
                     {
@@ -1271,10 +1270,10 @@ namespace ZDebug.Core.Instructions
                 {
                     var token = tokens[j];
 
-                    ZDictionaryEntry entry;
-                    if (context.TryLookupWord(token.Text, out entry))
+                    ushort address;
+                    if (context.TryLookupWord(token.Text, null, out address))
                     {
-                        context.WriteWord(parseBuffer + 2 + (j * 4), (ushort)entry.Address);
+                        context.WriteWord(parseBuffer + 2 + (j * 4), address);
                     }
                     else
                     {

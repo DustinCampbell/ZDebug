@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using ZDebug.Core.Dictionary;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
 
@@ -61,9 +60,9 @@ namespace ZDebug.Core.Execution
         void Print(string text);
         void Print(char ch);
 
-        ZCommandToken[] TokenizeCommand(string commandText);
+        ZCommandToken[] TokenizeCommand(string commandText, int? dictionaryAddress = null);
 
-        bool TryLookupWord(string word, out ZDictionaryEntry entry);
+        bool TryLookupWord(string word, int? dictionaryAddress, out ushort address);
 
         void Randomize(int seed);
         int NextRandom(int range);

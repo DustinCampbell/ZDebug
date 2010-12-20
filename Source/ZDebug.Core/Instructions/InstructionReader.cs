@@ -10,23 +10,25 @@ namespace ZDebug.Core.Instructions
         private const byte opKind_Variable = 2;
         private const byte opKind_Omitted = 3;
 
-        private readonly MemoryReader reader;
+        private int address;
+        private readonly Memory memory;
         private readonly OpcodeTable opcodeTable;
         private readonly InstructionCache cache;
 
         // This is used in instruction parsing
         private byte[] operandKinds = new byte[8];
 
-        internal InstructionReader(MemoryReader reader, OpcodeTable opcodeTable, InstructionCache cache)
+        internal InstructionReader(int address, Memory memory, OpcodeTable opcodeTable, InstructionCache cache)
         {
-            this.reader = reader;
+            this.memory = memory;
+            this.address = address;
             this.opcodeTable = opcodeTable;
             this.cache = cache != null ? cache : new InstructionCache();
         }
 
         private void ReadOperandKinds(int offset = 0)
         {
-            var b = reader.NextByte();
+            var b = memory.ReadByte(ref address);
 
             operandKinds[offset] = (byte)((b & 0xc0) >> 6);
             operandKinds[offset + 1] = (byte)((b & 0x30) >> 4);
@@ -39,11 +41,11 @@ namespace ZDebug.Core.Instructions
             switch (kind)
             {
                 case opKind_LargeConstant:
-                    return new Operand((OperandKind)kind, reader.NextWord());
+                    return new Operand((OperandKind)kind, memory.ReadWord(ref address));
 
                 case opKind_SmallConstant:
                 case opKind_Variable:
-                    return new Operand((OperandKind)kind, reader.NextByte());
+                    return new Operand((OperandKind)kind, memory.ReadByte(ref address));
 
                 default:
                     throw new InstructionReaderException("Attempted to read ommitted operand.");
@@ -89,16 +91,16 @@ namespace ZDebug.Core.Instructions
 
         public Instruction NextInstruction()
         {
-            var address = reader.Address;
+            var startAddress = address;
 
             Instruction instruction;
-            if (cache.TryGet(address, out instruction))
+            if (cache.TryGet(startAddress, out instruction))
             {
-                reader.Address += instruction.Length;
+                address += instruction.Length;
                 return instruction;
             }
 
-            var opByte = reader.NextByte();
+            var opByte = memory.ReadByte(ref address);
 
             Opcode opcode;
 
@@ -152,7 +154,7 @@ namespace ZDebug.Core.Instructions
             }
             else if (opByte == 0xbe)
             {
-                opcode = opcodeTable[OpcodeKind.Ext, reader.NextByte()];
+                opcode = opcodeTable[OpcodeKind.Ext, memory.ReadByte(ref address)];
                 ReadOperandKinds();
             }
             else if (opByte >= 0xc0 && opByte <= 0xdf)
@@ -176,26 +178,32 @@ namespace ZDebug.Core.Instructions
             Variable storeVariable = null;
             if (opcode.HasStoreVariable)
             {
-                storeVariable = reader.NextVariable();
+                storeVariable = memory.ReadVariable(ref address);
             }
 
             Branch? branch = null;
             if (opcode.HasBranch)
             {
-                branch = reader.NextBranch();
+                branch = memory.ReadBranch(ref address);
             }
 
             ushort[] ztext = null;
             if (opcode.HasZText)
             {
-                ztext = reader.NextZWords();
+                ztext = memory.ReadZWords(ref address);
             }
 
-            var length = reader.Address - address;
+            var length = address - startAddress;
 
-            instruction = new Instruction(address, length, opcode, operands, storeVariable, branch, ztext);
-            cache.Add(address, instruction);
+            instruction = new Instruction(startAddress, length, opcode, operands, storeVariable, branch, ztext);
+            cache.Add(startAddress, instruction);
             return instruction;
+        }
+
+        public int Address
+        {
+            get { return address; }
+            set { address = value; }
         }
     }
 }
