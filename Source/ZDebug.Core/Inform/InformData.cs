@@ -27,8 +27,7 @@ namespace ZDebug.Core.Inform
             var propNamePackedAddress = memory.ReadWord(address);
             var propNameAddress = memory.UnpackStringAddress(propNamePackedAddress);
 
-            var reader = memory.CreateReader(propNameAddress);
-            var propNameZWords = reader.NextZWords();
+            var propNameZWords = memory.ReadZWords(propNameAddress);
 
             return ZText.ZWordsAsString(propNameZWords, ZTextFlags.None, memory);
         }

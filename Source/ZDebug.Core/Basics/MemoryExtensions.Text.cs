@@ -41,8 +41,31 @@ namespace ZDebug.Core.Basics
 
             var abbreviationsTableAddress = memory.ReadAbbreviationsTableAddress();
             var abbreviationAddress = (2 * memory.ReadWord(abbreviationsTableAddress + (index * 2)));
-            var reader = memory.CreateReader(abbreviationAddress);
-            return reader.NextZWords();
+
+            return memory.ReadZWords(abbreviationAddress);
+        }
+
+        /// <summary>
+        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="Memory"/>.
+        /// </summary>
+        public static ushort[] ReadZWords(this Memory memory, int address)
+        {
+            if (memory == null)
+            {
+                throw new ArgumentNullException("memory");
+            }
+
+            int count = 0;
+            while (true)
+            {
+                var zword = memory.ReadWord(address + (count++ * 2));
+                if ((zword & 0x8000) != 0)
+                {
+                    break;
+                }
+            }
+
+            return memory.ReadWords(address, count);
         }
     }
 }

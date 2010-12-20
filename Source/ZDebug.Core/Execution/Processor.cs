@@ -802,8 +802,7 @@ namespace ZDebug.Core.Execution
 
         ushort[] IExecutionContext.ReadZWords(int address)
         {
-            var reader = story.Memory.CreateReader(address);
-            return reader.NextZWords();
+            return story.Memory.ReadZWords(address);
         }
 
         string IExecutionContext.ParseZWords(IList<ushort> zwords)
