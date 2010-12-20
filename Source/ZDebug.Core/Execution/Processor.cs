@@ -53,7 +53,7 @@ namespace ZDebug.Core.Execution
 
             var mainRoutineAddress = story.Memory.ReadMainRoutineAddress();
             this.reader = story.Memory.CreateReader(mainRoutineAddress);
-            this.instructions = reader.AsInstructionReader(story.Version, cache);
+            this.instructions = new InstructionReader(reader, story.Version, cache);
 
             localCount = reader.NextByte();
         }

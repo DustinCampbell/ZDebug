@@ -65,9 +65,7 @@
     <Compile Include="Execution\ZFont.cs" />
     <Compile Include="Execution\ZTextStyle.cs" />
     <Compile Include="GlobalVariablesTable.cs" />
-    <Compile Include="Basics\IMemoryReaderExtensions.Objects.cs" />
-    <Compile Include="Basics\IMemoryReaderExtensions.Text.cs" />
-    <Compile Include="Basics\IMemoryReader_Instructions.cs" />
+    <Compile Include="Basics\MemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\MemoryReader.cs" />
     <Compile Include="Basics\MemoryExtensions.Header.cs" />
@@ -85,6 +83,7 @@
     <Compile Include="Instructions\BranchKind.cs" />
     <Compile Include="Instructions\Instruction.cs" />
     <Compile Include="Instructions\InstructionReader.cs" />
+    <Compile Include="Instructions\MemoryReaderExtensions.cs" />
     <Compile Include="Instructions\Opcode.cs" />
     <Compile Include="Instructions\OpcodeFlags.cs" />
     <Compile Include="Instructions\OpcodeKind.cs" />
