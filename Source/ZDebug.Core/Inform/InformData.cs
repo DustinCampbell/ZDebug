@@ -8,12 +8,14 @@ namespace ZDebug.Core.Inform
         private readonly Memory memory;
         private readonly MemoryMap memoryMap;
         private readonly int version;
+        private readonly ZText ztext;
 
-        public InformData(Memory memory, MemoryMap memoryMap)
+        public InformData(Memory memory, MemoryMap memoryMap, ZText ztext)
         {
             this.memory = memory;
             this.memoryMap = memoryMap;
             this.version = memory.ReadInformVersionNumber();
+            this.ztext = ztext;
         }
 
         public int Version
@@ -29,7 +31,7 @@ namespace ZDebug.Core.Inform
 
             var propNameZWords = memory.ReadZWords(propNameAddress);
 
-            return ZText.ZWordsAsString(propNameZWords, ZTextFlags.None, memory);
+            return ztext.ZWordsAsString(propNameZWords, ZTextFlags.None);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ZDebug.Core.Objects;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Basics
 {
@@ -330,7 +331,7 @@ namespace ZDebug.Core.Basics
             memory.WritePropertyTableAddressByObjectNumber(objAddress, value);
         }
 
-        public static IList<ZObject> ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable)
+        public static IList<ZObject> ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable, ZText ztext)
         {
             var version = memory.ReadVersion();
             var maxObjects = ObjectHelpers.GetMaxObjects(version);
@@ -350,7 +351,7 @@ namespace ZDebug.Core.Basics
                     return objects;
                 }
 
-                objects.Add(new ZObject(memory, objectTable, address, i));
+                objects.Add(new ZObject(memory, objectTable, ztext, address, i));
 
                 var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
                 smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);

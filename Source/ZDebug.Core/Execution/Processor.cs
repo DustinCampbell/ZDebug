@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
@@ -13,6 +12,7 @@ namespace ZDebug.Core.Execution
 
         private readonly Story story;
         private readonly Memory memory;
+        private readonly ZText ztext;
         private readonly InstructionReader instructions;
 
         private int pc;
@@ -42,10 +42,11 @@ namespace ZDebug.Core.Execution
 
         private Instruction executingInstruction;
 
-        internal Processor(Story story, InstructionCache cache)
+        internal Processor(Story story, ZText ztext, InstructionCache cache)
         {
             this.story = story;
             this.memory = story.Memory;
+            this.ztext = ztext;
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
 
@@ -808,9 +809,9 @@ namespace ZDebug.Core.Execution
             return memory.ReadZWords(address);
         }
 
-        string IExecutionContext.ParseZWords(IList<ushort> zwords)
+        string IExecutionContext.ParseZWords(ushort[] zwords)
         {
-            return ZText.ZWordsAsString(zwords, ZTextFlags.All, story.Memory);
+            return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
         void IExecutionContext.SelectScreenStream()
@@ -855,12 +856,12 @@ namespace ZDebug.Core.Execution
 
         ZCommandToken[] IExecutionContext.TokenizeCommand(string commandText, int? dictionaryAddress)
         {
-            return ZText.TokenizeCommand(commandText, memory, dictionaryAddress ?? memory.ReadDictionaryAddress());
+            return ztext.TokenizeCommand(commandText, dictionaryAddress ?? memory.ReadDictionaryAddress());
         }
 
         bool IExecutionContext.TryLookupWord(string word, int? dictionaryAddress, out ushort address)
         {
-            address = ZText.LookupWord(word, memory, dictionaryAddress ?? memory.ReadDictionaryAddress());
+            address = ztext.LookupWord(word, dictionaryAddress ?? memory.ReadDictionaryAddress());
             return address > 0;
         }
 

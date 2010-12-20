@@ -11,15 +11,17 @@ namespace ZDebug.Core.Dictionary
     public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
     {
         private readonly Story story;
+        private readonly ZText ztext;
         private readonly int address;
 
         private readonly ReadOnlyCollection<char> wordSeparators;
 
         private readonly List<ZDictionaryEntry> entries;
 
-        internal ZDictionary(Story story)
+        internal ZDictionary(Story story, ZText ztext)
         {
             this.story = story;
+            this.ztext = ztext;
 
             var memory = story.Memory;
             this.address = memory.ReadDictionaryAddress();
@@ -41,7 +43,7 @@ namespace ZDebug.Core.Dictionary
                 var entryAddress = reader.Address;
                 var entryZWords = reader.NextWords(zwordsSize);
                 var entryData = reader.NextBytes(dataSize);
-                var entryZText = ZText.ZWordsAsString(entryZWords, ZTextFlags.All, memory);
+                var entryZText = ztext.ZWordsAsString(entryZWords, ZTextFlags.All);
                 entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryZText, entryData));
             }
         }

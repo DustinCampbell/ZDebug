@@ -44,6 +44,12 @@ namespace ZDebug.Core.Text
             }
         }
 
+        public void FullReset()
+        {
+            baseAlphabet = 0;
+            currentAlphabet = 0;
+        }
+
         public void Reset()
         {
             currentAlphabet = baseAlphabet;

@@ -6,30 +6,54 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Text
 {
-    public static class ZText
+    public sealed class ZText
     {
-        private static byte[] ZWordsToZChars(IList<ushort> zwords)
-        {
-            var result = new byte[zwords.Count * 3];
+        private readonly Memory memory;
+        private readonly AlphabetTable alphabetTable;
+        private readonly byte version;
+        private readonly StringBuilder builder;
 
-            for (int i = 0; i < zwords.Count; i++)
+        private readonly AlphabetTable abbreviationAlphabetTable;
+        private readonly StringBuilder abbreviationBuilder;
+
+        public ZText(Memory memory)
+        {
+            this.memory = memory;
+            this.alphabetTable = new AlphabetTable(memory);
+            this.version = memory.ReadVersion();
+            this.builder = new StringBuilder();
+            this.abbreviationAlphabetTable = new AlphabetTable(memory);
+            this.abbreviationBuilder = new StringBuilder();
+        }
+
+        private byte[] ZWordsToZChars(ushort[] zwords)
+        {
+            var count = zwords.Length;
+            var result = new byte[count * 3];
+            for (int i = 0; i < count; i++)
             {
                 var zword = zwords[i];
+                var offset = i * 3;
 
-                result[i * 3] = (byte)((zword & 0x7c00) >> 10);
-                result[(i * 3) + 1] = (byte)((zword & 0x03e0) >> 5);
-                result[(i * 3) + 2] = (byte)(zword & 0x001f);
+                result[offset] = (byte)((zword & 0x7c00) >> 10);
+                result[offset + 1] = (byte)((zword & 0x03e0) >> 5);
+                result[offset + 2] = (byte)(zword & 0x001f);
             }
 
             return result;
         }
 
-        public static string ZWordsAsString(IList<ushort> zwords, ZTextFlags flags, Memory memory)
+        private string ZWordsAsString(ushort[] zwords, ZTextFlags flags, AlphabetTable alphabetTable, StringBuilder builder)
         {
             var zchars = ZWordsToZChars(zwords);
-            var builder = new StringBuilder(zchars.Length);
-            var alphabetTable = new AlphabetTable(memory);
-            var version = memory.ReadVersion();
+
+            builder.Clear();
+            if (builder.Capacity < zchars.Length)
+            {
+                builder.Capacity = zchars.Length;
+            }
+
+            alphabetTable.FullReset();
 
             var i = 0;
             while (i < zchars.Length)
@@ -69,7 +93,7 @@ namespace ZDebug.Core.Text
                             var abbreviationCode = zchars[++i];
                             var abbreviationIndex = (32 * (zchar - 1)) + abbreviationCode;
                             var abbreviationZWords = memory.ReadAbbreviation(abbreviationIndex);
-                            var abbreviationText = ZWordsAsString(abbreviationZWords, ZTextFlags.None, memory);
+                            var abbreviationText = ZWordsAsString(abbreviationZWords, ZTextFlags.None, abbreviationAlphabetTable, abbreviationBuilder);
                             builder.Append(abbreviationText);
                         }
                     }
@@ -138,7 +162,12 @@ namespace ZDebug.Core.Text
             return builder.ToString();
         }
 
-        public static ZCommandToken[] TokenizeCommand(string commandText, Memory memory, int dictionaryAddress)
+        public string ZWordsAsString(ushort[] zwords, ZTextFlags flags)
+        {
+            return ZWordsAsString(zwords, flags, alphabetTable, builder);
+        }
+
+        public ZCommandToken[] TokenizeCommand(string commandText, int dictionaryAddress)
         {
             var wordSepCount = memory.ReadByte(ref dictionaryAddress);
             var wordSeps = memory.ReadBytes(ref dictionaryAddress, wordSepCount).ConvertAll(b => (char)b);
@@ -182,9 +211,8 @@ namespace ZDebug.Core.Text
             return tokens.ToArray();
         }
 
-        public static ushort LookupWord(string word, Memory memory, int dictionaryAddress)
+        public ushort LookupWord(string word, int dictionaryAddress)
         {
-            byte version = memory.ReadVersion();
             int zwordsSize = version <= 3 ? 2 : 3;
 
             if (word.Length > zwordsSize * 3)
@@ -223,7 +251,7 @@ namespace ZDebug.Core.Text
                 // TODO: Encode word and compare z-words directly
 
                 ushort[] entryZWords = memory.ReadWords(entryAddress, zwordsSize);
-                string entryText = ZText.ZWordsAsString(entryZWords, ZTextFlags.All, memory);
+                string entryText = ZWordsAsString(entryZWords, ZTextFlags.All);
 
                 if (entryText == word)
                 {

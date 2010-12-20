@@ -7,13 +7,15 @@ namespace ZDebug.Core.Objects
     {
         private readonly Memory memory;
         private readonly ZObjectTable objectTable;
+        private readonly ZText ztext;
         private readonly int address;
         private readonly int number;
 
-        internal ZObject(Memory memory, ZObjectTable objectTable, int address, int number)
+        internal ZObject(Memory memory, ZObjectTable objectTable, ZText ztext, int address, int number)
         {
             this.memory = memory;
             this.objectTable = objectTable;
+            this.ztext = ztext;
             this.address = address;
             this.number = number;
         }
@@ -33,7 +35,7 @@ namespace ZDebug.Core.Objects
             get
             {
                 var shortNameZWords = PropertyTable.GetShortNameZWords();
-                return ZText.ZWordsAsString(shortNameZWords, ZTextFlags.All, memory);
+                return ztext.ZWordsAsString(shortNameZWords, ZTextFlags.All);
             }
         }
 

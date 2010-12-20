@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ZDebug.Core.Instructions;
+﻿using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Execution
@@ -46,7 +45,7 @@ namespace ZDebug.Core.Execution
         void MoveTo(int objNum, int destNum);
 
         ushort[] ReadZWords(int address);
-        string ParseZWords(IList<ushort> zwords);
+        string ParseZWords(ushort[] zwords);
 
         void SelectScreenStream();
         void DeselectScreenStream();

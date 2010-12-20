@@ -5,6 +5,7 @@ using ZDebug.Core.Execution;
 using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Core
 {
@@ -18,6 +19,7 @@ namespace ZDebug.Core
 
         private readonly InstructionCache instructionCache;
 
+        private readonly ZText ztext;
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
@@ -34,13 +36,14 @@ namespace ZDebug.Core
             this.releaseNumber = memory.ReadReleaseNumber();
             this.actualChecksum = memory.CalculateChecksum();
             this.instructionCache = new InstructionCache();
+            this.ztext = new ZText(memory);
             this.memoryMap = new MemoryMap(memory);
-            this.informData = new InformData(memory, this.memoryMap);
-            this.objectTable = new ZObjectTable(memory);
+            this.informData = new InformData(memory, this.memoryMap, ztext);
+            this.objectTable = new ZObjectTable(memory, ztext);
             this.routineTable = new RoutineTable(memory, instructionCache);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
-            this.dictionary = new ZDictionary(this);
-            this.processor = new Processor(this, instructionCache);
+            this.dictionary = new ZDictionary(this, ztext);
+            this.processor = new Processor(this, ztext, instructionCache);
 
             // write interpreter number
             if (version >= 4)
@@ -77,6 +80,11 @@ namespace ZDebug.Core
         public Memory Memory
         {
             get { return memory; }
+        }
+
+        public ZText ZText
+        {
+            get { return ztext; }
         }
 
         public byte Version

@@ -4,7 +4,6 @@ using System.Windows.Media;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Text;
 using ZDebug.UI.Services;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.UI.Controls
 {
@@ -105,7 +104,7 @@ namespace ZDebug.UI.Controls
 
             if (instruction.HasZText && DebuggerService.HasStory)
             {
-                var ztextBuilder = new StringBuilder(ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All, DebuggerService.Story.Memory));
+                var ztextBuilder = new StringBuilder(DebuggerService.Story.ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All));
                 var ztext = ztextBuilder.ToString();
 
                 if (ztext.Length > 0)

@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using ZDebug.Core.Collections;
-using ZDebug.Core.Utilities;
+﻿using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
 {
@@ -15,7 +13,7 @@ namespace ZDebug.Core.Instructions
         public readonly bool HasBranch;
         public readonly Branch Branch;
         public readonly bool HasZText;
-        public readonly ReadOnlyCollection<ushort> ZText;
+        public readonly ushort[] ZText;
 
         internal Instruction(
             int address,
@@ -55,7 +53,7 @@ namespace ZDebug.Core.Instructions
 
             if (ztext != null)
             {
-                this.ZText = ztext.AsReadOnly();
+                this.ZText = ztext;
                 this.HasZText = true;
             }
             else

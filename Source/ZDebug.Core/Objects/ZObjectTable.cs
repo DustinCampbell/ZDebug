@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Objects
 {
@@ -14,14 +15,14 @@ namespace ZDebug.Core.Objects
         private readonly Dictionary<int, ZPropertyTable> propertyTables;
         private readonly ReadOnlyCollection<ZObject> objects;
 
-        internal ZObjectTable(Memory memory)
+        internal ZObjectTable(Memory memory, ZText ztext)
         {
             this.memory = memory;
             this.address = memory.ReadObjectTableAddress();
             this.propertyTables = new Dictionary<int, ZPropertyTable>();
 
             this.objects = new ReadOnlyCollection<ZObject>(
-                memory.ReadObjectTableObjects(this));
+                memory.ReadObjectTableObjects(this, ztext));
         }
 
         internal ZPropertyTable GetPropertyTable(int address)
