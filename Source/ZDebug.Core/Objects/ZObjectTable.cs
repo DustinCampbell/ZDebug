@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Text;
@@ -13,7 +12,7 @@ namespace ZDebug.Core.Objects
         private readonly int address;
 
         private readonly Dictionary<int, ZPropertyTable> propertyTables;
-        private readonly ReadOnlyCollection<ZObject> objects;
+        private readonly ZObject[] objects;
 
         internal ZObjectTable(Memory memory, ZText ztext)
         {
@@ -21,8 +20,7 @@ namespace ZDebug.Core.Objects
             this.address = memory.ReadObjectTableAddress();
             this.propertyTables = new Dictionary<int, ZPropertyTable>();
 
-            this.objects = new ReadOnlyCollection<ZObject>(
-                memory.ReadObjectTableObjects(this, ztext));
+            this.objects = memory.ReadObjectTableObjects(this, ztext);
         }
 
         internal ZPropertyTable GetPropertyTable(int address)
@@ -59,14 +57,14 @@ namespace ZDebug.Core.Objects
 
         public int Count
         {
-            get { return objects.Count; }
+            get { return objects.Length; }
         }
 
         public IEnumerator<ZObject> GetEnumerator()
         {
-            foreach (var obj in objects)
+            for (int i = 0; i < objects.Length; i++)
             {
-                yield return obj;
+                yield return objects[i];
             }
         }
 

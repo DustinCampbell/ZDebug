@@ -89,12 +89,12 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("attribute");
             }
 
-            var attributeBytes = memory.ReadAttributeBytesByObjectAddress(objAddress);
-
             var byteIdx = attribute / 8;
             var bitMask = 1 << (7 - (attribute % 8));
 
-            return (attributeBytes[byteIdx] & bitMask) == bitMask;
+            var b = memory.ReadByte(objAddress + byteIdx);
+
+            return (b & bitMask) == bitMask;
         }
 
         public static bool HasAttributeByObjectNumber(this Memory memory, int objNum, int attribute)
@@ -331,7 +331,7 @@ namespace ZDebug.Core.Basics
             memory.WritePropertyTableAddressByObjectNumber(objAddress, value);
         }
 
-        public static IList<ZObject> ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable, ZText ztext)
+        public static ZObject[] ReadObjectTableObjects(this Memory memory, ZObjectTable objectTable, ZText ztext)
         {
             var version = memory.ReadVersion();
             var maxObjects = ObjectHelpers.GetMaxObjects(version);
@@ -348,7 +348,7 @@ namespace ZDebug.Core.Basics
             {
                 if (address >= smallestPropertyTableAddress)
                 {
-                    return objects;
+                    return objects.ToArray();
                 }
 
                 objects.Add(new ZObject(memory, objectTable, ztext, address, i));
@@ -361,7 +361,7 @@ namespace ZDebug.Core.Basics
 
             if (address >= smallestPropertyTableAddress)
             {
-                return objects;
+                return objects.ToArray();
             }
 
             throw new InvalidOperationException("Could not find the end of the object table");
