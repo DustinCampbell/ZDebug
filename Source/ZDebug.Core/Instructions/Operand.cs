@@ -4,12 +4,12 @@ namespace ZDebug.Core.Instructions
     public struct Operand
     {
         public readonly OperandKind Kind;
-        public readonly ushort RawValue;
+        public readonly ushort Value;
 
-        public Operand(OperandKind kind, ushort rawValue)
+        public Operand(OperandKind kind, ushort value)
         {
             this.Kind = kind;
-            this.RawValue = rawValue;
+            this.Value = value;
         }
     }
 }

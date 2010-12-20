@@ -15,6 +15,8 @@ namespace ZDebug.PerfHarness
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
+        const string ZORK1_SCRIPT = @"..\..\ZCode\zork1\zork1_script.txt";
+
         static Story ReadStory(string path)
         {
             if (Path.GetExtension(path) == ".zblorb")
@@ -47,9 +49,15 @@ namespace ZDebug.PerfHarness
 
             var story = ReadStory(path);
 
+            var processor = story.Processor;
+
             var done = false;
-            var mockScreen = new MockScreen(() => done = true);
-            story.Processor.RegisterScreen(mockScreen);
+            //var mockScreen = new MockScreen(ZORK1_SCRIPT);
+            var mockScreen = new MockScreen(() => { done = true; });
+            //processor.SetRandomSeed(42);
+            processor.RegisterScreen(mockScreen);
+
+            processor.Quit += (s, e) => { done = true; };
 
             Mark("Stepping...");
 
@@ -59,7 +67,7 @@ namespace ZDebug.PerfHarness
             {
                 while (!done)
                 {
-                    story.Processor.Step();
+                    processor.Step();
                 }
             }
             catch
@@ -73,8 +81,8 @@ namespace ZDebug.PerfHarness
             DataCollection.StopProfile(ProfileLevel.Process, DataCollection.CurrentId);
 
             Console.WriteLine();
-            Console.WriteLine("{0:#,#} instructions", story.Processor.InstructionCount);
-            Console.WriteLine("{0:#,#} calls", story.Processor.CallCount);
+            Console.WriteLine("{0:#,#} instructions", processor.InstructionCount);
+            Console.WriteLine("{0:#,#} calls", processor.CallCount);
             Console.WriteLine();
             Console.WriteLine("{0:#,0.##########} seconds", (double)sw.ElapsedTicks / (double)Stopwatch.Frequency);
             Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)sw.ElapsedTicks / (double)Stopwatch.Frequency) / (double)story.Processor.InstructionCount);

@@ -59,7 +59,7 @@ namespace ZDebug.Core.Text
                     }
                     else // abbeviations
                     {
-                        if (!flags.HasFlag(ZTextFlags.AllowAbbreviations))
+                        if ((flags & ZTextFlags.AllowAbbreviations) == 0)
                         {
                             throw new InvalidOperationException("Encountered ZSCII code for an illegal abbreviation.");
                         }
@@ -117,7 +117,7 @@ namespace ZDebug.Core.Text
                     }
                     else
                     {
-                        if (!flags.HasFlag(ZTextFlags.AllowIncompleteMultibyteChars))
+                        if ((flags & ZTextFlags.AllowIncompleteMultibyteChars) == 0)
                         {
                             throw new InvalidOperationException("Encountered illegal incomplete multi-byte ZSCII character.");
                         }

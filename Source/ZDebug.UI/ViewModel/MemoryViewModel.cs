@@ -17,7 +17,7 @@ namespace ZDebug.UI.ViewModel
             lines = new BulkObservableCollection<MemoryLineViewModel>();
         }
 
-        private void MemoryChanged(object sender, MemoryChangedEventArgs e)
+        private void MemoryChanged(object sender, MemoryEventArgs e)
         {
             // Replace affected lines
             int firstLineIndex = e.Address / 16;

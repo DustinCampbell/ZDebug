@@ -41,7 +41,8 @@ namespace ZDebug.Core.Dictionary
                 var entryAddress = reader.Address;
                 var entryZWords = reader.NextWords(zwordsSize);
                 var entryData = reader.NextBytes(dataSize);
-                entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryData));
+                var entryZText = ZText.ZWordsAsString(entryZWords, ZTextFlags.All, memory);
+                entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryZText, entryData));
             }
         }
 
@@ -50,8 +51,7 @@ namespace ZDebug.Core.Dictionary
             for (int i = entries.Count - 1; i >= 0; i--)
             {
                 var e = entries[i];
-                var text = ZText.ZWordsAsString(e.ZWords, ZTextFlags.All, story.Memory);
-                if (word.StartsWith(text))
+                if (word.StartsWith(e.ZText))
                 {
                     entry = e;
                     return true;

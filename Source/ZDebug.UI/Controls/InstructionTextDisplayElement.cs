@@ -64,7 +64,7 @@ namespace ZDebug.UI.Controls
             {
                 if (instruction.Opcode.IsCall)
                 {
-                    var callAddress = instruction.Operands[0].RawValue;
+                    var callAddress = instruction.Operands[0].Value;
                     if (DebuggerService.HasStory)
                     {
                         builder.AddAddress(DebuggerService.Story.UnpackRoutineAddress(callAddress));
@@ -83,7 +83,7 @@ namespace ZDebug.UI.Controls
                 }
                 else if (instruction.Opcode.IsJump)
                 {
-                    var jumpOffset = (short)instruction.Operands[0].RawValue;
+                    var jumpOffset = (short)instruction.Operands[0].Value;
                     var jumpAddress = instruction.Address + instruction.Length + jumpOffset - 2;
                     builder.AddAddress(jumpAddress);
                 }

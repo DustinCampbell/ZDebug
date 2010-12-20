@@ -41,9 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basics\MemoryEventArgs.cs" />
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Blorb\BlorbFileException.cs" />
     <Compile Include="Blorb\PictureKind.cs" />
+    <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
     <Compile Include="Execution\IInputStream.cs" />
@@ -68,7 +70,6 @@
     <Compile Include="Basics\IMemoryReader_Instructions.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\MemoryReader.cs" />
-    <Compile Include="Basics\MemoryChangeEventArgs.cs" />
     <Compile Include="Basics\MemoryExtensions.Header.cs" />
     <Compile Include="Basics\MemoryExtensions.Objects.cs" />
     <Compile Include="Basics\MemoryExtensions.Text.cs" />

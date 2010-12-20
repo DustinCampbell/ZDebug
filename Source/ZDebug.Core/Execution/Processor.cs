@@ -13,8 +13,11 @@ namespace ZDebug.Core.Execution
         private const int stackSize = 1024;
 
         private readonly Story story;
+        private readonly Memory memory;
         private readonly MemoryReader reader;
         private readonly InstructionReader instructions;
+
+        private readonly ushort globalVariableTableAddress;
 
         // stack and routine call state
         private readonly int[] stack = new int[stackSize];
@@ -24,6 +27,9 @@ namespace ZDebug.Core.Execution
         private int localStackSize = 0;
         private int argumentCount = 0;
         private Variable storeVariable;
+
+        private ushort[] operandValues = new ushort[8];
+        private int operandCount;
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -38,6 +44,8 @@ namespace ZDebug.Core.Execution
         internal Processor(Story story, InstructionCache cache)
         {
             this.story = story;
+            this.memory = story.Memory;
+            this.globalVariableTableAddress = memory.ReadGlobalVariableTableAddress();
 
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
@@ -140,7 +148,7 @@ namespace ZDebug.Core.Execution
                     return locals[variable.Index];
 
                 case VariableKind.Global:
-                    return story.GlobalVariablesTable[variable.Index];
+                    return memory.ReadWord(this.globalVariableTableAddress + (variable.Index * 2));
 
                 default:
                     throw new InvalidOperationException();
@@ -199,8 +207,9 @@ namespace ZDebug.Core.Execution
                 case VariableKind.Global:
                     {
                         var index = variable.Index;
-                        var oldValue = story.GlobalVariablesTable[index];
-                        story.GlobalVariablesTable[index] = value;
+                        var address = this.globalVariableTableAddress + (index * 2);
+                        var oldValue = memory.ReadWord(address);
+                        memory.WriteWord(address, value);
 
                         var handler = GlobalVariableChanged;
                         if (handler != null)
@@ -221,11 +230,11 @@ namespace ZDebug.Core.Execution
             switch (operand.Kind)
             {
                 case OperandKind.LargeConstant:
-                    return operand.RawValue;
+                    return operand.Value;
                 case OperandKind.SmallConstant:
-                    return (byte)operand.RawValue;
+                    return (byte)operand.Value;
                 case OperandKind.Variable:
-                    return ReadVariable(Variable.FromByte((byte)operand.RawValue));
+                    return ReadVariable(Variable.FromByte((byte)operand.Value));
                 default:
                     throw new InvalidOperationException();
             }
@@ -239,26 +248,11 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void Call(int address, Operand[] operands, Variable storeVar)
+        private void Call(int address, ushort[] opValues, int opCount, Variable storeVar)
         {
             if (address < 0)
             {
                 throw new ArgumentOutOfRangeException("address");
-            }
-
-            // NOTE: argument values must be retrieved in case they manipulate the stack
-            ushort[] argValues;
-            if (operands != null)
-            {
-                argValues = new ushort[operands.Length];
-                for (int i = 0; i < operands.Length; i++)
-                {
-                    argValues[i] = GetOperandValue(operands[i]);
-                }
-            }
-            else
-            {
-                argValues = new ushort[0];
             }
 
             if (address == 0)
@@ -278,7 +272,7 @@ namespace ZDebug.Core.Execution
                 var returnAddress = reader.Address;
                 reader.Address = address;
 
-                argumentCount = argValues.Length;
+                argumentCount = opCount - 1;
 
                 // read locals
                 localCount = reader.NextByte();
@@ -297,8 +291,11 @@ namespace ZDebug.Core.Execution
                     }
                 }
 
-                var numberToCopy = Math.Min(argValues.Length, locals.Length);
-                Array.Copy(argValues, 0, locals, 0, numberToCopy);
+                var numberToCopy = Math.Min(argumentCount, locals.Length);
+                for (int i = 0; i < numberToCopy; i++)
+                {
+                    locals[i] = opValues[i + 1];
+                }
 
                 storeVariable = storeVar;
                 localStackSize = 0;
@@ -384,7 +381,7 @@ namespace ZDebug.Core.Execution
         {
             var oldPC = reader.Address;
 
-            var i = instructions.NextInstruction(); ;
+            var i = instructions.NextInstruction();
 
             executingInstruction = i;
 
@@ -394,7 +391,14 @@ namespace ZDebug.Core.Execution
                 steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
             }
 
-            i.Opcode.Execute(i, this);
+            var operands = i.Operands;
+            operandCount = operands.Length;
+            for (int j = 0; j < i.Operands.Length; j++)
+            {
+                operandValues[j] = GetOperandValue(operands[j]);
+            }
+
+            i.Opcode.Execute(i, operandValues, operandCount, this);
 
             var newPC = reader.Address;
 
@@ -626,9 +630,9 @@ namespace ZDebug.Core.Execution
             story.Memory.WriteWord(address, value);
         }
 
-        void IExecutionContext.Call(int address, Operand[] operands, Variable storeVariable)
+        void IExecutionContext.Call(int address, ushort[] opValues, int opCount, Variable storeVariable)
         {
-            Call(address, operands, storeVariable);
+            Call(address, opValues, opCount, storeVariable);
         }
 
         int IExecutionContext.GetArgumentCount()

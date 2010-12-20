@@ -20,7 +20,7 @@ namespace ZDebug.Core.Execution
         void WriteVariableIndirectly(Variable variable, ushort value);
         void WriteWord(int address, ushort value);
 
-        void Call(int address, Operand[] args = null, Variable storeVariable = null);
+        void Call(int address, ushort[] opValues, int opCount, Variable storeVariable = null);
 
         int GetArgumentCount();
 

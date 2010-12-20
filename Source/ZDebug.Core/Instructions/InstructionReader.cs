@@ -1,5 +1,6 @@
 ﻿using System;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
 {
@@ -57,7 +58,7 @@ namespace ZDebug.Core.Instructions
             return new Operand((OperandKind)kind, rawValue);
         }
 
-        private Operand[] ReadOperands()
+        private ReadOnlyArray<Operand> ReadOperands()
         {
             int size = 8;
             for (int i = 0; i < operandKinds.Length; i++)
@@ -69,7 +70,7 @@ namespace ZDebug.Core.Instructions
                 }
             }
 
-            var result = new Operand[size];
+            var result = cache.AllocateOperands(size);
 
             for (int i = 0; i < size; i++)
             {

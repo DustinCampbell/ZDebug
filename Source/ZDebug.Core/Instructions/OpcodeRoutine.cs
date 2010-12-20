@@ -2,5 +2,5 @@
 
 namespace ZDebug.Core.Instructions
 {
-    public delegate void OpcodeRoutine(Instruction instruction, IExecutionContext context);
+    public delegate void OpcodeRoutine(Instruction instruction, ushort[] operandValues, int operandCount, IExecutionContext context);
 }

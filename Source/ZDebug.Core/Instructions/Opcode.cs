@@ -36,7 +36,7 @@ namespace ZDebug.Core.Instructions
             this.routine = routine;
         }
 
-        public void Execute(Instruction instruction, IExecutionContext context)
+        public void Execute(Instruction instruction, ushort[] opValues, int opCount, IExecutionContext context)
         {
             if (context == null)
             {
@@ -58,7 +58,7 @@ Kind = {1}
 Number = {2:x2} ({2})", Name, Kind, Number));
             }
 
-            routine(instruction, context);
+            routine(instruction, opValues, opCount, context);
         }
     }
 }

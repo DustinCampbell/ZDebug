@@ -148,15 +148,6 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
-        private void OnMemoryChanged(int address, int length, byte[] oldValues, byte[] newValues)
-        {
-            var handler = MemoryChanged;
-            if (handler != null)
-            {
-                handler(this, new MemoryChangedEventArgs(this, address, length, oldValues, newValues));
-            }
-        }
-
         public void WriteByte(int address, byte value)
         {
             if (address < 0 || address + 1 > bytes.Length)
@@ -168,11 +159,11 @@ namespace ZDebug.Core.Basics
 
             bytes[address] = value;
 
-            OnMemoryChanged(
-                address,
-                length: 1,
-                oldValues: new byte[] { oldValue },
-                newValues: new byte[] { value });
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, 1));
+            }
         }
 
         public void WriteBytes(int address, byte[] values)
@@ -192,15 +183,13 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.ShallowCopy(address, values.Length);
-
             Array.Copy(values, 0, bytes, address, values.Length);
 
-            OnMemoryChanged(
-                address,
-                length: values.Length,
-                oldValues: oldValues,
-                newValues: values);
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, values.Length));
+            }
         }
 
         public void WriteWord(int address, ushort value)
@@ -210,20 +199,17 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var old1 = bytes[address];
-            var old2 = bytes[address + 1];
-
             var b1 = (byte)(value >> 8);
             var b2 = (byte)(value & 0x00ff);
 
             bytes[address] = b1;
             bytes[address + 1] = b2;
 
-            OnMemoryChanged(
-                address,
-                length: 2,
-                oldValues: new byte[] { old1, old2 },
-                newValues: new byte[] { b1, b2 });
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, 2));
+            }
         }
 
         public void WriteWords(int address, ushort[] values)
@@ -243,21 +229,17 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.ShallowCopy(address, values.Length * 2);
-
             for (int i = 0; i < values.Length; i++)
             {
                 bytes[address + (i * 2)] = (byte)(values[i] >> 8);
                 bytes[address + (i * 2) + 1] = (byte)(values[i] & 0x00ff);
             }
 
-            var newValues = bytes.ShallowCopy(address, values.Length * 2);
-
-            OnMemoryChanged(
-                address,
-                length: values.Length * 2,
-                oldValues: oldValues,
-                newValues: newValues);
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, values.Length * 2));
+            }
         }
 
         public void WriteDWord(int address, uint value)
@@ -266,11 +248,6 @@ namespace ZDebug.Core.Basics
             {
                 throw new ArgumentOutOfRangeException("address");
             }
-
-            var old1 = bytes[address];
-            var old2 = bytes[address + 1];
-            var old3 = bytes[address + 2];
-            var old4 = bytes[address + 3];
 
             var b1 = (byte)(value >> 24);
             var b2 = (byte)((value & 0x00ff0000) >> 16);
@@ -282,11 +259,11 @@ namespace ZDebug.Core.Basics
             bytes[address + 2] = b3;
             bytes[address + 3] = b4;
 
-            OnMemoryChanged(
-                address,
-                length: 4,
-                oldValues: new byte[] { old1, old2, old3, old4 },
-                newValues: new byte[] { b1, b2, b3, b4 });
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, 4));
+            }
         }
 
         public void WriteDWords(int address, uint[] values)
@@ -306,8 +283,6 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("address");
             }
 
-            var oldValues = bytes.ShallowCopy(address, values.Length * 4);
-
             for (int i = 0; i < values.Length; i++)
             {
                 bytes[address + (i * 4)] = (byte)(values[i] >> 24);
@@ -316,13 +291,11 @@ namespace ZDebug.Core.Basics
                 bytes[address + (i * 4) + 3] = (byte)(values[i] & 0x000000ff);
             }
 
-            var newValues = bytes.ShallowCopy(address, values.Length * 4);
-
-            OnMemoryChanged(
-                address,
-                length: values.Length * 4,
-                oldValues: oldValues,
-                newValues: newValues);
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, values.Length * 4));
+            }
         }
 
         public MemoryReader CreateReader(int address)
@@ -340,6 +313,6 @@ namespace ZDebug.Core.Basics
             get { return bytes.Length; }
         }
 
-        public event EventHandler<MemoryChangedEventArgs> MemoryChanged;
+        public event EventHandler<MemoryEventArgs> MemoryChanged;
     }
 }

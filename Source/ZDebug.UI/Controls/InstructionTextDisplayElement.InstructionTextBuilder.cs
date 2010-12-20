@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
+using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 using ZDebug.IO.Services;
 
@@ -104,7 +104,7 @@ namespace ZDebug.UI.Controls
             {
                 if (operand.Kind == OperandKind.SmallConstant)
                 {
-                    AddVariable(Variable.FromByte((byte)operand.RawValue));
+                    AddVariable(Variable.FromByte((byte)operand.Value));
                 }
                 else if (operand.Kind == OperandKind.Variable)
                 {
@@ -137,19 +137,19 @@ namespace ZDebug.UI.Controls
             {
                 if (operand.Kind == OperandKind.LargeConstant)
                 {
-                    AddConstant(operand.RawValue);
+                    AddConstant(operand.Value);
                 }
                 else if (operand.Kind == OperandKind.SmallConstant)
                 {
-                    AddConstant((byte)operand.RawValue);
+                    AddConstant((byte)operand.Value);
                 }
                 else // OperandKind.Variable
                 {
-                    AddVariable(Variable.FromByte((byte)operand.RawValue));
+                    AddVariable(Variable.FromByte((byte)operand.Value));
                 }
             }
 
-            public void AddOperands(IEnumerable<Operand> operands)
+            public void AddOperands(ReadOnlyArray<Operand> operands)
             {
                 var firstOpAdded = false;
 

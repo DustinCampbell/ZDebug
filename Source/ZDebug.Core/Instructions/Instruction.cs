@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ZDebug.Core.Collections;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
@@ -8,7 +9,7 @@ namespace ZDebug.Core.Instructions
         public readonly int Address;
         public readonly int Length;
         public readonly Opcode Opcode;
-        public readonly Operand[] Operands;
+        public readonly ReadOnlyArray<Operand> Operands;
         public readonly bool HasStoreVariable;
         public readonly Variable StoreVariable;
         public readonly bool HasBranch;
@@ -20,7 +21,7 @@ namespace ZDebug.Core.Instructions
             int address,
             int length,
             Opcode opcode,
-            Operand[] operands,
+            ReadOnlyArray<Operand> operands,
             Variable storeVariable = null,
             Branch? branch = null,
             ushort[] ztext = null)

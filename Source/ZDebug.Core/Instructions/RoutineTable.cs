@@ -34,7 +34,7 @@ namespace ZDebug.Core.Instructions
 
         private int UnpackCallAddress(Instruction i)
         {
-            return memory.UnpackRoutineAddress(i.Operands[0].RawValue);
+            return memory.UnpackRoutineAddress(i.Operands[0].Value);
         }
 
         public void Add(int address)

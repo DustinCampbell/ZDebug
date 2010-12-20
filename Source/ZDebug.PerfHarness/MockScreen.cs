@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using ZDebug.Core.Execution;
 
 namespace ZDebug.PerfHarness
@@ -6,10 +8,20 @@ namespace ZDebug.PerfHarness
     internal sealed class MockScreen : IScreen
     {
         private readonly Action readAction;
+        private readonly string[] commands;
+        private int commandIndex;
+        private StringBuilder output;
 
         public MockScreen(Action readAction)
         {
             this.readAction = readAction;
+        }
+
+        public MockScreen(string scriptPath)
+        {
+            this.commands = File.ReadAllLines(scriptPath);
+            this.commandIndex = 0;
+            this.output = new StringBuilder();
         }
 
         public void Clear(int window)
@@ -131,10 +143,18 @@ namespace ZDebug.PerfHarness
 
         public void Print(string text)
         {
+            if (output != null)
+            {
+                output.Append(text);
+            }
         }
 
         public void Print(char ch)
         {
+            if (output != null)
+            {
+                output.Append(ch);
+            }
         }
 
         public void ReadChar(Action<char> callback)
@@ -144,7 +164,21 @@ namespace ZDebug.PerfHarness
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            readAction();
+            if (readAction != null)
+            {
+                readAction();
+            }
+            else
+            {
+                var command = commands[commandIndex++];
+                output.AppendLine(command);
+                callback(command);
+            }
+        }
+
+        public string Output
+        {
+            get { return output.ToString(); }
         }
     }
 }
