@@ -18,9 +18,10 @@ namespace ZDebug.Core.Objects
         {
             this.memory = memory;
             this.address = memory.ReadObjectTableAddress();
-            this.propertyTables = new Dictionary<int, ZPropertyTable>();
 
             this.objects = memory.ReadObjectTableObjects(this, ztext);
+
+            this.propertyTables = new Dictionary<int, ZPropertyTable>(objects.Length);
         }
 
         internal ZPropertyTable GetPropertyTable(int address)

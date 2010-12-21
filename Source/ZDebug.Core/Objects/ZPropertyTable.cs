@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 
@@ -11,15 +10,14 @@ namespace ZDebug.Core.Objects
         private readonly Memory memory;
         private readonly int address;
 
-        private readonly ReadOnlyCollection<ZProperty> properties;
+        private readonly ZProperty[] properties;
 
         internal ZPropertyTable(Memory memory, int address)
         {
             this.memory = memory;
             this.address = address;
 
-            properties = new ReadOnlyCollection<ZProperty>(
-                memory.ReadPropertyTableProperties(this));
+            properties = memory.ReadPropertyTableProperties(this);
         }
 
         public ushort[] GetShortNameZWords()
@@ -29,7 +27,7 @@ namespace ZDebug.Core.Objects
 
         public bool Contains(int propNum)
         {
-            for (int i = 0; i < properties.Count; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
                 if (properties[i].Number == propNum)
                 {
@@ -42,7 +40,7 @@ namespace ZDebug.Core.Objects
 
         public ZProperty GetByNumber(int propNum)
         {
-            for (int i = 0; i < properties.Count; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
                 var p = properties[i];
                 if (p.Number == propNum)
@@ -66,14 +64,14 @@ namespace ZDebug.Core.Objects
 
         public int Count
         {
-            get { return properties.Count; }
+            get { return properties.Length; }
         }
 
         public IEnumerator<ZProperty> GetEnumerator()
         {
-            foreach (var prop in properties)
+            for (int i = 0; i < properties.Length; i++)
             {
-                yield return prop;
+                yield return properties[i];
             }
         }
 

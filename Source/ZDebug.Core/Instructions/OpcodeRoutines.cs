@@ -597,7 +597,7 @@ namespace ZDebug.Core.Instructions
             var len = opValues[2];
 
             var form = 0x82;
-            if (i.Operands.Length > 3)
+            if (opCount > 3)
             {
                 form = opValues[3];
             }
@@ -1110,7 +1110,7 @@ namespace ZDebug.Core.Instructions
             int textBuffer = opValues[0];
 
             int parseBuffer = 0;
-            if (i.Operands.Length > 1)
+            if (opCount > 1)
             {
                 parseBuffer = opValues[1];
             }
@@ -1421,6 +1421,22 @@ namespace ZDebug.Core.Instructions
             Strict.OperandCountIs(i, 0);
 
             context.Screen.ShowStatus();
+        };
+
+        public static readonly OpcodeRoutine tokenize = (i, opValues, opCount, context) =>
+        {
+            Strict.OperandCountInRange(i, 2, 4);
+
+            int textBuffer = opValues[0];
+            int parseBuffer = opValues[1];
+
+            int? dictionaryAddress = opCount > 2
+                ? (int?)opValues[2]
+                : null;
+
+            bool flag = opCount > 3
+                ? opValues[3] != 0
+                : false;
         };
 
         public static readonly OpcodeRoutine verify = (i, opValues, opCount, context) =>

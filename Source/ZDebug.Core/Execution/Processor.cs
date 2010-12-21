@@ -396,7 +396,7 @@ namespace ZDebug.Core.Execution
             }
 
             var operands = i.Operands;
-            operandCount = operands.Length;
+            operandCount = i.OperandCount;
             for (int j = 0; j < operandCount; j++)
             {
                 operandValues[j] = GetOperandValue(operands[j]);
@@ -671,41 +671,17 @@ namespace ZDebug.Core.Execution
 
         int IExecutionContext.GetChild(int objNum)
         {
-            var obj = this.objectTable.GetByNumber(objNum);
-            if (!obj.HasChild)
-            {
-                return 0;
-            }
-            else
-            {
-                return obj.Child.Number;
-            }
+            return memory.ReadChildNumberByObjectNumber(objNum);
         }
 
         int IExecutionContext.GetParent(int objNum)
         {
-            var obj = this.objectTable.GetByNumber(objNum);
-            if (!obj.HasParent)
-            {
-                return 0;
-            }
-            else
-            {
-                return obj.Parent.Number;
-            }
+            return memory.ReadParentNumberByObjectNumber(objNum);
         }
 
         int IExecutionContext.GetSibling(int objNum)
         {
-            var obj = this.objectTable.GetByNumber(objNum);
-            if (!obj.HasSibling)
-            {
-                return 0;
-            }
-            else
-            {
-                return obj.Sibling.Number;
-            }
+            return memory.ReadSiblingNumberByObjectNumber(objNum);
         }
 
         string IExecutionContext.GetShortName(int objNum)

@@ -447,7 +447,7 @@ namespace ZDebug.Core.Basics
             return dataLength;
         }
 
-        public static IList<ZProperty> ReadPropertyTableProperties(this Memory memory, ZPropertyTable propertyTable)
+        public static ZProperty[] ReadPropertyTableProperties(this Memory memory, ZPropertyTable propertyTable)
         {
             // read properties...
             var props = new List<ZProperty>();
@@ -464,7 +464,7 @@ namespace ZDebug.Core.Basics
                 prop = reader.NextProperty(version, propertyTable, ++index);
             }
 
-            return props;
+            return props.ToArray();
         }
 
         public static int? TryReadLeftSiblingNumberByObjectNumber(this Memory memory, int objNum)

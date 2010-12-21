@@ -35,7 +35,7 @@ namespace ZDebug.Core
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
             this.actualChecksum = memory.CalculateChecksum();
-            this.instructionCache = new InstructionCache();
+            this.instructionCache = new InstructionCache((memory.Size - memory.ReadStaticMemoryBase()) / 8);
             this.ztext = new ZText(memory);
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap, ztext);

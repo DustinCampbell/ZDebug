@@ -16,9 +16,9 @@ namespace ZDebug.Core.Instructions
         private int zwordArrayFreeIndex;
         private int zwordArraySize = 1024;
 
-        public InstructionCache()
+        public InstructionCache(int capacity = 0)
         {
-            map = new Dictionary<int, Instruction>();
+            map = new Dictionary<int, Instruction>(capacity);
         }
 
         public bool TryGet(int address, out Instruction instruction)

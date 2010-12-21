@@ -8,6 +8,7 @@ namespace ZDebug.Core.Instructions
         public readonly int Length;
         public readonly Opcode Opcode;
         public readonly ReadOnlyArray<Operand> Operands;
+        public readonly int OperandCount;
         public readonly bool HasStoreVariable;
         public readonly Variable StoreVariable;
         public readonly bool HasBranch;
@@ -20,6 +21,7 @@ namespace ZDebug.Core.Instructions
             int length,
             Opcode opcode,
             ReadOnlyArray<Operand> operands,
+            int operandCount,
             Variable storeVariable = null,
             Branch? branch = null,
             ushort[] ztext = null)
@@ -28,6 +30,7 @@ namespace ZDebug.Core.Instructions
             this.Length = length;
             this.Opcode = opcode;
             this.Operands = operands;
+            this.OperandCount = operandCount;
 
             if (storeVariable != null)
             {

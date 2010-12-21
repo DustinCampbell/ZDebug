@@ -14,17 +14,18 @@
 
         public static void OperandCountIs(Instruction instruction, int expected)
         {
-            if (instruction.Operands.Length != expected)
+            if (instruction.OperandCount != expected)
             {
-                Fail(instruction, "Expected {0} operands but found {1}.", expected, instruction.Operands.Length);
+                Fail(instruction, "Expected {0} operands but found {1}.", expected, instruction.OperandCount);
             }
         }
 
         public static void OperandCountInRange(Instruction instruction, int low, int high)
         {
-            if (instruction.Operands.Length < low || instruction.Operands.Length > high)
+            var opCount = instruction.OperandCount;
+            if (opCount < low || opCount > high)
             {
-                Fail(instruction, "Expected {0}-{1} operands but found {2}.", low, high, instruction.Operands.Length);
+                Fail(instruction, "Expected {0}-{1} operands but found {2}.", low, high, opCount);
             }
         }
 

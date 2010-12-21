@@ -195,7 +195,7 @@ namespace ZDebug.Core.Instructions
 
             var length = address - startAddress;
 
-            instruction = new Instruction(startAddress, length, opcode, operands, storeVariable, branch, ztext);
+            instruction = new Instruction(startAddress, length, opcode, operands, operands.Length, storeVariable, branch, ztext);
             cache.Add(startAddress, instruction);
             return instruction;
         }
