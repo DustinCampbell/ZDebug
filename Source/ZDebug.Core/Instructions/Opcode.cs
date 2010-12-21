@@ -58,7 +58,7 @@ Kind = {1}
 Number = {2:x2} ({2})", Name, Kind, Number));
             }
 
-            routine(instruction, opValues, opCount, context);
+            routine.Invoke(instruction, opValues, opCount, context);
         }
     }
 }

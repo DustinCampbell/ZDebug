@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
 {
     internal sealed class InstructionCache
     {
-        private readonly Dictionary<int, Instruction> map;
+        private readonly IntegerMap<Instruction> map;
 
         private Operand[] operandArray = new Operand[1024];
         private int operandArrayFreeIndex;
@@ -18,7 +17,7 @@ namespace ZDebug.Core.Instructions
 
         public InstructionCache(int capacity = 0)
         {
-            map = new Dictionary<int, Instruction>(capacity);
+            map = new IntegerMap<Instruction>(capacity);
         }
 
         public bool TryGet(int address, out Instruction instruction)

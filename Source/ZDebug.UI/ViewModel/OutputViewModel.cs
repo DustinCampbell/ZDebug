@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using ZDebug.Core.Execution;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
@@ -149,8 +150,12 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.HasGameScriptCommand())
             {
+                ResetStatusHeight();
+                currStatusHeight = 0;
+
                 string command = DebuggerService.GetNextGameScriptCommand();
                 windowManager.ActiveWindow.PutString(command + "\r\n");
+                windowContainer.Dispatcher.Invoke(new Action(() => { windowContainer.UpdateLayout(); }), DispatcherPriority.Loaded);
                 callback(command);
             }
             else
@@ -190,8 +195,7 @@ namespace ZDebug.UI.ViewModel
             {
                 if (unsplit)
                 {
-                    upperWindow.Close();
-                    upperWindow = null;
+                    Unsplit();
                 }
                 else
                 {
@@ -229,8 +233,10 @@ namespace ZDebug.UI.ViewModel
         {
             if (upperWindow != null)
             {
-                upperWindow.Close();
-                upperWindow = null;
+                upperWindow.SetHeight(0);
+                upperWindow.Clear();
+                ResetStatusHeight();
+                currStatusHeight = 0;
             }
         }
 

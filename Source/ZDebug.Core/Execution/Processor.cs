@@ -29,6 +29,14 @@ namespace ZDebug.Core.Execution
         private int argumentCount = 0;
         private Variable storeVariable;
 
+        // constants used for instruction parsing
+        private const byte opKind_LargeConstant = 0;
+        private const byte opKind_SmallConstant = 1;
+        private const byte opKind_Variable = 2;
+        private const byte opKind_Omitted = 3;
+
+        // instruction state
+        private byte[] operandKinds = new byte[8];
         private ushort[] operandValues = new ushort[8];
         private int operandCount;
 
@@ -396,10 +404,12 @@ namespace ZDebug.Core.Execution
             }
 
             var operands = i.Operands;
+            var startIndex = operands.StartIndex;
+            var innerArray = operands.InnerArray;
             operandCount = i.OperandCount;
             for (int j = 0; j < operandCount; j++)
             {
-                operandValues[j] = GetOperandValue(operands[j]);
+                operandValues[j] = GetOperandValue(innerArray[startIndex + j]);
             }
 
             i.Opcode.Execute(i, operandValues, operandCount, this);

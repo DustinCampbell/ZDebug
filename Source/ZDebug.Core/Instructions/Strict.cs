@@ -1,17 +1,21 @@
-﻿namespace ZDebug.Core.Instructions
+﻿using System.Diagnostics;
+namespace ZDebug.Core.Instructions
 {
     internal static class Strict
     {
+        [Conditional("STRICT")]
         private static void Fail(Instruction instruction, string message)
         {
             throw new StrictException(instruction, message);
         }
 
+        [Conditional("STRICT")]
         private static void Fail(Instruction instruction, string format, params object[] args)
         {
             Fail(instruction, string.Format(format, args));
         }
 
+        [Conditional("STRICT")]
         public static void OperandCountIs(Instruction instruction, int expected)
         {
             if (instruction.OperandCount != expected)
@@ -20,6 +24,7 @@
             }
         }
 
+        [Conditional("STRICT")]
         public static void OperandCountInRange(Instruction instruction, int low, int high)
         {
             var opCount = instruction.OperandCount;
@@ -29,6 +34,7 @@
             }
         }
 
+        [Conditional("STRICT")]
         public static void HasStoreVariable(Instruction instruction)
         {
             if (!instruction.HasStoreVariable)
@@ -37,6 +43,7 @@
             }
         }
 
+        [Conditional("STRICT")]
         public static void HasBranch(Instruction instruction)
         {
             if (!instruction.HasBranch)
@@ -45,6 +52,7 @@
             }
         }
 
+        [Conditional("STRICT")]
         public static void HasZText(Instruction instruction)
         {
             if (!instruction.HasZText)
@@ -53,6 +61,7 @@
             }
         }
 
+        [Conditional("STRICT")]
         public static void IsByte(Instruction instruction, ushort value)
         {
             if (value >= 256)

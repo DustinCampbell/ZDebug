@@ -45,10 +45,13 @@
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Blorb\BlorbFileException.cs" />
     <Compile Include="Blorb\PictureKind.cs" />
+    <Compile Include="Collections\HashHelpers.cs" />
+    <Compile Include="Collections\IntegerMap.cs" />
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
     <Compile Include="Execution\IInputStream.cs" />
+    <Compile Include="Execution\Processor.OpcodeRoutines.cs" />
     <Compile Include="Execution\StackEventArgs.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
@@ -121,6 +124,7 @@
     <Compile Include="Text\ZTextFlags.cs" />
     <Compile Include="Utilities\ArrayEx.cs" />
     <Compile Include="Utilities\ArrayExtensions.cs" />
+    <Compile Include="Utilities\ByteArrayExtensions.cs" />
     <Compile Include="Utilities\ReadOnlyCollectionExtensions.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
   </ItemGroup>

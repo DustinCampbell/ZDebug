@@ -190,11 +190,7 @@ namespace ZDebug.Core.Text
             {
                 parse += (byte)(tokenCount * 4);
 
-                var b1 = (byte)(address >> 8);
-                var b2 = (byte)(address & 0x00ff);
-
-                bytes[parse] = b1;
-                bytes[parse + 1] = b2;
+                bytes.WriteWord(parse, address);
                 bytes[parse + 2] = (byte)length;
                 bytes[parse + 3] = (byte)start;
             }

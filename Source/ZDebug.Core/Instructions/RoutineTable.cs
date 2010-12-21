@@ -12,14 +12,16 @@ namespace ZDebug.Core.Instructions
         private readonly Memory memory;
         private readonly OpcodeTable opcodeTable;
         private readonly InstructionCache cache;
-        private readonly SortedList<int, Routine> routines;
+        private readonly IntegerMap<Routine> routines;
+        private readonly List<int> sortedAddresses;
 
         internal RoutineTable(Memory memory, InstructionCache cache)
         {
             this.memory = memory;
             this.opcodeTable = OpcodeTables.GetOpcodeTable(memory.ReadVersion());
             this.cache = cache;
-            this.routines = new SortedList<int, Routine>();
+            this.routines = new IntegerMap<Routine>();
+            this.sortedAddresses = new List<int>();
 
             var mainRoutineAddress = memory.ReadMainRoutineAddress();
             Add(mainRoutineAddress);
@@ -48,6 +50,9 @@ namespace ZDebug.Core.Instructions
 
             routines.Add(address, routine);
 
+            var index = sortedAddresses.BinarySearch(address);
+            sortedAddresses.Insert(~index, address);
+
             var handler = RoutineAdded;
             if (handler != null)
             {
@@ -62,7 +67,7 @@ namespace ZDebug.Core.Instructions
 
         public bool Exists(int address)
         {
-            return routines.ContainsKey(address);
+            return routines.Contains(address);
         }
 
         public Routine GetByAddress(int address)
@@ -72,7 +77,7 @@ namespace ZDebug.Core.Instructions
 
         public Routine this[int index]
         {
-            get { return routines.Values[index]; }
+            get { return routines[sortedAddresses[index]]; }
         }
 
         public int Count
@@ -82,7 +87,10 @@ namespace ZDebug.Core.Instructions
 
         public IEnumerator<Routine> GetEnumerator()
         {
-            return routines.Values.GetEnumerator();
+            for (int i = 0; i < sortedAddresses.Count; i++)
+            {
+                yield return routines[sortedAddresses[i]];
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

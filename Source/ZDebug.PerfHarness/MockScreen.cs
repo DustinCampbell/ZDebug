@@ -167,6 +167,7 @@ namespace ZDebug.PerfHarness
             else
             {
                 var command = commands[commandIndex++];
+                //Program.Mark("Command: " + command);
                 output.AppendLine(command);
                 callback(command);
             }

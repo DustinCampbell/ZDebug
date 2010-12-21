@@ -2,5 +2,8 @@
 
 namespace ZDebug.Core.Instructions
 {
-    public delegate void OpcodeRoutine(Instruction instruction, ushort[] operandValues, int operandCount, IExecutionContext context);
+    public abstract class OpcodeRoutine
+    {
+        public abstract void Invoke(Instruction i, ushort[] opValues, int opCount, IExecutionContext context);
+    }
 }

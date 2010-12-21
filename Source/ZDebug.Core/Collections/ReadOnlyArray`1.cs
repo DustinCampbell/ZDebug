@@ -77,6 +77,16 @@ namespace ZDebug.Core.Collections
             this.length = array != null ? array.Length : 0;
         }
 
+        internal T[] InnerArray
+        {
+            get { return array; }
+        }
+
+        internal int StartIndex
+        {
+            get { return startIndex; }
+        }
+
         public T this[int index]
         {
             get { return array[startIndex + index]; }

@@ -28,6 +28,15 @@ namespace ZDebug.Core.Basics
             this.bytes = stream.ReadFully();
         }
 
+        internal void OnMemoryChanged(int address, int length)
+        {
+            var handler = MemoryChanged;
+            if (handler != null)
+            {
+                handler(this, new MemoryEventArgs(this, address, length));
+            }
+        }
+
         /// <summary>
         /// Access to underlying byte array for high-performance routines.
         /// </summary>

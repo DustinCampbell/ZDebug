@@ -7,7 +7,7 @@ using ZDebug.Core.Blorb;
 
 namespace ZDebug.PerfHarness
 {
-    class Program
+    internal class Program
     {
         const string BRONZE = @"..\..\ZCode\bronze\bronze.z8";
         const string DREAMHOLD = @"..\..\ZCode\dreamhold\dreamhold.z8";
@@ -15,6 +15,7 @@ namespace ZDebug.PerfHarness
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
+        const string BRONZE_SCRIPT = @"..\..\ZCode\bronze\bronze_script.txt";
         const string ROTA_SCRIPT = @"..\..\ZCode\rota\rota_script.txt";
         const string ZORK1_SCRIPT = @"..\..\ZCode\zork1\zork1_script.txt";
 
@@ -34,9 +35,9 @@ namespace ZDebug.PerfHarness
             }
         }
 
-        static int markID = 1000;
+        internal static int markID = 1000;
 
-        static void Mark(string text)
+        internal static void Mark(string text)
         {
             DataCollection.CommentMarkProfile(++markID, text);
             Console.WriteLine(text);
@@ -44,7 +45,7 @@ namespace ZDebug.PerfHarness
 
         static void Main(string[] args)
         {
-            string path = ROTA;
+            string path = ZORK1;
 
             Mark("Reading story");
 
@@ -55,7 +56,7 @@ namespace ZDebug.PerfHarness
             var done = false;
             Action doneAction = () => { done = true; };
 
-            var mockScreen = new MockScreen(ROTA_SCRIPT, doneAction);
+            var mockScreen = new MockScreen(ZORK1_SCRIPT, doneAction);
             //var mockScreen = new MockScreen(doneAction);
             processor.SetRandomSeed(42);
             processor.RegisterScreen(mockScreen);
@@ -73,8 +74,9 @@ namespace ZDebug.PerfHarness
                     processor.Step();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Mark(ex.GetType().FullName + ": " + ex.Message);
             }
 
             sw.Stop();
