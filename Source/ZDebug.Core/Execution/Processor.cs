@@ -12,8 +12,10 @@ namespace ZDebug.Core.Execution
 
         private readonly Story story;
         private readonly Memory memory;
+        private readonly byte version;
         private readonly ZText ztext;
         private readonly InstructionReader instructions;
+        private readonly OpcodeTable opcodeTable;
 
         private int pc;
 
@@ -37,12 +39,11 @@ namespace ZDebug.Core.Execution
         private int instructionCount;
         private int callCount;
 
-        private Instruction executingInstruction;
-
         internal Processor(Story story, ZText ztext, InstructionCache cache)
         {
             this.story = story;
             this.memory = story.Memory;
+            this.version = story.Version;
             this.ztext = ztext;
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
@@ -52,7 +53,8 @@ namespace ZDebug.Core.Execution
             RegisterMessageLog(NullMessageLog.Instance);
 
             this.pc = this.memory.ReadMainRoutineAddress();
-            this.instructions = new InstructionReader(pc, this.memory, OpcodeTables.GetOpcodeTable(story.Version), cache);
+            this.opcodeTable = OpcodeTables.GetOpcodeTable(this.version);
+            this.instructions = new InstructionReader(pc, this.memory, opcodeTable, cache);
 
             this.localCount = memory.ReadByte(ref pc);
         }
@@ -115,7 +117,7 @@ namespace ZDebug.Core.Execution
             argumentCount = stack[stackPointer--];
         }
 
-        private ushort ReadVariable(Variable variable, bool indirect = false)
+        private ushort ReadVariableValue(Variable variable, bool indirect = false)
         {
             switch (variable.Kind)
             {
@@ -154,7 +156,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void WriteVariable(Variable variable, ushort value, bool indirect = false)
+        private void WriteVariableValue(Variable variable, ushort value, bool indirect = false)
         {
             switch (variable.Kind)
             {
@@ -233,7 +235,7 @@ namespace ZDebug.Core.Execution
                 case OperandKind.SmallConstant:
                     return (byte)operand.Value;
                 case OperandKind.Variable:
-                    return ReadVariable(Variable.FromByte((byte)operand.Value));
+                    return ReadVariableValue(Variable.FromByte((byte)operand.Value));
                 default:
                     throw new InvalidOperationException();
             }
@@ -243,7 +245,7 @@ namespace ZDebug.Core.Execution
         {
             if (storeVar != null)
             {
-                WriteVariable(storeVar, value);
+                WriteVariableValue(storeVar, value);
             }
         }
 
@@ -378,31 +380,25 @@ namespace ZDebug.Core.Execution
 
         public int Step()
         {
-            var oldPC = pc;
-
             var steppingHandler = Stepping;
             if (steppingHandler != null)
             {
-                steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
+                steppingHandler(this, new ProcessorSteppingEventArgs(pc));
             }
 
             ReadNextInstruction();
 
-            opcode.Execute(executingInstruction, operandValues, operandCount, this);
-
-            var newPC = pc;
+            Execute();
 
             var steppedHandler = Stepped;
             if (steppedHandler != null)
             {
-                steppedHandler(this, new ProcessorSteppedEventArgs(oldPC, newPC));
+                steppedHandler(this, new ProcessorSteppedEventArgs(startAddress, pc));
             }
-
-            executingInstruction = null;
 
             instructionCount++;
 
-            return newPC;
+            return pc;
         }
 
         private void SetScreenDimensions()
@@ -566,12 +562,12 @@ namespace ZDebug.Core.Execution
 
         ushort IExecutionContext.ReadVariable(Variable variable)
         {
-            return ReadVariable(variable);
+            return ReadVariableValue(variable);
         }
 
         ushort IExecutionContext.ReadVariableIndirectly(Variable variable)
         {
-            return ReadVariable(variable, indirect: true);
+            return ReadVariableValue(variable, indirect: true);
         }
 
         ushort IExecutionContext.ReadWord(int address)
@@ -591,12 +587,12 @@ namespace ZDebug.Core.Execution
 
         void IExecutionContext.WriteVariable(Variable variable, ushort value)
         {
-            WriteVariable(variable, value);
+            WriteVariableValue(variable, value);
         }
 
         void IExecutionContext.WriteVariableIndirectly(Variable variable, ushort value)
         {
-            WriteVariable(variable, value, indirect: true);
+            WriteVariableValue(variable, value, indirect: true);
         }
 
         void IExecutionContext.WriteWord(int address, ushort value)

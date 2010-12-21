@@ -20,10 +20,9 @@
             OpcodeKind kind,
             byte number,
             string name,
-            OpcodeFlags flags = OpcodeFlags.None,
-            OpcodeRoutine routine = null)
+            OpcodeFlags flags = OpcodeFlags.None)
         {
-            opcodes[(int)kind][number] = new Opcode(kind, number, name, flags, routine);
+            opcodes[(int)kind][number] = new Opcode(kind, number, name, flags);
         }
 
         public Opcode this[OpcodeKind kind, byte number]

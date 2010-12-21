@@ -12,71 +12,71 @@ namespace ZDebug.Core.Execution
         // Arithmetic routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_add()
+        internal void op_add()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
             ushort result = (ushort)(x + y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_div()
+        internal void op_div()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
             ushort result = (ushort)(x / y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_mod()
+        internal void op_mod()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
             ushort result = (ushort)(x % y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_mul()
+        internal void op_mul()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
             ushort result = (ushort)(x * y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_sub()
+        internal void op_sub()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
             ushort result = (ushort)(x - y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Bit-level routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_and()
+        internal void op_and()
         {
             ushort x = operandValues[0];
             ushort y = operandValues[1];
 
             ushort result = (ushort)(x & y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_art_shift()
+        internal void op_art_shift()
         {
             short number = (short)operandValues[0];
             int places = (int)(short)operandValues[1];
@@ -85,10 +85,10 @@ namespace ZDebug.Core.Execution
                 ? (ushort)(number << places)
                 : (ushort)(number >> -places);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_log_shift()
+        internal void op_log_shift()
         {
             ushort number = operandValues[0];
             int places = (int)(short)operandValues[1];
@@ -97,29 +97,29 @@ namespace ZDebug.Core.Execution
                 ? (ushort)(number << places)
                 : (ushort)(number >> -places);
 
-            WriteVariable(store, (ushort)result);
+            WriteVariableValue(store, (ushort)result);
         }
 
-        private void op_not()
+        internal void op_not()
         {
             ushort x = operandValues[0];
 
             ushort result = (ushort)(~x);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_or()
+        internal void op_or()
         {
             ushort x = operandValues[0];
             ushort y = operandValues[1];
 
             ushort result = (ushort)(x | y);
 
-            WriteVariable(store, result);
+            WriteVariableValue(store, result);
         }
 
-        private void op_test()
+        internal void op_test()
         {
             ushort bitmap = operandValues[0];
             ushort flags = operandValues[1];
@@ -136,28 +136,28 @@ namespace ZDebug.Core.Execution
         // Increment/decrement routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_dec()
+        internal void op_dec()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
-            short value = (short)ReadVariable(var, indirect: true);
+            short value = (short)ReadVariableValue(var, indirect: true);
             value -= 1;
 
-            WriteVariable(var, (ushort)value, indirect: true);
+            WriteVariableValue(var, (ushort)value, indirect: true);
         }
 
-        private void op_dec_chk()
+        internal void op_dec_chk()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariable(var, indirect: true);
+            short value = (short)ReadVariableValue(var, indirect: true);
             value -= 1;
 
-            WriteVariable(var, (ushort)value, indirect: true);
+            WriteVariableValue(var, (ushort)value, indirect: true);
 
             if ((value < test) == branch.Condition)
             {
@@ -165,28 +165,28 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_inc()
+        internal void op_inc()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
-            short value = (short)ReadVariable(var, indirect: true);
+            short value = (short)ReadVariableValue(var, indirect: true);
             value += 1;
 
-            WriteVariable(var, (ushort)value, indirect: true);
+            WriteVariableValue(var, (ushort)value, indirect: true);
         }
 
-        private void op_inc_chk()
+        internal void op_inc_chk()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariable(var, indirect: true);
+            short value = (short)ReadVariableValue(var, indirect: true);
             value += 1;
 
-            WriteVariable(var, (ushort)value, indirect: true);
+            WriteVariableValue(var, (ushort)value, indirect: true);
 
             if ((value > test) == branch.Condition)
             {
@@ -198,7 +198,7 @@ namespace ZDebug.Core.Execution
         // Jump routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_je()
+        internal void op_je()
         {
             ushort x = operandValues[0];
 
@@ -218,7 +218,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_jg()
+        internal void op_jg()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
@@ -229,7 +229,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_jin()
+        internal void op_jin()
         {
             ushort obj1 = operandValues[0];
             ushort obj2 = operandValues[1];
@@ -242,7 +242,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_jl()
+        internal void op_jl()
         {
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
@@ -253,14 +253,14 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_jump()
+        internal void op_jump()
         {
             short offset = (short)operandValues[0];
 
             Jump(offset);
         }
 
-        private void op_jz()
+        internal void op_jz()
         {
             ushort x = operandValues[0];
 
@@ -274,7 +274,7 @@ namespace ZDebug.Core.Execution
         // Call routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_call_1n()
+        internal void op_call_1n()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -282,7 +282,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount);
         }
 
-        private void op_call_1s()
+        internal void op_call_1s()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -290,7 +290,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount, store);
         }
 
-        private void op_call_2n()
+        internal void op_call_2n()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -298,7 +298,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount);
         }
 
-        private void op_call_2s()
+        internal void op_call_2s()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -306,7 +306,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount, store);
         }
 
-        private void op_call_vn()
+        internal void op_call_vn()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -314,7 +314,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount);
         }
 
-        private void op_call_vs()
+        internal void op_call_vs()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -322,7 +322,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount, store);
         }
 
-        private void op_call_vn2()
+        internal void op_call_vn2()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -330,7 +330,7 @@ namespace ZDebug.Core.Execution
             Call(address, operandValues, operandCount);
         }
 
-        private void op_call_vs2()
+        internal void op_call_vs2()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
@@ -342,26 +342,26 @@ namespace ZDebug.Core.Execution
         // Return routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_ret()
+        internal void op_ret()
         {
             ushort value = operandValues[0];
 
             Return(value);
         }
 
-        private void op_ret_popped()
+        internal void op_ret_popped()
         {
-            ushort value = ReadVariable(Variable.Stack);
+            ushort value = ReadVariableValue(Variable.Stack);
 
             Return(value);
         }
 
-        private void op_rfalse()
+        internal void op_rfalse()
         {
             Return(0);
         }
 
-        private void op_rtrue()
+        internal void op_rtrue()
         {
             Return(1);
         }
@@ -370,17 +370,17 @@ namespace ZDebug.Core.Execution
         // Load/Store routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_load()
+        internal void op_load()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
-            ushort value = ReadVariable(var, indirect: true);
+            ushort value = ReadVariableValue(var, indirect: true);
 
-            WriteVariable(store, value);
+            WriteVariableValue(store, value);
         }
 
-        private void op_loadb()
+        internal void op_loadb()
         {
             ushort array = operandValues[0];
             ushort byteIndex = operandValues[1];
@@ -388,10 +388,10 @@ namespace ZDebug.Core.Execution
             int address = array + byteIndex;
             byte value = memory.ReadByte(address);
 
-            WriteVariable(store, value);
+            WriteVariableValue(store, value);
         }
 
-        private void op_loadw()
+        internal void op_loadw()
         {
             ushort array = operandValues[0];
             ushort wordIndex = operandValues[1];
@@ -399,20 +399,20 @@ namespace ZDebug.Core.Execution
             int address = array + (wordIndex * 2);
             ushort value = memory.ReadWord(address);
 
-            WriteVariable(store, value);
+            WriteVariableValue(store, value);
         }
 
-        private void op_store()
+        internal void op_store()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
             ushort value = operandValues[1];
 
-            WriteVariable(var, value, indirect: true);
+            WriteVariableValue(var, value, indirect: true);
         }
 
-        private void op_storeb()
+        internal void op_storeb()
         {
             ushort array = operandValues[0];
             ushort byteIndex = operandValues[1];
@@ -423,7 +423,7 @@ namespace ZDebug.Core.Execution
             memory.WriteByte(address, value);
         }
 
-        private void op_storew()
+        internal void op_storew()
         {
             ushort array = operandValues[0];
             ushort wordIndex = operandValues[1];
@@ -438,7 +438,7 @@ namespace ZDebug.Core.Execution
         // Table routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_copy_table()
+        internal void op_copy_table()
         {
             ushort first = operandValues[0];
             ushort second = operandValues[1];
@@ -475,7 +475,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_scan_table()
+        internal void op_scan_table()
         {
             // TODO: Rewrite to scan byte array directly
 
@@ -498,7 +498,7 @@ namespace ZDebug.Core.Execution
                     var value = memory.ReadWord(address);
                     if (value == x)
                     {
-                        WriteVariable(store, address);
+                        WriteVariableValue(store, address);
 
                         if (branch.Condition)
                         {
@@ -513,7 +513,7 @@ namespace ZDebug.Core.Execution
                     var value = memory.ReadByte(address);
                     if (value == x)
                     {
-                        WriteVariable(store, address);
+                        WriteVariableValue(store, address);
 
                         if (branch.Condition)
                         {
@@ -527,7 +527,7 @@ namespace ZDebug.Core.Execution
                 address += (ushort)(form & 0x7f);
             }
 
-            WriteVariable(store, 0);
+            WriteVariableValue(store, 0);
 
             if (!branch.Condition)
             {
@@ -539,28 +539,28 @@ namespace ZDebug.Core.Execution
         // Stack routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_pull()
+        internal void op_pull()
         {
             byte varIdx = (byte)operandValues[0];
             Variable var = Variable.FromByte(varIdx);
 
-            ushort value = ReadVariable(Variable.Stack);
+            ushort value = ReadVariableValue(Variable.Stack);
 
-            WriteVariable(var, value, indirect: true);
+            WriteVariableValue(var, value, indirect: true);
         }
 
-        private void op_push()
+        internal void op_push()
         {
             ushort value = operandValues[0];
 
-            WriteVariable(Variable.Stack, value);
+            WriteVariableValue(Variable.Stack, value);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Object routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_clear_attr()
+        internal void op_clear_attr()
         {
             ushort objNum = operandValues[0];
             ushort attrNum = operandValues[1];
@@ -571,7 +571,7 @@ namespace ZDebug.Core.Execution
             obj.ClearAttribute(attrNum);
         }
 
-        private void op_get_child()
+        internal void op_get_child()
         {
             ushort objNum = operandValues[0];
 
@@ -586,7 +586,7 @@ namespace ZDebug.Core.Execution
                 childNum = 0;
             }
 
-            WriteVariable(store, childNum);
+            WriteVariableValue(store, childNum);
 
             if ((childNum > 0) == branch.Condition)
             {
@@ -594,7 +594,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_get_next_prop()
+        internal void op_get_next_prop()
         {
             ushort objNum = operandValues[0];
             ushort propNum = operandValues[1];
@@ -618,15 +618,15 @@ namespace ZDebug.Core.Execution
             if (nextIndex < obj.PropertyTable.Count)
             {
                 ushort nextPropNum = (ushort)obj.PropertyTable[nextIndex].Number;
-                WriteVariable(store, nextPropNum);
+                WriteVariableValue(store, nextPropNum);
             }
             else
             {
-                WriteVariable(store, 0);
+                WriteVariableValue(store, 0);
             }
         }
 
-        private void op_get_parent()
+        internal void op_get_parent()
         {
             ushort objNum = operandValues[0];
 
@@ -641,10 +641,10 @@ namespace ZDebug.Core.Execution
                 parentNum = 0;
             }
 
-            WriteVariable(store, parentNum);
+            WriteVariableValue(store, parentNum);
         }
 
-        private void op_get_prop()
+        internal void op_get_prop()
         {
             ushort objNum = operandValues[0];
             ushort propNum = operandValues[1];
@@ -670,10 +670,10 @@ namespace ZDebug.Core.Execution
                 throw new InvalidOperationException();
             }
 
-            WriteVariable(store, value);
+            WriteVariableValue(store, value);
         }
 
-        private void op_get_prop_addr()
+        internal void op_get_prop_addr()
         {
             ushort objNum = operandValues[0];
             ushort propNum = operandValues[1];
@@ -685,19 +685,19 @@ namespace ZDebug.Core.Execution
                 ? (ushort)prop.DataAddress
                 : (ushort)0;
 
-            WriteVariable(store, propAddress);
+            WriteVariableValue(store, propAddress);
         }
 
-        private void op_get_prop_len()
+        internal void op_get_prop_len()
         {
             ushort dataAddress = operandValues[0];
 
             ushort propLen = (ushort)memory.ReadPropertyDataLength(dataAddress);
 
-            WriteVariable(store, propLen);
+            WriteVariableValue(store, propLen);
         }
 
-        private void op_get_sibling()
+        internal void op_get_sibling()
         {
             ushort objNum = operandValues[0];
 
@@ -712,7 +712,7 @@ namespace ZDebug.Core.Execution
                 siblingNum = 0;
             }
 
-            WriteVariable(store, siblingNum);
+            WriteVariableValue(store, siblingNum);
 
             if ((siblingNum > 0) == branch.Condition)
             {
@@ -720,7 +720,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_insert_obj()
+        internal void op_insert_obj()
         {
             ushort objNum = operandValues[0];
             ushort destNum = operandValues[1];
@@ -728,7 +728,7 @@ namespace ZDebug.Core.Execution
             memory.MoveObjectToDestinationByNumber(objNum, destNum);
         }
 
-        private void op_put_prop()
+        internal void op_put_prop()
         {
             ushort objNum = operandValues[0];
             ushort propNum = operandValues[1];
@@ -737,14 +737,14 @@ namespace ZDebug.Core.Execution
             WriteProperty(objNum, propNum, value);
         }
 
-        private void op_remove_obj()
+        internal void op_remove_obj()
         {
             ushort objNum = operandValues[0];
 
             memory.RemoveObjectFromParentByNumber(objNum);
         }
 
-        private void op_set_attr()
+        internal void op_set_attr()
         {
             ushort objNum = operandValues[0];
             ushort attrNum = operandValues[1];
@@ -755,7 +755,7 @@ namespace ZDebug.Core.Execution
             obj.SetAttribute(attrNum);
         }
 
-        private void op_test_attr()
+        internal void op_test_attr()
         {
             ushort objNum = operandValues[0];
             ushort attrNum = operandValues[1];
@@ -775,17 +775,17 @@ namespace ZDebug.Core.Execution
         // Output routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_buffer_mode()
+        internal void op_buffer_mode()
         {
             // TODO: What should we do with buffer_mode? Does it have any meaning?
         }
 
-        private void op_new_line()
+        internal void op_new_line()
         {
             outputStreams.Print('\n');
         }
 
-        private void op_output_stream()
+        internal void op_output_stream()
         {
             short number = (short)operandValues[0];
 
@@ -823,14 +823,14 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_print()
+        internal void op_print()
         {
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
         }
 
-        private void op_print_addr()
+        internal void op_print_addr()
         {
             ushort byteAddress = operandValues[0];
 
@@ -840,19 +840,19 @@ namespace ZDebug.Core.Execution
             outputStreams.Print(text);
         }
 
-        private void op_print_char()
+        internal void op_print_char()
         {
             char ch = (char)operandValues[0];
             outputStreams.Print(ch);
         }
 
-        private void op_print_num()
+        internal void op_print_num()
         {
             short number = (short)operandValues[0];
             outputStreams.Print(number.ToString());
         }
 
-        private void op_print_obj()
+        internal void op_print_obj()
         {
             ushort objNum = operandValues[0];
 
@@ -860,25 +860,25 @@ namespace ZDebug.Core.Execution
             outputStreams.Print(obj.ShortName);
         }
 
-        private void op_print_paddr()
+        internal void op_print_paddr()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackStringAddress(byteAddress);
 
-            ushort[] zwords = memory.ReadZWords(byteAddress);
+            ushort[] zwords = memory.ReadZWords(address);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
         }
 
-        private void op_print_ret()
+        internal void op_print_ret()
         {
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
             outputStreams.Print(text + "\n");
             Return(1);
         }
 
-        private void op_print_table()
+        internal void op_print_table()
         {
             ushort address = operandValues[0];
             ushort width = operandValues[1];
@@ -911,7 +911,7 @@ namespace ZDebug.Core.Execution
 
         }
 
-        private void op_set_color()
+        internal void op_set_color()
         {
             ZColor foreground = (ZColor)operandValues[0];
             ZColor background = (ZColor)operandValues[1];
@@ -927,16 +927,16 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_set_font()
+        internal void op_set_font()
         {
             ZFont font = (ZFont)operandValues[0];
 
             ushort oldFont = (ushort)screen.SetFont(font);
 
-            WriteVariable(store, oldFont);
+            WriteVariableValue(store, oldFont);
         }
 
-        private void op_set_text_style()
+        internal void op_set_text_style()
         {
             ZTextStyle textStyle = (ZTextStyle)operandValues[0];
 
@@ -947,7 +947,7 @@ namespace ZDebug.Core.Execution
         // Input routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_read_char()
+        internal void op_read_char()
         {
             if (operandCount > 0)
             {
@@ -965,11 +965,11 @@ namespace ZDebug.Core.Execution
 
             screen.ReadChar(ch =>
             {
-                WriteVariable(store, (ushort)ch);
+                WriteVariableValue(store, (ushort)ch);
             });
         }
 
-        private void op_aread()
+        internal void op_aread()
         {
             ushort textBuffer = operandValues[0];
 
@@ -1034,11 +1034,11 @@ namespace ZDebug.Core.Execution
                 }
 
                 // TODO: Update this when timed input is supported
-                WriteVariable(store, 10);
+                WriteVariableValue(store, 10);
             });
         }
 
-        private void op_sread1()
+        internal void op_sread1()
         {
             ushort textBuffer = operandValues[0];
             ushort parseBuffer = operandValues[1];
@@ -1089,7 +1089,7 @@ namespace ZDebug.Core.Execution
             });
         }
 
-        private void op_sread2()
+        internal void op_sread2()
         {
             ushort textBuffer = operandValues[0];
             ushort parseBuffer = operandValues[1];
@@ -1151,7 +1151,7 @@ namespace ZDebug.Core.Execution
         // Window routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_erase_window()
+        internal void op_erase_window()
         {
             short window = (short)operandValues[0];
 
@@ -1165,7 +1165,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_set_cursor()
+        internal void op_set_cursor()
         {
             ushort line = operandValues[0];
             ushort column = operandValues[1];
@@ -1173,14 +1173,14 @@ namespace ZDebug.Core.Execution
             screen.SetCursor(line - 1, column - 1);
         }
 
-        private void op_set_window()
+        internal void op_set_window()
         {
             ushort window = operandValues[0];
 
             screen.SetWindow(window);
         }
 
-        private void op_split_window()
+        internal void op_split_window()
         {
             ushort height = operandValues[0];
 
@@ -1198,7 +1198,7 @@ namespace ZDebug.Core.Execution
         // Miscellaneous routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        private void op_check_arg_count()
+        internal void op_check_arg_count()
         {
             ushort argNumber = operandValues[0];
 
@@ -1208,12 +1208,12 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_piracy()
+        internal void op_piracy()
         {
             Jump(branch);
         }
 
-        private void op_quit()
+        internal void op_quit()
         {
             var handler = Quit;
             if (handler != null)
@@ -1222,7 +1222,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_random()
+        internal void op_random()
         {
             short range = (short)operandValues[0];
 
@@ -1233,7 +1233,7 @@ namespace ZDebug.Core.Execution
                 int maxValue = Math.Max(minValue, range - 1);
                 int result = random.Next(minValue, maxValue);
 
-                WriteVariable(store, (ushort)result);
+                WriteVariableValue(store, (ushort)result);
             }
             else if (range < 0)
             {
@@ -1245,26 +1245,26 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void op_restore_undo()
+        internal void op_restore_undo()
         {
             messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
-            WriteVariable(store, unchecked((ushort)-1));
+            WriteVariableValue(store, unchecked((ushort)-1));
         }
 
-        private void op_save_undo()
+        internal void op_save_undo()
         {
             messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
-            WriteVariable(store, unchecked((ushort)-1));
+            WriteVariableValue(store, unchecked((ushort)-1));
         }
 
-        private void op_show_status()
+        internal void op_show_status()
         {
             screen.ShowStatus();
         }
 
-        private void op_tokenize()
+        internal void op_tokenize()
         {
             ushort textBuffer = operandValues[0];
             ushort parseBuffer = operandValues[1];
@@ -1280,12 +1280,870 @@ namespace ZDebug.Core.Execution
             ztext.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
         }
 
-        private void op_verify()
+        internal void op_verify()
         {
             if ((story.ActualChecksum == story.Memory.ReadChecksum()) == branch.Condition)
             {
                 Jump(branch);
             }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // Execute
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        private void Execute()
+        {
+            // TODO: The logic below should really be generated
+
+            switch (opcode.Kind)
+            {
+                case OpcodeKind.TwoOp:
+                    {
+                        switch (opcode.Number)
+                        {
+                            case 0x01:
+                                op_je();
+                                return;
+
+                            case 0x02:
+                                op_jl();
+                                return;
+
+                            case 0x03:
+                                op_jg();
+                                return;
+
+                            case 0x04:
+                                op_dec_chk();
+                                return;
+
+                            case 0x05:
+                                op_inc_chk();
+                                return;
+
+                            case 0x06:
+                                op_jin();
+                                return;
+
+                            case 0x07:
+                                op_test();
+                                return;
+
+                            case 0x08:
+                                op_or();
+                                return;
+
+                            case 0x09:
+                                op_and();
+                                return;
+
+                            case 0x0a:
+                                op_test_attr();
+                                return;
+
+                            case 0x0b:
+                                op_set_attr();
+                                return;
+
+                            case 0x0c:
+                                op_clear_attr();
+                                return;
+
+                            case 0x0d:
+                                op_store();
+                                return;
+
+                            case 0x0e:
+                                op_insert_obj();
+                                return;
+
+                            case 0x0f:
+                                op_loadw();
+                                return;
+
+                            case 0x10:
+                                op_loadb();
+                                return;
+
+                            case 0x11:
+                                op_get_prop();
+                                return;
+
+                            case 0x12:
+                                op_get_prop_addr();
+                                return;
+
+                            case 0x13:
+                                op_get_next_prop();
+                                return;
+
+                            case 0x14:
+                                op_add();
+                                return;
+
+                            case 0x15:
+                                op_sub();
+                                return;
+
+                            case 0x16:
+                                op_mul();
+                                return;
+
+                            case 0x17:
+                                op_div();
+                                return;
+
+                            case 0x18:
+                                op_mod();
+                                return;
+
+                            case 0x19:
+                                if (version < 4)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_call_2s();
+                                return;
+
+                            case 0x1a:
+                                if (version < 5)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_call_2n();
+                                return;
+
+                            case 0x1b:
+                                if (version < 5 || version == 6)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_set_color();
+                                return;
+
+                            case 0x1c:
+                                break; // 'throw' unsupported
+                        }
+                    }
+
+                    break;
+
+                case OpcodeKind.OneOp:
+                    {
+                        switch (opcode.Number)
+                        {
+                            case 0x00:
+                                op_jz();
+                                return;
+
+                            case 0x01:
+                                op_get_sibling();
+                                return;
+
+                            case 0x02:
+                                op_get_child();
+                                return;
+
+                            case 0x03:
+                                op_get_parent();
+                                return;
+
+                            case 0x04:
+                                op_get_prop_len();
+                                return;
+
+                            case 0x05:
+                                op_inc();
+                                return;
+
+                            case 0x06:
+                                op_dec();
+                                return;
+
+                            case 0x07:
+                                op_print_addr();
+                                return;
+
+                            case 0x08:
+                                if (version < 4)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_call_1s();
+                                return;
+
+                            case 0x09:
+                                op_remove_obj();
+                                return;
+
+                            case 0x0a:
+                                op_print_obj();
+                                return;
+
+                            case 0x0b:
+                                op_ret();
+                                return;
+
+                            case 0x0c:
+                                op_jump();
+                                return;
+
+                            case 0x0d:
+                                op_print_paddr();
+                                return;
+
+                            case 0x0e:
+                                op_load();
+                                return;
+
+                            case 0x0f:
+                                if (version < 5)
+                                {
+                                    break; // 'not' unsupported
+                                }
+
+                                op_call_1n();
+                                return;
+                        }
+                    }
+
+                    break;
+
+                case OpcodeKind.ZeroOp:
+                    {
+                        switch (opcode.Number)
+                        {
+                            case 0x00:
+                                op_rtrue();
+                                return;
+
+                            case 0x01:
+                                op_rfalse();
+                                return;
+
+                            case 0x02:
+                                op_print();
+                                return;
+
+                            case 0x03:
+                                op_print_ret();
+                                return;
+
+                            case 0x04:
+                                break; // 'nop' unsupported
+
+                            case 0x05:
+                                break; // 'save' unsupported
+
+                            case 0x06:
+                                break; // 'restore' unsupported
+
+                            case 0x07:
+                                break; // 'restart' unsupported
+
+                            case 0x08:
+                                op_ret_popped();
+                                return;
+
+                            case 0x09:
+                                if (version < 5)
+                                {
+                                    break; // 'pop' unsupported
+                                }
+                                else
+                                {
+                                    break; // 'catch' unsupported
+                                }
+
+                            case 0x0a:
+                                op_quit();
+                                return;
+
+                            case 0x0b:
+                                op_new_line();
+                                return;
+
+                            case 0x0c:
+                                if (version == 3)
+                                {
+                                    op_show_status();
+                                    return;
+                                }
+                                else
+                                {
+                                    break; // illegal
+                                }
+
+                            case 0x0d:
+                                if (version < 3)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_verify();
+                                return;
+
+                            case 0x0e:
+                                break; // first byte of extended opcode -- should never hit this
+
+                            case 0x0f:
+                                if (version < 5)
+                                {
+                                    break; // illegal
+                                }
+
+                                op_piracy();
+                                return;
+                        }
+                    }
+
+                    break;
+
+                case OpcodeKind.VarOp:
+                    {
+                        switch (opcode.Number)
+                        {
+                            case 0x00:
+                                op_call_vs();
+                                return;
+
+                            case 0x01:
+                                op_storew();
+                                return;
+
+                            case 0x02:
+                                op_storeb();
+                                return;
+
+                            case 0x03:
+                                op_put_prop();
+                                return;
+
+                            case 0x04:
+                                if (version < 4)
+                                {
+                                    op_sread1();
+                                }
+                                else if (version == 4)
+                                {
+                                    op_sread2();
+                                }
+                                else
+                                {
+                                    op_aread();
+                                }
+
+                                return;
+
+                            case 0x05:
+                                op_print_char();
+                                return;
+
+                            case 0x06:
+                                op_print_num();
+                                return;
+
+                            case 0x07:
+                                op_random();
+                                return;
+
+                            case 0x08:
+                                op_push();
+                                return;
+
+                            case 0x09:
+                                if (version == 6)
+                                {
+                                    break; // 'pull' stack unsupported
+                                }
+
+                                op_pull();
+                                return;
+
+                            case 0x0a:
+                                if (version < 3)
+                                {
+                                    break; // 'split_window' illegal
+                                }
+
+                                op_split_window();
+                                return;
+
+                            case 0x0b:
+                                if (version < 3)
+                                {
+                                    break; // 'set_window' illegal
+                                }
+
+                                op_set_window();
+                                return;
+
+                            case 0x0c:
+                                if (version < 4)
+                                {
+                                    break; // 'call_vs2' illegal
+                                }
+
+                                op_call_vs2();
+                                return;
+
+                            case 0x0d:
+                                if (version < 4)
+                                {
+                                    break; // 'erase_window' illegal
+                                }
+
+                                op_erase_window();
+                                return;
+
+                            case 0x0e:
+                                if (version < 4)
+                                {
+                                    break; // 'erase_line' illegal
+                                }
+                                else
+                                {
+                                    break; // 'erase_line' unsupported
+                                }
+
+                            case 0x0f:
+                                if (version < 4)
+                                {
+                                    break; // 'set_cursor' illegal
+                                }
+                                else if (version == 6)
+                                {
+                                    break; // 'set_cursor' unsupported
+                                }
+
+                                op_set_cursor();
+                                return;
+
+                            case 0x10:
+                                break; // 'get_cursor' unsupported;
+
+                            case 0x11:
+                                if (version < 4)
+                                {
+                                    break; // 'set_text_style' illegal
+                                }
+
+                                op_set_text_style();
+                                return;
+
+                            case 0x12:
+                                if (version < 4)
+                                {
+                                    break; // 'buffer_mode' illegal
+                                }
+
+                                op_buffer_mode();
+                                return;
+
+                            case 0x13:
+                                if (version < 3)
+                                {
+                                    break; // 'output_stream' illegal
+                                }
+                                else if (version == 6)
+                                {
+                                    break; // 'output_stream' unsupported
+                                }
+
+                                op_output_stream();
+                                return;
+
+                            case 0x14:
+                                if (version < 3)
+                                {
+                                    break; // 'input_stream' illegal
+                                }
+                                else
+                                {
+                                    break; // 'input_stream' unsupported
+                                }
+
+                            case 0x15:
+                                if (version < 3)
+                                {
+                                    break; // 'sound_effect' illegal
+                                }
+                                else
+                                {
+                                    break; // 'sound_effect' unsupported
+                                }
+
+                            case 0x16:
+                                if (version < 4)
+                                {
+                                    break; // 'read_char' illegal
+                                }
+
+                                op_read_char();
+                                return;
+
+                            case 0x17:
+                                if (version < 4)
+                                {
+                                    break; // 'scan_table' illegal
+                                }
+
+                                op_scan_table();
+                                return;
+
+                            case 0x18:
+                                if (version < 5)
+                                {
+                                    break; // 'not' illegal
+                                }
+
+                                op_not();
+                                return;
+
+                            case 0x19:
+                                if (version < 5)
+                                {
+                                    break; // 'call_vn' illegal
+                                }
+
+                                op_call_vn();
+                                return;
+
+                            case 0x1a:
+                                if (version < 5)
+                                {
+                                    break; // 'call_vn2' illegal
+                                }
+
+                                op_call_vn2();
+                                return;
+
+                            case 0x1b:
+                                if (version < 5)
+                                {
+                                    break; // 'tokenize' illegal
+                                }
+
+                                op_tokenize();
+                                return;
+
+                            case 0x1c:
+                                if (version < 5)
+                                {
+                                    break; // 'encode_text' illegal
+                                }
+                                else
+                                {
+                                    break; // encode_text unsupported
+                                }
+
+                            case 0x1d:
+                                if (version < 5)
+                                {
+                                    break; // 'copy_table' illegal
+                                }
+
+                                op_copy_table();
+                                return;
+
+                            case 0x1e:
+                                if (version < 5)
+                                {
+                                    break; // 'print_table' illegal
+                                }
+
+                                op_print_table();
+                                return;
+
+                            case 0x1f:
+                                if (version < 5)
+                                {
+                                    break; // 'check_arg_count' illegal
+                                }
+
+                                op_check_arg_count();
+                                return;
+                        }
+                    }
+
+                    break;
+
+                case OpcodeKind.Ext:
+                    {
+                        switch (opcode.Number)
+                        {
+                            case 0x00:
+                                if (version < 5)
+                                {
+                                    break; // 'save' illegal
+                                }
+                                else
+                                {
+                                    break; // 'save' unsupported
+                                }
+
+                            case 0x01:
+                                if (version < 5)
+                                {
+                                    break; // 'restore' illegal
+                                }
+                                else
+                                {
+                                    break; // 'restore' unsupported
+                                }
+
+                            case 0x02:
+                                if (version < 5)
+                                {
+                                    break; // 'log_shift' unsupported
+                                }
+
+                                op_log_shift();
+                                return;
+
+                            case 0x03:
+                                if (version < 5)
+                                {
+                                    break; // 'art_shift' unsupported
+                                }
+
+                                op_art_shift();
+                                return;
+
+                            case 0x04:
+                                if (version < 5)
+                                {
+                                    break; // 'set_font' unsupported
+                                }
+
+                                op_set_font();
+                                return;
+
+                            case 0x05:
+                                if (version != 6)
+                                {
+                                    break; // 'draw_picture' illegal
+                                }
+                                else
+                                {
+                                    break; // 'draw_picture' unsupported
+                                }
+
+                            case 0x06:
+                                if (version != 6)
+                                {
+                                    break; // 'picture_data' illegal
+                                }
+                                else
+                                {
+                                    break; // 'picture_data' unsupported
+                                }
+
+                            case 0x07:
+                                if (version != 6)
+                                {
+                                    break; // 'erase_picture' illegal
+                                }
+                                else
+                                {
+                                    break; // 'erase_picture' unsupported
+                                }
+
+                            case 0x08:
+                                if (version != 6)
+                                {
+                                    break; // 'set_margins' illegal
+                                }
+                                else
+                                {
+                                    break; // 'set_margins' unsupported
+                                }
+
+                            case 0x09:
+                                if (version < 5)
+                                {
+                                    break; // 'save_undo' unsupported
+                                }
+
+                                op_save_undo();
+                                return;
+
+                            case 0x0a:
+                                if (version < 5)
+                                {
+                                    break; // 'restore_undo' unsupported
+                                }
+
+                                op_restore_undo();
+                                return;
+
+                            case 0x0b:
+                                if (version < 5)
+                                {
+                                    break; // 'print_unicode' illegal
+                                }
+                                else
+                                {
+                                    break; // 'print_unicode' unsupported
+                                }
+
+                            case 0x0c:
+                                if (version < 5)
+                                {
+                                    break; // 'check_unicode' illegal
+                                }
+                                else
+                                {
+                                    break; // 'check_unicode' unsupported
+                                }
+
+                            case 0x10:
+                                if (version != 6)
+                                {
+                                    break; // 'move_window' illegal
+                                }
+                                else
+                                {
+                                    break; // 'move_window' unsupported
+                                }
+
+                            case 0x11:
+                                if (version != 6)
+                                {
+                                    break; // 'window_size' illegal
+                                }
+                                else
+                                {
+                                    break; // 'window_size' unsupported
+                                }
+
+                            case 0x12:
+                                if (version != 6)
+                                {
+                                    break; // 'window_style' illegal
+                                }
+                                else
+                                {
+                                    break; // 'window_style' unsupported
+                                }
+
+                            case 0x13:
+                                if (version != 6)
+                                {
+                                    break; // 'get_wind_prop' illegal
+                                }
+                                else
+                                {
+                                    break; // 'get_wind_prop' unsupported
+                                }
+
+                            case 0x14:
+                                if (version != 6)
+                                {
+                                    break; // 'scroll_window' illegal
+                                }
+                                else
+                                {
+                                    break; // 'scroll_window' unsupported
+                                }
+
+                            case 0x15:
+                                if (version != 6)
+                                {
+                                    break; // 'pop_stack' illegal
+                                }
+                                else
+                                {
+                                    break; // 'pop_stack' unsupported
+                                }
+
+                            case 0x16:
+                                if (version != 6)
+                                {
+                                    break; // 'read_mouse' illegal
+                                }
+                                else
+                                {
+                                    break; // 'read_mouse' unsupported
+                                }
+
+                            case 0x17:
+                                if (version != 6)
+                                {
+                                    break; // 'mouse_window' illegal
+                                }
+                                else
+                                {
+                                    break; // 'mouse_window' unsupported
+                                }
+
+                            case 0x18:
+                                if (version != 6)
+                                {
+                                    break; // 'push_stack' illegal
+                                }
+                                else
+                                {
+                                    break; // 'push_stack' unsupported
+                                }
+
+                            case 0x19:
+                                if (version != 6)
+                                {
+                                    break; // 'put_wind_prop' illegal
+                                }
+                                else
+                                {
+                                    break; // 'put_wind_prop' unsupported
+                                }
+
+                            case 0x1a:
+                                if (version != 6)
+                                {
+                                    break; // 'print_form' illegal
+                                }
+                                else
+                                {
+                                    break; // 'print_form' unsupported
+                                }
+
+                            case 0x1b:
+                                if (version != 6)
+                                {
+                                    break; // 'make_menu' illegal
+                                }
+                                else
+                                {
+                                    break; // 'make_menu' unsupported
+                                }
+
+                            case 0x1c:
+                                if (version != 6)
+                                {
+                                    break; // 'picture_table' illegal
+                                }
+                                else
+                                {
+                                    break; // 'picture_table' unsupported
+                                }
+                        }
+                    }
+
+                    break;
+            }
+
+            throw new InvalidOperationException(
+                string.Format(
+@"Routine does not exist for opcode '{0}'.
+
+Kind = {1}
+Number = {2:x2} ({2})", opcode.Name, opcode.Kind, opcode.Number));
+
         }
     }
 }

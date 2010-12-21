@@ -93,8 +93,6 @@
     <Compile Include="Instructions\OpcodeException.cs" />
     <Compile Include="Instructions\OpcodeFlags.cs" />
     <Compile Include="Instructions\OpcodeKind.cs" />
-    <Compile Include="Instructions\OpcodeRoutine.cs" />
-    <Compile Include="Instructions\OpcodeRoutines.cs" />
     <Compile Include="Instructions\OpcodeTable.cs" />
     <Compile Include="Instructions\OpcodeTables.cs" />
     <Compile Include="Instructions\Operand.cs" />
