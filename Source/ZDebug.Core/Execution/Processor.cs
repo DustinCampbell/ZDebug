@@ -835,6 +835,11 @@ namespace ZDebug.Core.Execution
             return ztext.TokenizeCommand(commandText, dictionaryAddress ?? memory.ReadDictionaryAddress());
         }
 
+        void IExecutionContext.TokenizeLine(ushort text, ushort parse, ushort dictionary, bool flag)
+        {
+            ztext.TokenizeLine(text, parse, dictionary, flag);
+        }
+
         bool IExecutionContext.TryLookupWord(string word, int? dictionaryAddress, out ushort address)
         {
             address = ztext.LookupWord(word, dictionaryAddress ?? memory.ReadDictionaryAddress());

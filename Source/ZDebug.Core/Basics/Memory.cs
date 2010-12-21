@@ -28,6 +28,14 @@ namespace ZDebug.Core.Basics
             this.bytes = stream.ReadFully();
         }
 
+        /// <summary>
+        /// Access to underlying byte array for high-performance routines.
+        /// </summary>
+        internal byte[] Bytes
+        {
+            get { return bytes; }
+        }
+
         public byte ReadByte(int address)
         {
             if (address < 0 || address > bytes.Length - 1)

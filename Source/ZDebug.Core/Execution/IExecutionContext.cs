@@ -60,6 +60,7 @@ namespace ZDebug.Core.Execution
         void Print(char ch);
 
         ZCommandToken[] TokenizeCommand(string commandText, int? dictionaryAddress = null);
+        void TokenizeLine(ushort text, ushort parse, ushort dictionary, bool flag);
 
         bool TryLookupWord(string word, int? dictionaryAddress, out ushort address);
 

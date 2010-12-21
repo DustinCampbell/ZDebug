@@ -1427,16 +1427,18 @@ namespace ZDebug.Core.Instructions
         {
             Strict.OperandCountInRange(i, 2, 4);
 
-            int textBuffer = opValues[0];
-            int parseBuffer = opValues[1];
+            ushort textBuffer = opValues[0];
+            ushort parseBuffer = opValues[1];
 
-            int? dictionaryAddress = opCount > 2
-                ? (int?)opValues[2]
-                : null;
+            ushort dictionary = opCount > 2
+                ? opValues[2]
+                : (ushort)0;
 
             bool flag = opCount > 3
                 ? opValues[3] != 0
                 : false;
+
+            context.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
         };
 
         public static readonly OpcodeRoutine verify = (i, opValues, opCount, context) =>

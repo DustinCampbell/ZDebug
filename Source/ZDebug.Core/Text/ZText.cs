@@ -167,6 +167,115 @@ namespace ZDebug.Core.Text
             return ZWordsAsString(zwords, flags, alphabetTable, builder);
         }
 
+        private void TokenizeWord(byte[] bytes, ushort text, ushort start, ushort length, ushort parse, ushort dictionary, bool flag)
+        {
+            byte tokenMax = bytes[parse++];
+            byte tokenCount = bytes[parse];
+
+            if (tokenCount < tokenMax)
+            {
+                bytes[parse++] = (byte)(tokenCount + 1);
+            }
+
+            char[] wordChars = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                wordChars[i] = (char)bytes[text + start + i];
+            }
+            string word = new string(wordChars);
+
+            ushort address = LookupWord(word, dictionary);
+
+            if (address != 0 || !flag)
+            {
+                parse += (byte)(tokenCount * 4);
+
+                var b1 = (byte)(address >> 8);
+                var b2 = (byte)(address & 0x00ff);
+
+                bytes[parse] = b1;
+                bytes[parse + 1] = b2;
+                bytes[parse + 2] = (byte)length;
+                bytes[parse + 3] = (byte)start;
+            }
+        }
+
+        /// <summary>
+        /// Performs Z-machine lexical analysis.
+        /// </summary>
+        /// <param name="text">Byte address of the text buffer.</param>
+        /// <param name="parse">Byte address of the parse buffer.</param>
+        /// <param name="dictionary">Byte address of the dictionary to use.</param>
+        /// <param name="flag">If true, unrecognized words are not written into parse.</param>
+        public void TokenizeLine(ushort text, ushort parse, ushort dictionary, bool flag)
+        {
+            // Use standard dictionary if none is provided.
+            if (dictionary == 0)
+            {
+                dictionary = memory.ReadDictionaryAddress();
+            }
+
+            var bytes = memory.Bytes;
+
+            // Set number of parse tokens to zero.
+            bytes[parse + 1] = 0;
+
+            int textPtr1 = text;
+            int textPtr2 = 0;
+
+            int length = 0;
+            if (version >= 5)
+            {
+                length = memory.ReadByte(++textPtr1);
+            }
+
+            byte zc;
+            do
+            {
+                // Get next ZSCII character
+                if (version >= 5 && textPtr1 == text + 2 + length)
+                {
+                    zc = 0;
+                }
+                else
+                {
+                    zc = memory.ReadByte(++textPtr1);
+                }
+
+                // Check for separator
+                int sepPtr = dictionary;
+                byte sepCount = bytes[sepPtr++];
+                byte sep;
+                do
+                {
+                    sep = bytes[sepPtr++];
+                }
+                while (zc != sep && --sepCount != 0);
+
+                // This could be the start or end of a word
+                if (sepCount == 0 && zc != 0x20 && zc != 0)
+                {
+                    if (textPtr2 == 0)
+                    {
+                        textPtr2 = textPtr1;
+                    }
+                }
+                else if (textPtr2 != 0)
+                {
+                    TokenizeWord(bytes, text, (ushort)(textPtr2 - text), (ushort)(textPtr1 - textPtr2), parse, dictionary, flag);
+
+                    textPtr2 = 0;
+                }
+
+                // Translate separator (which is a word in its own right)
+                if (sepCount != 0)
+                {
+                    TokenizeWord(bytes, text, (ushort)(textPtr1 - text), (ushort)1, parse, dictionary, flag);
+                }
+            }
+            while (zc != 0);
+        }
+
         public ZCommandToken[] TokenizeCommand(string commandText, int dictionaryAddress)
         {
             var wordSepCount = memory.ReadByte(ref dictionaryAddress);
