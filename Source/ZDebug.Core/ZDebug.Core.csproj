@@ -112,7 +112,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Objects\ZPropertyTable.cs" />
-    <Compile Include="Execution\IExecutionContext.cs" />
     <Compile Include="Execution\Processor.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
