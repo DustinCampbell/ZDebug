@@ -15,6 +15,7 @@ namespace ZDebug.PerfHarness
         const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
+        const string ROTA_SCRIPT = @"..\..\ZCode\rota\rota_script.txt";
         const string ZORK1_SCRIPT = @"..\..\ZCode\zork1\zork1_script.txt";
 
         static Story ReadStory(string path)
@@ -52,9 +53,11 @@ namespace ZDebug.PerfHarness
             var processor = story.Processor;
 
             var done = false;
-            //var mockScreen = new MockScreen(ZORK1_SCRIPT);
-            var mockScreen = new MockScreen(() => { done = true; });
-            //processor.SetRandomSeed(42);
+            Action doneAction = () => { done = true; };
+
+            var mockScreen = new MockScreen(ROTA_SCRIPT, doneAction);
+            //var mockScreen = new MockScreen(doneAction);
+            processor.SetRandomSeed(42);
             processor.RegisterScreen(mockScreen);
 
             processor.Quit += (s, e) => { done = true; };

@@ -7,18 +7,20 @@ namespace ZDebug.PerfHarness
 {
     internal sealed class MockScreen : IScreen
     {
-        private readonly Action readAction;
+        private readonly Action doneAction;
         private readonly string[] commands;
         private int commandIndex;
         private StringBuilder output;
 
-        public MockScreen(Action readAction)
+        public MockScreen(Action doneAction)
         {
-            this.readAction = readAction;
+            this.doneAction = doneAction;
+            this.output = new StringBuilder();
         }
 
-        public MockScreen(string scriptPath)
+        public MockScreen(string scriptPath, Action doneAction)
         {
+            this.doneAction = doneAction;
             this.commands = File.ReadAllLines(scriptPath);
             this.commandIndex = 0;
             this.output = new StringBuilder();
@@ -143,30 +145,24 @@ namespace ZDebug.PerfHarness
 
         public void Print(string text)
         {
-            if (output != null)
-            {
-                output.Append(text);
-            }
+            output.Append(text);
         }
 
         public void Print(char ch)
         {
-            if (output != null)
-            {
-                output.Append(ch);
-            }
+            output.Append(ch);
         }
 
         public void ReadChar(Action<char> callback)
         {
-            readAction();
+            doneAction();
         }
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            if (readAction != null)
+            if (commands == null || commandIndex == commands.Length)
             {
-                readAction();
+                doneAction();
             }
             else
             {
