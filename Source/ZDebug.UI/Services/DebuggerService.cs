@@ -56,6 +56,16 @@ namespace ZDebug.UI.Services
                     gameScript.Add(commandElem.Value);
                 }
             }
+
+            var routinesElem = xml.Element("knownroutines");
+            if (routinesElem != null)
+            {
+                foreach (var routineElem in routinesElem.Elements("routine"))
+                {
+                    var addAttr = routineElem.Attribute("address");
+                    story.RoutineTable.Add((int)addAttr);
+                }
+            }
         }
 
         private static void SaveSettings(Story story)
@@ -69,7 +79,9 @@ namespace ZDebug.UI.Services
                     new XElement("breakpoints",
                         breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))),
                     new XElement("gamescript",
-                        gameScript.Select(c => new XElement("command", c))));
+                        gameScript.Select(c => new XElement("command", c))),
+                    new XElement("knownroutines",
+                        story.RoutineTable.Select(r => new XElement("routine", new XAttribute("address", r.Address)))));
 
             Storage.SaveStorySettings(story, xml);
         }

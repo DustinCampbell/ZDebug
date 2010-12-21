@@ -91,6 +91,15 @@ namespace ZDebug.IO.Windows
             return false;
         }
 
+        public virtual int GetHeight()
+        {
+            return 0;
+        }
+
+        public virtual void SetHeight(int lines)
+        {
+        }
+
         public abstract int RowHeight { get; }
         public abstract int ColumnWidth { get; }
 

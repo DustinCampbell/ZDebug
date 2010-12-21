@@ -216,6 +216,21 @@ namespace ZDebug.IO.Windows
             reverse = value;
         }
 
+        public void SetHeight(int lines)
+        {
+            for (int i = visualPairs.Count - 1; i >= 0; i--)
+            {
+                var cursorPos = visualPairs.Keys[i];
+                if (cursorPos.Y > lines - 1)
+                {
+                    var visualPair = visualPairs[cursorPos];
+                    visuals.Remove(visualPair.Background);
+                    visuals.Remove(visualPair.Character);
+                    visualPairs.Remove(cursorPos);
+                }
+            }
+        }
+
         protected override Visual GetVisualChild(int index)
         {
             return visuals[index];

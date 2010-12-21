@@ -21,6 +21,9 @@ namespace ZDebug.UI.ViewModel
 
         private ZFont font;
 
+        private int currStatusHeight;
+        private int machStatusHeight;
+
         public OutputViewModel()
             : base("OutputView")
         {
@@ -39,6 +42,7 @@ namespace ZDebug.UI.ViewModel
         {
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
+            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 0);
 
             windowManager.Activate(mainWindow);
 
@@ -87,6 +91,18 @@ namespace ZDebug.UI.ViewModel
             return (DebuggerService.Story.Memory.ReadByte(0x01) & 0x01) == 0x00;
         }
 
+        private void ResetStatusHeight()
+        {
+            if (upperWindow != null)
+            {
+                int height = upperWindow.GetHeight();
+                if (machStatusHeight != height)
+                {
+                    upperWindow.SetHeight(machStatusHeight);
+                }
+            }
+        }
+
         public void Print(string text)
         {
             if (ForceFixedWidthFont())
@@ -121,6 +137,9 @@ namespace ZDebug.UI.ViewModel
 
             mainWindow.ReadChar(ch =>
             {
+                ResetStatusHeight();
+                currStatusHeight = 0;
+
                 callback(ch);
                 DebuggerService.EndAwaitingInput();
             });
@@ -140,6 +159,9 @@ namespace ZDebug.UI.ViewModel
 
                 mainWindow.ReadCommand(maxChars, text =>
                 {
+                    ResetStatusHeight();
+                    currStatusHeight = 0;
+
                     callback(text);
                     DebuggerService.EndAwaitingInput();
                 });
@@ -155,6 +177,8 @@ namespace ZDebug.UI.ViewModel
             else if (window == 1 && upperWindow != null)
             {
                 upperWindow.Clear();
+                ResetStatusHeight();
+                currStatusHeight = 0;
             }
         }
 
@@ -176,13 +200,28 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public void Split(int height)
+        public void Split(int lines)
         {
-            // TODO: If upperWindow exists, we should resize it if height is larger than the current height.
-
             if (upperWindow == null)
             {
-                upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, height);
+                return;
+            }
+
+            if (lines == 0 || lines > currStatusHeight)
+            {
+                int height = upperWindow.GetHeight();
+                if (lines != height)
+                {
+                    upperWindow.SetHeight(lines);
+                    currStatusHeight = lines;
+                }
+            }
+
+            machStatusHeight = lines;
+
+            if (DebuggerService.Story.Version == 3)
+            {
+                upperWindow.Clear();
             }
         }
 

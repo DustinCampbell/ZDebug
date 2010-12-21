@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using ZDebug.IO.Services;
 
@@ -87,6 +88,19 @@ namespace ZDebug.IO.Windows
             italic = value;
             textGrid.SetItalic(value);
             return oldValue;
+        }
+
+        public override int GetHeight()
+        {
+            var rowIndex = Grid.GetRow(this);
+            return (int)WindowParent.RowDefinitions[rowIndex].Height.Value / RowHeight;
+        }
+
+        public override void SetHeight(int lines)
+        {
+            var rowIndex = Grid.GetRow(this);
+            WindowParent.RowDefinitions[rowIndex].Height = new GridLength(lines * RowHeight, GridUnitType.Pixel);
+            textGrid.SetHeight(lines);
         }
 
         public override int RowHeight
