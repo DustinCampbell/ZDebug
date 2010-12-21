@@ -64,7 +64,7 @@ namespace ZDebug.UI.ViewModel
         private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
         {
             stackFrames[0].IsCurrent = false;
-            var newFrame = new StackFrameViewModel(e.Address, callAddress: DebuggerService.Story.Processor.ExecutingInstruction.Address);
+            var newFrame = new StackFrameViewModel(e.Address, callAddress: DebuggerService.Story.Processor.ExecutingAddress);
             newFrame.IsCurrent = true;
             stackFrames.Insert(0, newFrame);
         }

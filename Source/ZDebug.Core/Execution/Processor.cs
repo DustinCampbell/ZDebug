@@ -27,18 +27,7 @@ namespace ZDebug.Core.Execution
         private int localCount;
         private int localStackSize = 0;
         private int argumentCount = 0;
-        private Variable storeVariable;
-
-        // constants used for instruction parsing
-        private const byte opKind_LargeConstant = 0;
-        private const byte opKind_SmallConstant = 1;
-        private const byte opKind_Variable = 2;
-        private const byte opKind_Omitted = 3;
-
-        // instruction state
-        private byte[] operandKinds = new byte[8];
-        private ushort[] operandValues = new ushort[8];
-        private int operandCount;
+        private Variable callStore;
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -90,7 +79,7 @@ namespace ZDebug.Core.Execution
 
             stack[++stackPointer] = localCount;
             stack[++stackPointer] = pc;
-            stack[++stackPointer] = storeVariable != null ? storeVariable.ToByte() : -1;
+            stack[++stackPointer] = callStore != null ? callStore.ToByte() : -1;
         }
 
         /// <summary>
@@ -112,7 +101,7 @@ namespace ZDebug.Core.Execution
             }
 
             var variableIndex = stack[stackPointer--];
-            storeVariable = variableIndex >= 0 ? Variable.FromByte((byte)variableIndex) : null;
+            callStore = variableIndex >= 0 ? Variable.FromByte((byte)variableIndex) : null;
 
             pc = stack[stackPointer--];
             localCount = stack[stackPointer--];
@@ -258,7 +247,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void Call(int address, ushort[] opValues, int opCount, Variable storeVar)
+        private void Call(int address, ushort[] opValues, int opCount, Variable storeVar = null)
         {
             if (address < 0)
             {
@@ -307,7 +296,7 @@ namespace ZDebug.Core.Execution
                     locals[i] = opValues[i + 1];
                 }
 
-                storeVariable = storeVar;
+                callStore = storeVar;
                 localStackSize = 0;
 
                 var handler = EnterStackFrame;
@@ -322,7 +311,7 @@ namespace ZDebug.Core.Execution
 
         private void Return(ushort value)
         {
-            var storeVar = storeVariable;
+            var storeVar = callStore;
             var oldAddress = pc;
 
             PopFrame();
@@ -391,28 +380,15 @@ namespace ZDebug.Core.Execution
         {
             var oldPC = pc;
 
-            instructions.Address = pc;
-            var i = instructions.NextInstruction();
-            pc += i.Length;
-
-            executingInstruction = i;
-
             var steppingHandler = Stepping;
             if (steppingHandler != null)
             {
                 steppingHandler(this, new ProcessorSteppingEventArgs(oldPC));
             }
 
-            var operands = i.Operands;
-            var startIndex = operands.StartIndex;
-            var innerArray = operands.InnerArray;
-            operandCount = i.OperandCount;
-            for (int j = 0; j < operandCount; j++)
-            {
-                operandValues[j] = GetOperandValue(innerArray[startIndex + j]);
-            }
+            ReadNextInstruction();
 
-            i.Opcode.Execute(i, operandValues, operandCount, this);
+            opcode.Execute(executingInstruction, operandValues, operandCount, this);
 
             var newPC = pc;
 
@@ -427,11 +403,6 @@ namespace ZDebug.Core.Execution
             instructionCount++;
 
             return newPC;
-        }
-
-        private void Screen_DimensionsChanged(object sender, EventArgs e)
-        {
-            SetScreenDimensions();
         }
 
         private void SetScreenDimensions()
@@ -458,13 +429,7 @@ namespace ZDebug.Core.Execution
                 throw new ArgumentNullException("screen");
             }
 
-            if (this.screen != null)
-            {
-                this.screen.DimensionsChanged -= Screen_DimensionsChanged;
-            }
-
             this.screen = screen;
-            this.screen.DimensionsChanged += Screen_DimensionsChanged;
             SetScreenDimensions();
 
             if (story.Version >= 5)
@@ -554,11 +519,11 @@ namespace ZDebug.Core.Execution
         }
 
         /// <summary>
-        /// The Instruction that is being executed (only valid during a step).
+        /// The address of the instruction that is being executed (only valid during a step).
         /// </summary>
-        public Instruction ExecutingInstruction
+        public int ExecutingAddress
         {
-            get { return executingInstruction; }
+            get { return startAddress; }
         }
 
         public event EventHandler<ProcessorSteppingEventArgs> Stepping;
@@ -593,11 +558,6 @@ namespace ZDebug.Core.Execution
         public event EventHandler<StackEventArgs> StackWritten;
 
         public event EventHandler Quit;
-
-        ushort IExecutionContext.GetOperandValue(Operand operand)
-        {
-            return GetOperandValue(operand);
-        }
 
         byte IExecutionContext.ReadByte(int address)
         {
@@ -679,17 +639,17 @@ namespace ZDebug.Core.Execution
             return story.UnpackStringAddress(byteAddress);
         }
 
-        int IExecutionContext.GetChild(int objNum)
+        int IExecutionContext.GetChild(ushort objNum)
         {
             return memory.ReadChildNumberByObjectNumber(objNum);
         }
 
-        int IExecutionContext.GetParent(int objNum)
+        int IExecutionContext.GetParent(ushort objNum)
         {
             return memory.ReadParentNumberByObjectNumber(objNum);
         }
 
-        int IExecutionContext.GetSibling(int objNum)
+        int IExecutionContext.GetSibling(ushort objNum)
         {
             return memory.ReadSiblingNumberByObjectNumber(objNum);
         }
@@ -780,12 +740,12 @@ namespace ZDebug.Core.Execution
             obj.SetAttribute(attrNum);
         }
 
-        void IExecutionContext.RemoveFromParent(int objNum)
+        void IExecutionContext.RemoveFromParent(ushort objNum)
         {
             memory.RemoveObjectFromParentByNumber(objNum);
         }
 
-        void IExecutionContext.MoveTo(int objNum, int destNum)
+        void IExecutionContext.MoveTo(ushort objNum, ushort destNum)
         {
             memory.MoveObjectToDestinationByNumber(objNum, destNum);
         }

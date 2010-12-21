@@ -1460,7 +1460,6 @@ namespace ZDebug.Core.Instructions
                 if (opCount > 2)
                 {
                     context.MessageLog.SendWarning(i, "timed input was attempted but it is unsupported");
-                    var time = context.GetOperandValue(i.Operands[2]);
                 }
 
                 // TODO: Do something with time and routine operands if provided.

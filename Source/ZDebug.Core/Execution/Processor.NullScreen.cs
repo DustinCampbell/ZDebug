@@ -113,8 +113,6 @@ namespace ZDebug.Core.Execution
                 get { return 0; }
             }
 
-            public event EventHandler DimensionsChanged;
-
             public static readonly IScreen Instance = new NullScreen();
 
 

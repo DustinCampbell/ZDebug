@@ -111,8 +111,6 @@ namespace ZDebug.PerfHarness
             get { return 0; }
         }
 
-        public event EventHandler DimensionsChanged;
-
         public bool SupportsColors
         {
             get { return false; }

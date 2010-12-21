@@ -165,7 +165,7 @@ namespace ZDebug.Core.Basics
             memory.SetAttributeValueByObjectAddress(objAddress, attribute, value);
         }
 
-        private static int ReadObjectNumber(this Memory memory, byte version, int address)
+        private static ushort ReadObjectNumber(this Memory memory, byte version, int address)
         {
             var numberSize = ObjectHelpers.GetNumberSize(version);
 
@@ -211,7 +211,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int ReadParentNumberByObjectAddress(this Memory memory, int objAddress)
+        public static ushort ReadParentNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
             var parentOffset = ObjectHelpers.GetParentOffset(version);
@@ -219,7 +219,7 @@ namespace ZDebug.Core.Basics
             return memory.ReadObjectNumber(version, objAddress + parentOffset);
         }
 
-        public static int ReadParentNumberByObjectNumber(this Memory memory, int objNum)
+        public static ushort ReadParentNumberByObjectNumber(this Memory memory, int objNum)
         {
             var objAddress = GetObjectEntryAddress(memory, objNum);
 
@@ -241,7 +241,7 @@ namespace ZDebug.Core.Basics
             memory.WriteParentNumberByObjectAddress(objAddress, parentObjNum);
         }
 
-        public static int ReadSiblingNumberByObjectAddress(this Memory memory, int objAddress)
+        public static ushort ReadSiblingNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
             var siblingOffset = ObjectHelpers.GetSiblingOffset(version);
@@ -249,7 +249,7 @@ namespace ZDebug.Core.Basics
             return memory.ReadObjectNumber(version, objAddress + siblingOffset);
         }
 
-        public static int ReadSiblingNumberByObjectNumber(this Memory memory, int objNum)
+        public static ushort ReadSiblingNumberByObjectNumber(this Memory memory, ushort objNum)
         {
             var objAddress = GetObjectEntryAddress(memory, objNum);
 
@@ -271,7 +271,7 @@ namespace ZDebug.Core.Basics
             memory.WriteSiblingNumberByObjectAddress(objAddress, siblingObjNum);
         }
 
-        public static int ReadChildNumberByObjectAddress(this Memory memory, int objAddress)
+        public static ushort ReadChildNumberByObjectAddress(this Memory memory, int objAddress)
         {
             var version = memory.ReadVersion();
             var childOffset = ObjectHelpers.GetChildOffset(version);
@@ -279,7 +279,7 @@ namespace ZDebug.Core.Basics
             return memory.ReadObjectNumber(version, objAddress + childOffset);
         }
 
-        public static int ReadChildNumberByObjectNumber(this Memory memory, int objNum)
+        public static ushort ReadChildNumberByObjectNumber(this Memory memory, ushort objNum)
         {
             var objAddress = GetObjectEntryAddress(memory, objNum);
 
@@ -467,24 +467,24 @@ namespace ZDebug.Core.Basics
             return props.ToArray();
         }
 
-        public static int? TryReadLeftSiblingNumberByObjectNumber(this Memory memory, int objNum)
+        public static ushort? TryReadLeftSiblingNumberByObjectNumber(this Memory memory, ushort objNum)
         {
-            var parentNum = memory.ReadParentNumberByObjectNumber(objNum);
+            ushort parentNum = memory.ReadParentNumberByObjectNumber(objNum);
             if (parentNum == 0)
             {
                 return null;
             }
 
-            var parentChildNum = memory.ReadChildNumberByObjectNumber(parentNum);
+            ushort parentChildNum = memory.ReadChildNumberByObjectNumber(parentNum);
             if (parentChildNum == objNum)
             {
                 return null;
             }
 
-            var next = parentChildNum;
+            ushort next = parentChildNum;
             while (next != 0)
             {
-                var siblingNum = memory.ReadSiblingNumberByObjectNumber(next);
+                ushort siblingNum = memory.ReadSiblingNumberByObjectNumber(next);
                 if (siblingNum == objNum)
                 {
                     return next;
@@ -498,16 +498,16 @@ namespace ZDebug.Core.Basics
             return null;
         }
 
-        public static void RemoveObjectFromParentByNumber(this Memory memory, int objNum)
+        public static void RemoveObjectFromParentByNumber(this Memory memory, ushort objNum)
         {
-            var leftSiblingNum = memory.TryReadLeftSiblingNumberByObjectNumber(objNum);
-            var rightSiblingNum = memory.ReadSiblingNumberByObjectNumber(objNum);
+            ushort? leftSiblingNum = memory.TryReadLeftSiblingNumberByObjectNumber(objNum);
+            ushort rightSiblingNum = memory.ReadSiblingNumberByObjectNumber(objNum);
             if (leftSiblingNum.HasValue)
             {
                 memory.WriteSiblingNumberByObjectNumber(leftSiblingNum.Value, rightSiblingNum);
             }
 
-            var parentNum = memory.ReadParentNumberByObjectNumber(objNum);
+            ushort parentNum = memory.ReadParentNumberByObjectNumber(objNum);
             if (parentNum != 0)
             {
                 var parentChildNum = memory.ReadChildNumberByObjectNumber(parentNum);
@@ -521,14 +521,14 @@ namespace ZDebug.Core.Basics
             memory.WriteSiblingNumberByObjectNumber(objNum, 0);
         }
 
-        public static void MoveObjectToDestinationByNumber(this Memory memory, int objNum, int destNum)
+        public static void MoveObjectToDestinationByNumber(this Memory memory, ushort objNum, ushort destNum)
         {
             memory.RemoveObjectFromParentByNumber(objNum);
 
             if (destNum != 0)
             {
                 memory.WriteParentNumberByObjectNumber(objNum, destNum);
-                var parentChildNum = memory.ReadChildNumberByObjectNumber(destNum);
+                ushort parentChildNum = memory.ReadChildNumberByObjectNumber(destNum);
                 memory.WriteSiblingNumberByObjectNumber(objNum, parentChildNum);
                 memory.WriteChildNumberByObjectNumber(destNum, objNum);
             }

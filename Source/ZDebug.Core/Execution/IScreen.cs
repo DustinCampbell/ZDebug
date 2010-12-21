@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution
 {
     public interface IScreen : IOutputStream, IInputStream
     {
@@ -28,8 +26,6 @@ namespace ZDebug.Core.Execution
         ushort ScreenWidthInUnits { get; }
         byte FontHeightInUnits { get; }
         byte FontWidthInUnits { get; }
-
-        event EventHandler DimensionsChanged;
 
         bool SupportsColors { get; }
         bool SupportsBold { get; }

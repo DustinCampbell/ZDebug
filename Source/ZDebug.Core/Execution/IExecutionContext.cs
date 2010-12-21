@@ -5,8 +5,6 @@ namespace ZDebug.Core.Execution
 {
     public interface IExecutionContext
     {
-        ushort GetOperandValue(Operand operand);
-
         byte ReadByte(int address);
         ushort ReadVariable(Variable variable);
         ushort ReadVariableIndirectly(Variable variable);
@@ -30,9 +28,9 @@ namespace ZDebug.Core.Execution
         int UnpackRoutineAddress(ushort byteAddress);
         int UnpackStringAddress(ushort byteAddress);
 
-        int GetChild(int objNum);
-        int GetParent(int objNum);
-        int GetSibling(int objNum);
+        int GetChild(ushort objNum);
+        int GetParent(ushort objNum);
+        int GetSibling(ushort objNum);
         string GetShortName(int objNum);
         int GetNextProperty(int objNum, int propNum);
         int GetPropertyData(int objNum, int propNum);
@@ -41,8 +39,8 @@ namespace ZDebug.Core.Execution
         bool HasAttribute(int objNum, int attrNum);
         void ClearAttribute(int objNum, int attrNum);
         void SetAttribute(int objNum, int attrNum);
-        void RemoveFromParent(int objNum);
-        void MoveTo(int objNum, int destNum);
+        void RemoveFromParent(ushort objNum);
+        void MoveTo(ushort objNum, ushort destNum);
 
         ushort[] ReadZWords(int address);
         string ParseZWords(ushort[] zwords);
