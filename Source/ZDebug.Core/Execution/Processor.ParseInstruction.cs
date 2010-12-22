@@ -1,4 +1,5 @@
 ﻿using ZDebug.Core.Instructions;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -22,7 +23,7 @@ namespace ZDebug.Core.Execution
 
         private void ReadOperandKinds(ref int address, int offset = 0)
         {
-            var b = memory.ReadByte(ref address);
+            var b = bytes[address++];
 
             operandKinds[offset] = (byte)((b & 0xc0) >> 6);
             operandKinds[offset + 1] = (byte)((b & 0x30) >> 4);
@@ -38,19 +39,18 @@ namespace ZDebug.Core.Execution
                 var opKind = operandKinds[i];
                 if (opKind != opKind_Omitted)
                 {
-                    switch (opKind)
+                    if (opKind == opKind_Variable)
                     {
-                        case opKind_LargeConstant:
-                            operandValues[i] = memory.ReadWord(ref address);
-                            break;
-
-                        case opKind_SmallConstant:
-                            operandValues[i] = memory.ReadByte(ref address);
-                            break;
-
-                        case opKind_Variable:
-                            operandValues[i] = ReadVariableValue(memory.ReadByte(ref address));
-                            break;
+                        operandValues[i] = ReadVariableValue(bytes[address++]);
+                    }
+                    else if (opKind == opKind_SmallConstant)
+                    {
+                        operandValues[i] = bytes[address++];
+                    }
+                    else // opKind_LargeConstant
+                    {
+                        operandValues[i] = bytes.ReadWord(address);
+                        address += 2;
                     }
                 }
                 else
@@ -63,7 +63,7 @@ namespace ZDebug.Core.Execution
 
         private Branch ReadBranch(ref int address)
         {
-            var b1 = memory.ReadByte(ref address);
+            var b1 = bytes[address++];
 
             var condition = (b1 & 0x80) == 0x80;
 
@@ -77,7 +77,7 @@ namespace ZDebug.Core.Execution
             {
                 // OR bottom 6 bits with the next byte
                 b1 = (byte)(b1 & 0x3f);
-                var b2 = memory.ReadByte(ref address);
+                var b2 = bytes[address++];
                 var tmp = (ushort)((b1 << 8) | b2);
 
                 // if bit 13, set bits 14 and 15 as well to produce proper signed value.
@@ -132,7 +132,7 @@ namespace ZDebug.Core.Execution
                 operandKinds[i] = opKind_Omitted;
             }
 
-            var opByte = memory.ReadByte(ref address);
+            var opByte = bytes[address++];
 
             if (opByte >= 0x00 && opByte <= 0x1f)
             {
@@ -202,7 +202,7 @@ namespace ZDebug.Core.Execution
 
             if (opcode.HasStoreVariable)
             {
-                storeVariable = memory.ReadByte(ref address);
+                storeVariable = bytes[address++];
             }
 
             if (opcode.HasBranch)

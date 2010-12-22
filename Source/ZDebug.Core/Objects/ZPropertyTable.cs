@@ -1,58 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Objects
 {
     public class ZPropertyTable : IIndexedEnumerable<ZProperty>
     {
-        private readonly Memory memory;
-        private readonly int address;
+        private readonly ZObjectTable objectTable;
+        private readonly ushort address;
 
         private readonly ZProperty[] properties;
+        private readonly IntegerMap<ZProperty> numberToPropertyMap;
 
-        internal ZPropertyTable(Memory memory, int address)
+        internal ZPropertyTable(ZObjectTable objectTable, ushort address)
         {
-            this.memory = memory;
+            this.objectTable = objectTable;
             this.address = address;
 
-            properties = memory.ReadPropertyTableProperties(this);
+            properties = objectTable.ReadPropertyTableProperties(this);
+            numberToPropertyMap = new IntegerMap<ZProperty>(properties.Length);
+
+            foreach (var prop in properties)
+            {
+                numberToPropertyMap.Add(prop.Number, prop);
+            }
         }
 
         public ushort[] GetShortNameZWords()
         {
-            return memory.ReadShortName(address);
+            return objectTable.ReadShortName(address);
         }
 
         public bool Contains(int propNum)
         {
-            for (int i = 0; i < properties.Length; i++)
-            {
-                if (properties[i].Number == propNum)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return numberToPropertyMap.Contains(propNum);
         }
 
         public ZProperty GetByNumber(int propNum)
         {
-            for (int i = 0; i < properties.Length; i++)
+            ZProperty prop;
+            if (numberToPropertyMap.TryGetValue(propNum, out prop))
             {
-                var p = properties[i];
-                if (p.Number == propNum)
-                {
-                    return p;
-                }
+                return prop;
             }
 
             return null;
         }
 
-        public int Address
+        public ushort Address
         {
             get { return address; }
         }

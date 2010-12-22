@@ -60,7 +60,7 @@ namespace ZDebug.Core.Tests
             Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(21), Is.True);
             Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(25), Is.True);
 
-            foreach (var n in Enumerable.Range(0, 48).Where(n => n != 21 && n != 25))
+            foreach (byte n in Enumerable.Range(0, 48).Where(n => n != 21 && n != 25))
             {
                 Assert.That(story.ObjectTable.GetByNumber(484).HasAttribute(n), Is.False);
             }

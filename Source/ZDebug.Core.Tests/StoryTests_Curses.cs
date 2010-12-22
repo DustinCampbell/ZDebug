@@ -61,7 +61,7 @@ namespace ZDebug.Core.Tests
             Assert.That(story.ObjectTable.GetByNumber(478).HasAttribute(16), Is.True);
             Assert.That(story.ObjectTable.GetByNumber(478).HasAttribute(23), Is.True);
 
-            foreach (var n in Enumerable.Range(0, 48).Where(n => n != 0 && n != 16 && n != 23))
+            foreach (byte n in Enumerable.Range(0, 48).Where(n => n != 0 && n != 16 && n != 23))
             {
                 Assert.That(story.ObjectTable.GetByNumber(478).HasAttribute(n), Is.False);
             }

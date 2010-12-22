@@ -51,7 +51,6 @@
     <Compile Include="InformDataTests.cs" />
     <Compile Include="InstructionReaderTests_Curses.cs" />
     <Compile Include="MemoryExtensionsTests.Header.cs" />
-    <Compile Include="MemoryExtensionsTests.Objects.cs" />
     <Compile Include="MemoryExtensionsTests.cs" />
     <Compile Include="MemoryMapTests.cs" />
     <Compile Include="MemoryReaderTests.cs" />

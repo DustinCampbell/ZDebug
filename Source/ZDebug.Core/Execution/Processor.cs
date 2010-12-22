@@ -3,6 +3,7 @@ using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -13,6 +14,7 @@ namespace ZDebug.Core.Execution
         private readonly Story story;
         private readonly Memory memory;
         private readonly byte version;
+        private readonly byte[] bytes;
         private readonly ZText ztext;
         private readonly InstructionReader instructions;
         private readonly OpcodeTable opcodeTable;
@@ -44,6 +46,7 @@ namespace ZDebug.Core.Execution
             this.story = story;
             this.memory = story.Memory;
             this.version = story.Version;
+            this.bytes = this.memory.Bytes;
             this.ztext = ztext;
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
@@ -119,7 +122,11 @@ namespace ZDebug.Core.Execution
 
         private ushort ReadVariableValue(byte variableIndex, bool indirect = false)
         {
-            if (variableIndex == 0x00) // stack
+            if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
+            {
+                return locals[variableIndex - 0x01];
+            }
+            else if (variableIndex == 0x00) // stack
             {
                 if (localStackSize == 0)
                 {
@@ -144,13 +151,9 @@ namespace ZDebug.Core.Execution
                     return value;
                 }
             }
-            else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
-            {
-                return locals[variableIndex - 0x01];
-            }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return memory.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return bytes.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -202,7 +205,7 @@ namespace ZDebug.Core.Execution
                 var index = variableIndex - 0x10;
                 var address = this.globalVariableTableAddress + (index * 2);
                 var oldValue = memory.ReadWord(address);
-                memory.WriteWord(address, value);
+                bytes.WriteWord(address, value);
 
                 var handler = GlobalVariableChanged;
                 if (handler != null)
@@ -355,13 +358,6 @@ namespace ZDebug.Core.Execution
             {
                 throw new NotSupportedException();
             }
-        }
-
-        private bool HasAttribute(int objNum, int attrNum)
-        {
-            var obj = this.objectTable.GetByNumber(objNum);
-
-            return obj.HasAttribute(attrNum);
         }
 
         public int Step()

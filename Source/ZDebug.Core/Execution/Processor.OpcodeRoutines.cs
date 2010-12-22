@@ -230,7 +230,7 @@ namespace ZDebug.Core.Execution
             ushort obj1 = operandValues[0];
             ushort obj2 = operandValues[1];
 
-            ushort obj1Parent = memory.ReadParentNumberByObjectNumber(obj1);
+            ushort obj1Parent = objectTable.ReadParentNumberByObjectNumber(obj1);
 
             if ((obj1Parent == obj2) == branch.Condition)
             {
@@ -556,12 +556,9 @@ namespace ZDebug.Core.Execution
         internal void op_clear_attr()
         {
             ushort objNum = operandValues[0];
-            ushort attrNum = operandValues[1];
+            byte attrNum = (byte)operandValues[1];
 
-            // TODO: Call into memory directly
-
-            ZObject obj = objectTable.GetByNumber(objNum);
-            obj.ClearAttribute(attrNum);
+            objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, false);
         }
 
         internal void op_get_child()
@@ -571,7 +568,7 @@ namespace ZDebug.Core.Execution
             ushort childNum;
             if (objNum > 0)
             {
-                childNum = memory.ReadChildNumberByObjectNumber(objNum);
+                childNum = objectTable.ReadChildNumberByObjectNumber(objNum);
             }
             else
             {
@@ -626,7 +623,7 @@ namespace ZDebug.Core.Execution
             ushort parentNum;
             if (objNum > 0)
             {
-                parentNum = memory.ReadParentNumberByObjectNumber(objNum);
+                parentNum = objectTable.ReadParentNumberByObjectNumber(objNum);
             }
             else
             {
@@ -685,7 +682,7 @@ namespace ZDebug.Core.Execution
         {
             ushort dataAddress = operandValues[0];
 
-            ushort propLen = (ushort)memory.ReadPropertyDataLength(dataAddress);
+            ushort propLen = objectTable.ReadPropertyDataLength(dataAddress);
 
             WriteVariableValue(storeVariable, propLen);
         }
@@ -697,7 +694,7 @@ namespace ZDebug.Core.Execution
             ushort siblingNum;
             if (objNum > 0)
             {
-                siblingNum = memory.ReadSiblingNumberByObjectNumber(objNum);
+                siblingNum = objectTable.ReadSiblingNumberByObjectNumber(objNum);
             }
             else
             {
@@ -718,7 +715,7 @@ namespace ZDebug.Core.Execution
             ushort objNum = operandValues[0];
             ushort destNum = operandValues[1];
 
-            memory.MoveObjectToDestinationByNumber(objNum, destNum);
+            objectTable.MoveObjectToDestinationByNumber(objNum, destNum);
         }
 
         internal void op_put_prop()
@@ -734,31 +731,23 @@ namespace ZDebug.Core.Execution
         {
             ushort objNum = operandValues[0];
 
-            memory.RemoveObjectFromParentByNumber(objNum);
+            objectTable.RemoveObjectFromParentByNumber(objNum);
         }
 
         internal void op_set_attr()
         {
             ushort objNum = operandValues[0];
-            ushort attrNum = operandValues[1];
+            byte attrNum = (byte)operandValues[1];
 
-            // TODO: Call into memory directly
-
-            ZObject obj = objectTable.GetByNumber(objNum);
-            obj.SetAttribute(attrNum);
+            objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, true);
         }
 
         internal void op_test_attr()
         {
             ushort objNum = operandValues[0];
-            ushort attrNum = operandValues[1];
+            byte attrNum = (byte)operandValues[1];
 
-            // TODO: Call into memory directly
-
-            ZObject obj = this.objectTable.GetByNumber(objNum);
-            bool result = obj.HasAttribute(attrNum);
-
-            if (result == branch.Condition)
+            if (objectTable.HasAttributeByObjectNumber(objNum, attrNum) == branch.Condition)
             {
                 Jump(branch);
             }

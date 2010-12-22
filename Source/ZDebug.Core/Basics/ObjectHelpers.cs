@@ -4,7 +4,7 @@ namespace ZDebug.Core.Basics
 {
     internal static class ObjectHelpers
     {
-        public static int GetPropertyDefaultsCount(byte version)
+        public static byte GetPropertyDefaultsCount(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -20,12 +20,12 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetPropertyDefaultsTableSize(byte version)
+        public static byte GetPropertyDefaultsTableSize(byte version)
         {
-            return GetPropertyDefaultsCount(version) * 2;
+            return (byte)(GetPropertyDefaultsCount(version) * 2);
         }
 
-        public static int GetMaxObjects(byte version)
+        public static ushort GetMaxObjects(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -41,7 +41,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetEntrySize(byte version)
+        public static byte GetEntrySize(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -57,7 +57,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetAttributeBytesSize(byte version)
+        public static byte GetAttributeBytesSize(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -73,7 +73,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetAttributeCount(byte version)
+        public static byte GetAttributeCount(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -89,7 +89,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetParentOffset(byte version)
+        public static byte GetParentOffset(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -105,7 +105,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetSiblingOffset(byte version)
+        public static byte GetSiblingOffset(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -121,7 +121,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetChildOffset(byte version)
+        public static byte GetChildOffset(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -137,7 +137,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetPropertyTableAddressOffset(byte version)
+        public static byte GetPropertyTableAddressOffset(byte version)
         {
             if (version >= 1 && version <= 3)
             {
@@ -153,7 +153,7 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        public static int GetNumberSize(byte version)
+        public static byte GetNumberSize(byte version)
         {
             if (version >= 1 && version <= 3)
             {

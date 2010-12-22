@@ -8,10 +8,10 @@ namespace ZDebug.Core.Objects
         private readonly Memory memory;
         private readonly ZObjectTable objectTable;
         private readonly ZText ztext;
-        private readonly int address;
-        private readonly int number;
+        private readonly ushort address;
+        private readonly ushort number;
 
-        internal ZObject(Memory memory, ZObjectTable objectTable, ZText ztext, int address, int number)
+        internal ZObject(Memory memory, ZObjectTable objectTable, ZText ztext, ushort address, ushort number)
         {
             this.memory = memory;
             this.objectTable = objectTable;
@@ -20,12 +20,12 @@ namespace ZDebug.Core.Objects
             this.number = number;
         }
 
-        public int Address
+        public ushort Address
         {
             get { return address; }
         }
 
-        public int Number
+        public ushort Number
         {
             get { return number; }
         }
@@ -48,52 +48,52 @@ namespace ZDebug.Core.Objects
 
         public bool HasParent
         {
-            get { return memory.ReadParentNumberByObjectAddress(address) != 0; }
+            get { return objectTable.ReadParentNumberByObjectAddress(address) != 0; }
         }
 
         public ZObject Parent
         {
-            get { return GetObjectByNumber(memory.ReadParentNumberByObjectAddress(address)); }
+            get { return GetObjectByNumber(objectTable.ReadParentNumberByObjectAddress(address)); }
         }
 
         public bool HasSibling
         {
-            get { return memory.ReadSiblingNumberByObjectAddress(address) != 0; }
+            get { return objectTable.ReadSiblingNumberByObjectAddress(address) != 0; }
         }
 
         public ZObject Sibling
         {
-            get { return GetObjectByNumber(memory.ReadSiblingNumberByObjectAddress(address)); }
+            get { return GetObjectByNumber(objectTable.ReadSiblingNumberByObjectAddress(address)); }
         }
 
         public bool HasChild
         {
-            get { return memory.ReadChildNumberByObjectAddress(address) != 0; }
+            get { return objectTable.ReadChildNumberByObjectAddress(address) != 0; }
         }
 
         public ZObject Child
         {
-            get { return GetObjectByNumber(memory.ReadChildNumberByObjectAddress(address)); }
+            get { return GetObjectByNumber(objectTable.ReadChildNumberByObjectAddress(address)); }
         }
 
-        public bool HasAttribute(int attribute)
+        public bool HasAttribute(byte attribute)
         {
-            return memory.HasAttributeByObjectAddress(address, attribute);
+            return objectTable.HasAttributeByObjectAddress(address, attribute);
         }
 
-        public void SetAttribute(int attribute)
+        public void SetAttribute(byte attribute)
         {
-            memory.SetAttributeValueByObjectAddress(address, attribute, true);
+            objectTable.SetAttributeValueByObjectAddress(address, attribute, true);
         }
 
-        public void ClearAttribute(int attribute)
+        public void ClearAttribute(byte attribute)
         {
-            memory.SetAttributeValueByObjectAddress(address, attribute, false);
+            objectTable.SetAttributeValueByObjectAddress(address, attribute, false);
         }
 
         public bool[] GetAllAttributes()
         {
-            return memory.GetAllAttributeByObjectAddress(address);
+            return objectTable.GetAllAttributeByObjectAddress(address);
         }
 
         public ZPropertyTable PropertyTable
@@ -101,7 +101,7 @@ namespace ZDebug.Core.Objects
             get
             {
                 return objectTable.GetPropertyTable(
-                    memory.ReadPropertyTableAddressByObjectAddress(address));
+                    objectTable.ReadPropertyTableAddressByObjectAddress(address));
             }
         }
     }
