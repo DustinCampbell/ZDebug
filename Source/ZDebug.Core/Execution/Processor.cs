@@ -16,8 +16,7 @@ namespace ZDebug.Core.Execution
         private readonly byte version;
         private readonly byte[] bytes;
         private readonly ZText ztext;
-        private readonly InstructionReader instructions;
-        private readonly OpcodeTable opcodeTable;
+        private readonly Opcode[] opcodes;
 
         private int pc;
 
@@ -41,7 +40,7 @@ namespace ZDebug.Core.Execution
         private int instructionCount;
         private int callCount;
 
-        internal Processor(Story story, ZText ztext, InstructionCache cache)
+        internal Processor(Story story, ZText ztext)
         {
             this.story = story;
             this.memory = story.Memory;
@@ -56,8 +55,7 @@ namespace ZDebug.Core.Execution
             RegisterMessageLog(NullMessageLog.Instance);
 
             this.pc = this.memory.ReadMainRoutineAddress();
-            this.opcodeTable = OpcodeTables.GetOpcodeTable(this.version);
-            this.instructions = new InstructionReader(pc, this.memory, opcodeTable, cache);
+            this.opcodes = OpcodeTables.GetOpcodeTable(this.version).opcodes;
 
             this.localCount = memory.ReadByte(ref pc);
         }
@@ -122,33 +120,28 @@ namespace ZDebug.Core.Execution
 
         private ushort ReadVariableValue(byte variableIndex, bool indirect = false)
         {
-            if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
+            if (variableIndex < 16)
             {
-                return locals[variableIndex - 0x01];
-            }
-            else if (variableIndex == 0x00) // stack
-            {
-                if (localStackSize == 0)
+                if (variableIndex > 0)
                 {
-                    throw new InvalidOperationException("Local stack is empty.");
-                }
-
-                if (indirect)
-                {
-                    return (ushort)stack[stackPointer];
+                    return locals[variableIndex - 0x01];
                 }
                 else
                 {
-                    localStackSize--;
-                    var value = (ushort)stack[stackPointer--];
-
-                    var handler = StackPopped;
-                    if (handler != null)
+                    if (localStackSize == 0)
                     {
-                        handler(this, new StackEventArgs(value));
+                        throw new InvalidOperationException("Local stack is empty.");
                     }
 
-                    return value;
+                    if (!indirect)
+                    {
+                        localStackSize--;
+                        return (ushort)stack[stackPointer--];
+                    }
+                    else
+                    {
+                        return (ushort)stack[stackPointer];
+                    }
                 }
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
@@ -161,7 +154,12 @@ namespace ZDebug.Core.Execution
         {
             if (variableIndex == 0x00) // stack
             {
-                if (indirect)
+                if (!indirect)
+                {
+                    localStackSize++;
+                    stack[++stackPointer] = value;
+                }
+                else
                 {
                     if (localStackSize == 0)
                     {
@@ -169,64 +167,16 @@ namespace ZDebug.Core.Execution
                     }
 
                     stack[stackPointer] = value;
-
-                    var handler = StackWritten;
-                    if (handler != null)
-                    {
-                        handler(this, new StackEventArgs(value));
-                    }
-                }
-                else
-                {
-                    localStackSize++;
-                    stack[++stackPointer] = value;
-
-                    var handler = StackPushed;
-                    if (handler != null)
-                    {
-                        handler(this, new StackEventArgs(value));
-                    }
                 }
             }
             else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
             {
-                var index = variableIndex - 0x01;
-                var oldValue = locals[index];
-                locals[index] = value;
-
-                var handler = LocalVariableChanged;
-                if (handler != null)
-                {
-                    handler(this, new VariableChangedEventArgs(index, oldValue, value));
-                }
+                locals[variableIndex - 0x01] = value;
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                var index = variableIndex - 0x10;
-                var address = this.globalVariableTableAddress + (index * 2);
-                var oldValue = memory.ReadWord(address);
+                var address = this.globalVariableTableAddress + ((variableIndex - 0x10) * 2);
                 bytes.WriteWord(address, value);
-
-                var handler = GlobalVariableChanged;
-                if (handler != null)
-                {
-                    handler(this, new VariableChangedEventArgs(index, oldValue, value));
-                }
-            }
-        }
-
-        private ushort GetOperandValue(Operand operand)
-        {
-            switch (operand.Kind)
-            {
-                case OperandKind.LargeConstant:
-                    return operand.Value;
-                case OperandKind.SmallConstant:
-                    return (byte)operand.Value;
-                case OperandKind.Variable:
-                    return ReadVariableValue((byte)operand.Value);
-                default:
-                    throw new InvalidOperationException();
             }
         }
 
@@ -238,7 +188,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void Call(int address, ushort[] opValues, int opCount, byte? storeVarIndex = null)
+        private void Call(int address, byte? storeVarIndex = null)
         {
             if (address < 0)
             {
@@ -255,17 +205,17 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                story.RoutineTable.Add(address);
+                //story.RoutineTable.Add(address);
 
                 PushFrame();
 
                 var returnAddress = pc;
                 pc = address;
 
-                argumentCount = opCount - 1;
+                argumentCount = operandCount - 1;
 
                 // read locals
-                localCount = memory.ReadByte(ref pc);
+                localCount = bytes[pc++];
                 if (story.Version <= 4)
                 {
                     for (int i = 0; i < localCount; i++)
@@ -284,7 +234,7 @@ namespace ZDebug.Core.Execution
                 var numberToCopy = Math.Min(argumentCount, locals.Length);
                 for (int i = 0; i < numberToCopy; i++)
                 {
-                    locals[i] = opValues[i + 1];
+                    locals[i] = operandValues[i + 1];
                 }
 
                 callStoreVariable = storeVarIndex;
@@ -321,7 +271,7 @@ namespace ZDebug.Core.Execution
             pc += offset - 2;
         }
 
-        private void Jump(Branch branch)
+        private void Branch(Branch branch)
         {
             if (branch.Kind == BranchKind.Address)
             {
@@ -509,31 +459,6 @@ namespace ZDebug.Core.Execution
 
         public event EventHandler<StackFrameEventArgs> EnterStackFrame;
         public event EventHandler<StackFrameEventArgs> ExitStackFrame;
-
-        /// <summary>
-        /// Occurs when a local variable is written to.
-        /// </summary>
-        public event EventHandler<VariableChangedEventArgs> LocalVariableChanged;
-
-        /// <summary>
-        /// Occurs when a global variable is written to.
-        /// </summary>
-        public event EventHandler<VariableChangedEventArgs> GlobalVariableChanged;
-
-        /// <summary>
-        /// Occurs when a value is popped off of the local stack.
-        /// </summary>
-        public event EventHandler<StackEventArgs> StackPopped;
-
-        /// <summary>
-        /// Occurs when a value is pushed onto the local stack.
-        /// </summary>
-        public event EventHandler<StackEventArgs> StackPushed;
-
-        /// <summary>
-        /// Occurs when the top of the local stack is directly written to without popping or pushing.
-        /// </summary>
-        public event EventHandler<StackEventArgs> StackWritten;
 
         public event EventHandler Quit;
     }

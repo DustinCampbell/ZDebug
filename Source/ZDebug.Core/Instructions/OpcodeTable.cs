@@ -3,17 +3,13 @@
     internal sealed class OpcodeTable
     {
         private readonly byte version;
-        private readonly Opcode[][] opcodes;
+        internal readonly Opcode[] opcodes;
 
         public OpcodeTable(byte version)
         {
             this.version = version;
 
-            this.opcodes = new Opcode[5][];
-            for (int i = 0; i < 5; i++)
-            {
-                this.opcodes[i] = new Opcode[32];
-            }
+            this.opcodes = new Opcode[5 * 32];
         }
 
         public void Add(
@@ -22,14 +18,14 @@
             string name,
             OpcodeFlags flags = OpcodeFlags.None)
         {
-            opcodes[(int)kind][number] = new Opcode(kind, number, name, flags);
+            opcodes[((int)kind * 32) + number] = new Opcode(kind, number, name, flags);
         }
 
         public Opcode this[OpcodeKind kind, byte number]
         {
             get
             {
-                var opcode = opcodes[(int)kind][number];
+                var opcode = opcodes[((int)kind * 32) + number];
 
                 if (opcode == null)
                 {

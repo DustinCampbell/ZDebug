@@ -43,7 +43,7 @@ namespace ZDebug.Core
             this.routineTable = new RoutineTable(memory, instructionCache);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.dictionary = new ZDictionary(this, ztext);
-            this.processor = new Processor(this, ztext, instructionCache);
+            this.processor = new Processor(this, ztext);
 
             // write interpreter number
             if (version >= 4)

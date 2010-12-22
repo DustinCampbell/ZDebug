@@ -1,7 +1,4 @@
-﻿using System;
-using ZDebug.Core.Execution;
-
-namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions
 {
     public sealed class Opcode
     {

@@ -128,7 +128,7 @@ namespace ZDebug.Core.Execution
 
             if (result == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -159,7 +159,7 @@ namespace ZDebug.Core.Execution
 
             if ((value < test) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -186,7 +186,7 @@ namespace ZDebug.Core.Execution
 
             if ((value > test) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -210,7 +210,7 @@ namespace ZDebug.Core.Execution
 
             if (result == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -221,7 +221,7 @@ namespace ZDebug.Core.Execution
 
             if ((x > y) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ZDebug.Core.Execution
 
             if ((obj1Parent == obj2) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -245,7 +245,7 @@ namespace ZDebug.Core.Execution
 
             if ((x < y) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -262,7 +262,7 @@ namespace ZDebug.Core.Execution
 
             if ((x == 0) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -270,68 +270,20 @@ namespace ZDebug.Core.Execution
         // Call routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
-        internal void op_call_1n()
+        internal void op_call_n()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount);
+            Call(address);
         }
 
-        internal void op_call_1s()
+        internal void op_call_s()
         {
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount, storeVariable);
-        }
-
-        internal void op_call_2n()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount);
-        }
-
-        internal void op_call_2s()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount, storeVariable);
-        }
-
-        internal void op_call_vn()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount);
-        }
-
-        internal void op_call_vs()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount, storeVariable);
-        }
-
-        internal void op_call_vn2()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount);
-        }
-
-        internal void op_call_vs2()
-        {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address, operandValues, operandCount, storeVariable);
+            Call(address, storeVariable);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -496,7 +448,7 @@ namespace ZDebug.Core.Execution
 
                         if (branch.Condition)
                         {
-                            Jump(branch);
+                            Branch(branch);
                         }
 
                         return;
@@ -511,7 +463,7 @@ namespace ZDebug.Core.Execution
 
                         if (branch.Condition)
                         {
-                            Jump(branch);
+                            Branch(branch);
                         }
 
                         return;
@@ -525,7 +477,7 @@ namespace ZDebug.Core.Execution
 
             if (!branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -580,7 +532,7 @@ namespace ZDebug.Core.Execution
 
             if ((childNum > 0) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -706,7 +658,7 @@ namespace ZDebug.Core.Execution
 
             if ((siblingNum > 0) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -749,7 +701,7 @@ namespace ZDebug.Core.Execution
 
             if (objectTable.HasAttributeByObjectNumber(objNum, attrNum) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -1186,13 +1138,13 @@ namespace ZDebug.Core.Execution
 
             if ((argNumber <= argumentCount) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
         internal void op_piracy()
         {
-            Jump(branch);
+            Branch(branch);
         }
 
         internal void op_quit()
@@ -1266,7 +1218,7 @@ namespace ZDebug.Core.Execution
         {
             if ((story.ActualChecksum == story.Memory.ReadChecksum()) == branch.Condition)
             {
-                Jump(branch);
+                Branch(branch);
             }
         }
 
@@ -1386,7 +1338,7 @@ namespace ZDebug.Core.Execution
                                     break; // illegal
                                 }
 
-                                op_call_2s();
+                                op_call_s();
                                 return;
 
                             case 0x1a:
@@ -1395,7 +1347,7 @@ namespace ZDebug.Core.Execution
                                     break; // illegal
                                 }
 
-                                op_call_2n();
+                                op_call_n();
                                 return;
 
                             case 0x1b:
@@ -1456,7 +1408,7 @@ namespace ZDebug.Core.Execution
                                     break; // illegal
                                 }
 
-                                op_call_1s();
+                                op_call_s();
                                 return;
 
                             case 0x09:
@@ -1489,7 +1441,7 @@ namespace ZDebug.Core.Execution
                                     break; // 'not' unsupported
                                 }
 
-                                op_call_1n();
+                                op_call_n();
                                 return;
                         }
                     }
@@ -1591,7 +1543,7 @@ namespace ZDebug.Core.Execution
                         switch (opcode.Number)
                         {
                             case 0x00:
-                                op_call_vs();
+                                op_call_s();
                                 return;
 
                             case 0x01:
@@ -1671,7 +1623,7 @@ namespace ZDebug.Core.Execution
                                     break; // 'call_vs2' illegal
                                 }
 
-                                op_call_vs2();
+                                op_call_s();
                                 return;
 
                             case 0x0d:
@@ -1793,7 +1745,7 @@ namespace ZDebug.Core.Execution
                                     break; // 'call_vn' illegal
                                 }
 
-                                op_call_vn();
+                                op_call_n();
                                 return;
 
                             case 0x1a:
@@ -1802,7 +1754,7 @@ namespace ZDebug.Core.Execution
                                     break; // 'call_vn2' illegal
                                 }
 
-                                op_call_vn2();
+                                op_call_n();
                                 return;
 
                             case 0x1b:

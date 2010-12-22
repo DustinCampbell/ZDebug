@@ -1,4 +1,5 @@
-﻿using ZDebug.Core.Instructions;
+﻿using System;
+using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
@@ -6,6 +7,12 @@ namespace ZDebug.Core.Execution
     public sealed partial class Processor
     {
         // constants used for instruction parsing
+        private const byte opKind_Two = 0 * 32;
+        private const byte opKind_One = 1 * 32;
+        private const byte opKind_Zero = 2 * 32;
+        private const byte opKind_Var = 3 * 32;
+        private const byte opKind_Ext = 4 * 32;
+
         private const byte opKind_LargeConstant = 0;
         private const byte opKind_SmallConstant = 1;
         private const byte opKind_Variable = 2;
@@ -23,41 +30,65 @@ namespace ZDebug.Core.Execution
 
         private void ReadOperandKinds(ref int address, int offset = 0)
         {
-            var b = bytes[address++];
+            byte b = bytes[address++];
 
-            operandKinds[offset] = (byte)((b & 0xc0) >> 6);
-            operandKinds[offset + 1] = (byte)((b & 0x30) >> 4);
-            operandKinds[offset + 2] = (byte)((b & 0x0c) >> 2);
-            operandKinds[offset + 3] = (byte)(b & 0x03);
+            byte[] opKinds = operandKinds;
+
+            opKinds[offset] = (byte)((b & 0xc0) >> 6);
+            opKinds[offset + 1] = (byte)((b & 0x30) >> 4);
+            opKinds[offset + 2] = (byte)((b & 0x0c) >> 2);
+            opKinds[offset + 3] = (byte)(b & 0x03);
         }
 
-        private void ReadOperandValues(ref int address)
+        private void LoadOperand(byte kind, ref int address)
         {
-            operandCount = 8;
-            for (int i = 0; i < operandKinds.Length; i++)
+            if ((kind & opKind_Variable) != 0)
             {
-                var opKind = operandKinds[i];
-                if (opKind != opKind_Omitted)
+                byte variableIndex = bytes[address++];
+                if (variableIndex < 16)
                 {
-                    if (opKind == opKind_Variable)
+                    if (variableIndex > 0)
                     {
-                        operandValues[i] = ReadVariableValue(bytes[address++]);
+                        operandValues[operandCount++] = locals[variableIndex - 0x01];
                     }
-                    else if (opKind == opKind_SmallConstant)
+                    else
                     {
-                        operandValues[i] = bytes[address++];
-                    }
-                    else // opKind_LargeConstant
-                    {
-                        operandValues[i] = bytes.ReadWord(address);
-                        address += 2;
+                        if (localStackSize == 0)
+                        {
+                            throw new InvalidOperationException("Local stack is empty.");
+                        }
+
+                        localStackSize--;
+                        operandValues[operandCount++] = (ushort)stack[stackPointer--];
                     }
                 }
                 else
                 {
-                    operandCount = i;
+                    operandValues[operandCount++] = bytes.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                }
+            }
+            else if ((kind & opKind_SmallConstant) != 0)
+            {
+                operandValues[operandCount++] = bytes[address++];
+            }
+            else // kind == opKind_LargeConstant
+            {
+                operandValues[operandCount++] = bytes.ReadWord(address);
+                address += 2;
+            }
+        }
+
+        private void LoadAllOperands(byte kinds, ref int address)
+        {
+            for (int i = 6; i >= 0; i -= 2)
+            {
+                byte kind = (byte)((kinds >> i) & 0x03);
+                if (kind == opKind_Omitted)
+                {
                     break;
                 }
+
+                LoadOperand(kind, ref address);
             }
         }
 
@@ -65,10 +96,10 @@ namespace ZDebug.Core.Execution
         {
             var b1 = bytes[address++];
 
-            var condition = (b1 & 0x80) == 0x80;
+            var condition = (b1 & 0x80) != 0;
 
             short offset;
-            if ((b1 & 0x40) == 0x40) // is single byte
+            if ((b1 & 0x40) != 0) // is single byte
             {
                 // bottom 6 bits
                 offset = (short)(b1 & 0x3f);
@@ -81,7 +112,7 @@ namespace ZDebug.Core.Execution
                 var tmp = (ushort)((b1 << 8) | b2);
 
                 // if bit 13, set bits 14 and 15 as well to produce proper signed value.
-                if ((tmp & 0x2000) == 0x2000)
+                if ((tmp & 0x2000) != 0)
                 {
                     tmp = (ushort)(tmp | 0xc000);
                 }
@@ -127,94 +158,64 @@ namespace ZDebug.Core.Execution
             startAddress = pc;
             int address = startAddress;
 
-            for (int i = 0; i < 8; i++)
+            operandCount = 0;
+
+            byte opByte = bytes[address++];
+
+            Opcode op;
+            if (opByte < 0x80) // 2OP opcodes
             {
-                operandKinds[i] = opKind_Omitted;
+                op = opcodes[opKind_Two + (opByte & 0x1f)]; // long form
+                LoadOperand((opByte & 0x40) != 0 ? opKind_Variable : opKind_SmallConstant, ref address);
+                LoadOperand((opByte & 0x20) != 0 ? opKind_Variable : opKind_SmallConstant, ref address);
+            }
+            else if (opByte < 0xb0) // 1OP opcodes
+            {
+                op = opcodes[opKind_One + (opByte & 0x0f)]; // short form
+                LoadOperand((byte)(opByte >> 4), ref address);
+            }
+            else if (opByte == 0xbe) // EXT opcodes
+            {
+                op = opcodes[opKind_Ext + bytes[address++]];
+                LoadAllOperands(bytes[address++], ref address);
+            }
+            else if (opByte < 0xc0) // 0OP opcodes
+            {
+                op = opcodes[opKind_Zero + (opByte & 0x0f)]; // short form
+            }
+            else // VAR opcodes
+            {
+                op = opcodes[(opByte < 0xe0 ? opKind_Two : opKind_Var) + (opByte & 0x1f)]; // var form
+
+                if (!op.IsDoubleVariable)
+                {
+                    LoadAllOperands(bytes[address++], ref address);
+                }
+                else
+                {
+                    byte kinds1 = bytes[address++];
+                    byte kinds2 = bytes[address++];
+                    LoadAllOperands(kinds1, ref address);
+                    LoadAllOperands(kinds2, ref address);
+                }
             }
 
-            var opByte = bytes[address++];
-
-            if (opByte >= 0x00 && opByte <= 0x1f)
-            {
-                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
-                operandKinds[0] = opKind_SmallConstant;
-                operandKinds[1] = opKind_SmallConstant;
-            }
-            else if (opByte >= 0x20 && opByte <= 0x3f)
-            {
-                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
-                operandKinds[0] = opKind_SmallConstant;
-                operandKinds[1] = opKind_Variable;
-            }
-            else if (opByte >= 0x40 && opByte <= 0x5f)
-            {
-                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
-                operandKinds[0] = opKind_Variable;
-                operandKinds[1] = opKind_SmallConstant;
-            }
-            else if (opByte >= 0x60 && opByte <= 0x7f)
-            {
-                opcode = opcodeTable[OpcodeKind.TwoOp, LongForm(opByte)];
-                operandKinds[0] = opKind_Variable;
-                operandKinds[1] = opKind_Variable;
-            }
-            else if (opByte >= 0x80 && opByte <= 0x8f)
-            {
-                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
-                operandKinds[0] = opKind_LargeConstant;
-            }
-            else if (opByte >= 0x90 && opByte <= 0x9f)
-            {
-                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
-                operandKinds[0] = opKind_SmallConstant;
-            }
-            else if (opByte >= 0xa0 && opByte <= 0xaf)
-            {
-                opcode = opcodeTable[OpcodeKind.OneOp, ShortForm(opByte)];
-                operandKinds[0] = opKind_Variable;
-            }
-            else if ((opByte >= 0xb0 && opByte <= 0xbd) || opByte == 0xbf)
-            {
-                opcode = opcodeTable[OpcodeKind.ZeroOp, ShortForm(opByte)];
-            }
-            else if (opByte == 0xbe)
-            {
-                opcode = opcodeTable[OpcodeKind.Ext, memory.ReadByte(ref address)];
-                ReadOperandKinds(ref address);
-            }
-            else if (opByte >= 0xc0 && opByte <= 0xdf)
-            {
-                opcode = opcodeTable[OpcodeKind.TwoOp, VarForm(opByte)];
-                ReadOperandKinds(ref address);
-            }
-            else // opByte >= 0xe0 && opByte <= 0xff
-            {
-                opcode = opcodeTable[OpcodeKind.VarOp, VarForm(opByte)];
-                ReadOperandKinds(ref address);
-            }
-
-            if (opcode.IsDoubleVariable)
-            {
-                ReadOperandKinds(ref address, 4);
-            }
-
-            ReadOperandValues(ref address);
-
-            if (opcode.HasStoreVariable)
+            if (op.HasStoreVariable)
             {
                 storeVariable = bytes[address++];
             }
 
-            if (opcode.HasBranch)
+            if (op.HasBranch)
             {
                 branch = ReadBranch(ref address);
             }
 
-            if (opcode.HasZText)
+            if (op.HasZText)
             {
                 zwords = ReadZWords(ref address);
             }
 
+            opcode = op;
             pc += address - startAddress;
         }
     }

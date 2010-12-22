@@ -45,7 +45,7 @@ namespace ZDebug.PerfHarness
 
         static void Main(string[] args)
         {
-            string path = ZORK1;
+            string path = BRONZE;
 
             Mark("Reading story");
 
@@ -56,8 +56,8 @@ namespace ZDebug.PerfHarness
             var done = false;
             Action doneAction = () => { done = true; };
 
-            var mockScreen = new MockScreen(ZORK1_SCRIPT, doneAction);
-            //var mockScreen = new MockScreen(doneAction);
+            var mockScreen = new MockScreen(BRONZE_SCRIPT, doneAction, processor);
+            //var mockScreen = new MockScreen(doneAction, processor);
             processor.SetRandomSeed(42);
             processor.RegisterScreen(mockScreen);
 
