@@ -3,6 +3,7 @@ using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -309,7 +310,7 @@ namespace ZDebug.Core.Execution
             ushort byteIndex = operandValues[1];
 
             int address = array + byteIndex;
-            byte value = memory.ReadByte(address);
+            byte value = bytes[address];
 
             WriteVariableValue(storeVariable, value);
         }
@@ -320,7 +321,7 @@ namespace ZDebug.Core.Execution
             ushort wordIndex = operandValues[1];
 
             int address = array + (wordIndex * 2);
-            ushort value = memory.ReadWord(address);
+            ushort value = bytes.ReadWord(address);
 
             WriteVariableValue(storeVariable, value);
         }

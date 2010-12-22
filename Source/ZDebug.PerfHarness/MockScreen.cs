@@ -168,7 +168,7 @@ namespace ZDebug.PerfHarness
             else
             {
                 var command = commands[commandIndex++];
-                //Program.Mark(string.Format("Command: {0} ({1:#,#} instructions; {2:#,#} calls)", command, processor.InstructionCount, processor.CallCount));
+                Program.Mark(string.Format("Command: {0} ({1:#,#} instructions; {2:#,#} calls)", command, processor.InstructionCount, processor.CallCount));
                 output.AppendLine(command);
                 callback(command);
             }

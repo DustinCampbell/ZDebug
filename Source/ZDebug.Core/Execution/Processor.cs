@@ -30,7 +30,8 @@ namespace ZDebug.Core.Execution
         private int localCount;
         private int localStackSize = 0;
         private int argumentCount = 0;
-        private byte? callStoreVariable;
+        private bool hasCallStoreVariable;
+        private byte callStoreVariable;
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -82,7 +83,7 @@ namespace ZDebug.Core.Execution
 
             stack[++stackPointer] = localCount;
             stack[++stackPointer] = pc;
-            stack[++stackPointer] = callStoreVariable ?? -1;
+            stack[++stackPointer] = hasCallStoreVariable ? callStoreVariable : -1;
         }
 
         /// <summary>
@@ -104,7 +105,11 @@ namespace ZDebug.Core.Execution
             }
 
             var variableIndex = stack[stackPointer--];
-            callStoreVariable = variableIndex >= 0 ? (byte?)variableIndex : null;
+            hasCallStoreVariable = variableIndex >= 0;
+            if (hasCallStoreVariable)
+            {
+                callStoreVariable = (byte)variableIndex;
+            }
 
             pc = stack[stackPointer--];
             localCount = stack[stackPointer--];
@@ -180,15 +185,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void WriteStoreVariable(byte? storeVarIndex, ushort value)
-        {
-            if (storeVarIndex != null)
-            {
-                WriteVariableValue(storeVarIndex.Value, value);
-            }
-        }
-
-        private void Call(int address, byte? storeVarIndex = null)
+        private void Call(int address, short storeVarIndex = -1)
         {
             if (address < 0)
             {
@@ -201,7 +198,10 @@ namespace ZDebug.Core.Execution
                 // illegal to call a packed address where no routine is present.
 
                 // If there is a store variable, write 0 to it.
-                WriteStoreVariable(storeVarIndex, 0);
+                if (storeVarIndex >= 0)
+                {
+                    WriteVariableValue((byte)storeVarIndex, 0);
+                }
             }
             else
             {
@@ -215,8 +215,8 @@ namespace ZDebug.Core.Execution
                 argumentCount = operandCount - 1;
 
                 // read locals
-                localCount = bytes[pc++];
-                if (story.Version <= 4)
+                this.localCount = bytes[pc++];
+                if (version <= 4)
                 {
                     for (int i = 0; i < localCount; i++)
                     {
@@ -225,19 +225,18 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    for (int i = 0; i < localCount; i++)
-                    {
-                        locals[i] = 0;
-                    }
+                    Array.Clear(locals, 0, localCount);
                 }
 
                 var numberToCopy = Math.Min(argumentCount, locals.Length);
-                for (int i = 0; i < numberToCopy; i++)
+                Array.Copy(operandValues, 1, locals, 0, numberToCopy);
+
+                hasCallStoreVariable = storeVarIndex >= 0;
+                if (hasCallStoreVariable)
                 {
-                    locals[i] = operandValues[i + 1];
+                    callStoreVariable = (byte)storeVarIndex;
                 }
 
-                callStoreVariable = storeVarIndex;
                 localStackSize = 0;
 
                 var handler = EnterStackFrame;
@@ -252,12 +251,16 @@ namespace ZDebug.Core.Execution
 
         private void Return(ushort value)
         {
+            var hasStoreVar = hasCallStoreVariable;
             var storeVar = callStoreVariable;
             var oldAddress = pc;
 
             PopFrame();
 
-            WriteStoreVariable(storeVar, value);
+            if (hasStoreVar)
+            {
+                WriteVariableValue(storeVar, value);
+            }
 
             var handler = ExitStackFrame;
             if (handler != null)

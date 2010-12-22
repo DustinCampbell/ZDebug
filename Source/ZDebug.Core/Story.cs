@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Dictionary;
 using ZDebug.Core.Execution;
@@ -16,6 +17,8 @@ namespace ZDebug.Core
         private readonly int serialNumber;
         private readonly ushort releaseNumber;
         private readonly ushort actualChecksum;
+        private readonly ushort routinesOffset;
+        private readonly ushort stringsOffset;
 
         private readonly InstructionCache instructionCache;
 
@@ -35,6 +38,8 @@ namespace ZDebug.Core
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
             this.actualChecksum = memory.CalculateChecksum();
+            this.routinesOffset = memory.ReadRoutinesOffset();
+            this.stringsOffset = memory.ReadStringsOffset();
             this.instructionCache = new InstructionCache((memory.Size - memory.ReadStaticMemoryBase()) / 8);
             this.ztext = new ZText(memory);
             this.memoryMap = new MemoryMap(memory);
@@ -69,12 +74,44 @@ namespace ZDebug.Core
 
         public int UnpackRoutineAddress(ushort byteAddress)
         {
-            return memory.UnpackRoutineAddress(byteAddress);
+            switch (version)
+            {
+                case 1:
+                case 2:
+                case 3:
+                    return byteAddress * 2;
+                case 4:
+                case 5:
+                    return byteAddress * 4;
+                case 6:
+                case 7:
+                    return (byteAddress * 4) + (routinesOffset * 8);
+                case 8:
+                    return byteAddress * 8;
+                default:
+                    throw new InvalidOperationException("Invalid version number: " + version);
+            }
         }
 
         public int UnpackStringAddress(ushort byteAddress)
         {
-            return memory.UnpackStringAddress(byteAddress);
+            switch (version)
+            {
+                case 1:
+                case 2:
+                case 3:
+                    return byteAddress * 2;
+                case 4:
+                case 5:
+                    return byteAddress * 4;
+                case 6:
+                case 7:
+                    return (byteAddress * 4) + (stringsOffset * 8);
+                case 8:
+                    return byteAddress * 8;
+                default:
+                    throw new InvalidOperationException("Invalid version number: " + version);
+            }
         }
 
         public Memory Memory
