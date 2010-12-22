@@ -300,6 +300,18 @@ namespace ZDebug.Core.Execution
 
         private string DecodeEmbeddedText()
         {
+            int count = 0;
+            while (true)
+            {
+                var zword = bytes.ReadWord(pc + (count++ * 2));
+                if ((zword & 0x8000) != 0)
+                {
+                    break;
+                }
+            }
+
+            var zwords = memory.ReadWords(ref pc, count);
+
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }
 

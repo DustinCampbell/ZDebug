@@ -26,13 +26,12 @@ namespace ZDebug.Core.Execution
         private byte storeVariable;
         private bool branchCondition;
         private short branchOffset;
-        private ushort[] zwords;
 
-        private void LoadOperand(byte kind, ref int address)
+        private void LoadOperand(byte kind)
         {
             if ((kind & opKind_Variable) != 0)
             {
-                byte variableIndex = bytes[address++];
+                byte variableIndex = bytes[pc++];
                 if (variableIndex < 16)
                 {
                     if (variableIndex > 0)
@@ -57,16 +56,16 @@ namespace ZDebug.Core.Execution
             }
             else if ((kind & opKind_SmallConstant) != 0)
             {
-                operandValues[operandCount++] = bytes[address++];
+                operandValues[operandCount++] = bytes[pc++];
             }
             else // kind == opKind_LargeConstant
             {
-                operandValues[operandCount++] = bytes.ReadWord(address);
-                address += 2;
+                operandValues[operandCount++] = bytes.ReadWord(pc);
+                pc += 2;
             }
         }
 
-        private void LoadAllOperands(byte kinds, ref int address)
+        private void LoadAllOperands(byte kinds)
         {
             for (int i = 6; i >= 0; i -= 2)
             {
@@ -76,11 +75,11 @@ namespace ZDebug.Core.Execution
                     break;
                 }
 
-                LoadOperand(kind, ref address);
+                LoadOperand(kind);
             }
         }
 
-        private void ReadBranch(ref int address)
+        private void ReadBranch()
         {
             /* Instructions which test a condition are called "branch" instructions. The branch information is
              * stored in one or two bytes, indicating what to do with the result of the test. If bit 7 of the first
@@ -89,7 +88,7 @@ namespace ZDebug.Core.Execution
              * 6 bits. If bit 6 is clear, then the offset is a signed 14-bit number given in bits 0 to 5 of the first
              * byte followed by all 8 of the second. */
 
-            byte specifier = bytes[address++];
+            byte specifier = bytes[pc++];
 
             byte offset1 = (byte)(specifier & 0x3f);
 
@@ -101,11 +100,11 @@ namespace ZDebug.Core.Execution
                     offset1 |= 0xc0;
                 }
 
-                byte offset2 = bytes[address++];
+                byte offset2 = bytes[pc++];
 
                 offset = (ushort)((offset1 << 8) | offset2);
             }
-            else // short branch
+            else // short branchOffset
             {
                 offset = offset1;
             }
@@ -114,46 +113,30 @@ namespace ZDebug.Core.Execution
             branchOffset = (short)offset;
         }
 
-        private ushort[] ReadZWords(ref int address)
-        {
-            int count = 0;
-            while (true)
-            {
-                var zword = memory.ReadWord(address + (count++ * 2));
-                if ((zword & 0x8000) != 0)
-                {
-                    break;
-                }
-            }
-
-            return memory.ReadWords(ref address, count);
-        }
-
         private void ReadNextInstruction()
         {
             startAddress = pc;
-            int address = startAddress;
 
             operandCount = 0;
 
-            byte opByte = bytes[address++];
+            byte opByte = bytes[pc++];
 
             Opcode op;
             if (opByte < 0x80) // 2OP opcodes
             {
                 op = opcodes[opKind_Two + (opByte & 0x1f)]; // long form
-                LoadOperand((opByte & 0x40) != 0 ? opKind_Variable : opKind_SmallConstant, ref address);
-                LoadOperand((opByte & 0x20) != 0 ? opKind_Variable : opKind_SmallConstant, ref address);
+                LoadOperand((opByte & 0x40) != 0 ? opKind_Variable : opKind_SmallConstant);
+                LoadOperand((opByte & 0x20) != 0 ? opKind_Variable : opKind_SmallConstant);
             }
             else if (opByte < 0xb0) // 1OP opcodes
             {
                 op = opcodes[opKind_One + (opByte & 0x0f)]; // short form
-                LoadOperand((byte)(opByte >> 4), ref address);
+                LoadOperand((byte)(opByte >> 4));
             }
             else if (opByte == 0xbe) // EXT opcodes
             {
-                op = opcodes[opKind_Ext + bytes[address++]];
-                LoadAllOperands(bytes[address++], ref address);
+                op = opcodes[opKind_Ext + bytes[pc++]];
+                LoadAllOperands(bytes[pc++]);
             }
             else if (opByte < 0xc0) // 0OP opcodes
             {
@@ -165,34 +148,28 @@ namespace ZDebug.Core.Execution
 
                 if (!op.IsDoubleVariable)
                 {
-                    LoadAllOperands(bytes[address++], ref address);
+                    LoadAllOperands(bytes[pc++]);
                 }
                 else
                 {
-                    byte kinds1 = bytes[address++];
-                    byte kinds2 = bytes[address++];
-                    LoadAllOperands(kinds1, ref address);
-                    LoadAllOperands(kinds2, ref address);
+                    byte kinds1 = bytes[pc++];
+                    byte kinds2 = bytes[pc++];
+                    LoadAllOperands(kinds1);
+                    LoadAllOperands(kinds2);
                 }
             }
 
             if (op.HasStoreVariable)
             {
-                storeVariable = bytes[address++];
+                storeVariable = bytes[pc++];
             }
 
             if (op.HasBranch)
             {
-                ReadBranch(ref address);
-            }
-
-            if (op.HasZText)
-            {
-                zwords = ReadZWords(ref address);
+                ReadBranch();
             }
 
             opcode = op;
-            pc += address - startAddress;
         }
     }
 }

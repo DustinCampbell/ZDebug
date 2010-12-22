@@ -43,9 +43,9 @@ namespace ZDebug.PerfHarness
             Console.WriteLine(text);
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
-            string path = BRONZE;
+            string path = ZORK1;
 
             Mark("Reading story");
 
@@ -56,7 +56,7 @@ namespace ZDebug.PerfHarness
             var done = false;
             Action doneAction = () => { done = true; };
 
-            var mockScreen = new MockScreen(BRONZE_SCRIPT, doneAction, processor);
+            var mockScreen = new MockScreen(ZORK1_SCRIPT, doneAction, processor);
             //var mockScreen = new MockScreen(doneAction, processor);
             processor.SetRandomSeed(42);
             processor.RegisterScreen(mockScreen);
@@ -76,7 +76,7 @@ namespace ZDebug.PerfHarness
             }
             catch (Exception ex)
             {
-                Mark(ex.GetType().FullName + ": " + ex.Message);
+                Mark(string.Format("{0}: {1}", ex.GetType().FullName, ex.Message));
             }
 
             sw.Stop();
