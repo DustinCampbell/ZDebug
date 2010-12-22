@@ -271,23 +271,22 @@ namespace ZDebug.Core.Execution
             pc += offset - 2;
         }
 
-        private void Branch(Branch branch)
+        private void Branch(bool condition)
         {
-            if (branch.Kind == BranchKind.Address)
+            if (branchCondition == condition)
             {
-                pc += branch.Offset - 2;
-            }
-            else if (branch.Kind == BranchKind.RFalse)
-            {
-                Return(0);
-            }
-            else if (branch.Kind == BranchKind.RTrue)
-            {
-                Return(1);
-            }
-            else
-            {
-                throw new NotSupportedException();
+                if (branchOffset == 0)
+                {
+                    Return(0);
+                }
+                else if (branchOffset == 1)
+                {
+                    Return(1);
+                }
+                else
+                {
+                    pc += branchOffset - 2;
+                }
             }
         }
 

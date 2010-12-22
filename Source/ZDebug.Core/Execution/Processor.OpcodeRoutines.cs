@@ -124,12 +124,9 @@ namespace ZDebug.Core.Execution
             ushort bitmap = operandValues[0];
             ushort flags = operandValues[1];
 
-            bool result = (bitmap & flags) == flags;
+            bool result = (bitmap & flags) != 0;
 
-            if (result == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(result);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -157,10 +154,7 @@ namespace ZDebug.Core.Execution
 
             WriteVariableValue(varIdx, (ushort)value, indirect: true);
 
-            if ((value < test) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(value < test);
         }
 
         internal void op_inc()
@@ -184,10 +178,7 @@ namespace ZDebug.Core.Execution
 
             WriteVariableValue(varIdx, (ushort)value, indirect: true);
 
-            if ((value > test) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(value > test);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -208,10 +199,7 @@ namespace ZDebug.Core.Execution
                 }
             }
 
-            if (result == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(result);
         }
 
         internal void op_jg()
@@ -219,10 +207,7 @@ namespace ZDebug.Core.Execution
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
-            if ((x > y) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(x > y);
         }
 
         internal void op_jin()
@@ -232,10 +217,7 @@ namespace ZDebug.Core.Execution
 
             ushort obj1Parent = objectTable.ReadParentNumberByObjectNumber(obj1);
 
-            if ((obj1Parent == obj2) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(obj1Parent == obj2);
         }
 
         internal void op_jl()
@@ -243,10 +225,7 @@ namespace ZDebug.Core.Execution
             short x = (short)operandValues[0];
             short y = (short)operandValues[1];
 
-            if ((x < y) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(x < y);
         }
 
         internal void op_jump()
@@ -260,10 +239,7 @@ namespace ZDebug.Core.Execution
         {
             ushort x = operandValues[0];
 
-            if ((x == 0) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(x == 0);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -446,11 +422,7 @@ namespace ZDebug.Core.Execution
                     {
                         WriteVariableValue(storeVariable, address);
 
-                        if (branch.Condition)
-                        {
-                            Branch(branch);
-                        }
-
+                        Branch(true);
                         return;
                     }
                 }
@@ -461,11 +433,7 @@ namespace ZDebug.Core.Execution
                     {
                         WriteVariableValue(storeVariable, address);
 
-                        if (branch.Condition)
-                        {
-                            Branch(branch);
-                        }
-
+                        Branch(true);
                         return;
                     }
                 }
@@ -475,10 +443,7 @@ namespace ZDebug.Core.Execution
 
             WriteVariableValue(storeVariable, 0);
 
-            if (!branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(false);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -530,10 +495,7 @@ namespace ZDebug.Core.Execution
 
             WriteVariableValue(storeVariable, childNum);
 
-            if ((childNum > 0) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(childNum > 0);
         }
 
         internal void op_get_next_prop()
@@ -656,10 +618,7 @@ namespace ZDebug.Core.Execution
 
             WriteVariableValue(storeVariable, siblingNum);
 
-            if ((siblingNum > 0) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(siblingNum > 0);
         }
 
         internal void op_insert_obj()
@@ -699,10 +658,7 @@ namespace ZDebug.Core.Execution
             ushort objNum = operandValues[0];
             byte attrNum = (byte)operandValues[1];
 
-            if (objectTable.HasAttributeByObjectNumber(objNum, attrNum) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(objectTable.HasAttributeByObjectNumber(objNum, attrNum));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1136,15 +1092,12 @@ namespace ZDebug.Core.Execution
         {
             ushort argNumber = operandValues[0];
 
-            if ((argNumber <= argumentCount) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(argNumber <= argumentCount);
         }
 
         internal void op_piracy()
         {
-            Branch(branch);
+            Branch(true);
         }
 
         internal void op_quit()
@@ -1216,10 +1169,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_verify()
         {
-            if ((story.ActualChecksum == story.Memory.ReadChecksum()) == branch.Condition)
-            {
-                Branch(branch);
-            }
+            Branch(story.ActualChecksum == memory.ReadChecksum());
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////

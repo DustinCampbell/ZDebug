@@ -25,7 +25,8 @@ namespace ZDebug.Core.Execution
         private ushort[] operandValues = new ushort[8];
         private int operandCount;
         private byte storeVariable;
-        private Branch branch;
+        private bool branchCondition;
+        private short branchOffset;
         private ushort[] zwords;
 
         private void ReadOperandKinds(ref int address, int offset = 0)
@@ -92,7 +93,7 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private Branch ReadBranch(ref int address)
+        private void ReadBranch(ref int address)
         {
             var b1 = bytes[address++];
 
@@ -120,7 +121,8 @@ namespace ZDebug.Core.Execution
                 offset = (short)tmp;
             }
 
-            return new Branch(condition, offset);
+            this.branchCondition = condition;
+            this.branchOffset = offset;
         }
 
         private ushort[] ReadZWords(ref int address)
@@ -207,7 +209,7 @@ namespace ZDebug.Core.Execution
 
             if (op.HasBranch)
             {
-                branch = ReadBranch(ref address);
+                ReadBranch(ref address);
             }
 
             if (op.HasZText)
