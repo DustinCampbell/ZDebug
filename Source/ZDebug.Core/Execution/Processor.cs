@@ -123,7 +123,7 @@ namespace ZDebug.Core.Execution
             argumentCount = stack[stackPointer--];
         }
 
-        private ushort ReadVariableValue(byte variableIndex, bool indirect = false)
+        private ushort ReadVariableValue(byte variableIndex)
         {
             if (variableIndex < 16)
             {
@@ -138,15 +138,8 @@ namespace ZDebug.Core.Execution
                         throw new InvalidOperationException("Local stack is empty.");
                     }
 
-                    if (!indirect)
-                    {
-                        localStackSize--;
-                        return (ushort)stack[stackPointer--];
-                    }
-                    else
-                    {
-                        return (ushort)stack[stackPointer];
-                    }
+                    localStackSize--;
+                    return (ushort)stack[stackPointer--];
                 }
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
@@ -155,24 +148,58 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void WriteVariableValue(byte variableIndex, ushort value, bool indirect = false)
+        private ushort ReadVariableValueIndirectly(byte variableIndex)
         {
-            if (variableIndex == 0x00) // stack
+            if (variableIndex < 16)
             {
-                if (!indirect)
+                if (variableIndex > 0)
                 {
-                    localStackSize++;
-                    stack[++stackPointer] = value;
+                    return locals[variableIndex - 0x01];
                 }
                 else
                 {
                     if (localStackSize == 0)
                     {
-                        throw new InvalidOperationException("Stack is empty.");
+                        throw new InvalidOperationException("Local stack is empty.");
                     }
 
-                    stack[stackPointer] = value;
+                    return (ushort)stack[stackPointer];
                 }
+            }
+            else // global: variableIndex >= 0x10 && variableIndex <= 0xff
+            {
+                return bytes.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+            }
+        }
+
+        private void WriteVariableValue(byte variableIndex, ushort value)
+        {
+            if (variableIndex == 0x00) // stack
+            {
+                localStackSize++;
+                stack[++stackPointer] = value;
+            }
+            else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
+            {
+                locals[variableIndex - 0x01] = value;
+            }
+            else // global: variableIndex >= 0x10 && variableIndex <= 0xff
+            {
+                var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
+                bytes.WriteWord(address, value);
+            }
+        }
+
+        private void WriteVariableValueIndirectly(byte variableIndex, ushort value)
+        {
+            if (variableIndex == 0x00) // stack
+            {
+                if (localStackSize == 0)
+                {
+                    throw new InvalidOperationException("Stack is empty.");
+                }
+
+                stack[stackPointer] = value;
             }
             else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
             {
@@ -311,7 +338,7 @@ namespace ZDebug.Core.Execution
 
             if ((specifier & 0x80) != 0)
             {
-            	if (offset > 1)
+                if (offset > 1)
                 {
                     pc += (short)offset - 2;
                 }
@@ -324,6 +351,8 @@ namespace ZDebug.Core.Execution
 
         private void Store(ushort value)
         {
+            var storeVariable = bytes[pc++];
+
             WriteVariableValue(storeVariable, value);
         }
 

@@ -138,10 +138,10 @@ namespace ZDebug.Core.Execution
         {
             byte varIdx = (byte)operandValues[0];
 
-            short value = (short)ReadVariableValue(varIdx, indirect: true);
+            short value = (short)ReadVariableValueIndirectly(varIdx);
             value -= 1;
 
-            WriteVariableValue(varIdx, (ushort)value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, (ushort)value);
         }
 
         internal void op_dec_chk()
@@ -150,10 +150,10 @@ namespace ZDebug.Core.Execution
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariableValue(varIdx, indirect: true);
+            short value = (short)ReadVariableValueIndirectly(varIdx);
             value -= 1;
 
-            WriteVariableValue(varIdx, (ushort)value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, (ushort)value);
 
             Branch(value < test);
         }
@@ -162,10 +162,10 @@ namespace ZDebug.Core.Execution
         {
             byte varIdx = (byte)operandValues[0];
 
-            short value = (short)ReadVariableValue(varIdx, indirect: true);
+            short value = (short)ReadVariableValueIndirectly(varIdx);
             value += 1;
 
-            WriteVariableValue(varIdx, (ushort)value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, (ushort)value);
         }
 
         internal void op_inc_chk()
@@ -174,10 +174,10 @@ namespace ZDebug.Core.Execution
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariableValue(varIdx, indirect: true);
+            short value = (short)ReadVariableValueIndirectly(varIdx);
             value += 1;
 
-            WriteVariableValue(varIdx, (ushort)value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, (ushort)value);
 
             Branch(value > test);
         }
@@ -260,6 +260,8 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
+            var storeVariable = bytes[pc++];
+
             Call(address, storeVariable);
         }
 
@@ -299,7 +301,7 @@ namespace ZDebug.Core.Execution
         {
             byte varIdx = (byte)operandValues[0];
 
-            ushort value = ReadVariableValue(varIdx, indirect: true);
+            ushort value = ReadVariableValueIndirectly(varIdx);
 
             Store(value);
         }
@@ -332,7 +334,7 @@ namespace ZDebug.Core.Execution
 
             ushort value = operandValues[1];
 
-            WriteVariableValue(varIdx, value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, value);
         }
 
         internal void op_storeb()
@@ -449,7 +451,7 @@ namespace ZDebug.Core.Execution
 
             ushort value = ReadVariableValue(0x00); // stack
 
-            WriteVariableValue(varIdx, value, indirect: true);
+            WriteVariableValueIndirectly(varIdx, value);
         }
 
         internal void op_push()
@@ -1121,10 +1123,12 @@ namespace ZDebug.Core.Execution
             else if (range < 0)
             {
                 random = new Random(+range);
+                Store(0);
             }
             else // range = 0s
             {
                 random = new Random((int)DateTime.Now.Ticks);
+                Store(0);
             }
         }
 

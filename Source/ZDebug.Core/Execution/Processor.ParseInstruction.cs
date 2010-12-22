@@ -23,7 +23,6 @@ namespace ZDebug.Core.Execution
         private Opcode opcode;
         private readonly ushort[] operandValues = new ushort[8];
         private int operandCount;
-        private byte storeVariable;
 
         private void LoadOperand(byte kind)
         {
@@ -121,11 +120,6 @@ namespace ZDebug.Core.Execution
                     LoadAllOperands(kinds1);
                     LoadAllOperands(kinds2);
                 }
-            }
-
-            if (op.HasStoreVariable)
-            {
-                storeVariable = bytes[pc++];
             }
 
             opcode = op;
