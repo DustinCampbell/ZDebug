@@ -21,25 +21,12 @@ namespace ZDebug.Core.Execution
         // instruction state
         private int startAddress;
         private Opcode opcode;
-        private byte[] operandKinds = new byte[8];
-        private ushort[] operandValues = new ushort[8];
+        private readonly ushort[] operandValues = new ushort[8];
         private int operandCount;
         private byte storeVariable;
         private bool branchCondition;
         private short branchOffset;
         private ushort[] zwords;
-
-        private void ReadOperandKinds(ref int address, int offset = 0)
-        {
-            byte b = bytes[address++];
-
-            byte[] opKinds = operandKinds;
-
-            opKinds[offset] = (byte)((b & 0xc0) >> 6);
-            opKinds[offset + 1] = (byte)((b & 0x30) >> 4);
-            opKinds[offset + 2] = (byte)((b & 0x0c) >> 2);
-            opKinds[offset + 3] = (byte)(b & 0x03);
-        }
 
         private void LoadOperand(byte kind, ref int address)
         {
@@ -65,7 +52,7 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    operandValues[operandCount++] = bytes.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                    operandValues[operandCount++] = bytes.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
                 }
             }
             else if ((kind & opKind_SmallConstant) != 0)
@@ -95,34 +82,36 @@ namespace ZDebug.Core.Execution
 
         private void ReadBranch(ref int address)
         {
-            var b1 = bytes[address++];
+            /* Instructions which test a condition are called "branch" instructions. The branch information is
+             * stored in one or two bytes, indicating what to do with the result of the test. If bit 7 of the first
+             * byte is 0, a branch occurs when the condition was false; if 1, then branch is on true. If bit 6 is set,
+             * then the branch occupies 1 byte only, and the "offset" is in the range 0 to 63, given in the bottom
+             * 6 bits. If bit 6 is clear, then the offset is a signed 14-bit number given in bits 0 to 5 of the first
+             * byte followed by all 8 of the second. */
 
-            var condition = (b1 & 0x80) != 0;
+            byte specifier = bytes[address++];
 
-            short offset;
-            if ((b1 & 0x40) != 0) // is single byte
+            byte offset1 = (byte)(specifier & 0x3f);
+
+            ushort offset;
+            if ((specifier & 0x40) == 0) // long branch
             {
-                // bottom 6 bits
-                offset = (short)(b1 & 0x3f);
-            }
-            else // is two bytes
-            {
-                // OR bottom 6 bits with the next byte
-                b1 = (byte)(b1 & 0x3f);
-                var b2 = bytes[address++];
-                var tmp = (ushort)((b1 << 8) | b2);
-
-                // if bit 13, set bits 14 and 15 as well to produce proper signed value.
-                if ((tmp & 0x2000) != 0)
+                if ((offset1 & 0x20) != 0) // propogate sign bit
                 {
-                    tmp = (ushort)(tmp | 0xc000);
+                    offset1 |= 0xc0;
                 }
 
-                offset = (short)tmp;
+                byte offset2 = bytes[address++];
+
+                offset = (ushort)((offset1 << 8) | offset2);
+            }
+            else // short branch
+            {
+                offset = offset1;
             }
 
-            this.branchCondition = condition;
-            this.branchOffset = offset;
+            branchCondition = (specifier & 0x80) != 0;
+            branchOffset = (short)offset;
         }
 
         private ushort[] ReadZWords(ref int address)
@@ -138,21 +127,6 @@ namespace ZDebug.Core.Execution
             }
 
             return memory.ReadWords(ref address, count);
-        }
-
-        private static byte LongForm(byte opByte)
-        {
-            return (byte)(opByte & 0x1f);
-        }
-
-        private static byte ShortForm(byte opByte)
-        {
-            return (byte)(opByte & 0x0f);
-        }
-
-        private static byte VarForm(byte opByte)
-        {
-            return (byte)(opByte & 0x1f);
         }
 
         private void ReadNextInstruction()

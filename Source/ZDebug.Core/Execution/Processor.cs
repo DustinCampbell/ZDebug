@@ -293,9 +293,14 @@ namespace ZDebug.Core.Execution
             }
         }
 
+        private void Store(ushort value)
+        {
+            WriteVariableValue(storeVariable, value);
+        }
+
         private void WriteProperty(int objNum, int propNum, ushort value)
         {
-            var obj = this.objectTable.GetByNumber(objNum);
+            var obj = objectTable.GetByNumber(objNum);
             var prop = obj.PropertyTable.GetByNumber(propNum);
 
             if (prop.DataLength == 2)
@@ -393,7 +398,7 @@ namespace ZDebug.Core.Execution
                 story.Memory.WriteByte(0x01, flags1);
             }
 
-            this.outputStreams.RegisterScreen(screen);
+            outputStreams.RegisterScreen(screen);
         }
 
         public void RegisterMessageLog(IMessageLog messageLog)
@@ -408,7 +413,7 @@ namespace ZDebug.Core.Execution
 
         public void SetRandomSeed(int seed)
         {
-            this.random = new Random(seed);
+            random = new Random(seed);
         }
 
         public int PC
