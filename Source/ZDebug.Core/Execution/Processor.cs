@@ -28,8 +28,8 @@ namespace ZDebug.Core.Execution
         private int stackPointer = -1;
         private readonly ushort[] locals = new ushort[15];
         private int localCount;
-        private int localStackSize = 0;
-        private int argumentCount = 0;
+        private int localStackSize;
+        private int argumentCount;
         private bool hasCallStoreVariable;
         private byte callStoreVariable;
 
@@ -151,7 +151,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return bytes.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return bytes.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -180,7 +180,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                var address = this.globalVariableTableAddress + ((variableIndex - 0x10) * 2);
+                var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
                 bytes.WriteWord(address, value);
             }
         }
@@ -215,7 +215,7 @@ namespace ZDebug.Core.Execution
                 argumentCount = operandCount - 1;
 
                 // read locals
-                this.localCount = bytes[pc++];
+                localCount = bytes[pc++];
                 if (version <= 4)
                 {
                     for (int i = 0; i < localCount; i++)
@@ -296,6 +296,11 @@ namespace ZDebug.Core.Execution
         private void Store(ushort value)
         {
             WriteVariableValue(storeVariable, value);
+        }
+
+        private string DecodeEmbeddedText()
+        {
+            return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
         private void WriteProperty(int objNum, int propNum, ushort value)

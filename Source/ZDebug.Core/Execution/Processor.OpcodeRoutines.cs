@@ -711,7 +711,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_print()
         {
-            string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            string text = DecodeEmbeddedText();
 
             outputStreams.Print(text);
         }
@@ -759,7 +759,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_print_ret()
         {
-            string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            string text = DecodeEmbeddedText();
             outputStreams.Print(text + "\n");
             Return(1);
         }
