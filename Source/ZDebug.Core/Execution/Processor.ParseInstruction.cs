@@ -16,7 +16,7 @@ namespace ZDebug.Core.Execution
         private byte[] operandKinds = new byte[8];
         private ushort[] operandValues = new ushort[8];
         private int operandCount;
-        private Variable store;
+        private byte storeVariable;
         private Branch branch;
         private ushort[] zwords;
 
@@ -30,30 +30,6 @@ namespace ZDebug.Core.Execution
             operandKinds[offset + 3] = (byte)(b & 0x03);
         }
 
-        private Variable ReadVariable(ref int address)
-        {
-            return Variable.FromByte(memory.ReadByte(ref address));
-        }
-
-        private ushort ReadOperandValue(ref int address, byte kind)
-        {
-            switch (kind)
-            {
-                case opKind_LargeConstant:
-                    return memory.ReadWord(ref address);
-
-                case opKind_SmallConstant:
-                    return memory.ReadByte(ref address);
-
-                case opKind_Variable:
-                    Variable var = ReadVariable(ref address);
-                    return ReadVariableValue(var);
-
-                default:
-                    throw new InstructionReaderException("Attempted to read ommitted operand.");
-            }
-        }
-
         private void ReadOperandValues(ref int address)
         {
             operandCount = 8;
@@ -62,7 +38,20 @@ namespace ZDebug.Core.Execution
                 var opKind = operandKinds[i];
                 if (opKind != opKind_Omitted)
                 {
-                    operandValues[i] = ReadOperandValue(ref address, opKind);
+                    switch (opKind)
+                    {
+                        case opKind_LargeConstant:
+                            operandValues[i] = memory.ReadWord(ref address);
+                            break;
+
+                        case opKind_SmallConstant:
+                            operandValues[i] = memory.ReadByte(ref address);
+                            break;
+
+                        case opKind_Variable:
+                            operandValues[i] = ReadVariableValue(memory.ReadByte(ref address));
+                            break;
+                    }
                 }
                 else
                 {
@@ -213,7 +202,7 @@ namespace ZDebug.Core.Execution
 
             if (opcode.HasStoreVariable)
             {
-                store = ReadVariable(ref address);
+                storeVariable = memory.ReadByte(ref address);
             }
 
             if (opcode.HasBranch)

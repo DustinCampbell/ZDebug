@@ -29,7 +29,7 @@ namespace ZDebug.Core.Execution
         private int localCount;
         private int localStackSize = 0;
         private int argumentCount = 0;
-        private Variable callStore;
+        private byte? callStoreVariable;
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -81,7 +81,7 @@ namespace ZDebug.Core.Execution
 
             stack[++stackPointer] = localCount;
             stack[++stackPointer] = pc;
-            stack[++stackPointer] = callStore != null ? callStore.ToByte() : -1;
+            stack[++stackPointer] = callStoreVariable ?? -1;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace ZDebug.Core.Execution
             }
 
             var variableIndex = stack[stackPointer--];
-            callStore = variableIndex >= 0 ? Variable.FromByte((byte)variableIndex) : null;
+            callStoreVariable = variableIndex >= 0 ? (byte?)variableIndex : null;
 
             pc = stack[stackPointer--];
             localCount = stack[stackPointer--];
@@ -117,112 +117,98 @@ namespace ZDebug.Core.Execution
             argumentCount = stack[stackPointer--];
         }
 
-        private ushort ReadVariableValue(Variable variable, bool indirect = false)
+        private ushort ReadVariableValue(byte variableIndex, bool indirect = false)
         {
-            switch (variable.Kind)
+            if (variableIndex == 0x00) // stack
             {
-                case VariableKind.Stack:
-                    if (localStackSize == 0)
+                if (localStackSize == 0)
+                {
+                    throw new InvalidOperationException("Local stack is empty.");
+                }
+
+                if (indirect)
+                {
+                    return (ushort)stack[stackPointer];
+                }
+                else
+                {
+                    localStackSize--;
+                    var value = (ushort)stack[stackPointer--];
+
+                    var handler = StackPopped;
+                    if (handler != null)
                     {
-                        throw new InvalidOperationException("Local stack is empty.");
+                        handler(this, new StackEventArgs(value));
                     }
 
-                    if (indirect)
-                    {
-                        return (ushort)stack[stackPointer];
-                    }
-                    else
-                    {
-                        localStackSize--;
-                        var value = (ushort)stack[stackPointer--];
-
-                        var handler = StackPopped;
-                        if (handler != null)
-                        {
-                            handler(this, new StackEventArgs(value));
-                        }
-
-                        return value;
-                    }
-
-                case VariableKind.Local:
-                    return locals[variable.Index];
-
-                case VariableKind.Global:
-                    return memory.ReadWord(this.globalVariableTableAddress + (variable.Index * 2));
-
-                default:
-                    throw new InvalidOperationException();
+                    return value;
+                }
+            }
+            else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
+            {
+                return locals[variableIndex - 0x01];
+            }
+            else // global: variableIndex >= 0x10 && variableIndex <= 0xff
+            {
+                return memory.ReadWord(this.globalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
-        private void WriteVariableValue(Variable variable, ushort value, bool indirect = false)
+        private void WriteVariableValue(byte variableIndex, ushort value, bool indirect = false)
         {
-            switch (variable.Kind)
+            if (variableIndex == 0x00) // stack
             {
-                case VariableKind.Stack:
-                    if (indirect)
+                if (indirect)
+                {
+                    if (localStackSize == 0)
                     {
-                        if (localStackSize == 0)
-                        {
-                            throw new InvalidOperationException("Stack is empty.");
-                        }
-
-                        stack[stackPointer] = value;
-
-                        var handler = StackWritten;
-                        if (handler != null)
-                        {
-                            handler(this, new StackEventArgs(value));
-                        }
-                    }
-                    else
-                    {
-                        localStackSize++;
-                        stack[++stackPointer] = value;
-
-                        var handler = StackPushed;
-                        if (handler != null)
-                        {
-                            handler(this, new StackEventArgs(value));
-                        }
+                        throw new InvalidOperationException("Stack is empty.");
                     }
 
-                    break;
+                    stack[stackPointer] = value;
 
-                case VariableKind.Local:
+                    var handler = StackWritten;
+                    if (handler != null)
                     {
-                        var index = variable.Index;
-                        var oldValue = locals[index];
-                        locals[index] = value;
-
-                        var handler = LocalVariableChanged;
-                        if (handler != null)
-                        {
-                            handler(this, new VariableChangedEventArgs(index, oldValue, value));
-                        }
+                        handler(this, new StackEventArgs(value));
                     }
+                }
+                else
+                {
+                    localStackSize++;
+                    stack[++stackPointer] = value;
 
-                    break;
-
-                case VariableKind.Global:
+                    var handler = StackPushed;
+                    if (handler != null)
                     {
-                        var index = variable.Index;
-                        var address = this.globalVariableTableAddress + (index * 2);
-                        var oldValue = memory.ReadWord(address);
-                        memory.WriteWord(address, value);
-
-                        var handler = GlobalVariableChanged;
-                        if (handler != null)
-                        {
-                            handler(this, new VariableChangedEventArgs(index, oldValue, value));
-                        }
+                        handler(this, new StackEventArgs(value));
                     }
+                }
+            }
+            else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
+            {
+                var index = variableIndex - 0x01;
+                var oldValue = locals[index];
+                locals[index] = value;
 
-                    break;
+                var handler = LocalVariableChanged;
+                if (handler != null)
+                {
+                    handler(this, new VariableChangedEventArgs(index, oldValue, value));
+                }
+            }
+            else // global: variableIndex >= 0x10 && variableIndex <= 0xff
+            {
+                var index = variableIndex - 0x10;
+                var address = this.globalVariableTableAddress + (index * 2);
+                var oldValue = memory.ReadWord(address);
+                memory.WriteWord(address, value);
 
-                default:
-                    throw new InvalidOperationException();
+                var handler = GlobalVariableChanged;
+                if (handler != null)
+                {
+                    handler(this, new VariableChangedEventArgs(index, oldValue, value));
+                }
             }
         }
 
@@ -235,21 +221,21 @@ namespace ZDebug.Core.Execution
                 case OperandKind.SmallConstant:
                     return (byte)operand.Value;
                 case OperandKind.Variable:
-                    return ReadVariableValue(Variable.FromByte((byte)operand.Value));
+                    return ReadVariableValue((byte)operand.Value);
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        private void WriteStoreVariable(Variable storeVar, ushort value)
+        private void WriteStoreVariable(byte? storeVarIndex, ushort value)
         {
-            if (storeVar != null)
+            if (storeVarIndex != null)
             {
-                WriteVariableValue(storeVar, value);
+                WriteVariableValue(storeVarIndex.Value, value);
             }
         }
 
-        private void Call(int address, ushort[] opValues, int opCount, Variable storeVar = null)
+        private void Call(int address, ushort[] opValues, int opCount, byte? storeVarIndex = null)
         {
             if (address < 0)
             {
@@ -262,7 +248,7 @@ namespace ZDebug.Core.Execution
                 // illegal to call a packed address where no routine is present.
 
                 // If there is a store variable, write 0 to it.
-                WriteStoreVariable(storeVar, 0);
+                WriteStoreVariable(storeVarIndex, 0);
             }
             else
             {
@@ -298,7 +284,7 @@ namespace ZDebug.Core.Execution
                     locals[i] = opValues[i + 1];
                 }
 
-                callStore = storeVar;
+                callStoreVariable = storeVarIndex;
                 localStackSize = 0;
 
                 var handler = EnterStackFrame;
@@ -313,7 +299,7 @@ namespace ZDebug.Core.Execution
 
         private void Return(ushort value)
         {
-            var storeVar = callStore;
+            var storeVar = callStoreVariable;
             var oldAddress = pc;
 
             PopFrame();

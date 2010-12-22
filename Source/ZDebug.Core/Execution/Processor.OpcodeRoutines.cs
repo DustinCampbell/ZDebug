@@ -19,7 +19,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x + y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_div()
@@ -29,7 +29,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x / y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_mod()
@@ -39,7 +39,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x % y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_mul()
@@ -49,7 +49,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x * y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_sub()
@@ -59,7 +59,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x - y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x & y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_art_shift()
@@ -85,7 +85,7 @@ namespace ZDebug.Core.Execution
                 ? (ushort)(number << places)
                 : (ushort)(number >> -places);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_log_shift()
@@ -97,7 +97,7 @@ namespace ZDebug.Core.Execution
                 ? (ushort)(number << places)
                 : (ushort)(number >> -places);
 
-            WriteVariableValue(store, (ushort)result);
+            WriteVariableValue(storeVariable, (ushort)result);
         }
 
         internal void op_not()
@@ -106,7 +106,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(~x);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_or()
@@ -116,7 +116,7 @@ namespace ZDebug.Core.Execution
 
             ushort result = (ushort)(x | y);
 
-            WriteVariableValue(store, result);
+            WriteVariableValue(storeVariable, result);
         }
 
         internal void op_test()
@@ -139,25 +139,23 @@ namespace ZDebug.Core.Execution
         internal void op_dec()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
-            short value = (short)ReadVariableValue(var, indirect: true);
+            short value = (short)ReadVariableValue(varIdx, indirect: true);
             value -= 1;
 
-            WriteVariableValue(var, (ushort)value, indirect: true);
+            WriteVariableValue(varIdx, (ushort)value, indirect: true);
         }
 
         internal void op_dec_chk()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariableValue(var, indirect: true);
+            short value = (short)ReadVariableValue(varIdx, indirect: true);
             value -= 1;
 
-            WriteVariableValue(var, (ushort)value, indirect: true);
+            WriteVariableValue(varIdx, (ushort)value, indirect: true);
 
             if ((value < test) == branch.Condition)
             {
@@ -168,25 +166,23 @@ namespace ZDebug.Core.Execution
         internal void op_inc()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
-            short value = (short)ReadVariableValue(var, indirect: true);
+            short value = (short)ReadVariableValue(varIdx, indirect: true);
             value += 1;
 
-            WriteVariableValue(var, (ushort)value, indirect: true);
+            WriteVariableValue(varIdx, (ushort)value, indirect: true);
         }
 
         internal void op_inc_chk()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
             var test = (short)operandValues[1];
 
-            short value = (short)ReadVariableValue(var, indirect: true);
+            short value = (short)ReadVariableValue(varIdx, indirect: true);
             value += 1;
 
-            WriteVariableValue(var, (ushort)value, indirect: true);
+            WriteVariableValue(varIdx, (ushort)value, indirect: true);
 
             if ((value > test) == branch.Condition)
             {
@@ -287,7 +283,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount, store);
+            Call(address, operandValues, operandCount, storeVariable);
         }
 
         internal void op_call_2n()
@@ -303,7 +299,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount, store);
+            Call(address, operandValues, operandCount, storeVariable);
         }
 
         internal void op_call_vn()
@@ -319,7 +315,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount, store);
+            Call(address, operandValues, operandCount, storeVariable);
         }
 
         internal void op_call_vn2()
@@ -335,7 +331,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackRoutineAddress(byteAddress);
 
-            Call(address, operandValues, operandCount, store);
+            Call(address, operandValues, operandCount, storeVariable);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +347,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_ret_popped()
         {
-            ushort value = ReadVariableValue(Variable.Stack);
+            ushort value = ReadVariableValue(0x00); // read stack
 
             Return(value);
         }
@@ -373,11 +369,10 @@ namespace ZDebug.Core.Execution
         internal void op_load()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
-            ushort value = ReadVariableValue(var, indirect: true);
+            ushort value = ReadVariableValue(varIdx, indirect: true);
 
-            WriteVariableValue(store, value);
+            WriteVariableValue(storeVariable, value);
         }
 
         internal void op_loadb()
@@ -388,7 +383,7 @@ namespace ZDebug.Core.Execution
             int address = array + byteIndex;
             byte value = memory.ReadByte(address);
 
-            WriteVariableValue(store, value);
+            WriteVariableValue(storeVariable, value);
         }
 
         internal void op_loadw()
@@ -399,17 +394,16 @@ namespace ZDebug.Core.Execution
             int address = array + (wordIndex * 2);
             ushort value = memory.ReadWord(address);
 
-            WriteVariableValue(store, value);
+            WriteVariableValue(storeVariable, value);
         }
 
         internal void op_store()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
             ushort value = operandValues[1];
 
-            WriteVariableValue(var, value, indirect: true);
+            WriteVariableValue(varIdx, value, indirect: true);
         }
 
         internal void op_storeb()
@@ -498,7 +492,7 @@ namespace ZDebug.Core.Execution
                     var value = memory.ReadWord(address);
                     if (value == x)
                     {
-                        WriteVariableValue(store, address);
+                        WriteVariableValue(storeVariable, address);
 
                         if (branch.Condition)
                         {
@@ -513,7 +507,7 @@ namespace ZDebug.Core.Execution
                     var value = memory.ReadByte(address);
                     if (value == x)
                     {
-                        WriteVariableValue(store, address);
+                        WriteVariableValue(storeVariable, address);
 
                         if (branch.Condition)
                         {
@@ -527,7 +521,7 @@ namespace ZDebug.Core.Execution
                 address += (ushort)(form & 0x7f);
             }
 
-            WriteVariableValue(store, 0);
+            WriteVariableValue(storeVariable, 0);
 
             if (!branch.Condition)
             {
@@ -542,18 +536,17 @@ namespace ZDebug.Core.Execution
         internal void op_pull()
         {
             byte varIdx = (byte)operandValues[0];
-            Variable var = Variable.FromByte(varIdx);
 
-            ushort value = ReadVariableValue(Variable.Stack);
+            ushort value = ReadVariableValue(0x00); // stack
 
-            WriteVariableValue(var, value, indirect: true);
+            WriteVariableValue(varIdx, value, indirect: true);
         }
 
         internal void op_push()
         {
             ushort value = operandValues[0];
 
-            WriteVariableValue(Variable.Stack, value);
+            WriteVariableValue(0x00, value); // stack
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -586,7 +579,7 @@ namespace ZDebug.Core.Execution
                 childNum = 0;
             }
 
-            WriteVariableValue(store, childNum);
+            WriteVariableValue(storeVariable, childNum);
 
             if ((childNum > 0) == branch.Condition)
             {
@@ -618,11 +611,11 @@ namespace ZDebug.Core.Execution
             if (nextIndex < obj.PropertyTable.Count)
             {
                 ushort nextPropNum = (ushort)obj.PropertyTable[nextIndex].Number;
-                WriteVariableValue(store, nextPropNum);
+                WriteVariableValue(storeVariable, nextPropNum);
             }
             else
             {
-                WriteVariableValue(store, 0);
+                WriteVariableValue(storeVariable, 0);
             }
         }
 
@@ -641,7 +634,7 @@ namespace ZDebug.Core.Execution
                 parentNum = 0;
             }
 
-            WriteVariableValue(store, parentNum);
+            WriteVariableValue(storeVariable, parentNum);
         }
 
         internal void op_get_prop()
@@ -670,7 +663,7 @@ namespace ZDebug.Core.Execution
                 throw new InvalidOperationException();
             }
 
-            WriteVariableValue(store, value);
+            WriteVariableValue(storeVariable, value);
         }
 
         internal void op_get_prop_addr()
@@ -685,7 +678,7 @@ namespace ZDebug.Core.Execution
                 ? (ushort)prop.DataAddress
                 : (ushort)0;
 
-            WriteVariableValue(store, propAddress);
+            WriteVariableValue(storeVariable, propAddress);
         }
 
         internal void op_get_prop_len()
@@ -694,7 +687,7 @@ namespace ZDebug.Core.Execution
 
             ushort propLen = (ushort)memory.ReadPropertyDataLength(dataAddress);
 
-            WriteVariableValue(store, propLen);
+            WriteVariableValue(storeVariable, propLen);
         }
 
         internal void op_get_sibling()
@@ -712,7 +705,7 @@ namespace ZDebug.Core.Execution
                 siblingNum = 0;
             }
 
-            WriteVariableValue(store, siblingNum);
+            WriteVariableValue(storeVariable, siblingNum);
 
             if ((siblingNum > 0) == branch.Condition)
             {
@@ -933,7 +926,7 @@ namespace ZDebug.Core.Execution
 
             ushort oldFont = (ushort)screen.SetFont(font);
 
-            WriteVariableValue(store, oldFont);
+            WriteVariableValue(storeVariable, oldFont);
         }
 
         internal void op_set_text_style()
@@ -965,7 +958,7 @@ namespace ZDebug.Core.Execution
 
             screen.ReadChar(ch =>
             {
-                WriteVariableValue(store, (ushort)ch);
+                WriteVariableValue(storeVariable, (ushort)ch);
             });
         }
 
@@ -1034,7 +1027,7 @@ namespace ZDebug.Core.Execution
                 }
 
                 // TODO: Update this when timed input is supported
-                WriteVariableValue(store, 10);
+                WriteVariableValue(storeVariable, 10);
             });
         }
 
@@ -1233,7 +1226,7 @@ namespace ZDebug.Core.Execution
                 int maxValue = Math.Max(minValue, range - 1);
                 int result = random.Next(minValue, maxValue);
 
-                WriteVariableValue(store, (ushort)result);
+                WriteVariableValue(storeVariable, (ushort)result);
             }
             else if (range < 0)
             {
@@ -1249,14 +1242,14 @@ namespace ZDebug.Core.Execution
         {
             messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
-            WriteVariableValue(store, unchecked((ushort)-1));
+            WriteVariableValue(storeVariable, unchecked((ushort)-1));
         }
 
         internal void op_save_undo()
         {
             messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
-            WriteVariableValue(store, unchecked((ushort)-1));
+            WriteVariableValue(storeVariable, unchecked((ushort)-1));
         }
 
         internal void op_show_status()
