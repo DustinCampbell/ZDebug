@@ -125,7 +125,7 @@ namespace ZDebug.Core.Execution
             ushort bitmap = operandValues[0];
             ushort flags = operandValues[1];
 
-            bool result = (bitmap & flags) != 0;
+            bool result = (bitmap & flags) == flags;
 
             Branch(result);
         }
