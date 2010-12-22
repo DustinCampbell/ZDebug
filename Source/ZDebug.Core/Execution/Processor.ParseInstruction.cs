@@ -24,8 +24,6 @@ namespace ZDebug.Core.Execution
         private readonly ushort[] operandValues = new ushort[8];
         private int operandCount;
         private byte storeVariable;
-        private bool branchCondition;
-        private short branchOffset;
 
         private void LoadOperand(byte kind)
         {
@@ -79,40 +77,6 @@ namespace ZDebug.Core.Execution
             }
         }
 
-        private void ReadBranch()
-        {
-            /* Instructions which test a condition are called "branch" instructions. The branch information is
-             * stored in one or two bytes, indicating what to do with the result of the test. If bit 7 of the first
-             * byte is 0, a branch occurs when the condition was false; if 1, then branch is on true. If bit 6 is set,
-             * then the branch occupies 1 byte only, and the "offset" is in the range 0 to 63, given in the bottom
-             * 6 bits. If bit 6 is clear, then the offset is a signed 14-bit number given in bits 0 to 5 of the first
-             * byte followed by all 8 of the second. */
-
-            byte specifier = bytes[pc++];
-
-            byte offset1 = (byte)(specifier & 0x3f);
-
-            ushort offset;
-            if ((specifier & 0x40) == 0) // long branch
-            {
-                if ((offset1 & 0x20) != 0) // propogate sign bit
-                {
-                    offset1 |= 0xc0;
-                }
-
-                byte offset2 = bytes[pc++];
-
-                offset = (ushort)((offset1 << 8) | offset2);
-            }
-            else // short branchOffset
-            {
-                offset = offset1;
-            }
-
-            branchCondition = (specifier & 0x80) != 0;
-            branchOffset = (short)offset;
-        }
-
         private void ReadNextInstruction()
         {
             startAddress = pc;
@@ -162,11 +126,6 @@ namespace ZDebug.Core.Execution
             if (op.HasStoreVariable)
             {
                 storeVariable = bytes[pc++];
-            }
-
-            if (op.HasBranch)
-            {
-                ReadBranch();
             }
 
             opcode = op;
