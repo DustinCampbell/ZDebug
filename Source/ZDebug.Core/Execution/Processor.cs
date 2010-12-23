@@ -9,7 +9,7 @@ namespace ZDebug.Core.Execution
 {
     public sealed partial class Processor
     {
-        private const int stackSize = 1024;
+        private const int stackSize = 16384;
 
         private readonly Story story;
         private readonly Memory memory;
@@ -26,12 +26,16 @@ namespace ZDebug.Core.Execution
         // stack and routine call state
         private readonly int[] stack = new int[stackSize];
         private int stackPointer = -1;
+        private int callFrame = -1;
+        private readonly int[] callFrames = new int[stackSize];
+        private int callFramePointer = -1;
         private readonly ushort[] locals = new ushort[15];
         private int localCount;
-        private int localStackSize;
         private int argumentCount;
         private bool hasCallStoreVariable;
         private byte callStoreVariable;
+
+        private readonly ushort[] empty = new ushort[0];
 
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
@@ -65,7 +69,6 @@ namespace ZDebug.Core.Execution
         /// Push values of current frame to the stack. They are pushed in the following order:
         /// 
         /// * argument count
-        /// * local stack size
         /// * local variable values (in reverse order)
         /// * local variable count
         /// * return address
@@ -73,8 +76,8 @@ namespace ZDebug.Core.Execution
         /// </summary>
         private void PushFrame()
         {
+            callFrames[++callFramePointer] = callFrame;
             stack[++stackPointer] = argumentCount;
-            stack[++stackPointer] = localStackSize;
 
             for (int i = localCount - 1; i >= 0; i--)
             {
@@ -84,6 +87,7 @@ namespace ZDebug.Core.Execution
             stack[++stackPointer] = localCount;
             stack[++stackPointer] = pc;
             stack[++stackPointer] = hasCallStoreVariable ? callStoreVariable : -1;
+            callFrame = stackPointer;
         }
 
         /// <summary>
@@ -93,16 +97,12 @@ namespace ZDebug.Core.Execution
         /// * return address
         /// * local variable count
         /// * local variable values
-        /// * local stack size
         /// * argument count
         /// </summary>
         private void PopFrame()
         {
             // First, throw away any existing local stack
-            while (localStackSize-- > 0)
-            {
-                stackPointer--;
-            }
+            stackPointer = callFrame;
 
             var variableIndex = stack[stackPointer--];
             hasCallStoreVariable = variableIndex >= 0;
@@ -119,8 +119,8 @@ namespace ZDebug.Core.Execution
                 locals[i] = (ushort)stack[stackPointer--];
             }
 
-            localStackSize = stack[stackPointer--];
             argumentCount = stack[stackPointer--];
+            callFrame = callFrames[callFramePointer--];
         }
 
         private ushort ReadVariableValue(byte variableIndex)
@@ -133,12 +133,11 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    if (localStackSize == 0)
+                    if (stackPointer == callFrame)
                     {
                         throw new InvalidOperationException("Local stack is empty.");
                     }
 
-                    localStackSize--;
                     return (ushort)stack[stackPointer--];
                 }
             }
@@ -158,7 +157,7 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    if (localStackSize == 0)
+                    if (stackPointer == callFrame)
                     {
                         throw new InvalidOperationException("Local stack is empty.");
                     }
@@ -176,7 +175,6 @@ namespace ZDebug.Core.Execution
         {
             if (variableIndex == 0x00) // stack
             {
-                localStackSize++;
                 stack[++stackPointer] = value;
             }
             else if (variableIndex >= 0x01 && variableIndex <= 0x0f) // local
@@ -194,7 +192,7 @@ namespace ZDebug.Core.Execution
         {
             if (variableIndex == 0x00) // stack
             {
-                if (localStackSize == 0)
+                if (stackPointer == callFrame)
                 {
                     throw new InvalidOperationException("Stack is empty.");
                 }
@@ -232,7 +230,7 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                story.RoutineTable.Add(address);
+                //story.RoutineTable.Add(address);
 
                 PushFrame();
 
@@ -263,8 +261,6 @@ namespace ZDebug.Core.Execution
                 {
                     callStoreVariable = (byte)storeVarIndex;
                 }
-
-                localStackSize = 0;
 
                 var handler = EnterStackFrame;
                 if (handler != null)
@@ -508,6 +504,12 @@ namespace ZDebug.Core.Execution
 
         public ushort[] GetStackValues()
         {
+            var localStackSize = stackPointer - callFrame;
+            if (localStackSize == 0)
+            {
+                return empty;
+            }
+
             var result = new ushort[localStackSize];
 
             for (int i = localStackSize - 1; i >= 0; i--)
