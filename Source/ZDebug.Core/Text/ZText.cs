@@ -280,7 +280,8 @@ namespace ZDebug.Core.Text
             var tokens = new List<ZCommandToken>();
 
             int start = -1;
-            for (int i = 0; i < commandText.Length; i++)
+            int i = 0;
+            while (i < commandText.Length)
             {
                 var ch = commandText[i];
                 if (start < 0)
@@ -288,6 +289,12 @@ namespace ZDebug.Core.Text
                     if (ch != ' ')
                     {
                         start = i;
+                    }
+
+                    if (wordSeps.Contains(ch))
+                    {
+                        tokens.Add(new ZCommandToken(i, 1, ch.ToString()));
+                        start = -1;
                     }
                 }
                 else if (ch == ' ')
@@ -305,6 +312,8 @@ namespace ZDebug.Core.Text
 
                     start = -1;
                 }
+
+                i++;
             }
 
             if (start >= 0)
