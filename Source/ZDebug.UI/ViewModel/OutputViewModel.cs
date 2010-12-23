@@ -374,6 +374,16 @@ namespace ZDebug.UI.ViewModel
             {
                 upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
             }
+            else
+            {
+                int height = upperWindow.GetHeight();
+                if (height != 1)
+                {
+                    upperWindow.SetHeight(1);
+                    currStatusHeight = 1;
+                    machStatusHeight = 1;
+                }
+            }
 
             upperWindow.Clear();
 
