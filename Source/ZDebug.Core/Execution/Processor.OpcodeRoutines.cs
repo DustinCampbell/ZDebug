@@ -972,7 +972,7 @@ namespace ZDebug.Core.Execution
                     }
 
                     memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
             });
         }
@@ -1030,7 +1030,7 @@ namespace ZDebug.Core.Execution
                     }
 
                     memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
             });
         }
