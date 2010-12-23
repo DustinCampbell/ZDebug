@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ZDebug.IO.Services;
 using System.Windows.Threading;
+using System.Windows.Controls.Primitives;
 
 namespace ZDebug.IO.Windows
 {
@@ -91,23 +92,45 @@ namespace ZDebug.IO.Windows
             return run;
         }
 
-        private ScrollViewer FindScrollViewer()
+        private static T FindFirstVisualChild<T>(DependencyObject obj, Predicate<T> match = null) where T : DependencyObject
         {
-            DependencyObject obj = scrollViewer;
-            do
+            if (obj == null)
             {
-                if (VisualTreeHelper.GetChildrenCount(obj) > 0)
+                return null;
+            }
+
+            T foundChild = null;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(obj);
+            if (childCount > 0)
+            {
+                for (int i = 0; i < childCount; i++)
                 {
-                    obj = VisualTreeHelper.GetChild(obj as Visual, 0);
-                }
-                else
-                {
-                    return null;
+                    DependencyObject child = VisualTreeHelper.GetChild(obj as Visual, i);
+
+                    T childType = child as T;
+                    if (childType == null)
+                    {
+                        foundChild = FindFirstVisualChild<T>(child, match);
+                        if (foundChild != null)
+                        {
+                            break;
+                        }
+                    }
+                    else if (match == null || match(childType))
+                    {
+                        foundChild = childType;
+                        break;
+                    }
+                    else
+                    {
+                        foundChild = childType;
+                        break;
+                    }
                 }
             }
-            while (!(obj is ScrollViewer));
 
-            return obj as ScrollViewer;
+            return foundChild;
         }
 
         public override void Clear()
@@ -118,13 +141,13 @@ namespace ZDebug.IO.Windows
         public override void PutString(string text)
         {
             paragraph.Inlines.Add(GetFormattedRun(text));
-            FindScrollViewer().ScrollToEnd();
+            FindFirstVisualChild<ScrollViewer>(scrollViewer).ScrollToEnd();
         }
 
         public override void PutChar(char ch)
         {
             paragraph.Inlines.Add(GetFormattedRun(ch.ToString()));
-            FindScrollViewer().ScrollToEnd();
+            FindFirstVisualChild<ScrollViewer>(scrollViewer).ScrollToEnd();
         }
 
         public override void ReadChar(Action<char> callback)
@@ -149,8 +172,13 @@ namespace ZDebug.IO.Windows
                 Padding = new Thickness(0),
                 Margin = new Thickness(0),
                 BorderBrush = Brushes.Transparent,
-                BorderThickness = new Thickness(0)
+                BorderThickness = new Thickness(0),
+                Background = Brushes.WhiteSmoke
             };
+
+            var scrollContent = FindFirstVisualChild<ScrollContentPresenter>(scrollViewer);
+            var lastCharacterRect = document.ContentEnd.GetCharacterRect(LogicalDirection.Forward);
+            inputTextBox.MinWidth = scrollContent.ActualWidth - document.PagePadding.Right - lastCharacterRect.Right;
 
             var inlineUIContainer = new InlineUIContainer(inputTextBox, document.ContentEnd)
             {
