@@ -222,8 +222,8 @@ namespace ZDebug.UI.ViewModel
             var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
             objectsContent.Content = ViewModelWithView.Create<ObjectsViewModel, UserControl>();
 
-            var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
-            memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
+            //var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
+            //memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
             var localsContent = this.View.FindName<DockableContent>("localsContent");
             localsContent.Content = ViewModelWithView.Create<LocalsViewModel, UserControl>();

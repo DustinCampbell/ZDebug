@@ -41,7 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Basics\MemoryEventArgs.cs" />
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Blorb\BlorbFileException.cs" />
     <Compile Include="Blorb\PictureKind.cs" />

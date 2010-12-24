@@ -7,6 +7,7 @@ using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
+    // TODO: This is officially broken and needs updating.
     internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly BulkObservableCollection<MemoryLineViewModel> lines;
@@ -17,25 +18,25 @@ namespace ZDebug.UI.ViewModel
             lines = new BulkObservableCollection<MemoryLineViewModel>();
         }
 
-        private void MemoryChanged(object sender, MemoryEventArgs e)
-        {
-            // Replace affected lines
-            int firstLineIndex = e.Address / 16;
-            int lastLineIndex = (e.Address + e.Length) / 16;
+        //private void MemoryChanged(object sender, MemoryEventArgs e)
+        //{
+        //    // Replace affected lines
+        //    int firstLineIndex = e.Address / 16;
+        //    int lastLineIndex = (e.Address + e.Length) / 16;
 
-            var reader = e.Memory.CreateReader(firstLineIndex * 16);
+        //    var reader = e.Memory.CreateReader(firstLineIndex * 16);
 
-            for (int i = firstLineIndex; i <= lastLineIndex; i++)
-            {
-                var address = reader.Address;
-                var count = Math.Min(8, reader.RemainingBytes);
-                var values = reader.NextWords(count);
+        //    for (int i = firstLineIndex; i <= lastLineIndex; i++)
+        //    {
+        //        var address = reader.Address;
+        //        var count = Math.Min(8, reader.RemainingBytes);
+        //        var values = reader.NextWords(count);
 
-                lines[i] = new MemoryLineViewModel(address, values);
-            }
+        //        lines[i] = new MemoryLineViewModel(address, values);
+        //    }
 
-            // TODO: Highlight modified memory
-        }
+        //    // TODO: Highlight modified memory
+        //}
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
@@ -85,8 +86,6 @@ namespace ZDebug.UI.ViewModel
             {
                 lines.EndBulkOperation();
             }
-
-            e.Story.Memory.MemoryChanged += MemoryChanged;
 
             PropertyChanged("HasStory");
         }

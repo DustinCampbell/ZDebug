@@ -109,7 +109,7 @@
                         <ad:DocumentPane SelectedIndex="0">
                             <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>
                             <ad:DocumentContent Title="Objects" Name="objectsContent"/>
-                            <ad:DocumentContent Title="Memory" Name="memoryContent"/>
+                            <!--<ad:DocumentContent Title="Memory" Name="memoryContent"/>-->
                         </ad:DocumentPane>
                         <ad:ResizingPanel Orientation="Horizontal" ad:ResizingPanel.ResizeHeight="150">
                             <ad:DockablePane>
