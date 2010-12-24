@@ -5,7 +5,6 @@ namespace ZDebug.UI.ViewModel
     {
         private bool hasBreakpoint;
         private bool hasIP;
-        private bool isNextInstruction;
         private DisassemblyLineState state;
         private object toolTip;
 
@@ -31,19 +30,6 @@ namespace ZDebug.UI.ViewModel
                 {
                     hasIP = value;
                     PropertyChanged("HasIP");
-                }
-            }
-        }
-
-        public bool IsNextInstruction
-        {
-            get { return isNextInstruction; }
-            set
-            {
-                if (isNextInstruction != value)
-                {
-                    isNextInstruction = value;
-                    PropertyChanged("IsNextInstruction");
                 }
             }
         }
