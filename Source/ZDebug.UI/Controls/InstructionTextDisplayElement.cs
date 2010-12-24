@@ -63,22 +63,31 @@ namespace ZDebug.UI.Controls
             {
                 if (instruction.Opcode.IsCall)
                 {
-                    var callAddress = instruction.Operands[0].Value;
-                    if (DebuggerService.HasStory)
+                    var callOp = instruction.Operands[0];
+                    if (callOp.Kind == OperandKind.Variable)
                     {
-                        builder.AddAddress(DebuggerService.Story.UnpackRoutineAddress(callAddress));
+                        builder.AddVariable(Variable.FromByte((byte)callOp.Value));
                     }
                     else
                     {
-                        builder.AddAddress(callAddress);
+                        var callAddress = callOp.Value;
+                        if (DebuggerService.HasStory)
+                        {
+                            builder.AddAddress(DebuggerService.Story.UnpackRoutineAddress(callAddress));
+                        }
+                        else
+                        {
+                            builder.AddAddress(callAddress);
+                        }
+
+                        if (instruction.OperandCount > 1)
+                        {
+                            builder.AddSeparator(" (");
+                            builder.AddOperands(instruction.Operands.Skip(1));
+                            builder.AddSeparator(")");
+                        }
                     }
 
-                    if (instruction.OperandCount > 1)
-                    {
-                        builder.AddSeparator(" (");
-                        builder.AddOperands(instruction.Operands.Skip(1));
-                        builder.AddSeparator(")");
-                    }
                 }
                 else if (instruction.Opcode.IsJump)
                 {
