@@ -18,7 +18,7 @@ namespace ZDebug.UI.Services
     internal static class DebuggerService
     {
         private static DebuggerState state;
-        private static object stateLock = new object();
+        private static bool stopping;
 
         private static Story story;
         private static GameInfo gameInfo;
@@ -43,6 +43,8 @@ namespace ZDebug.UI.Services
             {
                 handler(null, new DebuggerStateChangedEventArgs(oldState, newState));
             }
+
+            CommandManager.InvalidateRequerySuggested();
         }
 
         /// <summary>
@@ -271,20 +273,27 @@ namespace ZDebug.UI.Services
             get { return state == DebuggerState.Stopped; }
         }
 
-        public static void StartDebugging()
+        private static void RunModePump()
         {
-            ChangeState(DebuggerState.Running);
-
             try
             {
-                while (state == DebuggerState.Running)
+                int count = 0;
+                while (state == DebuggerState.Running && count < 25000)
                 {
                     int newPC = Step();
+
+                    if (stopping)
+                    {
+                        stopping = false;
+                        ChangeState(DebuggerState.Stopped);
+                    }
 
                     if (state == DebuggerState.Running && breakpoints.Contains(newPC))
                     {
                         ChangeState(DebuggerState.Stopped);
                     }
+
+                    count++;
                 }
             }
             catch (Exception ex)
@@ -292,16 +301,25 @@ namespace ZDebug.UI.Services
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
             }
+
+            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
         }
 
-        public static bool CanPauseDebugging
+        public static void StartDebugging()
+        {
+            ChangeState(DebuggerState.Running);
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
+        }
+
+        public static bool CanStopDebugging
         {
             get { return state == DebuggerState.Running; }
         }
 
-        public static void PauseDebugging()
+        public static void StopDebugging()
         {
-            ChangeState(DebuggerState.Stopped);
+            stopping = true;
         }
 
         public static bool CanStepNext

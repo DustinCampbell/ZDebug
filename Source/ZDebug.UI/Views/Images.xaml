@@ -18,6 +18,7 @@
     <BitmapImage x:Key="resetImage" UriSource="../Images/reset.png"/>
     <BitmapImage x:Key="scriptImage" UriSource="../Images/script.png"/>
     <BitmapImage x:Key="stepImage" UriSource="../Images/step.png"/>
+    <BitmapImage x:Key="stopImage" UriSource="../Images/stop.png"/>
     <BitmapImage x:Key="stoppedImage" UriSource="../Images/stopped.png"/>
     <BitmapImage x:Key="warningImage" UriSource="../Images/warning.png"/>
     <BitmapImage x:Key="watchImage" UriSource="../Images/watch.png"/>

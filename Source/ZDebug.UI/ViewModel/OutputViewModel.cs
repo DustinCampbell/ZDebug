@@ -155,7 +155,6 @@ namespace ZDebug.UI.ViewModel
 
                 string command = DebuggerService.GetNextGameScriptCommand();
                 windowManager.ActiveWindow.PutString(command + "\r\n");
-                windowContainer.Dispatcher.Invoke(new Action(() => { windowContainer.UpdateLayout(); }), DispatcherPriority.Loaded);
                 callback(command);
             }
             else

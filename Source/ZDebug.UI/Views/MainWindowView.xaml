@@ -41,9 +41,9 @@
                         <c:AutoDisableImage Source="{StaticResource playImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Command="{Binding PauseDebuggingCommand}" Header="_Pause Debugging">
+                <MenuItem Command="{Binding StopDebuggingCommand}" Header="Stop D_ebugging">
                     <MenuItem.Icon>
-                        <c:AutoDisableImage Source="{StaticResource pauseImage}"/>
+                        <c:AutoDisableImage Source="{StaticResource stopImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
@@ -79,8 +79,8 @@
                 <Button Command="{Binding StartDebuggingCommand}" ToolTip="Start Debugging">
                     <c:AutoDisableImage Source="{StaticResource playImage}"/>
                 </Button>
-                <Button Command="{Binding PauseDebuggingCommand}" ToolTip="Pause Debugging">
-                    <c:AutoDisableImage Source="{StaticResource pauseImage}"/>
+                <Button Command="{Binding StopDebuggingCommand}" ToolTip="Stop Debugging">
+                    <c:AutoDisableImage Source="{StaticResource stopImage}"/>
                 </Button>
                 <Separator/>
                 <Button Command="{Binding StepNextCommand}" ToolTip="Step to Next Instruction">

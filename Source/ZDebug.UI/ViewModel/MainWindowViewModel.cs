@@ -43,11 +43,11 @@ namespace ZDebug.UI.ViewModel
                 canExecute: CanStartDebuggingExecute,
                 inputGestures: new KeyGesture(Key.F5));
 
-            this.PauseDebuggingCommand = RegisterCommand(
+            this.StopDebuggingCommand = RegisterCommand(
                 text: "PauseDebugging",
                 name: "Pause Debugging",
-                executed: PauseDebuggingExecuted,
-                canExecute: CanPauseDebuggingExecute,
+                executed: StopDebuggingExecuted,
+                canExecute: CanStopDebuggingExecute,
                 inputGestures: new KeyGesture(Key.Pause, ModifierKeys.Alt | ModifierKeys.Control));
 
             this.StepNextCommand = RegisterCommand(
@@ -78,7 +78,7 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanOpenStoryExecute()
         {
-            return true;
+            return DebuggerService.State != DebuggerState.Running;
         }
 
         private void OpenStoryExecuted()
@@ -100,7 +100,8 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanEditGameScriptExecute()
         {
-            return DebuggerService.HasStory;
+            return DebuggerService.HasStory &&
+                DebuggerService.State != DebuggerState.Running;
         }
 
         private void EditGameScriptExecuted()
@@ -110,7 +111,7 @@ namespace ZDebug.UI.ViewModel
             if (gameScriptDialog.ShowDialog() == true)
             {
                 var viewModel = (GameScriptDialogViewModel)gameScriptDialog.DataContext;
-                DebuggerService.SetGameScriptCommands(viewModel.Commands.Split(new char[] { '\r', '\n'}, StringSplitOptions.RemoveEmptyEntries));
+                DebuggerService.SetGameScriptCommands(viewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
         }
 
@@ -134,14 +135,14 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StartDebugging();
         }
 
-        private bool CanPauseDebuggingExecute()
+        private bool CanStopDebuggingExecute()
         {
-            return DebuggerService.CanPauseDebugging;
+            return DebuggerService.CanStopDebugging;
         }
 
-        private void PauseDebuggingExecuted()
+        private void StopDebuggingExecuted()
         {
-            DebuggerService.PauseDebugging();
+            DebuggerService.StopDebugging();
         }
 
         private bool CanStepNextExecute()
@@ -190,7 +191,7 @@ namespace ZDebug.UI.ViewModel
         public ICommand EditGameScriptCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
-        public ICommand PauseDebuggingCommand { get; private set; }
+        public ICommand StopDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
         public ICommand ResetWindowLayoutCommand { get; private set; }
