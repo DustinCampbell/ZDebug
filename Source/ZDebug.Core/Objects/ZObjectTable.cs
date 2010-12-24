@@ -17,7 +17,7 @@ namespace ZDebug.Core.Objects
         private readonly ushort address;
 
         private readonly ushort maxObjects;
-        private readonly byte propertyDefaultsCount;
+        private readonly byte maxProperties;
         private readonly byte propertyDefaultsTableSize;
         private readonly ushort objectEntriesAddress;
         private readonly byte entrySize;
@@ -40,22 +40,27 @@ namespace ZDebug.Core.Objects
             this.version = memory.ReadVersion();
             this.address = memory.ReadObjectTableAddress();
 
-            this.maxObjects = ObjectHelpers.GetMaxObjects(version);
-            this.propertyDefaultsCount = ObjectHelpers.GetPropertyDefaultsCount(version);
-            this.propertyDefaultsTableSize = (byte)(propertyDefaultsCount * 2);
+            this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
+            this.maxProperties = (byte)(version <= 3 ? 31 : 63);
+            this.propertyDefaultsTableSize = (byte)(maxProperties * 2);
             this.objectEntriesAddress = (ushort)(address + propertyDefaultsTableSize);
-            this.entrySize = ObjectHelpers.GetEntrySize(version);
-            this.attributeBytesSize = ObjectHelpers.GetAttributeBytesSize(version);
-            this.attributeCount = ObjectHelpers.GetAttributeCount(version);
-            this.numberSize = ObjectHelpers.GetNumberSize(version);
-            this.parentOffset = ObjectHelpers.GetParentOffset(version);
-            this.siblingOffset = ObjectHelpers.GetSiblingOffset(version);
-            this.childOffset = ObjectHelpers.GetChildOffset(version);
-            this.propertyTableAddressOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
+            this.entrySize = (byte)(version <= 3 ? 9 : 14);
+            this.attributeBytesSize = (byte)(version <= 3 ? 4 : 6);
+            this.attributeCount = (byte)(version <= 3 ? 32 : 48);
+            this.numberSize = (byte)(version <= 3 ? 1 : 2);
+            this.parentOffset = (byte)(version <= 3 ? 4 : 6);
+            this.siblingOffset = (byte)(version <= 3 ? 5 : 8);
+            this.childOffset = (byte)(version <= 3 ? 6 : 10);
+            this.propertyTableAddressOffset = (byte)(version <= 3 ? 7 : 12);
 
             this.objects = ReadAllObjects();
 
             this.propertyTables = new IntegerMap<ZPropertyTable>(objects.Length);
+        }
+
+        public byte MaxProperties
+        {
+            get { return maxProperties; }
         }
 
         internal ushort GetObjectEntryAddress(ushort objNum)
@@ -70,7 +75,7 @@ namespace ZDebug.Core.Objects
 
         internal ushort ReadPropertyDefault(int propNum)
         {
-            if (propNum < 1 || propNum > propertyDefaultsCount)
+            if (propNum < 1 || propNum > maxProperties)
             {
                 throw new ArgumentOutOfRangeException("propNum");
             }
@@ -170,14 +175,9 @@ namespace ZDebug.Core.Objects
             int byteIdx = attribute / 8;
             int bitMask = 1 << (7 - (attribute % 8));
 
-            if (value)
-            {
-                attributeBytes[byteIdx] = (byte)(attributeBytes[byteIdx] | bitMask);
-            }
-            else
-            {
-                attributeBytes[byteIdx] = (byte)(attributeBytes[byteIdx] & ~bitMask);
-            }
+            attributeBytes[byteIdx] = value
+                ? (byte)(attributeBytes[byteIdx] | bitMask)
+                : (byte)(attributeBytes[byteIdx] & ~bitMask);
 
             WriteAttributeBytesByObjectAddress(objAddress, attributeBytes);
         }
@@ -429,7 +429,7 @@ namespace ZDebug.Core.Objects
 
             var version = memory.ReadVersion();
             var index = 0;
-            ZProperty prop = reader.NextProperty(version, propertyTable, index);
+            var prop = reader.NextProperty(version, propertyTable, index);
             while (prop != null)
             {
                 props.Add(prop);

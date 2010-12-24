@@ -10,7 +10,6 @@ namespace ZDebug.Core.Objects
         private readonly ushort address;
 
         private readonly ZProperty[] properties;
-        private readonly IntegerMap<ZProperty> numberToPropertyMap;
 
         internal ZPropertyTable(ZObjectTable objectTable, ushort address)
         {
@@ -18,12 +17,6 @@ namespace ZDebug.Core.Objects
             this.address = address;
 
             properties = objectTable.ReadPropertyTableProperties(this);
-            numberToPropertyMap = new IntegerMap<ZProperty>(properties.Length);
-
-            foreach (var prop in properties)
-            {
-                numberToPropertyMap.Add(prop.Number, prop);
-            }
         }
 
         public ushort[] GetShortNameZWords()
@@ -33,15 +26,25 @@ namespace ZDebug.Core.Objects
 
         public bool Contains(int propNum)
         {
-            return numberToPropertyMap.Contains(propNum);
+            foreach (var prop in properties)
+            {
+                if (prop.Number == propNum)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public ZProperty GetByNumber(int propNum)
         {
-            ZProperty prop;
-            if (numberToPropertyMap.TryGetValue(propNum, out prop))
+            foreach (var prop in properties)
             {
-                return prop;
+                if (prop.Number == propNum)
+                {
+                    return prop;
+                }
             }
 
             return null;
@@ -64,9 +67,9 @@ namespace ZDebug.Core.Objects
 
         public IEnumerator<ZProperty> GetEnumerator()
         {
-            for (int i = 0; i < properties.Length; i++)
+            foreach (var prop in properties)
             {
-                yield return properties[i];
+                yield return prop;
             }
         }
 
