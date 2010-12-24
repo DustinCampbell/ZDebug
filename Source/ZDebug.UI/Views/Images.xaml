@@ -11,6 +11,7 @@
     <BitmapImage x:Key="ipArrowImage" UriSource="../Images/ip_arrow.png"/>
     <BitmapImage x:Key="magnifyImage" UriSource="../Images/magnify.png"/>
     <BitmapImage x:Key="openImage" UriSource="../Images/open.png"/>
+    <BitmapImage x:Key="pauseImage" UriSource="../Images/pause.png"/>
     <BitmapImage x:Key="pausedImage" UriSource="../Images/paused.png"/>
     <BitmapImage x:Key="playImage" UriSource="../Images/play.png"/>
     <BitmapImage x:Key="refreshImage" UriSource="../Images/refresh.png"/>
