@@ -3,7 +3,7 @@ using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
 {
-    internal sealed class InstructionReader
+    public sealed class InstructionReader
     {
         private const byte opKind_LargeConstant = 0;
         private const byte opKind_SmallConstant = 1;
@@ -18,12 +18,12 @@ namespace ZDebug.Core.Instructions
         // This is used in instruction parsing
         private byte[] operandKinds = new byte[8];
 
-        internal InstructionReader(int address, Memory memory, OpcodeTable opcodeTable, InstructionCache cache)
+        public InstructionReader(int address, Memory memory, InstructionCache cache = null)
         {
             this.memory = memory;
             this.address = address;
-            this.opcodeTable = opcodeTable;
-            this.cache = cache != null ? cache : new InstructionCache();
+            this.opcodeTable = OpcodeTables.GetOpcodeTable(memory.ReadVersion());
+            this.cache = cache ?? new InstructionCache();
         }
 
         private void ReadOperandKinds(int offset = 0)

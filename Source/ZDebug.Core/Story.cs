@@ -26,10 +26,10 @@ namespace ZDebug.Core
         private readonly MemoryMap memoryMap;
         private readonly InformData informData;
         private readonly ZObjectTable objectTable;
-        private readonly RoutineTable routineTable;
         private readonly GlobalVariablesTable globalVariablesTable;
         private readonly ZDictionary dictionary;
         private readonly Processor processor;
+        private readonly int mainRoutineAddress;
 
         private Story(Memory memory)
         {
@@ -45,10 +45,10 @@ namespace ZDebug.Core
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap, ztext);
             this.objectTable = new ZObjectTable(memory, ztext);
-            this.routineTable = new RoutineTable(memory, instructionCache);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.dictionary = new ZDictionary(this, ztext);
             this.processor = new Processor(this, ztext);
+            this.mainRoutineAddress = memory.ReadMainRoutineAddress();
 
             // write interpreter number
             if (version >= 4)
@@ -164,11 +164,6 @@ namespace ZDebug.Core
             get { return objectTable; }
         }
 
-        public RoutineTable RoutineTable
-        {
-            get { return routineTable; }
-        }
-
         public GlobalVariablesTable GlobalVariablesTable
         {
             get { return globalVariablesTable; }
@@ -182,6 +177,11 @@ namespace ZDebug.Core
         public Processor Processor
         {
             get { return processor; }
+        }
+
+        public int MainRoutineAddress
+        {
+            get { return mainRoutineAddress; }
         }
 
         public static Story FromBytes(byte[] bytes)

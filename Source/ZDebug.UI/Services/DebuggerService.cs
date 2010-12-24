@@ -6,6 +6,8 @@ using System.Xml.Linq;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
 using ZDebug.UI.Utilities;
+using ZDebug.Core.Instructions;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.UI.Services
 {
@@ -14,6 +16,9 @@ namespace ZDebug.UI.Services
         private static DebuggerState state;
         private static Story story;
         private static GameInfo gameInfo;
+        private static RoutineTable routineTable;
+        private static InstructionReader reader;
+        private static Instruction currentInstruction;
         private static string fileName;
         private static Exception currentException;
         private readonly static SortedSet<int> breakpoints = new SortedSet<int>();
@@ -32,6 +37,38 @@ namespace ZDebug.UI.Services
             {
                 handler(null, new DebuggerStateChangedEventArgs(oldState, newState));
             }
+        }
+
+        /// <summary>
+        /// Performs a single processor step.
+        /// </summary>
+        private static int Step()
+        {
+            var processor = story.Processor;
+
+            reader.Address = processor.PC;
+            currentInstruction = reader.NextInstruction();
+
+            var oldPC = processor.PC;
+            OnProcessorStepping(oldPC);
+
+            var newPC = processor.Step();
+
+            // If the instruction just executed was a call, we should add the address to the
+            // routine table. The address is packed inside the first operand value. Note that
+            // we need to do this prior to calling firing the ProcessorStepped event to ensure
+            // that the disassembly view gets updated with the new routine before attempting
+            // to set the new IP.
+            if (currentInstruction.Opcode.IsCall)
+            {
+                var callOpValue = processor.GetOperandValue(0);
+                var callAddress = story.UnpackRoutineAddress(callOpValue);
+                routineTable.Add(callAddress);
+            }
+
+            OnProcessorStepped(oldPC, newPC);
+
+            return newPC;
         }
 
         private static void LoadSettings(Story story)
@@ -63,7 +100,7 @@ namespace ZDebug.UI.Services
                 foreach (var routineElem in routinesElem.Elements("routine"))
                 {
                     var addAttr = routineElem.Attribute("address");
-                    story.RoutineTable.Add((int)addAttr);
+                    routineTable.Add((int)addAttr);
                 }
             }
         }
@@ -81,7 +118,7 @@ namespace ZDebug.UI.Services
                     new XElement("gamescript",
                         gameScript.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
-                        story.RoutineTable.Select(r => new XElement("routine", new XAttribute("address", r.Address)))));
+                        routineTable.Select(r => new XElement("routine", new XAttribute("address", r.Address)))));
 
             Storage.SaveStorySettings(story, xml);
         }
@@ -99,6 +136,9 @@ namespace ZDebug.UI.Services
 
             story = null;
             gameInfo = null;
+            routineTable = null;
+            reader = null;
+            currentInstruction = null;
             fileName = null;
 
             breakpoints.Clear();
@@ -131,6 +171,10 @@ namespace ZDebug.UI.Services
                 DebuggerService.story = Story.FromBytes(File.ReadAllBytes(fileName));
             }
 
+            var cache = new InstructionCache();
+            routineTable = new RoutineTable(story, cache);
+            reader = new InstructionReader(story.Processor.PC, story.Memory, cache);
+
             DebuggerService.fileName = fileName;
 
             LoadSettings(story);
@@ -154,6 +198,24 @@ namespace ZDebug.UI.Services
         private static void Processor_Quit(object sender, EventArgs e)
         {
             ChangeState(DebuggerState.Done);
+        }
+
+        private static void OnProcessorStepping(int oldPC)
+        {
+            var handler = ProcessorStepping;
+            if (handler != null)
+            {
+                handler(null, new ProcessorSteppingEventArgs(oldPC));
+            }
+        }
+
+        private static void OnProcessorStepped(int oldPC, int newPC)
+        {
+            var handler = ProcessorStepped;
+            if (handler != null)
+            {
+                handler(null, new ProcessorSteppedEventArgs(oldPC, newPC));
+            }
         }
 
         public static void AddBreakpoint(int address)
@@ -204,27 +266,11 @@ namespace ZDebug.UI.Services
         {
             ChangeState(DebuggerState.Running);
 
-            var processor = story.Processor;
-
             try
             {
                 while (state == DebuggerState.Running)
                 {
-                    var oldPC = processor.PC;
-
-                    var handlerStepping = ProcessorStepping;
-                    if (handlerStepping != null)
-                    {
-                        handlerStepping(null, new ProcessorSteppingEventArgs(oldPC));
-                    }
-
-                    var newPC = processor.Step();
-
-                    var handlerStepped = ProcessorStepped;
-                    if (handlerStepped != null)
-                    {
-                        handlerStepped(null, new ProcessorSteppedEventArgs(oldPC, newPC));
-                    }
+                    int newPC = Step();
 
                     if (state == DebuggerState.Running && breakpoints.Contains(newPC))
                     {
@@ -246,25 +292,9 @@ namespace ZDebug.UI.Services
 
         public static void StepNext()
         {
-            var processor = story.Processor;
-            
             try
             {
-                var oldPC = processor.PC;
-
-                var handlerStepping = ProcessorStepping;
-                if (handlerStepping != null)
-                {
-                    handlerStepping(null, new ProcessorSteppingEventArgs(oldPC));
-                }
-
-                var newPC = story.Processor.Step();
-
-                var handlerStepped = ProcessorStepped;
-                if (handlerStepped != null)
-                {
-                    handlerStepped(null, new ProcessorSteppedEventArgs(oldPC, newPC));
-                }
+                int newPC = Step();
             }
             catch (Exception ex)
             {
@@ -331,6 +361,11 @@ namespace ZDebug.UI.Services
         public static bool HasGameInfo
         {
             get { return gameInfo != null; }
+        }
+
+        public static RoutineTable RoutineTable
+        {
+            get { return routineTable; }
         }
 
         public static string FileName

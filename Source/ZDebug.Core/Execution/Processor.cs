@@ -230,8 +230,6 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                story.RoutineTable.Add(address);
-
                 PushFrame();
 
                 var returnAddress = pc;
@@ -488,6 +486,11 @@ namespace ZDebug.Core.Execution
         public int LocalCount
         {
             get { return localCount; }
+        }
+
+        public ushort GetOperandValue(int index)
+        {
+            return operandValues[index];
         }
 
         public ushort[] GetStackValues()

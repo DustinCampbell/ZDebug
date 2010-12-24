@@ -50,19 +50,20 @@ namespace ZDebug.Core.Instructions
             get { return instructions; }
         }
 
-        internal static Routine Parse(int address, Memory memory, OpcodeTable opcodeTable, InstructionCache cache)
+        internal static Routine Parse(int address, Story story, InstructionCache cache)
         {
             var routineAddress = address;
 
             // read locals
-            var localCount = memory.ReadByte(ref address);
+            var localCount = story.Memory.ReadByte(address++);
             var locals = new ushort[localCount];
-            if (opcodeTable.Version <= 4)
+            if (story.Version <= 4)
             {
-                locals = memory.ReadWords(ref address, localCount);
+                locals = story.Memory.ReadWords(address, localCount);
+                address += localCount * 2;
             }
 
-            var reader = new InstructionReader(address, memory, opcodeTable, cache);
+            var reader = new InstructionReader(address, story.Memory, cache);
 
             var instructions = new List<Instruction>();
             var lastAddressKnown = address;

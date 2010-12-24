@@ -53,7 +53,7 @@ namespace ZDebug.UI.ViewModel
             lines.BeginBulkOperation();
             try
             {
-                var routineTable = e.Story.RoutineTable;
+                var routineTable = DebuggerService.RoutineTable;
 
                 for (int rIndex = 0; rIndex < routineTable.Count; rIndex++)
                 {
@@ -103,7 +103,7 @@ namespace ZDebug.UI.ViewModel
 
             e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
             e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
-            e.Story.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
+            DebuggerService.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
         }
 
         private void BringLineIntoView(DisassemblyLineViewModel line)
@@ -150,7 +150,7 @@ namespace ZDebug.UI.ViewModel
             lines.BeginBulkOperation();
             try
             {
-                // FInd routine header line that would follow this routine
+                // Find routine header line that would follow this routine
                 int nextRoutineIndex = -1;
                 int insertionPoint = -1;
                 for (int i = 0; i < routineAddressAndIndexList.Count; i++)

@@ -9,22 +9,19 @@ namespace ZDebug.Core.Instructions
 {
     public sealed class RoutineTable : IIndexedEnumerable<Routine>
     {
-        private readonly Memory memory;
-        private readonly OpcodeTable opcodeTable;
+        private readonly Story story;
         private readonly InstructionCache cache;
         private readonly IntegerMap<Routine> routines;
         private readonly List<int> sortedAddresses;
 
-        internal RoutineTable(Memory memory, InstructionCache cache)
+        public RoutineTable(Story story, InstructionCache cache = null)
         {
-            this.memory = memory;
-            this.opcodeTable = OpcodeTables.GetOpcodeTable(memory.ReadVersion());
-            this.cache = cache;
+            this.story = story;
+            this.cache = cache ?? new InstructionCache();
             this.routines = new IntegerMap<Routine>();
             this.sortedAddresses = new List<int>();
 
-            var mainRoutineAddress = memory.ReadMainRoutineAddress();
-            Add(mainRoutineAddress);
+            Add(story.MainRoutineAddress);
         }
 
         private static bool IsAnalyzableCall(Instruction i)
@@ -36,7 +33,7 @@ namespace ZDebug.Core.Instructions
 
         private int UnpackCallAddress(Instruction i)
         {
-            return memory.UnpackRoutineAddress(i.Operands[0].Value);
+            return story.UnpackRoutineAddress(i.Operands[0].Value);
         }
 
         public void Add(int address)
@@ -46,7 +43,7 @@ namespace ZDebug.Core.Instructions
                 return;
             }
 
-            var routine = Routine.Parse(address, memory, opcodeTable, cache);
+            var routine = Routine.Parse(address, story, cache);
 
             routines.Add(address, routine);
 

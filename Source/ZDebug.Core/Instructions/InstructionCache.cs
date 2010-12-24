@@ -3,7 +3,7 @@ using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Instructions
 {
-    internal sealed class InstructionCache
+    public sealed class InstructionCache
     {
         private readonly IntegerMap<Instruction> map;
 
@@ -20,17 +20,17 @@ namespace ZDebug.Core.Instructions
             map = new IntegerMap<Instruction>(capacity);
         }
 
-        public bool TryGet(int address, out Instruction instruction)
+        internal bool TryGet(int address, out Instruction instruction)
         {
             return map.TryGetValue(address, out instruction);
         }
 
-        public void Add(int address, Instruction instruction)
+        internal void Add(int address, Instruction instruction)
         {
             map.Add(address, instruction);
         }
 
-        public ReadOnlyArray<Operand> AllocateOperands(int length)
+        internal ReadOnlyArray<Operand> AllocateOperands(int length)
         {
             if (length == 0)
             {
@@ -51,7 +51,7 @@ namespace ZDebug.Core.Instructions
             return result;
         }
 
-        public ReadOnlyArray<ushort> AllocateZWords(int length)
+        internal ReadOnlyArray<ushort> AllocateZWords(int length)
         {
             if (length == 0)
             {
