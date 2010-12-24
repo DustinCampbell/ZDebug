@@ -57,7 +57,8 @@ namespace ZDebug.Core.Collections
             int hash = key % buckets.Length;
 
             var bucket = buckets[hash];
-            if (bucket.Entries == null)
+            var bucketSize = bucket.Size;
+            if (bucketSize == 0)
             {
                 var entries = new Entry[4];
                 entries[0] = new Entry(key, value);
@@ -67,7 +68,6 @@ namespace ZDebug.Core.Collections
             else
             {
                 var entries = bucket.Entries;
-                var bucketSize = bucket.Size;
 
                 for (int i = 0; i < bucketSize; i++)
                 {
@@ -98,10 +98,10 @@ namespace ZDebug.Core.Collections
             for (int i = 0; i < buckets.Length; i++)
             {
                 var bucket = buckets[i];
-                if (bucket.Entries != null)
+                var bucketSize = bucket.Size;
+                if (bucketSize > 0)
                 {
                     var entries = bucket.Entries;
-                    var bucketSize = bucket.Size;
                     for (int j = 0; j < bucketSize; j++)
                     {
                         var entry = entries[j];
@@ -126,15 +126,21 @@ namespace ZDebug.Core.Collections
             Insert(key, value);
         }
 
+        public void Clear()
+        {
+            this.buckets = new Bucket[this.capacity];
+            size = 0;
+        }
+
         public bool Contains(int key)
         {
             int hash = key % capacity;
 
             var bucket = buckets[hash];
-            if (bucket.Entries != null)
+            var bucketSize = bucket.Size;
+            if (bucketSize > 0)
             {
                 var entries = bucket.Entries;
-                var bucketSize = bucket.Size;
                 for (int i = 0; i < bucketSize; i++)
                 {
                     if (entries[i].Key == key)
@@ -152,10 +158,10 @@ namespace ZDebug.Core.Collections
             int hash = key % capacity;
 
             var bucket = buckets[hash];
-            if (bucket.Entries != null)
+            var bucketSize = bucket.Size;
+            if (bucketSize > 0)
             {
                 var entries = bucket.Entries;
-                var bucketSize = bucket.Size;
                 for (int i = 0; i < bucketSize; i++)
                 {
                     var entry = entries[i];

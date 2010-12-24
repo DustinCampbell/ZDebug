@@ -8,6 +8,7 @@ using ZDebug.Core.Instructions;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
+using ZDebug.Core.Collections;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -26,7 +27,7 @@ namespace ZDebug.UI.ViewModel
         }
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
-        private readonly Dictionary<int, DisassemblyLineViewModel> addressToLineMap;
+        private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
         private readonly List<AddressAndIndex> routineAddressAndIndexList;
 
         private DisassemblyLineViewModel inputLine;
@@ -35,7 +36,7 @@ namespace ZDebug.UI.ViewModel
             : base("DisassemblyView")
         {
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
-            addressToLineMap = new Dictionary<int, DisassemblyLineViewModel>();
+            addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
             routineAddressAndIndexList = new List<AddressAndIndex>();
         }
 
