@@ -79,13 +79,13 @@ namespace ZDebug.UI.Controls
                         {
                             builder.AddAddress(callAddress);
                         }
+                    }
 
-                        if (instruction.OperandCount > 1)
-                        {
-                            builder.AddSeparator(" (");
-                            builder.AddOperands(instruction.Operands.Skip(1));
-                            builder.AddSeparator(")");
-                        }
+                    if (instruction.OperandCount > 1)
+                    {
+                        builder.AddSeparator(" (");
+                        builder.AddOperands(instruction.Operands.Skip(1));
+                        builder.AddSeparator(")");
                     }
 
                 }
