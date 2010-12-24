@@ -117,7 +117,7 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanExitExecute()
         {
-            return true;
+            return DebuggerService.State != DebuggerState.Running;
         }
 
         private void ExitExecuted()
@@ -157,11 +157,12 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanResetSessionExecute()
         {
-            return false;
+            return DebuggerService.CanResetSession;
         }
 
         private void ResetSessionExecuted()
         {
+            DebuggerService.ResetSession();
         }
 
         private bool CanResetWindowLayoutExecute()

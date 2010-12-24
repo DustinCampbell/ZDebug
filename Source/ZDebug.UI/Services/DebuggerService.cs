@@ -19,6 +19,7 @@ namespace ZDebug.UI.Services
     {
         private static DebuggerState state;
         private static bool stopping;
+        private static bool hasStepped;
 
         private static Story story;
         private static GameInfo gameInfo;
@@ -78,6 +79,8 @@ namespace ZDebug.UI.Services
             }
 
             OnProcessorStepped(oldPC, newPC);
+
+            hasStepped = true;
 
             return newPC;
         }
@@ -151,6 +154,7 @@ namespace ZDebug.UI.Services
             reader = null;
             currentInstruction = null;
             fileName = null;
+            hasStepped = false;
 
             breakpoints.Clear();
             gameScript.Clear();
@@ -338,6 +342,18 @@ namespace ZDebug.UI.Services
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
             }
+        }
+
+        public static bool CanResetSession
+        {
+            get { return state != DebuggerState.Running && state != DebuggerState.Unavailable && hasStepped; }
+        }
+
+        public static void ResetSession()
+        {
+            string fileName = DebuggerService.fileName;
+            CloseStory();
+            OpenStory(fileName);
         }
 
         public static void BeginAwaitingInput()
