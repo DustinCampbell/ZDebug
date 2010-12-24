@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZDebug.Core.Execution
+namespace ZDebug.UI.Services
 {
     public class ProcessorSteppedEventArgs : EventArgs
     {

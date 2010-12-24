@@ -80,7 +80,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
+        private void DebuggerService_ProcessorStepped(object sender, ProcessorSteppedEventArgs e)
         {
             Update();
         }
@@ -102,15 +102,11 @@ namespace ZDebug.UI.ViewModel
             {
                 locals[i].Visible = false;
             }
-
-            e.Story.Processor.Stepped -= Processor_Stepped;
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
             Update();
-
-            e.Story.Processor.Stepped += Processor_Stepped;
         }
 
         protected internal override void Initialize()
@@ -118,6 +114,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
+            DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
         }
 
         public IndexedVariableViewModel[] Locals

@@ -101,7 +101,6 @@ namespace ZDebug.UI.ViewModel
 
             BringLineIntoView(ipLine);
 
-            e.Story.Processor.Stepped += Processor_Stepped;
             e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
             e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
             e.Story.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
@@ -113,7 +112,7 @@ namespace ZDebug.UI.ViewModel
             lines.BringIntoView(line);
         }
 
-        private void Processor_Stepped(object sender, ProcessorSteppedEventArgs e)
+        private void DebuggerService_Stepped(object sender, ProcessorSteppedEventArgs e)
         {
             var oldLine = GetLineByAddress(e.OldPC);
             oldLine.HasIP = false;
@@ -324,6 +323,8 @@ namespace ZDebug.UI.ViewModel
 
             DebuggerService.BreakpointAdded += DebuggerService_BreakpointAdded;
             DebuggerService.BreakpointRemoved += DebuggerService_BreakpointRemoved;
+
+            DebuggerService.ProcessorStepped += DebuggerService_Stepped;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 

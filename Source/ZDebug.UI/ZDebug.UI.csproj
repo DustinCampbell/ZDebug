@@ -131,6 +131,8 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
     <Compile Include="Services\GameInfo.cs" />
+    <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
+    <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />

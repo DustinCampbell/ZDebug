@@ -230,7 +230,7 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                //story.RoutineTable.Add(address);
+                story.RoutineTable.Add(address);
 
                 PushFrame();
 
@@ -390,21 +390,9 @@ namespace ZDebug.Core.Execution
 
         public int Step()
         {
-            var steppingHandler = Stepping;
-            if (steppingHandler != null)
-            {
-                steppingHandler(this, new ProcessorSteppingEventArgs(pc));
-            }
-
             ReadNextInstruction();
 
             Execute();
-
-            var steppedHandler = Stepped;
-            if (steppedHandler != null)
-            {
-                steppedHandler(this, new ProcessorSteppedEventArgs(startAddress, pc));
-            }
 
             instructionCount++;
 
@@ -537,9 +525,6 @@ namespace ZDebug.Core.Execution
         {
             get { return startAddress; }
         }
-
-        public event EventHandler<ProcessorSteppingEventArgs> Stepping;
-        public event EventHandler<ProcessorSteppedEventArgs> Stepped;
 
         public event EventHandler<StackFrameEventArgs> EnterStackFrame;
         public event EventHandler<StackFrameEventArgs> ExitStackFrame;

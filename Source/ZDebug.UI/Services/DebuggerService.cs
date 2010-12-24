@@ -16,8 +16,8 @@ namespace ZDebug.UI.Services
         private static GameInfo gameInfo;
         private static string fileName;
         private static Exception currentException;
-        private static SortedSet<int> breakpoints = new SortedSet<int>();
-        private static List<string> gameScript = new List<string>();
+        private readonly static SortedSet<int> breakpoints = new SortedSet<int>();
+        private readonly static List<string> gameScript = new List<string>();
         private static int gameScriptCommandIndex;
 
         private static DebuggerState priorState;
@@ -210,7 +210,21 @@ namespace ZDebug.UI.Services
             {
                 while (state == DebuggerState.Running)
                 {
+                    var oldPC = processor.PC;
+
+                    var handlerStepping = ProcessorStepping;
+                    if (handlerStepping != null)
+                    {
+                        handlerStepping(null, new ProcessorSteppingEventArgs(oldPC));
+                    }
+
                     var newPC = processor.Step();
+
+                    var handlerStepped = ProcessorStepped;
+                    if (handlerStepped != null)
+                    {
+                        handlerStepped(null, new ProcessorSteppedEventArgs(oldPC, newPC));
+                    }
 
                     if (state == DebuggerState.Running && breakpoints.Contains(newPC))
                     {
@@ -232,9 +246,25 @@ namespace ZDebug.UI.Services
 
         public static void StepNext()
         {
+            var processor = story.Processor;
+            
             try
             {
-                story.Processor.Step();
+                var oldPC = processor.PC;
+
+                var handlerStepping = ProcessorStepping;
+                if (handlerStepping != null)
+                {
+                    handlerStepping(null, new ProcessorSteppingEventArgs(oldPC));
+                }
+
+                var newPC = story.Processor.Step();
+
+                var handlerStepped = ProcessorStepped;
+                if (handlerStepped != null)
+                {
+                    handlerStepped(null, new ProcessorSteppedEventArgs(oldPC, newPC));
+                }
             }
             catch (Exception ex)
             {
@@ -362,5 +392,8 @@ namespace ZDebug.UI.Services
 
         public static event EventHandler<BreakpointEventArgs> BreakpointAdded;
         public static event EventHandler<BreakpointEventArgs> BreakpointRemoved;
+
+        public static event EventHandler<ProcessorSteppingEventArgs> ProcessorStepping;
+        public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
     }
 }
