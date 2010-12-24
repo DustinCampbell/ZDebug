@@ -8,12 +8,18 @@ using ZDebug.Core.Blorb;
 using ZDebug.UI.Utilities;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Execution;
+using System.Windows.Input;
+using System.Windows;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace ZDebug.UI.Services
 {
     internal static class DebuggerService
     {
         private static DebuggerState state;
+        private static object stateLock = new object();
+
         private static Story story;
         private static GameInfo gameInfo;
         private static RoutineTable routineTable;
@@ -29,7 +35,7 @@ namespace ZDebug.UI.Services
 
         private static void ChangeState(DebuggerState newState)
         {
-            var oldState = state;
+            DebuggerState oldState = state;
             state = newState;
 
             var handler = StateChanged;
@@ -63,7 +69,10 @@ namespace ZDebug.UI.Services
             {
                 var callOpValue = processor.GetOperandValue(0);
                 var callAddress = story.UnpackRoutineAddress(callOpValue);
-                routineTable.Add(callAddress);
+                if (callAddress != 0)
+                {
+                    routineTable.Add(callAddress);
+                }
             }
 
             OnProcessorStepped(oldPC, newPC);
@@ -283,6 +292,16 @@ namespace ZDebug.UI.Services
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
             }
+        }
+
+        public static bool CanPauseDebugging
+        {
+            get { return state == DebuggerState.Running; }
+        }
+
+        public static void PauseDebugging()
+        {
+            ChangeState(DebuggerState.Stopped);
         }
 
         public static bool CanStepNext

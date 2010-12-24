@@ -7,6 +7,7 @@ using AvalonDock;
 using Microsoft.Win32;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
+using System.Windows.Threading;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -41,6 +42,13 @@ namespace ZDebug.UI.ViewModel
                 executed: StartDebuggingExecuted,
                 canExecute: CanStartDebuggingExecute,
                 inputGestures: new KeyGesture(Key.F5));
+
+            this.PauseDebuggingCommand = RegisterCommand(
+                text: "PauseDebugging",
+                name: "Pause Debugging",
+                executed: PauseDebuggingExecuted,
+                canExecute: CanPauseDebuggingExecute,
+                inputGestures: new KeyGesture(Key.Pause, ModifierKeys.Alt | ModifierKeys.Control));
 
             this.StepNextCommand = RegisterCommand(
                 text: "StepNext",
@@ -126,6 +134,16 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StartDebugging();
         }
 
+        private bool CanPauseDebuggingExecute()
+        {
+            return DebuggerService.CanPauseDebugging;
+        }
+
+        private void PauseDebuggingExecuted()
+        {
+            DebuggerService.PauseDebugging();
+        }
+
         private bool CanStepNextExecute()
         {
             return DebuggerService.CanStepNext;
@@ -172,6 +190,7 @@ namespace ZDebug.UI.ViewModel
         public ICommand EditGameScriptCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
+        public ICommand PauseDebuggingCommand { get; private set; }
         public ICommand StepNextCommand { get; private set; }
         public ICommand ResetSessionCommand { get; private set; }
         public ICommand ResetWindowLayoutCommand { get; private set; }
