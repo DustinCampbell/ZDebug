@@ -113,11 +113,15 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_Stepped(object sender, ProcessorSteppedEventArgs e)
         {
+            if (DebuggerService.State == DebuggerState.Running)
+            {
+                return;
+            }
+
             var oldLine = GetLineByAddress(e.OldPC);
             oldLine.HasIP = false;
 
-            if (DebuggerService.State == DebuggerState.Running ||
-                DebuggerService.State == DebuggerState.AwaitingInput ||
+            if (DebuggerService.State == DebuggerState.AwaitingInput ||
                 DebuggerService.State == DebuggerState.Done)
             {
                 return;
@@ -245,7 +249,12 @@ namespace ZDebug.UI.ViewModel
                 return;
             }
 
-            if (e.NewState == DebuggerState.StoppedAtError)
+            if (e.NewState == DebuggerState.Running)
+            {
+                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                line.HasIP = false;
+            }
+            else if (e.NewState == DebuggerState.StoppedAtError)
             {
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingAddress);
                 line.State = DisassemblyLineState.Blocked;
