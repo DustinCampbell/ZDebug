@@ -272,6 +272,15 @@ namespace ZDebug.UI.Services
             return breakpoints.Contains(address);
         }
 
+        public static void RequestNavigation(int address)
+        {
+            var handler = NavigationRequested;
+            if (handler != null)
+            {
+                handler(null, new NavigationRequestedEventArgs(address));
+            }
+        }
+
         public static bool CanStartDebugging
         {
             get { return state == DebuggerState.Stopped; }
@@ -483,5 +492,7 @@ namespace ZDebug.UI.Services
 
         public static event EventHandler<ProcessorSteppingEventArgs> ProcessorStepping;
         public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
+
+        public static event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
     }
 }

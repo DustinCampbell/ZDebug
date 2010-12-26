@@ -307,6 +307,19 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        private void DebuggerService_NavigationRequested(object sender, NavigationRequestedEventArgs e)
+        {
+            var line = GetLineByAddress(e.Address);
+            if (line != null)
+            {
+                BringLineIntoView(line);
+            }
+            else
+            {
+                // TODO: Show error message
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
@@ -318,6 +331,8 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.BreakpointRemoved += DebuggerService_BreakpointRemoved;
 
             DebuggerService.ProcessorStepped += DebuggerService_Stepped;
+
+            DebuggerService.NavigationRequested += DebuggerService_NavigationRequested;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 

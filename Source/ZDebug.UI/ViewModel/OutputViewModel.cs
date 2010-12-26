@@ -463,8 +463,6 @@ namespace ZDebug.UI.ViewModel
             get { return (byte)GetFixedFontMeasureText().Width; }
         }
 
-        public event EventHandler DimensionsChanged;
-
 
         public bool SupportsColors
         {

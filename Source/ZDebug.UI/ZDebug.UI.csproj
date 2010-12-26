@@ -75,6 +75,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\GoToAddressView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\LocalsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -134,6 +138,7 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
     <Compile Include="Services\GameInfo.cs" />
+    <Compile Include="Services\NavigationRequestedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
@@ -155,6 +160,7 @@
     <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
     <Compile Include="ViewModel\GlobalsViewModel.cs" />
+    <Compile Include="ViewModel\GoToAddressViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\IndexedVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />

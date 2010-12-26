@@ -35,6 +35,15 @@
                 <Separator/>
                 <MenuItem Command="{Binding ExitCommand}" Header="E_xit"/>
             </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command="{Binding EditGameScriptCommand}" Header="Edit Game _Script...">
+                    <MenuItem.Icon>
+                        <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Command="{Binding GoToAddressCommand}" Header="_Go To Address..."/>
+            </MenuItem>
             <MenuItem Header="_Debug">
                 <MenuItem Command="{Binding StartDebuggingCommand}" Header="_Start Debugging">
                     <MenuItem.Icon>
@@ -56,12 +65,6 @@
                 <MenuItem Command="{Binding ResetSessionCommand}" Header="_Reset Session">
                     <MenuItem.Icon>
                         <c:AutoDisableImage Source="{StaticResource resetImage}"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <Separator/>
-                <MenuItem Command="{Binding EditGameScriptCommand}" Header="Edit Game _Script...">
-                    <MenuItem.Icon>
-                        <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
