@@ -93,64 +93,6 @@ namespace ZDebug.Core.Execution
             this.localCount = memory.ReadByte(ref pc);
         }
 
-        /// <summary>
-        /// Push values of current frame to the stack. They are pushed in the following order:
-        /// 
-        /// * argument count
-        /// * local variable values (in reverse order)
-        /// * local variable count
-        /// * return address
-        /// * store variable (encoded as byte; -1 for no variable)
-        /// </summary>
-        private void PushFrame()
-        {
-            callFrames[++callFramePointer] = callFrame;
-            stack[++stackPointer] = argumentCount;
-
-            for (int i = localCount - 1; i >= 0; i--)
-            {
-                stack[++stackPointer] = locals[i];
-            }
-
-            stack[++stackPointer] = localCount;
-            stack[++stackPointer] = pc;
-            stack[++stackPointer] = hasCallStoreVariable ? callStoreVariable : -1;
-            callFrame = stackPointer;
-        }
-
-        /// <summary>
-        /// Pop values from the stack to set up the current frame. They are popped in the following order:
-        /// 
-        /// * store variable (encoded as byte; -1 for no variable)
-        /// * return address
-        /// * local variable count
-        /// * local variable values
-        /// * argument count
-        /// </summary>
-        private void PopFrame()
-        {
-            // First, throw away any existing local stack
-            stackPointer = callFrame;
-
-            var variableIndex = stack[stackPointer--];
-            hasCallStoreVariable = variableIndex >= 0;
-            if (hasCallStoreVariable)
-            {
-                callStoreVariable = (byte)variableIndex;
-            }
-
-            pc = stack[stackPointer--];
-            localCount = stack[stackPointer--];
-
-            for (int i = 0; i < localCount; i++)
-            {
-                locals[i] = (ushort)stack[stackPointer--];
-            }
-
-            argumentCount = stack[stackPointer--];
-            callFrame = callFrames[callFramePointer--];
-        }
-
         private ushort ReadVariableValue(byte variableIndex)
         {
             if (variableIndex < 16)
@@ -258,29 +200,63 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                PushFrame();
+                // Push values of current frame to the stack. They are pushed in the following order:
+                // * argument count
+                // * local variable values (in reverse order)
+                // * local variable count
+                // * return address
+                // * store variable (encoded as byte; -1 for no variable)
+
+                callFrames[++callFramePointer] = callFrame;
+                stack[++stackPointer] = argumentCount;
+
+                for (int i = localCount - 1; i >= 0; i--)
+                {
+                    stack[++stackPointer] = locals[i];
+                }
+
+                stack[++stackPointer] = localCount;
+                stack[++stackPointer] = pc;
+                stack[++stackPointer] = hasCallStoreVariable ? callStoreVariable : -1;
+                callFrame = stackPointer;
 
                 var returnAddress = pc;
                 pc = address;
 
-                argumentCount = operandCount - 1;
+                var argCount = operandCount - 1;
+                this.argumentCount = argCount;
 
                 // read locals
-                localCount = bytes[pc++];
-                if (version <= 4)
+                var locCount = bytes[pc++];
+                this.localCount = locCount;
+
+                for (int i = 0; i < argCount; i++)
                 {
-                    for (int i = 0; i < localCount; i++)
-                    {
-                        locals[i] = memory.ReadWord(ref pc);
-                    }
-                }
-                else
-                {
-                    Array.Clear(locals, 0, localCount);
+                	locals[i] = operandValues[i+1];
                 }
 
-                var numberToCopy = Math.Min(argumentCount, locals.Length);
-                Array.Copy(operandValues, 1, locals, 0, numberToCopy);
+                if (version <= 4)
+                {
+                    pc += argCount * 2;
+                }
+
+                if (argCount < locCount)
+                {
+                    if (version <= 4)
+                    {
+                        for (int i = argCount; i < locCount; i++)
+                        {
+                            locals[i] = memory.ReadWord(ref pc);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = argCount; i < locCount; i++)
+                        {
+                            locals[i] = 0;
+                        }
+                    }
+                }
 
                 hasCallStoreVariable = storeVarIndex >= 0;
                 if (hasCallStoreVariable)
@@ -304,7 +280,33 @@ namespace ZDebug.Core.Execution
             var storeVar = callStoreVariable;
             var oldAddress = pc;
 
-            PopFrame();
+            // Pop values from the stack to set up the current frame. They are popped in the following order:
+            // * store variable (encoded as byte; -1 for no variable)
+            // * return address
+            // * local variable count
+            // * local variable values
+            // * argument count
+
+            // First, throw away any existing local stack
+            stackPointer = callFrame;
+
+            var variableIndex = stack[stackPointer--];
+            this.hasCallStoreVariable = variableIndex >= 0;
+            if (this.hasCallStoreVariable)
+            {
+                this.callStoreVariable = (byte)variableIndex;
+            }
+
+            this.pc = stack[stackPointer--];
+            this.localCount = stack[stackPointer--];
+
+            for (int i = 0; i < localCount; i++)
+            {
+                locals[i] = (ushort)stack[stackPointer--];
+            }
+
+            this.argumentCount = stack[stackPointer--];
+            this.callFrame = callFrames[callFramePointer--];
 
             if (hasStoreVar)
             {
@@ -316,11 +318,6 @@ namespace ZDebug.Core.Execution
             {
                 handler(this, new StackFrameEventArgs(pc, oldAddress));
             }
-        }
-
-        private void Jump(short offset)
-        {
-            pc += offset - 2;
         }
 
         private void Branch(bool condition)

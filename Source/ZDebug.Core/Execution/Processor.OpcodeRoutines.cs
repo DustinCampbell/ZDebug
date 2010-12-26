@@ -240,7 +240,7 @@ namespace ZDebug.Core.Execution
         {
             short offset = (short)operandValues[0];
 
-            Jump(offset);
+            pc += offset - 2;
         }
 
         internal void op_jz()
