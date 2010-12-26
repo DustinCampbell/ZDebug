@@ -216,6 +216,13 @@ namespace ZDebug.Core.Execution
             ushort obj1 = operandValues[0];
             ushort obj2 = operandValues[1];
 
+            if (obj1 == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                Branch(obj2 == 0);
+                return;
+            }
+
             ushort obj1Parent = objectTable.ReadParentNumberByObjectNumber(obj1);
 
             Branch(obj1Parent == obj2);
@@ -468,6 +475,13 @@ namespace ZDebug.Core.Execution
         internal void op_clear_attr()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
+
             byte attrNum = (byte)operandValues[1];
 
             objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, false);
@@ -477,16 +491,15 @@ namespace ZDebug.Core.Execution
         {
             ushort objNum = operandValues[0];
 
-            ushort childNum;
-            if (objNum > 0)
-            {
-                childNum = objectTable.ReadChildNumberByObjectNumber(objNum);
-            }
-            else
+            if (objNum == 0)
             {
                 messageLog.SendWarning(opcode, startAddress, "called with object 0");
-                childNum = 0;
+                Store(0);
+                Branch(false);
+                return;
             }
+
+            ushort childNum = objectTable.ReadChildNumberByObjectNumber(objNum);
 
             Store(childNum);
             Branch(childNum > 0);
@@ -495,6 +508,14 @@ namespace ZDebug.Core.Execution
         internal void op_get_next_prop()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                Store(0);
+                return;
+            }
+
             ushort propNum = operandValues[1];
 
             // TODO: Call into memory directly to find next property
@@ -528,16 +549,14 @@ namespace ZDebug.Core.Execution
         {
             ushort objNum = operandValues[0];
 
-            ushort parentNum;
-            if (objNum > 0)
-            {
-                parentNum = objectTable.ReadParentNumberByObjectNumber(objNum);
-            }
-            else
+            if (objNum == 0)
             {
                 messageLog.SendWarning(opcode, startAddress, "called with object 0");
-                parentNum = 0;
+                Store(0);
+                return;
             }
+
+            ushort parentNum = objectTable.ReadParentNumberByObjectNumber(objNum);
 
             Store(parentNum);
         }
@@ -546,6 +565,13 @@ namespace ZDebug.Core.Execution
         {
             ushort objNum = operandValues[0];
             ushort propNum = operandValues[1];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                Store(0);
+                return;
+            }
 
             ZObject obj = objectTable.GetByNumber(objNum);
             ZProperty prop = obj.PropertyTable.GetByNumber(propNum);
@@ -574,6 +600,14 @@ namespace ZDebug.Core.Execution
         internal void op_get_prop_addr()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                Store(0);
+                return;
+            }
+
             ushort propNum = operandValues[1];
 
             ZObject obj = objectTable.GetByNumber(objNum);
@@ -599,16 +633,15 @@ namespace ZDebug.Core.Execution
         {
             ushort objNum = operandValues[0];
 
-            ushort siblingNum;
-            if (objNum > 0)
-            {
-                siblingNum = objectTable.ReadSiblingNumberByObjectNumber(objNum);
-            }
-            else
+            if (objNum == 0)
             {
                 messageLog.SendWarning(opcode, startAddress, "called with object 0");
-                siblingNum = 0;
+                Store(0);
+                Branch(false);
+                return;
             }
+
+            ushort siblingNum = objectTable.ReadSiblingNumberByObjectNumber(objNum);
 
             Store(siblingNum);
             Branch(siblingNum > 0);
@@ -617,7 +650,20 @@ namespace ZDebug.Core.Execution
         internal void op_insert_obj()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
+
             ushort destNum = operandValues[1];
+
+            if (destNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
 
             objectTable.MoveObjectToDestinationByNumber(objNum, destNum);
         }
@@ -625,15 +671,42 @@ namespace ZDebug.Core.Execution
         internal void op_put_prop()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
+
             ushort propNum = operandValues[1];
             ushort value = operandValues[2];
 
-            WriteProperty(objNum, propNum, value);
+            var obj = objectTable.GetByNumber(objNum);
+            var prop = obj.PropertyTable.GetByNumber(propNum);
+
+            if (prop.DataLength == 2)
+            {
+                story.Memory.WriteWord(prop.DataAddress, value);
+            }
+            else if (prop.DataLength == 1)
+            {
+                story.Memory.WriteByte(prop.DataAddress, (byte)(value & 0x00ff));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         internal void op_remove_obj()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
 
             objectTable.RemoveObjectFromParentByNumber(objNum);
         }
@@ -641,6 +714,13 @@ namespace ZDebug.Core.Execution
         internal void op_set_attr()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                return;
+            }
+
             byte attrNum = (byte)operandValues[1];
 
             objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, true);
@@ -649,6 +729,14 @@ namespace ZDebug.Core.Execution
         internal void op_test_attr()
         {
             ushort objNum = operandValues[0];
+
+            if (objNum == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                Branch(false);
+                return;
+            }
+            
             byte attrNum = (byte)operandValues[1];
 
             bool result = objectTable.HasAttributeByObjectNumber(objNum, attrNum);

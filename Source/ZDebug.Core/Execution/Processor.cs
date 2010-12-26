@@ -367,25 +367,6 @@ namespace ZDebug.Core.Execution
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
-        private void WriteProperty(int objNum, int propNum, ushort value)
-        {
-            var obj = objectTable.GetByNumber(objNum);
-            var prop = obj.PropertyTable.GetByNumber(propNum);
-
-            if (prop.DataLength == 2)
-            {
-                story.Memory.WriteWord(prop.DataAddress, value);
-            }
-            else if (prop.DataLength == 1)
-            {
-                story.Memory.WriteByte(prop.DataAddress, (byte)(value & 0x00ff));
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
         public int Step()
         {
             ReadNextInstruction();
