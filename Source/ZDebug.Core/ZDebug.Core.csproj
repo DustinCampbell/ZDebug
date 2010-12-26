@@ -52,11 +52,9 @@
     <Compile Include="Execution\IInputStream.cs" />
     <Compile Include="Execution\Processor.OpcodeRoutines.cs" />
     <Compile Include="Execution\Processor.ParseInstruction.cs" />
-    <Compile Include="Execution\StackEventArgs.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
-    <Compile Include="Execution\VariableChangedEventArgs.cs" />
     <Compile Include="Execution\IMessageLog.cs" />
     <Compile Include="Execution\MessageLogExtensions.cs" />
     <Compile Include="Execution\Processor.NullMessageLog.cs" />
