@@ -518,31 +518,28 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            // TODO: Call into memory directly to find next property
+            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte value;
 
-            ZObject obj = objectTable.GetByNumber(objNum);
+            ushort propAddress = GetFirstProperty(objNum);
 
-            int nextIndex = 0;
-            if (propNum > 0)
+            if (propNum != 0)
             {
-                var prop = obj.PropertyTable.GetByNumber(propNum);
-                if (prop == null)
+                do
+                {
+                    value = bytes[propAddress];
+                    propAddress = GetNextProperty(propAddress);
+                }
+                while ((value & mask) > propNum);
+
+                if ((value & mask) != propNum)
                 {
                     throw new InvalidOperationException();
                 }
-
-                nextIndex = prop.Index + 1;
             }
 
-            if (nextIndex < obj.PropertyTable.Count)
-            {
-                ushort nextPropNum = (ushort)obj.PropertyTable[nextIndex].Number;
-                Store(nextPropNum);
-            }
-            else
-            {
-                Store(0);
-            }
+            value = bytes[propAddress];
+            Store((ushort)(value & mask));
         }
 
         internal void op_get_parent()
@@ -564,7 +561,6 @@ namespace ZDebug.Core.Execution
         internal void op_get_prop()
         {
             ushort objNum = operandValues[0];
-            ushort propNum = operandValues[1];
 
             if (objNum == 0)
             {
@@ -573,28 +569,44 @@ namespace ZDebug.Core.Execution
                 return;
             }
 
-            ZObject obj = objectTable.GetByNumber(objNum);
-            ZProperty prop = obj.PropertyTable.GetByNumber(propNum);
+            ushort propNum = operandValues[1];
 
-            ushort value;
-            if (prop == null)
+            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte value;
+
+            ushort propAddress = GetFirstProperty(objNum);
+            while (true)
             {
-                value = objectTable.GetPropertyDefault(propNum);
+                value = bytes[propAddress];
+                if ((value & mask) <= propNum)
+                {
+                    break;
+                }
+
+                propAddress = GetNextProperty(propAddress);
             }
-            else if (prop.DataLength == 1)
+
+            ushort result;
+            if ((value & mask) == propNum)
             {
-                value = memory.ReadByte(prop.DataAddress);
-            }
-            else if (prop.DataLength == 2)
-            {
-                value = memory.ReadWord(prop.DataAddress);
+                propAddress++;
+
+                if ((version <= 3 && (value & 0xe0) == 0) || (version >= 4 && (value & 0xc0) == 0))
+                {
+                    result = bytes[propAddress];
+                }
+                else
+                {
+                    result = bytes.ReadWord(propAddress);
+                }
             }
             else
             {
-                throw new InvalidOperationException();
+                propAddress = (ushort)(this.objectTableAddress + ((propNum - 1) * 2));
+                result = bytes.ReadWord(propAddress);
             }
 
-            Store(value);
+            Store(result);
         }
 
         internal void op_get_prop_addr()
@@ -610,23 +622,68 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            ZObject obj = objectTable.GetByNumber(objNum);
-            ZProperty prop = obj.PropertyTable.GetByNumber(propNum);
+            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte value;
 
-            ushort propAddress = prop != null
-                ? (ushort)prop.DataAddress
-                : (ushort)0;
+            ushort propAddress = GetFirstProperty(objNum);
+            while (true)
+            {
+                value = bytes[propAddress];
+                if ((value & mask) <= propNum)
+                {
+                    break;
+                }
 
-            Store(propAddress);
+                propAddress = GetNextProperty(propAddress);
+            }
+
+            if ((value & mask) == propNum)
+            {
+                if (version >= 4 && (value & 0x80) != 0)
+                {
+                    propAddress++;
+                }
+
+                Store(++propAddress);
+            }
+            else
+            {
+                Store(0);
+            }
         }
 
         internal void op_get_prop_len()
         {
             ushort dataAddress = operandValues[0];
 
-            ushort propLen = objectTable.ReadPropertyDataLength(dataAddress);
+            if (dataAddress == 0)
+            {
+                Store(0);
+                return;
+            }
 
-            Store(propLen);
+            dataAddress--;
+            byte value = bytes[dataAddress];
+
+            if (this.version <= 3)
+            {
+                value = (byte)((value >> 5) + 1);
+            }
+            else if ((value & 0x80) == 0)
+            {
+                value = (byte)((value >> 6) + 1);
+            }
+            else
+            {
+                value &= 0x3f;
+            }
+
+            if (value == 0)
+            {
+                value = 64;
+            }
+
+            Store(value);
         }
 
         internal void op_get_sibling()
@@ -679,22 +736,36 @@ namespace ZDebug.Core.Execution
             }
 
             ushort propNum = operandValues[1];
-            ushort value = operandValues[2];
 
-            var obj = objectTable.GetByNumber(objNum);
-            var prop = obj.PropertyTable.GetByNumber(propNum);
+            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte value;
 
-            if (prop.DataLength == 2)
+            ushort propAddress = GetFirstProperty(objNum);
+            while (true)
             {
-                story.Memory.WriteWord(prop.DataAddress, value);
+                value = bytes[propAddress];
+                if ((value & mask) <= propNum)
+                {
+                    break;
+                }
+
+                propAddress = GetNextProperty(propAddress);
             }
-            else if (prop.DataLength == 1)
+
+            if ((value & mask) != propNum)
             {
-                story.Memory.WriteByte(prop.DataAddress, (byte)(value & 0x00ff));
+                throw new InvalidOperationException();
+            }
+
+            propAddress++;
+
+            if ((this.version <= 3 && (value & 0xe0) == 0) || (this.version >= 4) && (value & 0xc0) == 0)
+            {
+                bytes[propAddress] = (byte)operandValues[2];
             }
             else
             {
-                throw new NotSupportedException();
+                bytes.WriteWord(propAddress, operandValues[2]);
             }
         }
 

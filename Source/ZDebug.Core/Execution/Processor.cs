@@ -20,6 +20,20 @@ namespace ZDebug.Core.Execution
 
         private int pc;
 
+        private readonly ushort objectTableAddress;
+        private readonly ushort maxObjects;
+        private readonly byte maxProperties;
+        private readonly byte propertyDefaultsTableSize;
+        private readonly ushort objectEntriesAddress;
+        private readonly byte entrySize;
+        private readonly byte attributeBytesSize;
+        private readonly byte attributeCount;
+        private readonly byte numberSize;
+        private readonly byte parentOffset;
+        private readonly byte siblingOffset;
+        private readonly byte childOffset;
+        private readonly byte propertyTableAddressOffset;
+
         private readonly ZObjectTable objectTable;
         private readonly ushort globalVariableTableAddress;
 
@@ -54,6 +68,20 @@ namespace ZDebug.Core.Execution
             this.ztext = ztext;
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
+
+            this.objectTableAddress = this.memory.ReadObjectTableAddress();
+            this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
+            this.maxProperties = (byte)(version <= 3 ? 31 : 63);
+            this.propertyDefaultsTableSize = (byte)(maxProperties * 2);
+            this.objectEntriesAddress = (ushort)(this.objectTableAddress + propertyDefaultsTableSize);
+            this.entrySize = (byte)(version <= 3 ? 9 : 14);
+            this.attributeBytesSize = (byte)(version <= 3 ? 4 : 6);
+            this.attributeCount = (byte)(version <= 3 ? 32 : 48);
+            this.numberSize = (byte)(version <= 3 ? 1 : 2);
+            this.parentOffset = (byte)(version <= 3 ? 4 : 6);
+            this.siblingOffset = (byte)(version <= 3 ? 5 : 8);
+            this.childOffset = (byte)(version <= 3 ? 6 : 10);
+            this.propertyTableAddressOffset = (byte)(version <= 3 ? 7 : 12);
 
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
@@ -365,6 +393,67 @@ namespace ZDebug.Core.Execution
             var zwords = memory.ReadWords(ref pc, count);
 
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);
+        }
+
+        private ushort GetObjectAddress(ushort objNum)
+        {
+            if (objNum < 1)
+            {
+                throw new ArgumentOutOfRangeException("objNum");
+            }
+
+            return (ushort)(this.objectEntriesAddress + ((objNum - 1) * this.entrySize));
+        }
+
+        /// <summary>
+        /// Given an object number, retrieves the address in memory of its short name.
+        /// </summary>
+        private ushort GetObjectName(ushort objNum)
+        {
+            ushort objAddress = GetObjectAddress(objNum);
+            objAddress += this.propertyTableAddressOffset;
+
+            return bytes.ReadWord(objAddress);
+        }
+
+        /// <summary>
+        /// Given an object number, retrieves the address in memory of its first property.
+        /// </summary>
+        private ushort GetFirstProperty(ushort objNum)
+        {
+            ushort propAddress = GetObjectName(objNum);
+            byte nameLength = bytes[propAddress++];
+
+            return (ushort)(propAddress + (ushort)(nameLength * 2));
+        }
+
+        /// <summary>
+        /// Given a property address, retrieves the address in memory of the next property.
+        /// </summary>
+        private ushort GetNextProperty(ushort propAddress)
+        {
+            byte size = bytes[propAddress++];
+
+            if (this.version <= 3)
+            {
+                size >>= 5;
+            }
+            else if ((size & 0x80) != 0x80)
+            {
+                size >>= 6;
+            }
+            else
+            {
+                size = bytes[propAddress];
+                size &= 0x3f;
+
+                if (size == 0)
+                {
+                    size = 64;
+                }
+            }
+
+            return (ushort)(propAddress + size + 1);
         }
 
         public int Step()

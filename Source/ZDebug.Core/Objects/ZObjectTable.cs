@@ -58,7 +58,7 @@ namespace ZDebug.Core.Objects
             this.propertyTables = new IntegerMap<ZPropertyTable>(objects.Length);
         }
 
-        public byte MaxProperties
+        internal byte MaxProperties
         {
             get { return maxProperties; }
         }
