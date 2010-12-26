@@ -9,7 +9,7 @@ namespace ZDebug.Core.Execution
 {
     public sealed partial class Processor
     {
-        private const int stackSize = 16384;
+        private const int stackSize = 1024;
 
         private readonly Story story;
         private readonly Memory memory;
@@ -570,7 +570,9 @@ namespace ZDebug.Core.Execution
 
             var result = new ushort[localStackSize];
 
-            for (int i = localStackSize - 1; i >= 0; i--)
+            var low = stackPointer == stackSize ? 1 : 0;
+
+            for (int i = localStackSize - 1; i >= low; i--)
             {
                 result[i] = (ushort)stack[stackPointer - i];
             }

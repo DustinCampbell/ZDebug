@@ -299,14 +299,14 @@ namespace ZDebug.UI.Services
 
                     count++;
                 }
+
+                Dispatcher.CurrentDispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
             }
             catch (Exception ex)
             {
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
             }
-
-            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
         }
 
         public static void StartDebugging()
