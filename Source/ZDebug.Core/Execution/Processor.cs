@@ -45,6 +45,7 @@ namespace ZDebug.Core.Execution
         private int callFramePointer = -1;
         private readonly ushort[] locals = new ushort[15];
         private int localCount;
+        private int callAddress;
         private int argumentCount;
         private bool hasCallStoreVariable;
         private byte callStoreVariable;
@@ -90,6 +91,7 @@ namespace ZDebug.Core.Execution
             this.pc = this.memory.ReadMainRoutineAddress();
             this.opcodes = OpcodeTables.GetOpcodeTable(this.version).opcodes;
 
+            this.callAddress = this.pc;
             this.localCount = memory.ReadByte(ref pc);
         }
 
@@ -201,13 +203,15 @@ namespace ZDebug.Core.Execution
             else
             {
                 // Push values of current frame to the stack. They are pushed in the following order:
+                // * call address
                 // * argument count
                 // * local variable values (in reverse order)
                 // * local variable count
-                // * return address
                 // * store variable (encoded as byte; -1 for no variable)
+                // * return address
 
                 callFrames[++callFramePointer] = callFrame;
+                stack[++stackPointer] = callAddress;
                 stack[++stackPointer] = argumentCount;
 
                 for (int i = localCount - 1; i >= 0; i--)
@@ -216,10 +220,11 @@ namespace ZDebug.Core.Execution
                 }
 
                 stack[++stackPointer] = localCount;
-                stack[++stackPointer] = pc;
                 stack[++stackPointer] = hasCallStoreVariable ? callStoreVariable : -1;
+                stack[++stackPointer] = pc;
                 callFrame = stackPointer;
 
+                callAddress = address;
                 var returnAddress = pc;
                 pc = address;
 
@@ -232,7 +237,7 @@ namespace ZDebug.Core.Execution
 
                 for (int i = 0; i < argCount; i++)
                 {
-                	locals[i] = operandValues[i+1];
+                    locals[i] = operandValues[i + 1];
                 }
 
                 if (version <= 4)
@@ -281,14 +286,17 @@ namespace ZDebug.Core.Execution
             var oldAddress = pc;
 
             // Pop values from the stack to set up the current frame. They are popped in the following order:
-            // * store variable (encoded as byte; -1 for no variable)
             // * return address
+            // * store variable (encoded as byte; -1 for no variable)
             // * local variable count
             // * local variable values
             // * argument count
+            // * call address
 
             // First, throw away any existing local stack
             stackPointer = callFrame;
+
+            this.pc = stack[stackPointer--];
 
             var variableIndex = stack[stackPointer--];
             this.hasCallStoreVariable = variableIndex >= 0;
@@ -297,7 +305,6 @@ namespace ZDebug.Core.Execution
                 this.callStoreVariable = (byte)variableIndex;
             }
 
-            this.pc = stack[stackPointer--];
             this.localCount = stack[stackPointer--];
 
             for (int i = 0; i < localCount; i++)
@@ -306,6 +313,8 @@ namespace ZDebug.Core.Execution
             }
 
             this.argumentCount = stack[stackPointer--];
+            this.callAddress = stack[stackPointer--];
+
             this.callFrame = callFrames[callFramePointer--];
 
             if (hasStoreVar)
@@ -558,6 +567,66 @@ namespace ZDebug.Core.Execution
         public ushort GetOperandValue(int index)
         {
             return operandValues[index];
+        }
+
+        private StackFrame GetStackFrameFromSP(int sp)
+        {
+            var storeVariableIndex = stack[sp--];
+            var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
+            var localCount = stack[sp--];
+            ushort[] locals = new ushort[localCount];
+            for (int i = 0; i < localCount; i++)
+            {
+                locals[i] = (ushort)stack[sp--];
+            }
+            var argumentCount = stack[sp--];
+            var callAddress = stack[sp--];
+
+            var returnAddress = sp >= 0 ? stack[sp] : 0;
+
+            return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
+        }
+
+        public StackFrame GetStackFrame(int index)
+        {
+            if (index == 0)
+            {
+                var localsCopy = new ushort[localCount];
+                Array.Copy(this.locals, localsCopy, localCount);
+                var returnAddress = stack[callFrame]; // skip store variable
+                var storeVariable = hasCallStoreVariable ? Variable.FromByte(callStoreVariable) : null;
+
+                return new StackFrame(this.callAddress, this.argumentCount, localsCopy, returnAddress, storeVariable);
+            }
+            else if (index == 1 && index < callFramePointer + 2)
+            {
+                return GetStackFrameFromSP(callFrame - 1); // skip return address
+            }
+            else if (index > 1 && index < callFramePointer + 2)
+            {
+                return GetStackFrameFromSP(callFrames[callFramePointer - index + 2] - 1);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+        }
+
+        public StackFrame[] GetStackFrames()
+        {
+            var count = GetStackFrameCount();
+            var result = new StackFrame[count];
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = GetStackFrame(i);
+            }
+
+            return result;
+        }
+
+        public int GetStackFrameCount()
+        {
+            return callFramePointer + 2;
         }
 
         public ushort[] GetStackValues()
