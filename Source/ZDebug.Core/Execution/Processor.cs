@@ -618,7 +618,19 @@ namespace ZDebug.Core.Execution
                     locals[locIndex + 1] = (ushort)(loc & 0xffff);
                 }
             }
+
             return locals;
+        }
+
+        private StackFrame GetStackFrameFromSP(int sp, uint returnAddress)
+        {
+            var storeVariableIndex = stack[sp--];
+            var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
+            var locals = GetLocals(ref sp);
+            var argumentCount = (int)stack[sp--];
+            var callAddress = stack[sp--];
+
+            return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
         }
 
         public StackFrame GetStackFrame(int index)
@@ -635,30 +647,19 @@ namespace ZDebug.Core.Execution
             else if (index == 1 && index < callFramePointer + 2)
             {
                 var sp = callFrame - 1; // skipping return address
-                var storeVariableIndex = stack[sp--];
-                var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
-                var locals = GetLocals(ref sp);
-                var argumentCount = (int)stack[sp--];
-                var callAddress = stack[sp--];
-
                 var returnAddress = callFramePointer > 0 ? stack[callFrames[callFramePointer]] : 0;
 
-                return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
+                return GetStackFrameFromSP(sp, returnAddress);
             }
             else if (index > 1 && index < callFramePointer + 2)
             {
                 var cfp = callFramePointer - index + 2;
                 var sp = callFrames[cfp] - 1; // skipping return address
-                var storeVariableIndex = stack[sp--];
-                var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
-                var locals = GetLocals(ref sp);
-                var argumentCount = (int)stack[sp--];
-                var callAddress = stack[sp--];
 
                 var nextSP = callFrames[cfp - 1];
                 var returnAddress = nextSP >= 0 ? stack[nextSP] : 0;
 
-                return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
+                return GetStackFrameFromSP(sp, returnAddress);
             }
             else
             {
