@@ -1,32 +1,31 @@
-﻿namespace ZDebug.UI.ViewModel
+﻿using ZDebug.Core.Execution;
+namespace ZDebug.UI.ViewModel
 {
     internal sealed class StackFrameViewModel : ViewModelBase
     {
-        private readonly int address;
-        private readonly int? callAddress;
+        private readonly StackFrame stackFrame;
         private bool isCurrent;
 
-        public StackFrameViewModel(int address, int? callAddress)
+        public StackFrameViewModel(StackFrame stackFrame)
         {
-            this.address = address;
-            this.callAddress = callAddress;
+            this.stackFrame = stackFrame;
         }
 
         public int Address
         {
-            get { return address; }
+            get { return stackFrame.CallAddress; }
         }
 
         public string CallAddressText
         {
             get
             {
-                if (callAddress == null)
+                if (stackFrame.ReturnAddress == 0)
                 {
                     return string.Empty;
                 }
 
-                return callAddress.Value.ToString("x4");
+                return stackFrame.ReturnAddress.ToString("x4");
             }
         }
 

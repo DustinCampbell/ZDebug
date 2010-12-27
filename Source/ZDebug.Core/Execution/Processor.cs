@@ -9,7 +9,7 @@ namespace ZDebug.Core.Execution
 {
     public sealed partial class Processor
     {
-        private const int stackSize = 1024;
+        private const int stackSize = 32768;
 
         private readonly Story story;
         private readonly Memory memory;
@@ -569,8 +569,9 @@ namespace ZDebug.Core.Execution
             return operandValues[index];
         }
 
-        private StackFrame GetStackFrameFromSP(int sp)
+        private StackFrame GetStackFrameFromCallFrame(int callFrameIndex)
         {
+            var sp = callFrames[callFrameIndex] - 1; // skipping return address
             var storeVariableIndex = stack[sp--];
             var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
             var localCount = stack[sp--];
@@ -582,7 +583,7 @@ namespace ZDebug.Core.Execution
             var argumentCount = stack[sp--];
             var callAddress = stack[sp--];
 
-            var returnAddress = sp >= 0 ? stack[sp] : 0;
+            var returnAddress = callFrameIndex > 0 ? stack[callFrames[callFrameIndex - 1]] : 0;
 
             return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
         }
@@ -593,18 +594,48 @@ namespace ZDebug.Core.Execution
             {
                 var localsCopy = new ushort[localCount];
                 Array.Copy(this.locals, localsCopy, localCount);
-                var returnAddress = stack[callFrame]; // skip store variable
+                var returnAddress = callFrame >= 0 ? stack[callFrame] : 0;
                 var storeVariable = hasCallStoreVariable ? Variable.FromByte(callStoreVariable) : null;
 
                 return new StackFrame(this.callAddress, this.argumentCount, localsCopy, returnAddress, storeVariable);
             }
             else if (index == 1 && index < callFramePointer + 2)
             {
-                return GetStackFrameFromSP(callFrame - 1); // skip return address
+                var sp = callFrame - 1; // skipping return address
+                var storeVariableIndex = stack[sp--];
+                var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
+                var localCount = stack[sp--];
+                ushort[] locals = new ushort[localCount];
+                for (int i = 0; i < localCount; i++)
+                {
+                    locals[i] = (ushort)stack[sp--];
+                }
+                var argumentCount = stack[sp--];
+                var callAddress = stack[sp--];
+
+                var returnAddress = callFramePointer > 0 ? stack[callFrames[callFramePointer]] : 0;
+
+                return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
             }
             else if (index > 1 && index < callFramePointer + 2)
             {
-                return GetStackFrameFromSP(callFrames[callFramePointer - index + 2] - 1);
+                var cfp = callFramePointer - index + 2;
+                var sp = callFrames[cfp] - 1; // skipping return address
+                var storeVariableIndex = stack[sp--];
+                var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
+                var localCount = stack[sp--];
+                ushort[] locals = new ushort[localCount];
+                for (int i = 0; i < localCount; i++)
+                {
+                    locals[i] = (ushort)stack[sp--];
+                }
+                var argumentCount = stack[sp--];
+                var callAddress = stack[sp--];
+
+                var nextSP = callFrames[cfp - 1];
+                var returnAddress = nextSP >= 0 ? stack[nextSP] : 0;
+
+                return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
             }
             else
             {

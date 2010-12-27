@@ -25,14 +25,14 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.State != DebuggerState.Running)
             {
-                var processor = DebuggerService.Story.Processor;
+                var story = DebuggerService.Story;
 
                 // Update globals...
                 for (int i = 0; i < 240; i++)
                 {
                     var global = globals[i];
 
-                    var newGlobalValue = DebuggerService.Story.GlobalVariablesTable[i];
+                    var newGlobalValue = story.GlobalVariablesTable[i];
                     global.IsModified = !storyOpened && global.Value != newGlobalValue;
                     global.Value = newGlobalValue;
                 }
