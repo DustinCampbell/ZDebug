@@ -11,7 +11,7 @@ namespace ZDebug.UI.ViewModel
             this.stackFrame = stackFrame;
         }
 
-        public int Address
+        public uint Address
         {
             get { return stackFrame.CallAddress; }
         }
