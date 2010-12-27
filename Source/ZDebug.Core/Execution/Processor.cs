@@ -46,6 +46,7 @@ namespace ZDebug.Core.Execution
         private readonly ushort[] locals = new ushort[16];
         private int localCount;
         private uint callAddress;
+        private readonly ushort[] arguments = new ushort[8];
         private int argumentCount;
         private bool hasCallStoreVariable;
         private byte callStoreVariable;
@@ -204,6 +205,7 @@ namespace ZDebug.Core.Execution
             {
                 // Push values of current frame to the stack. They are pushed in the following order:
                 // * call address
+                // * argument values (in reverse order)
                 // * argument count
                 // * local variable values (in reverse order)
                 // * local variable count
@@ -217,14 +219,25 @@ namespace ZDebug.Core.Execution
                 var sp = this.sp;
 
                 stack[++sp] = (uint)callAddress;
-                stack[++sp] = (uint)argumentCount;
 
-                var localCount = this.localCount;
+                // calculate number of stack slots used to store arguments
+                var argCount = this.argumentCount;
+                var argSlotCount = (argCount / 2) + (argCount % 2 != 0 ? 1 : 0);
+
+                for (int i = argSlotCount - 1; i >= 0; i--)
+                {
+                    var index = i * 2;
+                    var arg = (uint)((arguments[index] << 16) | arguments[index + 1]);
+                    stack[++sp] = arg;
+                }
+
+                stack[++sp] = (uint)argCount;
 
                 // calculate number of stack slots used to store locals
-                var slotCount = (localCount / 2) + (localCount % 2 != 0 ? 1 : 0);
+                var localCount = this.localCount;
+                var locSlotCount = (localCount / 2) + (localCount % 2 != 0 ? 1 : 0);
 
-                for (int i = slotCount - 1; i >= 0; i--)
+                for (int i = locSlotCount - 1; i >= 0; i--)
                 {
                     var index = i * 2;
                     var loc = (uint)((locals[index] << 16) | locals[index + 1]);
@@ -244,7 +257,7 @@ namespace ZDebug.Core.Execution
                 var returnAddress = pc;
                 pc = address;
 
-                var argCount = operandCount - 1;
+                argCount = operandCount - 1;
                 this.argumentCount = argCount;
 
                 // read locals
@@ -255,6 +268,8 @@ namespace ZDebug.Core.Execution
                 {
                     locals[i] = operandValues[i + 1];
                 }
+
+                Array.Copy(locals, 0, arguments, 0, argCount);
 
                 if (version <= 4)
                 {
@@ -307,6 +322,7 @@ namespace ZDebug.Core.Execution
             // * local variable count
             // * local variable values
             // * argument count
+            // * argument values (in reverse order)
             // * call address
 
             // reduce field access by storing in local variables
@@ -329,9 +345,9 @@ namespace ZDebug.Core.Execution
             this.localCount = localCount;
 
             // calculate number of stack slots used to store locals
-            var slotCount = (localCount / 2) + (localCount % 2 != 0 ? 1 : 0);
+            var locSlotCount = (localCount / 2) + (localCount % 2 != 0 ? 1 : 0);
 
-            for (int i = 0; i < slotCount; i++)
+            for (int i = 0; i < locSlotCount; i++)
             {
                 var loc = stack[sp--];
                 var index = i * 2;
@@ -339,7 +355,20 @@ namespace ZDebug.Core.Execution
                 locals[index+1] = (ushort)(loc & 0xffff);
             }
 
-            this.argumentCount = (int)stack[sp--];
+            var argCount = (int)stack[sp--];
+            this.argumentCount = argCount;
+
+            // calculate number of stack slots used to store locals
+            var argSlotCount = (argCount / 2) + (argCount % 2 != 0 ? 1 : 0);
+
+            for (int i = 0; i < argSlotCount; i++)
+            {
+                var arg = stack[sp--];
+                var index = i * 2;
+                arguments[index] = (ushort)((arg >> 16) & 0xffff);
+                arguments[index + 1] = (ushort)(arg & 0xffff);
+            }
+
             this.callAddress = stack[sp--];
 
             this.callFrame = callFrames[callFramePointer--];
@@ -599,38 +628,38 @@ namespace ZDebug.Core.Execution
             return operandValues[index];
         }
 
-        private ushort[] GetLocals(ref int sp)
+        private ushort[] GetValues(ref int sp)
         {
-            var localCount = (int)stack[sp--];
-            ushort[] locals = new ushort[localCount];
+            var count = (int)stack[sp--];
+            ushort[] values = new ushort[count];
 
             // calculate number of stack slots used to store locals
-            var slotCount = (localCount / 2) + (localCount % 2 != 0 ? 1 : 0);
+            var slotCount = (count / 2) + (count % 2 != 0 ? 1 : 0);
 
             for (int i = 0; i < slotCount; i++)
             {
-                var loc = stack[sp--];
-                var locIndex = i * 2;
-                locals[locIndex] = (ushort)((loc >> 16) & 0xffff);
+                var value = stack[sp--];
+                var index = i * 2;
+                values[index] = (ushort)((value >> 16) & 0xffff);
 
-                if (locIndex + 1 < localCount)
+                if (index + 1 < count)
                 {
-                    locals[locIndex + 1] = (ushort)(loc & 0xffff);
+                    values[index + 1] = (ushort)(value & 0xffff);
                 }
             }
 
-            return locals;
+            return values;
         }
 
         private StackFrame GetStackFrameFromSP(int sp, uint returnAddress)
         {
             var storeVariableIndex = stack[sp--];
             var storeVariable = storeVariableIndex >= 0 ? Variable.FromByte((byte)storeVariableIndex) : null;
-            var locals = GetLocals(ref sp);
-            var argumentCount = (int)stack[sp--];
+            var locals = GetValues(ref sp);
+            var arguments = GetValues(ref sp);
             var callAddress = stack[sp--];
 
-            return new StackFrame(callAddress, argumentCount, locals, returnAddress, storeVariable);
+            return new StackFrame(callAddress, arguments, locals, returnAddress, storeVariable);
         }
 
         public StackFrame GetStackFrame(int index)
@@ -639,10 +668,12 @@ namespace ZDebug.Core.Execution
             {
                 var localsCopy = new ushort[localCount];
                 Array.Copy(this.locals, localsCopy, localCount);
+                var argumentsCopy = new ushort[argumentCount];
+                Array.Copy(this.arguments, argumentsCopy, argumentCount);
                 var returnAddress = callFrame >= 0 ? stack[callFrame] : 0;
                 var storeVariable = hasCallStoreVariable ? Variable.FromByte(callStoreVariable) : null;
 
-                return new StackFrame(this.callAddress, this.argumentCount, localsCopy, returnAddress, storeVariable);
+                return new StackFrame(this.callAddress, argumentsCopy, localsCopy, returnAddress, storeVariable);
             }
             else if (index == 1 && index < callFramePointer + 2)
             {

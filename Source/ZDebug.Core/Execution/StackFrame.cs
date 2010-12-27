@@ -11,15 +11,15 @@ namespace ZDebug.Core.Execution
     public sealed class StackFrame
     {
         private readonly uint callAddress;
-        private readonly int argumentCount;
+        private readonly ReadOnlyCollection<ushort> arguments;
         private readonly ReadOnlyCollection<ushort> locals;
         private readonly uint returnAddress;
         private readonly Variable storeVariable;
 
-        internal StackFrame(uint callAddress, int argumentCount, ushort[] locals, uint returnAddress, Variable storeVariable)
+        internal StackFrame(uint callAddress, ushort[] arguments, ushort[] locals, uint returnAddress, Variable storeVariable)
         {
             this.callAddress = callAddress;
-            this.argumentCount = argumentCount;
+            this.arguments = arguments.AsReadOnly();
             this.locals = locals.AsReadOnly();
             this.returnAddress = returnAddress;
             this.storeVariable = storeVariable;
@@ -30,9 +30,9 @@ namespace ZDebug.Core.Execution
             get { return callAddress; }
         }
 
-        public int ArgumentCount
+        public ReadOnlyCollection<ushort> Arguments
         {
-            get { return argumentCount; }
+            get { return arguments; }
         }
 
         public ReadOnlyCollection<ushort> Locals

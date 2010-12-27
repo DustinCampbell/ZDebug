@@ -11,37 +11,28 @@
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid
+                        TextElement.FontFamily="Consolas">
+
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="CallAddress"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="Address"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Args"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock
                             Grid.Column="0"
-                            Margin="0,0,8,0"
-                            Text="{Binding CallAddressText, Mode=OneWay}"/>
+                            FontWeight="Bold"
+                            HorizontalAlignment="Right"
+                            Text="{Binding CallAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
 
-                        <!-- IP arrow image -->
-                        <Image Grid.Column="1" Source="{StaticResource ipArrowImage}" Width="16" Height="16">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=IsCurrent}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
+                        <TextBlock
+                            Grid.Column="1"
+                            Text=" "/>
 
                         <TextBlock
                             Grid.Column="2"
-                            Margin="8,0,0,0"
-                            FontWeight="Bold"
-                            Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            Text="{Binding ArgText, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
