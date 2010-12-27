@@ -37,12 +37,12 @@ namespace ZDebug.Core.Execution
                     }
                     else
                     {
-                        if (stackPointer == callFrame)
+                        if (sp == callFrame)
                         {
                             throw new InvalidOperationException("Local stack is empty.");
                         }
 
-                        operandValues[operandCount++] = (ushort)stack[stackPointer--];
+                        operandValues[operandCount++] = (ushort)stack[sp--];
                     }
                 }
                 else
