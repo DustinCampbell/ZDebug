@@ -114,7 +114,19 @@ namespace ZDebug.UI.Services
                 foreach (var routineElem in routinesElem.Elements("routine"))
                 {
                     var addAttr = routineElem.Attribute("address");
-                    routineTable.Add((int)addAttr);
+                    var nameAttr = routineElem.Attribute("name");
+
+                    var address = (int)addAttr;
+                    var name = nameAttr != null ? (string)nameAttr : null;
+
+                    if (routineTable.Exists(address))
+                    {
+                        routineTable.GetByAddress(address).Name = name;
+                    }
+                    else
+                    {
+                        routineTable.Add(address, name);
+                    }
                 }
             }
         }
@@ -132,7 +144,9 @@ namespace ZDebug.UI.Services
                     new XElement("gamescript",
                         gameScript.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
-                        routineTable.Select(r => new XElement("routine", new XAttribute("address", r.Address)))));
+                        routineTable.Select(r => new XElement("routine", 
+                            new XAttribute("address", r.Address),
+                            new XAttribute("name", r.Name)))));
 
             Storage.SaveStorySettings(story, xml);
         }
@@ -278,6 +292,23 @@ namespace ZDebug.UI.Services
             if (handler != null)
             {
                 handler(null, new NavigationRequestedEventArgs(address));
+            }
+        }
+
+        public static void SetRoutineName(int address, string name)
+        {
+            var routine = routineTable.GetByAddress(address);
+            if (routine.Name == name)
+            {
+                return;
+            }
+
+            routine.Name = name;
+
+            var handler = RoutineNameChanged;
+            if (handler != null)
+            {
+                handler(null, new RoutineNameChangedEventArgs(routine));
             }
         }
 
@@ -494,5 +525,7 @@ namespace ZDebug.UI.Services
         public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
 
         public static event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
+
+        public static event EventHandler<RoutineNameChangedEventArgs> RoutineNameChanged;
     }
 }

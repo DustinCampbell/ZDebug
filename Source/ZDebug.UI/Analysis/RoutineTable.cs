@@ -21,7 +21,7 @@ namespace ZDebug.Core.Instructions
             this.routines = new IntegerMap<Routine>();
             this.sortedAddresses = new List<int>();
 
-            Add(story.MainRoutineAddress);
+            Add(story.MainRoutineAddress, "Main");
         }
 
         private static bool IsAnalyzableCall(Instruction i)
@@ -36,14 +36,14 @@ namespace ZDebug.Core.Instructions
             return story.UnpackRoutineAddress(i.Operands[0].Value);
         }
 
-        public void Add(int address)
+        public void Add(int address, string name = null)
         {
             if (Exists(address))
             {
                 return;
             }
 
-            var routine = Routine.Parse(address, story, cache);
+            var routine = Routine.Parse(address, story, cache, name);
 
             routines.Add(address, routine);
 

@@ -268,8 +268,10 @@
                         <StackPanel>
                             <TextBlock
                                 Margin="4,0,0,0"
-                                FontWeight="Bold"
-                                Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                FontWeight="Bold">
+                                <Run Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                <Run Foreground="MediumBlue" Text="{Binding Name, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            </TextBlock>
 
                             <TextBlock
                                 Margin="4,0,0,0"
