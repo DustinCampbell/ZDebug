@@ -16,6 +16,7 @@ namespace ZDebug.Core
         private readonly byte version;
         private readonly int serialNumber;
         private readonly ushort releaseNumber;
+        private readonly ushort checksum;
         private readonly ushort actualChecksum;
         private readonly ushort routinesOffset;
         private readonly ushort stringsOffset;
@@ -37,6 +38,7 @@ namespace ZDebug.Core
             this.version = memory.ReadVersion();
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
+            this.checksum = memory.ReadChecksum();
             this.actualChecksum = memory.CalculateChecksum();
             this.routinesOffset = memory.ReadRoutinesOffset();
             this.stringsOffset = memory.ReadStringsOffset();
@@ -137,6 +139,11 @@ namespace ZDebug.Core
         public ushort ReleaseNumber
         {
             get { return releaseNumber; }
+        }
+
+        public ushort Checksum
+        {
+            get { return checksum; }
         }
 
         internal ushort ActualChecksum

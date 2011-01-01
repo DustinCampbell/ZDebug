@@ -119,7 +119,7 @@ namespace ZDebug.UI.Utilities
 
         private static string GetStorySettingsFileName(Story story)
         {
-            return string.Format("{0:d6}_{1}_{2}", story.SerialNumber, story.ReleaseNumber, story.Version);
+            return string.Format("{0:d6}_{1}_{2}_{3:x4}", story.SerialNumber, story.ReleaseNumber, story.Version, story.Checksum);
         }
 
         public static XElement RestoreStorySettings(Story story)
