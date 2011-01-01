@@ -270,7 +270,7 @@
                                 Margin="4,0,0,0"
                                 FontWeight="Bold">
                                 <Run Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                                <Run Foreground="MediumBlue" Text="{Binding Name, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                <Run Foreground="DodgerBlue" FontSize="18.0" Text="{Binding Name, StringFormat=\{0:x4\}, Mode=OneWay}"/>
                             </TextBlock>
 
                             <TextBlock
