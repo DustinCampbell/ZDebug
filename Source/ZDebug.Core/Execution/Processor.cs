@@ -56,6 +56,7 @@ namespace ZDebug.Core.Execution
         private readonly OutputStreams outputStreams;
         private Random random = new Random();
         private IScreen screen;
+        private ISoundEngine soundEngine;
         private IMessageLog messageLog;
 
         private int instructionCount;
@@ -87,6 +88,7 @@ namespace ZDebug.Core.Execution
 
             this.outputStreams = new OutputStreams(story);
             RegisterScreen(NullScreen.Instance);
+            RegisterSoundEngine(NullSoundEngine.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
 
             this.pc = this.memory.ReadMainRoutineAddress();
@@ -591,6 +593,16 @@ namespace ZDebug.Core.Execution
             }
 
             outputStreams.RegisterScreen(screen);
+        }
+
+        public void RegisterSoundEngine(ISoundEngine soundEngine)
+        {
+            if (soundEngine == null)
+            {
+                throw new ArgumentNullException("soundEngine");
+            }
+
+            this.soundEngine = soundEngine;
         }
 
         public void RegisterMessageLog(IMessageLog messageLog)

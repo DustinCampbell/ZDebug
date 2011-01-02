@@ -49,7 +49,9 @@
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
+    <Compile Include="Execution\Processor.NullSoundEngine.cs" />
     <Compile Include="Execution\IInputStream.cs" />
+    <Compile Include="Execution\ISoundEngine.cs" />
     <Compile Include="Execution\Processor.OpcodeRoutines.cs" />
     <Compile Include="Execution\Processor.ParseInstruction.cs" />
     <Compile Include="Execution\StackFrame.cs" />

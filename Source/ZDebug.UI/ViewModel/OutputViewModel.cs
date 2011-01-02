@@ -9,10 +9,11 @@ using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
+using System.Media;
 
 namespace ZDebug.UI.ViewModel
 {
-    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
+    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen, ISoundEngine
     {
         private ZWindowManager windowManager;
         private Grid windowContainer;
@@ -492,6 +493,11 @@ namespace ZDebug.UI.ViewModel
         public ZColor DefaultForegroundColor
         {
             get { return ZColor.Black; }
+        }
+
+        public void Beep()
+        {
+            SystemSounds.Beep.Play();
         }
     }
 }

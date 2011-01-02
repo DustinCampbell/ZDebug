@@ -1221,6 +1221,19 @@ namespace ZDebug.Core.Execution
             screen.ShowStatus();
         }
 
+        internal void op_sound_effect()
+        {
+            if (operandCount == 0)
+            {
+                messageLog.SendWarning(opcode, startAddress, "Called without any operands.");
+                soundEngine.Beep();
+            }
+            else
+            {
+                messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported", operandValues[0]);
+            }
+        }
+
         internal void op_tokenize()
         {
             ushort textBuffer = operandValues[0];
@@ -1729,7 +1742,8 @@ namespace ZDebug.Core.Execution
                                 }
                                 else
                                 {
-                                    break; // 'sound_effect' unsupported
+                                    op_sound_effect();
+                                    return;
                                 }
 
                             case 0x16:
