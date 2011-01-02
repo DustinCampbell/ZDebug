@@ -167,6 +167,97 @@ namespace ZDebug.Core.Text
             return ZWordsAsString(zwords, flags, alphabetTable, builder);
         }
 
+        private string ExpandCommonAbbreviations(string text)
+        {
+            // Some older games don't define these common abbreviations
+            if (text == "g")
+            {
+                return "again";
+            }
+            if (text == "x")
+            {
+                return "examine";
+            }
+            else if (text == "z")
+            {
+                return "wait";
+            }
+            else
+            {
+                return text;
+            }
+        }
+
+        private ushort TranslateToZscii(char ch)
+        {
+            // TODO: Handle unicode, mouse clicks, etc.
+
+            return (ushort)ch;
+        }
+
+        private ushort[] EncodeZText(string text)
+        {
+            var resolution = version <= 3 ? 2 : 3;
+            text = ExpandCommonAbbreviations(text);
+
+            byte[] zchars = new byte[resolution * 3];
+
+            int i = 0;
+            int textIndex = 0;
+            while (i < 3 * resolution)
+            {
+                if (textIndex < text.Length)
+                {
+                    var ch = text[textIndex++];
+                    if (ch == 0x20) // space
+                    {
+                        zchars[i++] = 0;
+                        continue;
+                    }
+
+                    var setAndIndex = alphabetTable.FindSetAndIndexOfChar(ch);
+
+                    if (setAndIndex != null)
+                    {
+                        if (setAndIndex.Item1 != 0)
+                        {
+                            zchars[i++] = (byte)((version <= 2 ? 1 : 3) + setAndIndex.Item1);
+                        }
+
+                        zchars[i++] = setAndIndex.Item2;
+                    }
+                    else
+                    {
+                        // character not found, store its ZSCII value
+                        ushort zc = TranslateToZscii(ch);
+
+                        zchars[i++] = 5;
+                        zchars[i++] = 6;
+                        zchars[i++] = (byte)(zc >> 5);
+                        zchars[i++] = (byte)(zc & 0x1f);
+                    }
+                }
+                else
+                {
+                    zchars[i++] = 5;
+                }
+            }
+
+            var result = new ushort[resolution];
+
+            for (i = 0; i < resolution; i++)
+            {
+                result[i] = (ushort)(
+                    (ushort)(zchars[i * 3] << 10) |
+                    (ushort)(zchars[i * 3 + 1] << 5) |
+                    (ushort)(zchars[i * 3 + 2]));
+            }
+
+            result[resolution - 1] |= 0x8000;
+
+            return result;
+        }
+
         private void TokenizeWord(byte[] bytes, ushort text, ushort start, ushort length, ushort parse, ushort dictionary, bool flag)
         {
             byte tokenMax = bytes[parse++];
@@ -216,57 +307,59 @@ namespace ZDebug.Core.Text
             // Set number of parse tokens to zero.
             bytes[parse + 1] = 0;
 
-            int textPtr1 = text;
-            int textPtr2 = 0;
+            int addr1 = text;
+            int addr2 = 0;
 
             int length = 0;
             if (version >= 5)
             {
-                length = memory.ReadByte(++textPtr1);
+                length = bytes[++addr1];
             }
 
             byte zc;
             do
             {
                 // Get next ZSCII character
-                if (version >= 5 && textPtr1 == text + 2 + length)
+                addr1++;
+
+                if (version >= 5 && addr1 == text + 2 + length)
                 {
                     zc = 0;
                 }
                 else
                 {
-                    zc = memory.ReadByte(++textPtr1);
+                    zc = memory.ReadByte(addr1);
                 }
 
                 // Check for separator
-                int sepPtr = dictionary;
-                byte sepCount = bytes[sepPtr++];
-                byte sep;
+                int sepAddr = dictionary;
+                byte sepCount = bytes[sepAddr++];
+                byte separator;
                 do
                 {
-                    sep = bytes[sepPtr++];
+                    separator = bytes[sepAddr++];
                 }
-                while (zc != sep && --sepCount != 0);
+                while (zc != separator && --sepCount != 0);
 
                 // This could be the start or end of a word
                 if (sepCount == 0 && zc != 0x20 && zc != 0)
                 {
-                    if (textPtr2 == 0)
+                    if (addr2 == 0)
                     {
-                        textPtr2 = textPtr1;
+                        addr2 = addr1;
                     }
                 }
-                else if (textPtr2 != 0)
+                else if (addr2 != 0)
                 {
-                    TokenizeWord(bytes, text, (ushort)(textPtr2 - text), (ushort)(textPtr1 - textPtr2), parse, dictionary, flag);
+                    TokenizeWord(bytes, text, (ushort)(addr2 - text), (ushort)(addr1 - addr2), parse, dictionary, flag);
 
-                    textPtr2 = 0;
+                    addr2 = 0;
                 }
 
                 // Translate separator (which is a word in its own right)
                 if (sepCount != 0)
                 {
-                    TokenizeWord(bytes, text, (ushort)(textPtr1 - text), (ushort)1, parse, dictionary, flag);
+                    TokenizeWord(bytes, text, (ushort)(addr1 - text), (ushort)1, parse, dictionary, flag);
                 }
             }
             while (zc != 0);
@@ -327,12 +420,14 @@ namespace ZDebug.Core.Text
 
         public ushort LookupWord(string word, int dictionaryAddress)
         {
-            int zwordsSize = version <= 3 ? 2 : 3;
+            int resolution = version <= 3 ? 2 : 3;
 
-            if (word.Length > zwordsSize * 3)
+            if (word.Length > resolution * 3)
             {
-                word = word.Substring(0, zwordsSize * 3);
+                word = word.Substring(0, resolution * 3);
             }
+
+            ushort[] encoded = EncodeZText(word);
 
             byte wordSepCount = memory.ReadByte(ref dictionaryAddress);
             dictionaryAddress += wordSepCount;
@@ -362,31 +457,45 @@ namespace ZDebug.Core.Text
 
                 ushort entryAddress = (ushort)(dictionaryAddress + (entryNumber * entryLength));
 
-                // TODO: Encode word and compare z-words directly
+                ushort addr = entryAddress;
 
-                ushort[] entryZWords = memory.ReadWords(entryAddress, zwordsSize);
-                string entryText = ZWordsAsString(entryZWords, ZTextFlags.All);
-
-                if (entryText == word)
+                bool cont = false;
+                for (int i = 0; i < resolution; i++)
                 {
-                    return entryAddress;
-                }
+                    ushort entry = memory.ReadWord(addr);
 
-                if (sorted)
-                {
-                    if (string.CompareOrdinal(word, entryText) > 0)
+                    if (encoded[i] != entry)
                     {
-                        lower = (ushort)(entryNumber + 1);
+                        if (sorted)
+                        {
+                            if (encoded[i] > entry)
+                            {
+                                lower = (ushort)(entryNumber + 1);
+                            }
+                            else
+                            {
+                                upper = (ushort)(entryNumber - 1);
+                            }
+                        }
+                        else
+                        {
+                            lower++;
+                        }
+
+                        cont = true;
+                        break;
                     }
-                    else
-                    {
-                        upper = (ushort)(entryNumber - 1);
-                    }
+
+                    addr += 2;
                 }
-                else
+
+                if (cont)
                 {
-                    lower++;
+                    continue;
                 }
+
+                // exact match found
+                return entryAddress;
             }
 
             return 0;
