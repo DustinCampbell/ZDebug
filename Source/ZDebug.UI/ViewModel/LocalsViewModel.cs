@@ -102,11 +102,15 @@ namespace ZDebug.UI.ViewModel
             {
                 locals[i].Visible = false;
             }
+
+            PropertyChanged("HasStory");
         }
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
             Update();
+
+            PropertyChanged("HasStory");
         }
 
         protected internal override void Initialize()
@@ -125,6 +129,11 @@ namespace ZDebug.UI.ViewModel
         public VariableViewModel[] LocalStack
         {
             get { return reversedStack; }
+        }
+
+        public bool HasStory
+        {
+            get { return DebuggerService.HasStory; }
         }
     }
 }
