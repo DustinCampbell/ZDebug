@@ -9,6 +9,7 @@ using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 using ZDebug.Core.Collections;
+using System.Windows.Input;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -38,7 +39,41 @@ namespace ZDebug.UI.ViewModel
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
             routineAddressAndIndexList = new List<AddressAndIndex>();
+
+            this.EditNameCommand = RegisterCommand<int>(
+                text: "EditName",
+                name: "Edit Name",
+                executed: EditNameExecuted,
+                canExecute: CanEditNameExecute);
         }
+
+        private bool CanEditNameExecute(int address)
+        {
+            return true;
+        }
+
+        private void EditNameExecuted(int address)
+        {
+            var routineViewModel = GetLineByAddress(address) as DisassemblyRoutineHeaderLineViewModel;
+            if (routineViewModel == null)
+            {
+                // TODO: Show error
+                return;
+            }
+
+            var dialog = ViewModelWithView.Create<EditRoutineNameViewModel, Window>();
+
+            var dialogViewModel = (EditRoutineNameViewModel)dialog.DataContext;
+            dialogViewModel.Name = routineViewModel.Name;
+
+            dialog.Owner = Application.Current.MainWindow;
+            if (dialog.ShowDialog() == true)
+            {
+                DebuggerService.SetRoutineName(address, dialogViewModel.Name);
+            }
+        }
+
+        public ICommand EditNameCommand { get; private set; }
 
         private DisassemblyLineViewModel GetLineByAddress(int address)
         {
@@ -320,6 +355,19 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        private void DebuggerService_RoutineNameChanged(object sender, RoutineNameChangedEventArgs e)
+        {
+            var line = GetLineByAddress(e.Routine.Address) as DisassemblyRoutineHeaderLineViewModel;
+            if (line != null)
+            {
+                line.NameUpdated();
+            }
+            else
+            {
+                // TODO: Show error message
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
@@ -333,6 +381,8 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.ProcessorStepped += DebuggerService_Stepped;
 
             DebuggerService.NavigationRequested += DebuggerService_NavigationRequested;
+
+            DebuggerService.RoutineNameChanged += DebuggerService_RoutineNameChanged;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 

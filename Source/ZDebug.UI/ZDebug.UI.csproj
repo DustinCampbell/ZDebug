@@ -59,6 +59,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\EditRoutineNameView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\DisassemblyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -158,6 +162,7 @@
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
+    <Compile Include="ViewModel\EditRoutineNameViewModel.cs" />
     <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
     <Compile Include="ViewModel\GlobalsViewModel.cs" />

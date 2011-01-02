@@ -1,4 +1,7 @@
 ﻿using ZDebug.Core.Instructions;
+using System.Windows.Input;
+using System.Windows;
+using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {

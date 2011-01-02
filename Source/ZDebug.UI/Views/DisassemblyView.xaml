@@ -8,7 +8,9 @@
              Foreground="Black"
              SnapsToDevicePixels="True"
              UseLayoutRounding="True"
-             TextOptions.TextFormattingMode="Display">
+             TextOptions.TextFormattingMode="Display"
+             Name="viewDisassembly"
+             vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 
     <Grid>
         <ItemsControl Name="lines"
@@ -82,28 +84,6 @@
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding Path=HasIP}" Value="True"/>
-                                                <Condition Binding="{Binding Path=State}" Value="None"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
-
-                        <!-- call stack arrow image -->
-                        <Image Grid.Column="0" Source="{StaticResource stepImage}" Width="16" Height="16"
-                               ToolTip="{Binding ToolTip}"
-                               Margin="0,1,0,0"
-                               VerticalAlignment="Top"
-                               vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=IsNextInstruction}" Value="True"/>
                                                 <Condition Binding="{Binding Path=State}" Value="None"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Visibility" Value="Visible"/>
@@ -264,7 +244,10 @@
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyRoutineHeaderLineViewModel}">
-                    <ContentControl Template="{StaticResource lineTemplate}">
+                    <ContentControl
+                        Template="{StaticResource lineTemplate}"
+                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        
                         <StackPanel>
                             <TextBlock
                                 Margin="4,0,0,0"
@@ -294,6 +277,16 @@
                             <!-- blank line -->
                             <TextBlock Text=" "/>
                         </StackPanel>
+                        
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem
+                                    Command="{Binding Parent.PlacementTarget.Tag.EditNameCommand, RelativeSource={RelativeSource Self}}"
+                                    CommandParameter="{Binding Address}"
+                                    CommandTarget="{Binding Path=Parent.PlacementTarget, RelativeSource={RelativeSource Self}}"
+                                    Header="Edit Name..."/>
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
                     </ContentControl>
                 </DataTemplate>
 

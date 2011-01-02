@@ -4,20 +4,20 @@
         WindowStartupLocation="CenterOwner"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
-        Title="Go To Address">
-    
-    <Grid FocusManager.FocusedElement="{Binding ElementName=txtAddress}">
+        Title="Edit Name">
+
+    <Grid FocusManager.FocusedElement="{Binding ElementName=txtName}">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <TextBox Grid.Row="0"
-                 Name="txtAddress"
+                 Name="txtName"
                  Margin="8"
                  Width="200">
             <TextBox.Text>
-                <Binding Path="AddressText"
+                <Binding Path="Name"
                          UpdateSourceTrigger="PropertyChanged"/>
             </TextBox.Text>
         </TextBox>
@@ -29,7 +29,7 @@
 
             <Button Content="OK"
                     IsDefault="True"
-                    IsEnabled="{Binding AcceptableAddress}"
+                    IsEnabled="{Binding AcceptableName}"
                     Width="75"
                     vm:DialogBehaviors.IsAccept="True"/>
 
