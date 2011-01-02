@@ -49,6 +49,7 @@ namespace ZDebug.UI.ViewModel
             windowManager.Activate(mainWindow);
 
             e.Story.Processor.RegisterScreen(this);
+            e.Story.Processor.RegisterSoundEngine(this);
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
@@ -495,7 +496,13 @@ namespace ZDebug.UI.ViewModel
             get { return ZColor.Black; }
         }
 
-        public void Beep()
+
+        public void HighBeep()
+        {
+            SystemSounds.Asterisk.Play();
+        }
+
+        public void LowBeep()
         {
             SystemSounds.Beep.Play();
         }

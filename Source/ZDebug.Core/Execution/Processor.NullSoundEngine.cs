@@ -8,7 +8,11 @@
             {
             }
 
-            public void Beep()
+            public void HighBeep()
+            {
+            }
+
+            public void LowBeep()
             {
             }
 

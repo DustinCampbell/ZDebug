@@ -1225,8 +1225,24 @@ namespace ZDebug.Core.Execution
         {
             if (operandCount == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "Called without any operands.");
-                soundEngine.Beep();
+                messageLog.SendError(opcode, startAddress, "Called without any operands.");
+                soundEngine.HighBeep();
+            }
+            else if (operandCount == 1)
+            {
+                ushort number = operandValues[0];
+                if (number == 1)
+                {
+                    soundEngine.HighBeep();
+                }
+                else if (number == 2)
+                {
+                    soundEngine.LowBeep();
+                }
+                else
+                {
+                    messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported without additional operands", operandValues[0]);
+                }
             }
             else
             {
