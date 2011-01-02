@@ -215,31 +215,52 @@
                                 </Style>
                             </Border.Style>
                         </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text=" ">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ShowBlankBefore}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
-                        <ContentPresenter
-                            Grid.Column="1"
-                            ContentSource="Content"/>
+                            <ContentPresenter ContentSource="Content"/>
+
+                            <TextBlock Text=" ">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ShowBlankAfter}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
                     </Grid>
                 </ControlTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyAddressGapLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <StackPanel>
-                            <TextBlock
-                                Margin="20,0,0,0"
-                                FontFamily="Segoe UI"
-                                FontStyle="Italic"
-                                Foreground="CornflowerBlue">
+                        <TextBlock
+                            Margin="20,0,0,0"
+                            FontFamily="Segoe UI"
+                            FontStyle="Italic"
+                            Foreground="CornflowerBlue">
 
-                                <Run Text="{Binding LengthText, StringFormat=\{0\}:, Mode=OneWay}"/>
-                                <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                                <Run Text="to"/>
-                                <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                            </TextBlock>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" "/>
-                        </StackPanel>
+                            <Run Text="{Binding LengthText, StringFormat=\{0\}:, Mode=OneWay}"/>
+                            <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            <Run Text="to"/>
+                            <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                        </TextBlock>
                     </ContentControl>
                 </DataTemplate>
 
@@ -247,7 +268,7 @@
                     <ContentControl
                         Template="{StaticResource lineTemplate}"
                         Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                        
+
                         <StackPanel>
                             <TextBlock
                                 Margin="4,0,0,0"
@@ -273,11 +294,8 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" "/>
                         </StackPanel>
-                        
+
                         <ContentControl.ContextMenu>
                             <ContextMenu>
                                 <MenuItem
@@ -292,45 +310,29 @@
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyInstructionLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <StackPanel>
-                            <Grid>
+                        <Grid>
 
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{DynamicResource addressWidth}"/>
-                                    <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{DynamicResource addressWidth}"/>
+                                <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0">
-                                    <Run Text="  "/><Run 
-                                         Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
-                                         Foreground="{StaticResource SeparatorForeground}" Text=":"/>
-                                </TextBlock>
-
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Text="{Binding OpcodeName, Mode=OneWay}"
-                                    Foreground="{StaticResource OpcodeForeground}"/>
-
-                                <c:InstructionTextDisplayElement
-                                    Grid.Column="2"
-                                    Instruction="{Binding Instruction, Mode=OneWay}"/>
-                            </Grid>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" ">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsLast}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
+                            <TextBlock Grid.Column="0">
+                                <Run Text="  "/><Run 
+                                        Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
+                                        Foreground="{StaticResource SeparatorForeground}" Text=":"/>
                             </TextBlock>
-                        </StackPanel>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Text="{Binding OpcodeName, Mode=OneWay}"
+                                Foreground="{StaticResource OpcodeForeground}"/>
+
+                            <c:InstructionTextDisplayElement
+                                Grid.Column="2"
+                                Instruction="{Binding Instruction, Mode=OneWay}"/>
+                        </Grid>
                     </ContentControl>
                 </DataTemplate>
             </ItemsControl.Resources>

@@ -100,12 +100,21 @@ namespace ZDebug.UI.ViewModel
                         var lastRoutine = routineTable[rIndex - 1];
                         if (lastRoutine.Address + lastRoutine.Length < routine.Address)
                         {
-                            var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine);
+                            var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine)
+                            {
+                                ShowBlankBefore = true
+                            };
+
                             lines.Add(addressGapLine);
                         }
                     }
 
-                    var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine);
+                    var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine)
+                    {
+                        ShowBlankBefore = rIndex > 0,
+                        ShowBlankAfter = true
+                    };
+
                     routineAddressAndIndexList.Add(new AddressAndIndex(routineHeaderLine.Address, lines.Count));
                     lines.Add(routineHeaderLine);
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
@@ -213,13 +222,20 @@ namespace ZDebug.UI.ViewModel
                         else if (addressGap.StartAddress < e.Routine.Address)
                         {
                             // If the address gap starts before this routine, we need to update it in place.
-                            lines[insertionPoint - 1] = new DisassemblyAddressGapLineViewModel(priorRoutine, e.Routine);
+                            lines[insertionPoint - 1] = new DisassemblyAddressGapLineViewModel(priorRoutine, e.Routine)
+                            {
+                                ShowBlankBefore = true
+                            };
                         }
 
                         if (nextRoutine.Address > e.Routine.Address + e.Routine.Length - 1)
                         {
                             // If there is a gap between this routine and the next one, we need to insert an address gap.
-                            var newAddressGap = new DisassemblyAddressGapLineViewModel(e.Routine, nextRoutine);
+                            var newAddressGap = new DisassemblyAddressGapLineViewModel(e.Routine, nextRoutine)
+                            {
+                                ShowBlankBefore = true
+                            };
+
                             lines.Insert(insertionPoint, newAddressGap);
                             count++;
                         }
@@ -243,7 +259,12 @@ namespace ZDebug.UI.ViewModel
                     addressToLineMap.Add(instruction.Address, instructionLine);
                 }
 
-                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine)
+                {
+                    ShowBlankBefore = insertionPoint > 0,
+                    ShowBlankAfter = true
+                };
+
                 lines.Insert(insertionPoint, routineHeaderLine);
                 count++;
                 addressToLineMap.Add(e.Routine.Address, routineHeaderLine);

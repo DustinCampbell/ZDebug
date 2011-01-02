@@ -5,6 +5,8 @@ namespace ZDebug.UI.ViewModel
     {
         private bool hasBreakpoint;
         private bool hasIP;
+        private bool showBlankBefore;
+        private bool showBlankAfter;
         private DisassemblyLineState state;
         private object toolTip;
 
@@ -56,6 +58,32 @@ namespace ZDebug.UI.ViewModel
                 {
                     toolTip = value;
                     PropertyChanged("ToolTip");
+                }
+            }
+        }
+
+        public bool ShowBlankBefore
+        {
+            get { return showBlankBefore; }
+            set
+            {
+                if (showBlankBefore != value)
+                {
+                    showBlankBefore = value;
+                    PropertyChanged("ShowBlankBefore");
+                }
+            }
+        }
+
+        public bool ShowBlankAfter
+        {
+            get { return showBlankAfter; }
+            set
+            {
+                if (showBlankAfter != value)
+                {
+                    showBlankAfter = value;
+                    PropertyChanged("ShowBlankAfter");
                 }
             }
         }
