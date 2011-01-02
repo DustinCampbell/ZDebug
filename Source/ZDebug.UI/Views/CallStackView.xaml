@@ -7,31 +7,39 @@
         <ItemsControl ItemsSource="{Binding StackFrames}"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                       ScrollViewer.CanContentScroll="True">
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid
-                        TextElement.FontFamily="Consolas">
+                    <Grid TextElement.FontFamily="Consolas">
 
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Name"/>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="CallAddress"/>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="Args"/>
                         </Grid.ColumnDefinitions>
 
                         <TextBlock
                             Grid.Column="0"
+                            FontFamily="Segoe UI"
+                            Foreground="DodgerBlue"
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,8,0"
+                            Text="{Binding Name, Mode=OneWay}"/>
+
+                        <TextBlock
+                            Grid.Column="1"
                             FontWeight="Bold"
+                            VerticalAlignment="Bottom"
                             HorizontalAlignment="Right"
                             Text="{Binding CallAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
 
                         <TextBlock
-                            Grid.Column="1"
-                            Text=" "/>
-
-                        <TextBlock
                             Grid.Column="2"
+                            VerticalAlignment="Bottom"
+                            Margin="8,0,0,0"
                             Text="{Binding ArgText, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>

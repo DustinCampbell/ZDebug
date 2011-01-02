@@ -1,6 +1,7 @@
 ﻿using ZDebug.Core.Execution;
 using ZDebug.Core.Utilities;
 using System;
+using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -11,6 +12,16 @@ namespace ZDebug.UI.ViewModel
         public StackFrameViewModel(StackFrame stackFrame)
         {
             this.stackFrame = stackFrame;
+        }
+
+        public string Name
+        {
+            get { return DebuggerService.RoutineTable.GetByAddress((int)stackFrame.CallAddress).Name; }
+        }
+
+        public bool HasName
+        {
+            get { return Name.Length > 0; }
         }
 
         public uint CallAddress
