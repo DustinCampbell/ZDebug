@@ -8,6 +8,7 @@ using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
 using ZDebug.Core.Interpreter;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
 {
@@ -136,6 +137,52 @@ namespace ZDebug.Core
 
             memory.WriteByte(0x32, interpreter.StandardRevisionMajorVersion);
             memory.WriteByte(0x33, interpreter.StandardRevisionMinorVersion);
+
+            // Set various flags
+            ushort flags1 = memory.ReadWord(0x01);
+            if (this.version <= 3)
+            {
+                // Only set this flag if the status line is NOT available
+                flags1 = interpreter.SupportsStatusLine ? Bits.Clear(flags1, 4) : Bits.Set(flags1, 4);
+                flags1 = interpreter.SupportsScreenSplitting ? Bits.Set(flags1, 5) : Bits.Set(flags1, 5);
+                flags1 = interpreter.IsDefaultFontVariablePitch ? Bits.Set(flags1, 6) : Bits.Set(flags1, 6);
+            }
+            else // this.version >= 4
+            {
+                if (this.version >= 5)
+                {
+                    flags1 = interpreter.SupportsColor ? Bits.Set(flags1, 0) : Bits.Clear(flags1, 0);
+                }
+
+                if (this.version == 6)
+                {
+                    flags1 = interpreter.SupportsPictureDisplay ? Bits.Set(flags1, 1) : Bits.Clear(flags1, 1);
+                    flags1 = interpreter.SupportsSoundEffects ? Bits.Set(flags1, 5) : Bits.Clear(flags1, 5);
+                }
+
+                flags1 = interpreter.SupportsBoldFont ? Bits.Set(flags1, 2) : Bits.Clear(flags1, 2);
+                flags1 = interpreter.SupportsItalicFont ? Bits.Set(flags1, 3) : Bits.Clear(flags1, 3);
+                flags1 = interpreter.SupportsFixedWidthFont ? Bits.Set(flags1, 4) : Bits.Clear(flags1, 4);
+                flags1 = interpreter.SupportsTimedKeyboardInput ? Bits.Set(flags1, 7) : Bits.Clear(flags1, 7);
+            }
+
+            memory.WriteWord(0x01, flags1);
+
+            ushort flags2 = memory.ReadWord(0x10);
+            if (this.version >= 5)
+            {
+                flags2 = interpreter.SupportsPictureDisplay ? flags2 : Bits.Clear(flags2, 3);
+                flags2 = interpreter.SupportsUndo ? flags2 : Bits.Clear(flags2, 4);
+                flags2 = interpreter.SupportsMouse ? flags2 : Bits.Clear(flags2, 5);
+                flags2 = interpreter.SupportsSoundEffects ? flags2 : Bits.Clear(flags2, 7);
+
+                if (this.version == 6)
+                {
+                    flags2 = interpreter.SupportsMenus ? flags2 : Bits.Clear(flags2, 8);
+                }
+            }
+
+            memory.WriteWord(0x10, flags2);
         }
 
         public Memory Memory
