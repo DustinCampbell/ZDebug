@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Threading;
 using System.Windows.Threading;
+using ZDebug.Core.Interpreter;
 
 namespace ZDebug.UI.Services
 {
@@ -21,6 +22,7 @@ namespace ZDebug.UI.Services
         private static bool stopping;
         private static bool hasStepped;
 
+        private static IInterpreter interpreter;
         private static Story story;
         private static GameInfo gameInfo;
         private static RoutineTable routineTable;
@@ -162,6 +164,7 @@ namespace ZDebug.UI.Services
 
             var oldStory = story;
 
+            interpreter = null;
             story = null;
             gameInfo = null;
             routineTable = null;
@@ -200,6 +203,8 @@ namespace ZDebug.UI.Services
                 DebuggerService.story = Story.FromBytes(File.ReadAllBytes(fileName));
             }
 
+            interpreter = new Interpreter();
+            story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
             routineTable = new RoutineTable(story, cache);
             reader = new InstructionReader(story.Processor.PC, story.Memory, cache);

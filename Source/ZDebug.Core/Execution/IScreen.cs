@@ -27,11 +27,6 @@
         byte FontHeightInUnits { get; }
         byte FontWidthInUnits { get; }
 
-        bool SupportsColors { get; }
-        bool SupportsBold { get; }
-        bool SupportsItalic { get; }
-        bool SupportsFixedFont { get; }
-
         ZColor DefaultBackgroundColor { get; }
         ZColor DefaultForegroundColor { get; }
     }

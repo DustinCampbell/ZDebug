@@ -115,27 +115,6 @@ namespace ZDebug.Core.Execution
 
             public static readonly IScreen Instance = new NullScreen();
 
-
-            public bool SupportsColors
-            {
-                get { return false; }
-            }
-
-            public bool SupportsBold
-            {
-                get { return false; }
-            }
-
-            public bool SupportsItalic
-            {
-                get { return false; }
-            }
-
-            public bool SupportsFixedFont
-            {
-                get { return false; }
-            }
-
             public ZColor DefaultBackgroundColor
             {
                 get { return ZColor.White; }

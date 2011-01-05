@@ -142,6 +142,7 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
     <Compile Include="Services\GameInfo.cs" />
+    <Compile Include="Services\Interpreter.cs" />
     <Compile Include="Services\NavigationRequestedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />

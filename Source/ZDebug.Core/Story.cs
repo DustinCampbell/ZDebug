@@ -139,7 +139,7 @@ namespace ZDebug.Core
             memory.WriteByte(0x33, interpreter.StandardRevisionMinorVersion);
 
             // Set various flags
-            ushort flags1 = memory.ReadWord(0x01);
+            byte flags1 = memory.ReadByte(0x01);
             if (this.version <= 3)
             {
                 // Only set this flag if the status line is NOT available
@@ -166,7 +166,7 @@ namespace ZDebug.Core
                 flags1 = interpreter.SupportsTimedKeyboardInput ? Bits.Set(flags1, 7) : Bits.Clear(flags1, 7);
             }
 
-            memory.WriteWord(0x01, flags1);
+            memory.WriteByte(0x01, flags1);
 
             ushort flags2 = memory.ReadWord(0x10);
             if (this.version >= 5)

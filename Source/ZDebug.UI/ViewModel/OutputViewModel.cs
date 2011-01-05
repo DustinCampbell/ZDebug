@@ -465,27 +465,6 @@ namespace ZDebug.UI.ViewModel
             get { return (byte)GetFixedFontMeasureText().Width; }
         }
 
-
-        public bool SupportsColors
-        {
-            get { return true; }
-        }
-
-        public bool SupportsBold
-        {
-            get { return true; }
-        }
-
-        public bool SupportsItalic
-        {
-            get { return true; }
-        }
-
-        public bool SupportsFixedFont
-        {
-            get { return true; }
-        }
-
         public ZColor DefaultBackgroundColor
         {
             get { return ZColor.White; }

@@ -559,37 +559,13 @@ namespace ZDebug.Core.Execution
             }
 
             this.screen = screen;
+
             SetScreenDimensions();
 
             if (story.Version >= 5)
             {
-                var flags1 = story.Memory.ReadByte(0x01);
-                flags1 = screen.SupportsColors
-                    ? (byte)(flags1 | 0x01)
-                    : (byte)(flags1 & ~0x01);
-                story.Memory.WriteByte(0x01, flags1);
-
                 story.Memory.WriteByte(0x2c, (byte)screen.DefaultBackgroundColor);
                 story.Memory.WriteByte(0x2d, (byte)screen.DefaultForegroundColor);
-            }
-
-            if (story.Version >= 4)
-            {
-                var flags1 = story.Memory.ReadByte(0x01);
-
-                flags1 = screen.SupportsBold
-                    ? (byte)(flags1 | 0x04)
-                    : (byte)(flags1 & ~0x04);
-
-                flags1 = screen.SupportsItalic
-                    ? (byte)(flags1 | 0x08)
-                    : (byte)(flags1 & ~0x08);
-
-                flags1 = screen.SupportsFixedFont
-                    ? (byte)(flags1 | 0x10)
-                    : (byte)(flags1 & ~0x10);
-
-                story.Memory.WriteByte(0x01, flags1);
             }
 
             outputStreams.RegisterScreen(screen);
