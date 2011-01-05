@@ -7,6 +7,7 @@ using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
+using ZDebug.Core.Interpreter;
 
 namespace ZDebug.Core
 {
@@ -32,6 +33,8 @@ namespace ZDebug.Core
         private readonly Processor processor;
         private readonly int mainRoutineAddress;
 
+        private IInterpreter interpreter;
+
         private Story(Memory memory)
         {
             this.memory = memory;
@@ -52,16 +55,7 @@ namespace ZDebug.Core
             this.processor = new Processor(this, ztext);
             this.mainRoutineAddress = memory.ReadMainRoutineAddress();
 
-            // write interpreter number
-            if (version >= 4)
-            {
-                memory.WriteByte(0x1e, 6); // MS-DOS
-                memory.WriteByte(0x1f, 65); // A
-            }
-
-            // write standard revision number
-            memory.WriteByte(0x32, 1);
-            memory.WriteByte(0x33, 0);
+            RegisterInterpreter(new DefaultInterpreter());
         }
 
         private Story(byte[] bytes)
@@ -114,6 +108,34 @@ namespace ZDebug.Core
                 default:
                     throw new InvalidOperationException("Invalid version number: " + version);
             }
+        }
+
+        /// <summary>
+        /// Registers a Z-Machine interpreter with this story.
+        /// </summary>
+        /// <param name="interpreter"></param>
+        public void RegisterInterpreter(IInterpreter interpreter)
+        {
+            if (interpreter == null)
+            {
+                throw new ArgumentNullException("interpreter");
+            }
+
+            if (this.interpreter != null && !(this.interpreter is DefaultInterpreter))
+            {
+                throw new InvalidOperationException("Interpreter has already been registered.");
+            }
+
+            this.interpreter = interpreter;
+
+            if (version >= 4)
+            {
+                memory.WriteByte(0x1e, (byte)interpreter.Target);
+                memory.WriteByte(0x1f, interpreter.Version);
+            }
+
+            memory.WriteByte(0x32, interpreter.StandardRevisionMajorVersion);
+            memory.WriteByte(0x33, interpreter.StandardRevisionMinorVersion);
         }
 
         public Memory Memory
