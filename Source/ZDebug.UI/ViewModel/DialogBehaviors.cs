@@ -19,6 +19,7 @@ namespace ZDebug.UI.ViewModel
             if (parent != null)
             {
                 ((Window)parent).DialogResult = true;
+                e.Handled = true;
             }
         }
 

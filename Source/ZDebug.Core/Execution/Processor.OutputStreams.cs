@@ -9,6 +9,7 @@ namespace ZDebug.Core.Execution
         private class OutputStreams
         {
             private readonly Story story;
+            private readonly Memory memory;
 
             private bool screenActive;
             private IOutputStream screenStream;
@@ -21,6 +22,7 @@ namespace ZDebug.Core.Execution
             internal OutputStreams(Story story)
             {
                 this.story = story;
+                this.memory = story.Memory;
                 this.memoryStreams = new Stack<MemoryOutputStream>();
 
                 screenActive = true;
@@ -61,11 +63,21 @@ namespace ZDebug.Core.Execution
             public void SelectTranscriptStream()
             {
                 transcriptActive = true;
+                
+                // set transcript flag as demanded by standard 1.0
+                var flags2 = memory.ReadWord(0x10);
+                flags2 |= 0x01;
+                memory.WriteWord(0x10, flags2);
             }
 
             public void DeselectTranscriptStream()
             {
                 transcriptActive = false;
+
+                // clear transcript flag as demanded by standard 1.0
+                var flags2 = memory.ReadWord(0x10);
+                flags2 &= unchecked((ushort)(~0x01));
+                memory.WriteWord(0x10, flags2);
             }
 
             public void SelectMemoryStream(Memory memory, int address)

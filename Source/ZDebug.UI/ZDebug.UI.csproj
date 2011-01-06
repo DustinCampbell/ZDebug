@@ -59,6 +59,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\EditRoutineNameView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\DisassemblyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -72,6 +76,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\GlobalsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GoToAddressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -134,8 +142,11 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
     <Compile Include="Services\GameInfo.cs" />
+    <Compile Include="Services\Interpreter.cs" />
+    <Compile Include="Services\NavigationRequestedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
+    <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />
@@ -152,9 +163,11 @@
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
+    <Compile Include="ViewModel\EditRoutineNameViewModel.cs" />
     <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
     <Compile Include="ViewModel\GlobalsViewModel.cs" />
+    <Compile Include="ViewModel\GoToAddressViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\IndexedVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />

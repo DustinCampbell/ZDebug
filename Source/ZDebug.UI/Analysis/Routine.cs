@@ -11,12 +11,14 @@ namespace ZDebug.Core.Instructions
         private readonly int address;
         private readonly ReadOnlyCollection<ushort> locals;
         private readonly ReadOnlyCollection<Instruction> instructions;
+        private string name;
 
-        private Routine(int address, ReadOnlyCollection<ushort> locals, ReadOnlyCollection<Instruction> instructions)
+        private Routine(int address, ReadOnlyCollection<ushort> locals, ReadOnlyCollection<Instruction> instructions, string name)
         {
             this.address = address;
             this.locals = locals;
             this.instructions = instructions;
+            this.name = name ?? string.Empty;
         }
 
         public int Address
@@ -50,7 +52,19 @@ namespace ZDebug.Core.Instructions
             get { return instructions; }
         }
 
-        internal static Routine Parse(int address, Story story, InstructionCache cache)
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value ?? string.Empty;
+            }
+        }
+
+        internal static Routine Parse(int address, Story story, InstructionCache cache, string name = null)
         {
             var routineAddress = address;
 
@@ -102,7 +116,7 @@ namespace ZDebug.Core.Instructions
                 }
             }
 
-            return new Routine(routineAddress, locals.AsReadOnly(), instructions.AsReadOnly());
+            return new Routine(routineAddress, locals.AsReadOnly(), instructions.AsReadOnly(), name);
         }
     }
 }

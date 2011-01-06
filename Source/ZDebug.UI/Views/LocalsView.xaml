@@ -4,6 +4,17 @@
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
 
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasStory}" Value="True">
+                        <Setter Property="Visibility" Value="Visible"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -11,9 +22,10 @@
 
         <ItemsControl Grid.Column="0" ItemsSource="{Binding Locals}">
             <ItemsControl.ItemTemplate>
-                <DataTemplate >
+                <DataTemplate>
                     <StackPanel Orientation="Horizontal"
-                                TextElement.FontFamily="Consolas">
+                                TextElement.FontFamily="Consolas"
+                                Margin="8,0,0,0">
 
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -47,7 +59,7 @@
 
         <StackPanel Grid.Column="1">
             <TextBlock Text="Stack" Foreground="{StaticResource grayBrush}"/>
-            
+
             <TextBlock Text="(empty)" Foreground="Silver">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
@@ -60,7 +72,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            
+
             <ItemsControl ItemsSource="{Binding LocalStack}">
                 <ItemsControl.Style>
                     <Style TargetType="ItemsControl">

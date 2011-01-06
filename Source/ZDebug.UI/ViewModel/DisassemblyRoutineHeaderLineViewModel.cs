@@ -1,4 +1,7 @@
 ﻿using ZDebug.Core.Instructions;
+using System.Windows.Input;
+using System.Windows;
+using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -9,6 +12,11 @@ namespace ZDebug.UI.ViewModel
         public DisassemblyRoutineHeaderLineViewModel(Routine routine)
         {
             this.routine = routine;
+        }
+
+        public void NameUpdated()
+        {
+            PropertyChanged("Name");
         }
 
         public int Address
@@ -35,6 +43,11 @@ namespace ZDebug.UI.ViewModel
                     return localCount + " locals";
                 }
             }
+        }
+
+        public string Name
+        {
+            get { return routine.Name; }
         }
     }
 }

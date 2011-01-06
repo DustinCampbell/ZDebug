@@ -9,10 +9,11 @@ using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
+using System.Media;
 
 namespace ZDebug.UI.ViewModel
 {
-    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen
+    internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen, ISoundEngine
     {
         private ZWindowManager windowManager;
         private Grid windowContainer;
@@ -48,6 +49,7 @@ namespace ZDebug.UI.ViewModel
             windowManager.Activate(mainWindow);
 
             e.Story.Processor.RegisterScreen(this);
+            e.Story.Processor.RegisterSoundEngine(this);
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
@@ -463,29 +465,6 @@ namespace ZDebug.UI.ViewModel
             get { return (byte)GetFixedFontMeasureText().Width; }
         }
 
-        public event EventHandler DimensionsChanged;
-
-
-        public bool SupportsColors
-        {
-            get { return true; }
-        }
-
-        public bool SupportsBold
-        {
-            get { return true; }
-        }
-
-        public bool SupportsItalic
-        {
-            get { return true; }
-        }
-
-        public bool SupportsFixedFont
-        {
-            get { return true; }
-        }
-
         public ZColor DefaultBackgroundColor
         {
             get { return ZColor.White; }
@@ -494,6 +473,17 @@ namespace ZDebug.UI.ViewModel
         public ZColor DefaultForegroundColor
         {
             get { return ZColor.Black; }
+        }
+
+
+        public void HighBeep()
+        {
+            SystemSounds.Asterisk.Play();
+        }
+
+        public void LowBeep()
+        {
+            SystemSounds.Beep.Play();
         }
     }
 }

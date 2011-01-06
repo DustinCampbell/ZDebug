@@ -37,12 +37,12 @@ namespace ZDebug.Core.Execution
                     }
                     else
                     {
-                        if (stackPointer == callFrame)
+                        if (sp == callFrame)
                         {
                             throw new InvalidOperationException("Local stack is empty.");
                         }
 
-                        operandValues[operandCount++] = (ushort)stack[stackPointer--];
+                        operandValues[operandCount++] = (ushort)stack[sp--];
                     }
                 }
                 else
@@ -63,16 +63,39 @@ namespace ZDebug.Core.Execution
 
         private void LoadAllOperands(byte kinds)
         {
-            for (int i = 6; i >= 0; i -= 2)
-            {
-                byte kind = (byte)((kinds >> i) & 0x03);
-                if (kind == opKind_Omitted)
-                {
-                    break;
-                }
+            byte kind;
 
-                LoadOperand(kind);
+            kind = (byte)((kinds >> 6) & 0x03);
+            if (kind == opKind_Omitted)
+            {
+                return;
             }
+
+            LoadOperand(kind);
+
+            kind = (byte)((kinds >> 4) & 0x03);
+            if (kind == opKind_Omitted)
+            {
+                return;
+            }
+
+            LoadOperand(kind);
+
+            kind = (byte)((kinds >> 2) & 0x03);
+            if (kind == opKind_Omitted)
+            {
+                return;
+            }
+
+            LoadOperand(kind);
+
+            kind = (byte)(kinds & 0x03);
+            if (kind == opKind_Omitted)
+            {
+                return;
+            }
+
+            LoadOperand(kind);
         }
 
         private void ReadNextInstruction()

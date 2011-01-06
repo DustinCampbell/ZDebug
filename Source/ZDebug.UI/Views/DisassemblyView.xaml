@@ -8,7 +8,9 @@
              Foreground="Black"
              SnapsToDevicePixels="True"
              UseLayoutRounding="True"
-             TextOptions.TextFormattingMode="Display">
+             TextOptions.TextFormattingMode="Display"
+             Name="viewDisassembly"
+             vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 
     <Grid>
         <ItemsControl Name="lines"
@@ -82,28 +84,6 @@
                                         <MultiDataTrigger>
                                             <MultiDataTrigger.Conditions>
                                                 <Condition Binding="{Binding Path=HasIP}" Value="True"/>
-                                                <Condition Binding="{Binding Path=State}" Value="None"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
-
-                        <!-- call stack arrow image -->
-                        <Image Grid.Column="0" Source="{StaticResource stepImage}" Width="16" Height="16"
-                               ToolTip="{Binding ToolTip}"
-                               Margin="0,1,0,0"
-                               VerticalAlignment="Top"
-                               vm:DisassemblyLineBehaviors.TogglesBreakpointOnClick="True">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding Path=IsNextInstruction}" Value="True"/>
                                                 <Condition Binding="{Binding Path=State}" Value="None"/>
                                             </MultiDataTrigger.Conditions>
                                             <Setter Property="Visibility" Value="Visible"/>
@@ -235,41 +215,67 @@
                                 </Style>
                             </Border.Style>
                         </Border>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text=" ">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ShowBlankBefore}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
 
-                        <ContentPresenter
-                            Grid.Column="1"
-                            ContentSource="Content"/>
+                            <ContentPresenter ContentSource="Content"/>
+
+                            <TextBlock Text=" ">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ShowBlankAfter}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
                     </Grid>
                 </ControlTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyAddressGapLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <StackPanel>
-                            <TextBlock
-                                Margin="20,0,0,0"
-                                FontFamily="Segoe UI"
-                                FontStyle="Italic"
-                                Foreground="CornflowerBlue">
+                        <TextBlock
+                            Margin="20,0,0,0"
+                            FontFamily="Segoe UI"
+                            FontStyle="Italic"
+                            Foreground="CornflowerBlue">
 
-                                <Run Text="{Binding LengthText, StringFormat=\{0\}:, Mode=OneWay}"/>
-                                <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                                <Run Text="to"/>
-                                <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
-                            </TextBlock>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" "/>
-                        </StackPanel>
+                            <Run Text="{Binding LengthText, StringFormat=\{0\}:, Mode=OneWay}"/>
+                            <Run Text="{Binding StartAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            <Run Text="to"/>
+                            <Run Text="{Binding EndAddress, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                        </TextBlock>
                     </ContentControl>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyRoutineHeaderLineViewModel}">
-                    <ContentControl Template="{StaticResource lineTemplate}">
+                    <ContentControl
+                        Template="{StaticResource lineTemplate}"
+                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+
                         <StackPanel>
                             <TextBlock
                                 Margin="4,0,0,0"
-                                FontWeight="Bold"
-                                Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                FontWeight="Bold">
+                                <Run Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                                <Run Foreground="DodgerBlue" FontSize="18.0" Text="{Binding Name, StringFormat=\{0:x4\}, Mode=OneWay}"/>
+                            </TextBlock>
 
                             <TextBlock
                                 Margin="4,0,0,0"
@@ -288,54 +294,45 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" "/>
                         </StackPanel>
+
+                        <ContentControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem
+                                    Command="{Binding Parent.PlacementTarget.Tag.EditNameCommand, RelativeSource={RelativeSource Self}}"
+                                    CommandParameter="{Binding Address}"
+                                    CommandTarget="{Binding Path=Parent.PlacementTarget, RelativeSource={RelativeSource Self}}"
+                                    Header="Edit Name..."/>
+                            </ContextMenu>
+                        </ContentControl.ContextMenu>
                     </ContentControl>
                 </DataTemplate>
 
                 <DataTemplate DataType="{x:Type vm:DisassemblyInstructionLineViewModel}">
                     <ContentControl Template="{StaticResource lineTemplate}">
-                        <StackPanel>
-                            <Grid>
+                        <Grid>
 
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{DynamicResource addressWidth}"/>
-                                    <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{DynamicResource addressWidth}"/>
+                                <ColumnDefinition Width="{DynamicResource opcodeWidth}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0">
-                                    <Run Text="  "/><Run 
-                                         Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
-                                         Foreground="{StaticResource SeparatorForeground}" Text=":"/>
-                                </TextBlock>
-
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Text="{Binding OpcodeName, Mode=OneWay}"
-                                    Foreground="{StaticResource OpcodeForeground}"/>
-
-                                <c:InstructionTextDisplayElement
-                                    Grid.Column="2"
-                                    Instruction="{Binding Instruction, Mode=OneWay}"/>
-                            </Grid>
-
-                            <!-- blank line -->
-                            <TextBlock Text=" ">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsLast}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
+                            <TextBlock Grid.Column="0">
+                                <Run Text="  "/><Run 
+                                        Foreground="{StaticResource AddressForeground}" Text="{Binding Address, StringFormat=\{0:x4\}, Mode=OneWay}"/><Run
+                                        Foreground="{StaticResource SeparatorForeground}" Text=":"/>
                             </TextBlock>
-                        </StackPanel>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Text="{Binding OpcodeName, Mode=OneWay}"
+                                Foreground="{StaticResource OpcodeForeground}"/>
+
+                            <c:InstructionTextDisplayElement
+                                Grid.Column="2"
+                                Instruction="{Binding Instruction, Mode=OneWay}"/>
+                        </Grid>
                     </ContentControl>
                 </DataTemplate>
             </ItemsControl.Resources>

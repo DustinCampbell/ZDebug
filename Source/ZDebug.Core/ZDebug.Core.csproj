@@ -23,6 +23,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -49,14 +51,15 @@
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
+    <Compile Include="Execution\Processor.NullSoundEngine.cs" />
     <Compile Include="Execution\IInputStream.cs" />
+    <Compile Include="Execution\ISoundEngine.cs" />
     <Compile Include="Execution\Processor.OpcodeRoutines.cs" />
     <Compile Include="Execution\Processor.ParseInstruction.cs" />
-    <Compile Include="Execution\StackEventArgs.cs" />
+    <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
-    <Compile Include="Execution\VariableChangedEventArgs.cs" />
     <Compile Include="Execution\IMessageLog.cs" />
     <Compile Include="Execution\MessageLogExtensions.cs" />
     <Compile Include="Execution\Processor.NullMessageLog.cs" />
@@ -97,6 +100,9 @@
     <Compile Include="Instructions\StrictException.cs" />
     <Compile Include="Instructions\Variable.cs" />
     <Compile Include="Instructions\VariableKind.cs" />
+    <Compile Include="Interpreter\DefaultInterpreter.cs" />
+    <Compile Include="Interpreter\IInterpreter.cs" />
+    <Compile Include="Interpreter\InterpreterTarget.cs" />
     <Compile Include="Objects\ZObject.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -115,6 +121,7 @@
     <Compile Include="Text\ZTextFlags.cs" />
     <Compile Include="Utilities\ArrayEx.cs" />
     <Compile Include="Utilities\ArrayExtensions.cs" />
+    <Compile Include="Utilities\Bits.cs" />
     <Compile Include="Utilities\ByteArrayExtensions.cs" />
     <Compile Include="Utilities\ReadOnlyCollectionExtensions.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />

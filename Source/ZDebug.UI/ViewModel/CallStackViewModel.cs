@@ -15,58 +15,56 @@ namespace ZDebug.UI.ViewModel
             stackFrames = new BulkObservableCollection<StackFrameViewModel>();
         }
 
+        private void Update()
+        {
+            if (DebuggerService.State != DebuggerState.Running)
+            {
+                var frames = DebuggerService.Story.Processor.GetStackFrames();
+
+                stackFrames.BeginBulkOperation();
+                try
+                {
+                    stackFrames.Clear();
+
+                    foreach (var frame in frames)
+                    {
+                        stackFrames.Add(new StackFrameViewModel(frame));
+                    }
+                }
+                finally
+                {
+                    stackFrames.EndBulkOperation();
+                }
+            }
+        }
+
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
-            stackFrames.BeginBulkOperation();
-            try
-            {
-                var mainFrame = new StackFrameViewModel(e.Story.Processor.PC - 1, callAddress: null);
-                mainFrame.IsCurrent = true;
-                stackFrames.Add(mainFrame);
-            }
-            finally
-            {
-                stackFrames.EndBulkOperation();
-            }
-
-            e.Story.Processor.EnterStackFrame += Processor_EnterFrame;
-            e.Story.Processor.ExitStackFrame += Processor_ExitFrame;
+            Update();
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
         {
             stackFrames.Clear();
-
-            e.Story.Processor.EnterStackFrame -= Processor_EnterFrame;
-            e.Story.Processor.ExitStackFrame -= Processor_ExitFrame;
         }
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
-            if (e.NewState == DebuggerState.Running)
+            // When input is wrapped up, we need to update as if the processor had stepped.
+            if ((e.OldState == DebuggerState.AwaitingInput ||
+                e.OldState == DebuggerState.Running) &&
+                e.NewState != DebuggerState.Unavailable)
             {
-                this.View.DataContext = null;
-                stackFrames.BeginBulkOperation();
-            }
-            else if (e.OldState == DebuggerState.Running)
-            {
-                stackFrames.EndBulkOperation();
-                this.View.DataContext = this;
+                Update();
             }
         }
 
-        private void Processor_ExitFrame(object sender, StackFrameEventArgs e)
+        private void DebuggerService_ProcessorStepped(object sender, ProcessorSteppedEventArgs e)
         {
-            stackFrames.RemoveAt(0);
-            stackFrames[0].IsCurrent = true;
-        }
-
-        private void Processor_EnterFrame(object sender, StackFrameEventArgs e)
-        {
-            stackFrames[0].IsCurrent = false;
-            var newFrame = new StackFrameViewModel(e.Address, callAddress: DebuggerService.Story.Processor.ExecutingAddress);
-            newFrame.IsCurrent = true;
-            stackFrames.Insert(0, newFrame);
+            if (DebuggerService.State != DebuggerState.Running)
+            {
+                Update();
+            }
         }
 
         protected internal override void Initialize()
@@ -74,6 +72,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
+            DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
         }
 
         public BulkObservableCollection<StackFrameViewModel> StackFrames

@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows;
 using System.Threading;
 using System.Windows.Threading;
+using ZDebug.Core.Interpreter;
 
 namespace ZDebug.UI.Services
 {
@@ -21,6 +22,7 @@ namespace ZDebug.UI.Services
         private static bool stopping;
         private static bool hasStepped;
 
+        private static IInterpreter interpreter;
         private static Story story;
         private static GameInfo gameInfo;
         private static RoutineTable routineTable;
@@ -114,7 +116,19 @@ namespace ZDebug.UI.Services
                 foreach (var routineElem in routinesElem.Elements("routine"))
                 {
                     var addAttr = routineElem.Attribute("address");
-                    routineTable.Add((int)addAttr);
+                    var nameAttr = routineElem.Attribute("name");
+
+                    var address = (int)addAttr;
+                    var name = nameAttr != null ? (string)nameAttr : null;
+
+                    if (routineTable.Exists(address))
+                    {
+                        routineTable.GetByAddress(address).Name = name;
+                    }
+                    else
+                    {
+                        routineTable.Add(address, name);
+                    }
                 }
             }
         }
@@ -132,7 +146,9 @@ namespace ZDebug.UI.Services
                     new XElement("gamescript",
                         gameScript.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
-                        routineTable.Select(r => new XElement("routine", new XAttribute("address", r.Address)))));
+                        routineTable.Select(r => new XElement("routine", 
+                            new XAttribute("address", r.Address),
+                            new XAttribute("name", r.Name)))));
 
             Storage.SaveStorySettings(story, xml);
         }
@@ -148,6 +164,7 @@ namespace ZDebug.UI.Services
 
             var oldStory = story;
 
+            interpreter = null;
             story = null;
             gameInfo = null;
             routineTable = null;
@@ -186,6 +203,8 @@ namespace ZDebug.UI.Services
                 DebuggerService.story = Story.FromBytes(File.ReadAllBytes(fileName));
             }
 
+            interpreter = new Interpreter();
+            story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
             routineTable = new RoutineTable(story, cache);
             reader = new InstructionReader(story.Processor.PC, story.Memory, cache);
@@ -272,6 +291,32 @@ namespace ZDebug.UI.Services
             return breakpoints.Contains(address);
         }
 
+        public static void RequestNavigation(int address)
+        {
+            var handler = NavigationRequested;
+            if (handler != null)
+            {
+                handler(null, new NavigationRequestedEventArgs(address));
+            }
+        }
+
+        public static void SetRoutineName(int address, string name)
+        {
+            var routine = routineTable.GetByAddress(address);
+            if (routine.Name == name)
+            {
+                return;
+            }
+
+            routine.Name = name;
+
+            var handler = RoutineNameChanged;
+            if (handler != null)
+            {
+                handler(null, new RoutineNameChangedEventArgs(routine));
+            }
+        }
+
         public static bool CanStartDebugging
         {
             get { return state == DebuggerState.Stopped; }
@@ -299,14 +344,14 @@ namespace ZDebug.UI.Services
 
                     count++;
                 }
+
+                Dispatcher.CurrentDispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
             }
             catch (Exception ex)
             {
                 currentException = ex;
                 ChangeState(DebuggerState.StoppedAtError);
             }
-
-            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
         }
 
         public static void StartDebugging()
@@ -483,5 +528,9 @@ namespace ZDebug.UI.Services
 
         public static event EventHandler<ProcessorSteppingEventArgs> ProcessorStepping;
         public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
+
+        public static event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
+
+        public static event EventHandler<RoutineNameChangedEventArgs> RoutineNameChanged;
     }
 }

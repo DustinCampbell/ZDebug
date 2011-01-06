@@ -7,6 +7,8 @@ using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
+using ZDebug.Core.Interpreter;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
 {
@@ -16,6 +18,7 @@ namespace ZDebug.Core
         private readonly byte version;
         private readonly int serialNumber;
         private readonly ushort releaseNumber;
+        private readonly ushort checksum;
         private readonly ushort actualChecksum;
         private readonly ushort routinesOffset;
         private readonly ushort stringsOffset;
@@ -31,12 +34,15 @@ namespace ZDebug.Core
         private readonly Processor processor;
         private readonly int mainRoutineAddress;
 
+        private IInterpreter interpreter;
+
         private Story(Memory memory)
         {
             this.memory = memory;
             this.version = memory.ReadVersion();
             this.serialNumber = memory.ReadSerialNumber();
             this.releaseNumber = memory.ReadReleaseNumber();
+            this.checksum = memory.ReadChecksum();
             this.actualChecksum = memory.CalculateChecksum();
             this.routinesOffset = memory.ReadRoutinesOffset();
             this.stringsOffset = memory.ReadStringsOffset();
@@ -50,16 +56,7 @@ namespace ZDebug.Core
             this.processor = new Processor(this, ztext);
             this.mainRoutineAddress = memory.ReadMainRoutineAddress();
 
-            // write interpreter number
-            if (version >= 4)
-            {
-                memory.WriteByte(0x1e, 6); // MS-DOS
-                memory.WriteByte(0x1f, 65); // A
-            }
-
-            // write standard revision number
-            memory.WriteByte(0x32, 1);
-            memory.WriteByte(0x33, 0);
+            RegisterInterpreter(new DefaultInterpreter());
         }
 
         private Story(byte[] bytes)
@@ -114,6 +111,80 @@ namespace ZDebug.Core
             }
         }
 
+        /// <summary>
+        /// Registers a Z-Machine interpreter with this story.
+        /// </summary>
+        /// <param name="interpreter"></param>
+        public void RegisterInterpreter(IInterpreter interpreter)
+        {
+            if (interpreter == null)
+            {
+                throw new ArgumentNullException("interpreter");
+            }
+
+            if (this.interpreter != null && !(this.interpreter is DefaultInterpreter))
+            {
+                throw new InvalidOperationException("Interpreter has already been registered.");
+            }
+
+            this.interpreter = interpreter;
+
+            if (version >= 4)
+            {
+                memory.WriteByte(0x1e, (byte)interpreter.Target);
+                memory.WriteByte(0x1f, interpreter.Version);
+            }
+
+            memory.WriteByte(0x32, interpreter.StandardRevisionMajorVersion);
+            memory.WriteByte(0x33, interpreter.StandardRevisionMinorVersion);
+
+            // Set various flags
+            byte flags1 = memory.ReadByte(0x01);
+            if (this.version <= 3)
+            {
+                // Only set this flag if the status line is NOT available
+                flags1 = interpreter.SupportsStatusLine ? Bits.Clear(flags1, 4) : Bits.Set(flags1, 4);
+                flags1 = interpreter.SupportsScreenSplitting ? Bits.Set(flags1, 5) : Bits.Set(flags1, 5);
+                flags1 = interpreter.IsDefaultFontVariablePitch ? Bits.Set(flags1, 6) : Bits.Set(flags1, 6);
+            }
+            else // this.version >= 4
+            {
+                if (this.version >= 5)
+                {
+                    flags1 = interpreter.SupportsColor ? Bits.Set(flags1, 0) : Bits.Clear(flags1, 0);
+                }
+
+                if (this.version == 6)
+                {
+                    flags1 = interpreter.SupportsPictureDisplay ? Bits.Set(flags1, 1) : Bits.Clear(flags1, 1);
+                    flags1 = interpreter.SupportsSoundEffects ? Bits.Set(flags1, 5) : Bits.Clear(flags1, 5);
+                }
+
+                flags1 = interpreter.SupportsBoldFont ? Bits.Set(flags1, 2) : Bits.Clear(flags1, 2);
+                flags1 = interpreter.SupportsItalicFont ? Bits.Set(flags1, 3) : Bits.Clear(flags1, 3);
+                flags1 = interpreter.SupportsFixedWidthFont ? Bits.Set(flags1, 4) : Bits.Clear(flags1, 4);
+                flags1 = interpreter.SupportsTimedKeyboardInput ? Bits.Set(flags1, 7) : Bits.Clear(flags1, 7);
+            }
+
+            memory.WriteByte(0x01, flags1);
+
+            ushort flags2 = memory.ReadWord(0x10);
+            if (this.version >= 5)
+            {
+                flags2 = interpreter.SupportsPictureDisplay ? flags2 : Bits.Clear(flags2, 3);
+                flags2 = interpreter.SupportsUndo ? flags2 : Bits.Clear(flags2, 4);
+                flags2 = interpreter.SupportsMouse ? flags2 : Bits.Clear(flags2, 5);
+                flags2 = interpreter.SupportsSoundEffects ? flags2 : Bits.Clear(flags2, 7);
+
+                if (this.version == 6)
+                {
+                    flags2 = interpreter.SupportsMenus ? flags2 : Bits.Clear(flags2, 8);
+                }
+            }
+
+            memory.WriteWord(0x10, flags2);
+        }
+
         public Memory Memory
         {
             get { return memory; }
@@ -137,6 +208,11 @@ namespace ZDebug.Core
         public ushort ReleaseNumber
         {
             get { return releaseNumber; }
+        }
+
+        public ushort Checksum
+        {
+            get { return checksum; }
         }
 
         internal ushort ActualChecksum

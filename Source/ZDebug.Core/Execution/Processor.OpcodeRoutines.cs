@@ -15,52 +15,27 @@ namespace ZDebug.Core.Execution
 
         internal void op_add()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            ushort result = (ushort)(x + y);
-
-            Store(result);
+            Store((ushort)((short)operandValues[0] + (short)operandValues[1]));
         }
 
         internal void op_div()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            ushort result = (ushort)(x / y);
-
-            Store(result);
+            Store((ushort)((short)operandValues[0] / (short)operandValues[1]));
         }
 
         internal void op_mod()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            ushort result = (ushort)(x % y);
-
-            Store(result);
+            Store((ushort)((short)operandValues[0] % (short)operandValues[1]));
         }
 
         internal void op_mul()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            ushort result = (ushort)(x * y);
-
-            Store(result);
+            Store((ushort)((short)operandValues[0] * (short)operandValues[1]));
         }
 
         internal void op_sub()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            ushort result = (ushort)(x - y);
-
-            Store(result);
+            Store((ushort)((short)operandValues[0] - (short)operandValues[1]));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -69,12 +44,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_and()
         {
-            ushort x = operandValues[0];
-            ushort y = operandValues[1];
-
-            ushort result = (ushort)(x & y);
-
-            Store(result);
+            Store((ushort)(operandValues[0] & operandValues[1]));
         }
 
         internal void op_art_shift()
@@ -103,31 +73,19 @@ namespace ZDebug.Core.Execution
 
         internal void op_not()
         {
-            ushort x = operandValues[0];
-
-            ushort result = (ushort)(~x);
-
-            Store(result);
+            Store((ushort)(~operandValues[0]));
         }
 
         internal void op_or()
         {
-            ushort x = operandValues[0];
-            ushort y = operandValues[1];
-
-            ushort result = (ushort)(x | y);
-
-            Store(result);
+            Store((ushort)(operandValues[0] | operandValues[1]));
         }
 
         internal void op_test()
         {
-            ushort bitmap = operandValues[0];
             ushort flags = operandValues[1];
 
-            bool result = (bitmap & flags) == flags;
-
-            Branch(result);
+            Branch((operandValues[0] & flags) == flags);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -148,14 +106,12 @@ namespace ZDebug.Core.Execution
         {
             byte varIdx = (byte)operandValues[0];
 
-            var test = (short)operandValues[1];
-
             short value = (short)ReadVariableValueIndirectly(varIdx);
             value -= 1;
 
             WriteVariableValueIndirectly(varIdx, (ushort)value);
 
-            Branch(value < test);
+            Branch(value < (short)operandValues[1]);
         }
 
         internal void op_inc()
@@ -172,14 +128,12 @@ namespace ZDebug.Core.Execution
         {
             byte varIdx = (byte)operandValues[0];
 
-            var test = (short)operandValues[1];
-
             short value = (short)ReadVariableValueIndirectly(varIdx);
             value += 1;
 
             WriteVariableValueIndirectly(varIdx, (ushort)value);
 
-            Branch(value > test);
+            Branch(value > (short)operandValues[1]);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +159,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_jg()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            Branch(x > y);
+            Branch((short)operandValues[0] > (short)operandValues[1]);
         }
 
         internal void op_jin()
@@ -230,24 +181,17 @@ namespace ZDebug.Core.Execution
 
         internal void op_jl()
         {
-            short x = (short)operandValues[0];
-            short y = (short)operandValues[1];
-
-            Branch(x < y);
+            Branch((short)operandValues[0] < (short)operandValues[1]);
         }
 
         internal void op_jump()
         {
-            short offset = (short)operandValues[0];
-
-            pc += offset - 2;
+            pc += (short)operandValues[0] - 2;
         }
 
         internal void op_jz()
         {
-            ushort x = operandValues[0];
-
-            Branch(x == 0);
+            Branch(operandValues[0] == 0);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -256,20 +200,15 @@ namespace ZDebug.Core.Execution
 
         internal void op_call_n()
         {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            Call(address);
+            Call(story.UnpackRoutineAddress(operandValues[0]));
         }
 
         internal void op_call_s()
         {
-            ushort byteAddress = operandValues[0];
-            int address = story.UnpackRoutineAddress(byteAddress);
-
-            var storeVariable = bytes[pc++];
-
-            Call(address, storeVariable);
+            var pc = this.pc;
+            var storeVariable = bytes[pc];
+            this.pc = pc + 1;
+            Call(story.UnpackRoutineAddress(operandValues[0]), storeVariable);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -278,16 +217,12 @@ namespace ZDebug.Core.Execution
 
         internal void op_ret()
         {
-            ushort value = operandValues[0];
-
-            Return(value);
+            Return(operandValues[0]);
         }
 
         internal void op_ret_popped()
         {
-            ushort value = ReadVariableValue(0x00); // read stack
-
-            Return(value);
+            Return(ReadVariableValue(0x00)); // read stack
         }
 
         internal void op_rfalse()
@@ -306,64 +241,40 @@ namespace ZDebug.Core.Execution
 
         internal void op_load()
         {
-            byte varIdx = (byte)operandValues[0];
-
-            ushort value = ReadVariableValueIndirectly(varIdx);
-
-            Store(value);
+            Store(ReadVariableValueIndirectly((byte)operandValues[0]));
         }
 
         internal void op_loadb()
         {
-            ushort array = operandValues[0];
-            ushort byteIndex = operandValues[1];
+            int address = operandValues[0] + operandValues[1];
 
-            int address = array + byteIndex;
-            byte value = bytes[address];
-
-            Store(value);
+            Store(bytes[address]);
         }
 
         internal void op_loadw()
         {
-            ushort array = operandValues[0];
-            ushort wordIndex = operandValues[1];
+            int address = operandValues[0] + (operandValues[1] * 2);
 
-            int address = array + (wordIndex * 2);
-            ushort value = bytes.ReadWord(address);
-
-            Store(value);
+            Store(bytes.ReadWord(address));
         }
 
         internal void op_store()
         {
-            byte varIdx = (byte)operandValues[0];
-
-            ushort value = operandValues[1];
-
-            WriteVariableValueIndirectly(varIdx, value);
+            WriteVariableValueIndirectly((byte)operandValues[0], operandValues[1]);
         }
 
         internal void op_storeb()
         {
-            ushort array = operandValues[0];
-            ushort byteIndex = operandValues[1];
-            byte value = (byte)operandValues[2];
+            int address = operandValues[0] + operandValues[1];
 
-            int address = array + byteIndex;
-
-            memory.WriteByte(address, value);
+            bytes[address] = (byte)operandValues[2];
         }
 
         internal void op_storew()
         {
-            ushort array = operandValues[0];
-            ushort wordIndex = operandValues[1];
-            ushort value = operandValues[2];
+            int address = operandValues[0] + (operandValues[1] * 2);
 
-            int address = array + (wordIndex * 2);
-
-            memory.WriteWord(address, value);
+            bytes.WriteWord(address, operandValues[2]);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1310,6 +1221,35 @@ namespace ZDebug.Core.Execution
             screen.ShowStatus();
         }
 
+        internal void op_sound_effect()
+        {
+            if (operandCount == 0)
+            {
+                messageLog.SendError(opcode, startAddress, "Called without any operands.");
+                soundEngine.HighBeep();
+            }
+            else if (operandCount == 1)
+            {
+                ushort number = operandValues[0];
+                if (number == 1)
+                {
+                    soundEngine.HighBeep();
+                }
+                else if (number == 2)
+                {
+                    soundEngine.LowBeep();
+                }
+                else
+                {
+                    messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported without additional operands", operandValues[0]);
+                }
+            }
+            else
+            {
+                messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported", operandValues[0]);
+            }
+        }
+
         internal void op_tokenize()
         {
             ushort textBuffer = operandValues[0];
@@ -1818,7 +1758,8 @@ namespace ZDebug.Core.Execution
                                 }
                                 else
                                 {
-                                    break; // 'sound_effect' unsupported
+                                    op_sound_effect();
+                                    return;
                                 }
 
                             case 0x16:

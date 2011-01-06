@@ -15,6 +15,9 @@ namespace ZDebug.Core.Execution
             {
                 this.memory = memory;
                 this.address = address;
+
+                this.count = 0;
+                memory.WriteWord(address, this.count);
             }
 
             private byte CharToByte(char ch)

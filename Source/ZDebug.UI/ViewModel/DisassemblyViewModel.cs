@@ -9,6 +9,7 @@ using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 using ZDebug.Core.Collections;
+using System.Windows.Input;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -38,7 +39,41 @@ namespace ZDebug.UI.ViewModel
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
             routineAddressAndIndexList = new List<AddressAndIndex>();
+
+            this.EditNameCommand = RegisterCommand<int>(
+                text: "EditName",
+                name: "Edit Name",
+                executed: EditNameExecuted,
+                canExecute: CanEditNameExecute);
         }
+
+        private bool CanEditNameExecute(int address)
+        {
+            return true;
+        }
+
+        private void EditNameExecuted(int address)
+        {
+            var routineViewModel = GetLineByAddress(address) as DisassemblyRoutineHeaderLineViewModel;
+            if (routineViewModel == null)
+            {
+                // TODO: Show error
+                return;
+            }
+
+            var dialog = ViewModelWithView.Create<EditRoutineNameViewModel, Window>();
+
+            var dialogViewModel = (EditRoutineNameViewModel)dialog.DataContext;
+            dialogViewModel.Name = routineViewModel.Name;
+
+            dialog.Owner = Application.Current.MainWindow;
+            if (dialog.ShowDialog() == true)
+            {
+                DebuggerService.SetRoutineName(address, dialogViewModel.Name);
+            }
+        }
+
+        public ICommand EditNameCommand { get; private set; }
 
         private DisassemblyLineViewModel GetLineByAddress(int address)
         {
@@ -65,12 +100,21 @@ namespace ZDebug.UI.ViewModel
                         var lastRoutine = routineTable[rIndex - 1];
                         if (lastRoutine.Address + lastRoutine.Length < routine.Address)
                         {
-                            var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine);
+                            var addressGapLine = new DisassemblyAddressGapLineViewModel(lastRoutine, routine)
+                            {
+                                ShowBlankBefore = true
+                            };
+
                             lines.Add(addressGapLine);
                         }
                     }
 
-                    var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine);
+                    var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(routine)
+                    {
+                        ShowBlankBefore = rIndex > 0,
+                        ShowBlankAfter = true
+                    };
+
                     routineAddressAndIndexList.Add(new AddressAndIndex(routineHeaderLine.Address, lines.Count));
                     lines.Add(routineHeaderLine);
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
@@ -178,13 +222,20 @@ namespace ZDebug.UI.ViewModel
                         else if (addressGap.StartAddress < e.Routine.Address)
                         {
                             // If the address gap starts before this routine, we need to update it in place.
-                            lines[insertionPoint - 1] = new DisassemblyAddressGapLineViewModel(priorRoutine, e.Routine);
+                            lines[insertionPoint - 1] = new DisassemblyAddressGapLineViewModel(priorRoutine, e.Routine)
+                            {
+                                ShowBlankBefore = true
+                            };
                         }
 
                         if (nextRoutine.Address > e.Routine.Address + e.Routine.Length - 1)
                         {
                             // If there is a gap between this routine and the next one, we need to insert an address gap.
-                            var newAddressGap = new DisassemblyAddressGapLineViewModel(e.Routine, nextRoutine);
+                            var newAddressGap = new DisassemblyAddressGapLineViewModel(e.Routine, nextRoutine)
+                            {
+                                ShowBlankBefore = true
+                            };
+
                             lines.Insert(insertionPoint, newAddressGap);
                             count++;
                         }
@@ -208,7 +259,12 @@ namespace ZDebug.UI.ViewModel
                     addressToLineMap.Add(instruction.Address, instructionLine);
                 }
 
-                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine);
+                var routineHeaderLine = new DisassemblyRoutineHeaderLineViewModel(e.Routine)
+                {
+                    ShowBlankBefore = insertionPoint > 0,
+                    ShowBlankAfter = true
+                };
+
                 lines.Insert(insertionPoint, routineHeaderLine);
                 count++;
                 addressToLineMap.Add(e.Routine.Address, routineHeaderLine);
@@ -244,6 +300,12 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
+            if (e.OldState == DebuggerState.AwaitingInput)
+            {
+                inputLine.State = DisassemblyLineState.None;
+                inputLine = null;
+            }
+
             if (e.NewState == DebuggerState.Unavailable)
             {
                 return;
@@ -261,12 +323,6 @@ namespace ZDebug.UI.ViewModel
                 line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
                 BringLineIntoView(line);
             }
-            else if (e.OldState == DebuggerState.Running && e.NewState == DebuggerState.Stopped)
-            {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
-                line.HasIP = true;
-                BringLineIntoView(line);
-            }
             else if (e.NewState == DebuggerState.Done)
             {
                 var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingAddress);
@@ -279,13 +335,12 @@ namespace ZDebug.UI.ViewModel
                 inputLine.State = DisassemblyLineState.Paused;
                 BringLineIntoView(inputLine);
             }
-            else if (e.OldState == DebuggerState.AwaitingInput)
+            else if (e.NewState == DebuggerState.Stopped &&
+                (e.OldState == DebuggerState.Running || e.OldState == DebuggerState.AwaitingInput))
             {
-                inputLine.State = DisassemblyLineState.None;
-                inputLine = null;
-
-                var ipLine = GetLineByAddress(DebuggerService.Story.Processor.PC);
-                ipLine.HasIP = true;
+                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                line.HasIP = true;
+                BringLineIntoView(line);
             }
         }
 
@@ -307,6 +362,32 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        private void DebuggerService_NavigationRequested(object sender, NavigationRequestedEventArgs e)
+        {
+            var line = GetLineByAddress(e.Address);
+            if (line != null)
+            {
+                BringLineIntoView(line);
+            }
+            else
+            {
+                // TODO: Show error message
+            }
+        }
+
+        private void DebuggerService_RoutineNameChanged(object sender, RoutineNameChangedEventArgs e)
+        {
+            var line = GetLineByAddress(e.Routine.Address) as DisassemblyRoutineHeaderLineViewModel;
+            if (line != null)
+            {
+                line.NameUpdated();
+            }
+            else
+            {
+                // TODO: Show error message
+            }
+        }
+
         protected internal override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
@@ -318,6 +399,10 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.BreakpointRemoved += DebuggerService_BreakpointRemoved;
 
             DebuggerService.ProcessorStepped += DebuggerService_Stepped;
+
+            DebuggerService.NavigationRequested += DebuggerService_NavigationRequested;
+
+            DebuggerService.RoutineNameChanged += DebuggerService_RoutineNameChanged;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 

@@ -29,6 +29,13 @@ namespace ZDebug.UI.ViewModel
                 executed: EditGameScriptExecuted,
                 canExecute: CanEditGameScriptExecute);
 
+            this.GoToAddressCommand = RegisterCommand(
+                text: "GoToAddress",
+                name: "GoToAddress",
+                executed: GoToAddressExecuted,
+                canExecute: CanGoToAddressExecute,
+                inputGestures: new KeyGesture(Key.G, ModifierKeys.Control));
+
             this.ExitCommand = RegisterCommand(
                 text: "Exit",
                 name: "Exit",
@@ -48,7 +55,7 @@ namespace ZDebug.UI.ViewModel
                 name: "Pause Debugging",
                 executed: StopDebuggingExecuted,
                 canExecute: CanStopDebuggingExecute,
-                inputGestures: new KeyGesture(Key.Pause, ModifierKeys.Alt | ModifierKeys.Control));
+                inputGestures: new KeyGesture(Key.F5, ModifierKeys.Shift));
 
             this.StepNextCommand = RegisterCommand(
                 text: "StepNext",
@@ -112,6 +119,23 @@ namespace ZDebug.UI.ViewModel
             {
                 var viewModel = (GameScriptDialogViewModel)gameScriptDialog.DataContext;
                 DebuggerService.SetGameScriptCommands(viewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            }
+        }
+
+        private bool CanGoToAddressExecute()
+        {
+            return DebuggerService.HasStory &&
+                DebuggerService.State != DebuggerState.Running;
+        }
+
+        private void GoToAddressExecuted()
+        {
+            var dialog = ViewModelWithView.Create<GoToAddressViewModel, Window>();
+            dialog.Owner = this.View;
+            if (dialog.ShowDialog() == true)
+            {
+                var viewModel = (GoToAddressViewModel)dialog.DataContext;
+                DebuggerService.RequestNavigation(viewModel.Address);
             }
         }
 
@@ -190,6 +214,7 @@ namespace ZDebug.UI.ViewModel
 
         public ICommand OpenStoryCommand { get; private set; }
         public ICommand EditGameScriptCommand { get; private set; }
+        public ICommand GoToAddressCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand StartDebuggingCommand { get; private set; }
         public ICommand StopDebuggingCommand { get; private set; }

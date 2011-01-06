@@ -5,10 +5,10 @@ namespace ZDebug.Core.Text
 {
     internal sealed class AlphabetTable
     {
-        private static readonly char[] A0 = "??????abcdefghijklmnopqrstuvwxyz".ToCharArray();
-        private static readonly char[] A1 = "??????ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-        private static readonly char[] A2 = "???????\n0123456789.,!?_#'\"/\\-:()".ToCharArray();
-        private static readonly char[] A3 = "???????0123456789.,!?_#'\"/\\<-:()".ToCharArray();
+        private static readonly char[] A0 = "      abcdefghijklmnopqrstuvwxyz".ToCharArray();
+        private static readonly char[] A1 = "      ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+        private static readonly char[] A2 = "       \n0123456789.,!?_#'\"/\\-:()".ToCharArray();
+        private static readonly char[] A3 = "       0123456789.,!?_#'\"/\\<-:()".ToCharArray();
 
         private readonly char[][] alphabets;
 
@@ -93,6 +93,22 @@ namespace ZDebug.Core.Text
         public int CurrentAlphabet
         {
             get { return currentAlphabet; }
+        }
+
+        public Tuple<byte, byte> FindSetAndIndexOfChar(char ch)
+        {
+            for (byte set = 0; set < 3; set++)
+            {
+                for (byte index = 6; index < 32; index++)
+                {
+                    if (alphabets[set][index] == ch)
+                    {
+                        return Tuple.Create(set, index);
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

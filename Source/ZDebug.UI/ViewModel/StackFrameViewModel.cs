@@ -1,45 +1,39 @@
-﻿namespace ZDebug.UI.ViewModel
+﻿using ZDebug.Core.Execution;
+using ZDebug.Core.Utilities;
+using System;
+using ZDebug.UI.Services;
+
+namespace ZDebug.UI.ViewModel
 {
     internal sealed class StackFrameViewModel : ViewModelBase
     {
-        private readonly int address;
-        private readonly int? callAddress;
-        private bool isCurrent;
+        private readonly StackFrame stackFrame;
 
-        public StackFrameViewModel(int address, int? callAddress)
+        public StackFrameViewModel(StackFrame stackFrame)
         {
-            this.address = address;
-            this.callAddress = callAddress;
+            this.stackFrame = stackFrame;
         }
 
-        public int Address
+        public string Name
         {
-            get { return address; }
+            get { return DebuggerService.RoutineTable.GetByAddress((int)stackFrame.CallAddress).Name; }
         }
 
-        public string CallAddressText
+        public bool HasName
         {
-            get
+            get { return Name.Length > 0; }
+        }
+
+        public uint CallAddress
+        {
+            get { return stackFrame.CallAddress; }
+        }
+
+        public string ArgText
+        {
+            get 
             {
-                if (callAddress == null)
-                {
-                    return string.Empty;
-                }
-
-                return callAddress.Value.ToString("x4");
-            }
-        }
-
-        public bool IsCurrent
-        {
-            get { return isCurrent; }
-            set
-            {
-                if (isCurrent != value)
-                {
-                    isCurrent = value;
-                    PropertyChanged("IsCurrent");
-                }
+                return "(" + string.Join(", ", stackFrame.Arguments.ToArray().ConvertAll(arg => arg.ToString("x4"))) + ")";
             }
         }
     }
