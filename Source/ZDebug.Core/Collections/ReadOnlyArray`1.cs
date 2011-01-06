@@ -70,7 +70,7 @@ namespace ZDebug.Core.Collections
             this.length = length;
         }
 
-        internal ReadOnlyArray(T[] array)
+        public ReadOnlyArray(T[] array)
         {
             this.array = array;
             this.startIndex = 0;

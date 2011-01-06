@@ -11,11 +11,6 @@ namespace ZDebug.Core.Utilities
             return Array.FindIndex(array, predicate) >= 0;
         }
 
-        public static IIndexedEnumerable<T> AsIndexedEnumerable<T>(this T[] array)
-        {
-            return new ArrayIndexedEnumerable<T>(array);
-        }
-
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] array)
         {
             return Array.AsReadOnly(array);

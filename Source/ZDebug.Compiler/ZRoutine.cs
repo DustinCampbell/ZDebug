@@ -17,15 +17,15 @@ namespace ZDebug.Compiler
         private readonly int address;
         private readonly int length;
         private readonly Story story;
-        private readonly IIndexedEnumerable<Instruction> instructions;
-        private readonly IIndexedEnumerable<ushort> locals;
+        private readonly ReadOnlyArray<Instruction> instructions;
+        private readonly ReadOnlyArray<ushort> locals;
 
         private ZRoutine(int address, Story story, Instruction[] instructions, ushort[] locals)
         {
             this.address = address;
             this.story = story;
-            this.instructions = instructions.AsIndexedEnumerable();
-            this.locals = locals.AsIndexedEnumerable();
+            this.instructions = new ReadOnlyArray<Instruction>(instructions);
+            this.locals = new ReadOnlyArray<ushort>(locals);
 
             if (instructions.Length > 0)
             {
@@ -53,12 +53,12 @@ namespace ZDebug.Compiler
             get { return story; }
         }
 
-        public IIndexedEnumerable<Instruction> Instructions
+        public ReadOnlyArray<Instruction> Instructions
         {
             get { return instructions; }
         }
 
-        public IIndexedEnumerable<ushort> Locals
+        public ReadOnlyArray<ushort> Locals
         {
             get { return locals; }
         }
