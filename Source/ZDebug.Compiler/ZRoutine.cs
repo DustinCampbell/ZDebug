@@ -6,6 +6,9 @@ using ZDebug.Core;
 using ZDebug.Core.Instructions;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Collections;
+using System.Collections;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
@@ -14,17 +17,15 @@ namespace ZDebug.Compiler
         private readonly int address;
         private readonly int length;
         private readonly Story story;
-        private Instruction[] instructions;
-        private readonly ushort[] locals;
-
-        private Action code;
+        private readonly IIndexedEnumerable<Instruction> instructions;
+        private readonly IIndexedEnumerable<ushort> locals;
 
         private ZRoutine(int address, Story story, Instruction[] instructions, ushort[] locals)
         {
             this.address = address;
             this.story = story;
-            this.instructions = instructions;
-            this.locals = locals;
+            this.instructions = instructions.AsIndexedEnumerable();
+            this.locals = locals.AsIndexedEnumerable();
 
             if (instructions.Length > 0)
             {
@@ -35,6 +36,31 @@ namespace ZDebug.Compiler
             {
                 this.length = 0;
             }
+        }
+
+        public int Address
+        {
+            get { return address; }
+        }
+
+        public int Length
+        {
+            get { return length; }
+        }
+
+        public Story Story
+        {
+            get { return story; }
+        }
+
+        public IIndexedEnumerable<Instruction> Instructions
+        {
+            get { return instructions; }
+        }
+
+        public IIndexedEnumerable<ushort> Locals
+        {
+            get { return locals; }
         }
 
         private static ushort[] ReadLocals(ref int address, Memory memory, byte version)
@@ -94,6 +120,7 @@ namespace ZDebug.Compiler
 
             return instructions.ToArray();
         }
+
         public static ZRoutine Create(int address, Story story)
         {
             var memory = story.Memory;

@@ -120,6 +120,7 @@
     <Compile Include="Text\ZText.cs" />
     <Compile Include="Text\ZTextFlags.cs" />
     <Compile Include="Utilities\ArrayEx.cs" />
+    <Compile Include="Utilities\ArrayExtensions.ArrayIndexedEnumerable.cs" />
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\Bits.cs" />
     <Compile Include="Utilities\ByteArrayExtensions.cs" />

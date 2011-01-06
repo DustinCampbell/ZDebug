@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Utilities
 {
-    public static class ArrayExtensions
+    public static partial class ArrayExtensions
     {
         public static bool Any<T>(this T[] array, Predicate<T> predicate)
         {
             return Array.FindIndex(array, predicate) >= 0;
+        }
+
+        public static IIndexedEnumerable<T> AsIndexedEnumerable<T>(this T[] array)
+        {
+            return new ArrayIndexedEnumerable<T>(array);
         }
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] array)
