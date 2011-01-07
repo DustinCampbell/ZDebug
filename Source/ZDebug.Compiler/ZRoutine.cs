@@ -6,9 +6,9 @@ using ZDebug.Core;
 using ZDebug.Core.Instructions;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Collections;
 using System.Collections;
 using ZDebug.Core.Utilities;
+using ZDebug.Compiler.Collections;
 
 namespace ZDebug.Compiler
 {
@@ -16,14 +16,12 @@ namespace ZDebug.Compiler
     {
         private readonly int address;
         private readonly int length;
-        private readonly Story story;
         private readonly ReadOnlyArray<Instruction> instructions;
         private readonly ReadOnlyArray<ushort> locals;
 
-        private ZRoutine(int address, Story story, Instruction[] instructions, ushort[] locals)
+        private ZRoutine(int address, Instruction[] instructions, ushort[] locals)
         {
             this.address = address;
-            this.story = story;
             this.instructions = new ReadOnlyArray<Instruction>(instructions);
             this.locals = new ReadOnlyArray<ushort>(locals);
 
@@ -48,11 +46,6 @@ namespace ZDebug.Compiler
             get { return length; }
         }
 
-        public Story Story
-        {
-            get { return story; }
-        }
-
         public ReadOnlyArray<Instruction> Instructions
         {
             get { return instructions; }
@@ -63,13 +56,12 @@ namespace ZDebug.Compiler
             get { return locals; }
         }
 
-        private static ushort[] ReadLocals(ref int address, Memory memory, byte version)
+        private static ushort[] ReadLocals(ref int address, byte[] memory, byte version)
         {
-            byte localCount = memory.ReadByte(address++);
+            var localCount = memory.ReadByte(ref address);
             if (version <= 4)
             {
-                var locals = memory.ReadWords(address, localCount);
-                address += localCount * 2;
+                var locals = memory.ReadWords(ref address, localCount);
                 return locals;
             }
             else
@@ -78,7 +70,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private static Instruction[] ReadInstructions(int address, Memory memory)
+        private static Instruction[] ReadInstructions(int address, byte[] memory)
         {
             var reader = new InstructionReader(address, memory);
             var instructions = new List<Instruction>();
@@ -121,16 +113,15 @@ namespace ZDebug.Compiler
             return instructions.ToArray();
         }
 
-        public static ZRoutine Create(int address, Story story)
+        public static ZRoutine Create(int address, byte[] memory)
         {
-            var memory = story.Memory;
-            var version = story.Version;
+            var version = memory.ReadByte(0);
 
             var startAddress = address;
             var locals = ReadLocals(ref address, memory, version);
             var instructions = ReadInstructions(address, memory);
 
-            return new ZRoutine(startAddress, story, instructions, locals);
+            return new ZRoutine(startAddress, instructions, locals);
         }
     }
 }

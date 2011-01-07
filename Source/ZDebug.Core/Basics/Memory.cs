@@ -31,7 +31,7 @@ namespace ZDebug.Core.Basics
         /// <summary>
         /// Access to underlying byte array for high-performance routines.
         /// </summary>
-        internal byte[] Bytes
+        public byte[] Bytes
         {
             get { return bytes; }
         }
@@ -41,7 +41,7 @@ namespace ZDebug.Core.Basics
             return bytes[address];
         }
 
-        internal byte ReadByte(ref int address)
+        public byte ReadByte(ref int address)
         {
             return bytes[address++];
         }
@@ -58,7 +58,7 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
-        internal byte[] ReadBytes(ref int address, int length)
+        public byte[] ReadBytes(ref int address, int length)
         {
             if (length == 0)
             {
@@ -79,7 +79,7 @@ namespace ZDebug.Core.Basics
             return (ushort)(b1 << 8 | b2);
         }
 
-        internal ushort ReadWord(ref int address)
+        public ushort ReadWord(ref int address)
         {
             var b1 = bytes[address];
             var b2 = bytes[address + 1];
@@ -109,7 +109,7 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
-        internal ushort[] ReadWords(ref int address, int length)
+        public ushort[] ReadWords(ref int address, int length)
         {
             if (length == 0)
             {
@@ -141,7 +141,7 @@ namespace ZDebug.Core.Basics
             return (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
         }
 
-        internal uint ReadDWord(ref int address)
+        public uint ReadDWord(ref int address)
         {
             var b1 = bytes[address];
             var b2 = bytes[address + 1];
@@ -175,7 +175,7 @@ namespace ZDebug.Core.Basics
             return result;
         }
 
-        internal uint[] ReadDWords(ref int address, int length)
+        public uint[] ReadDWords(ref int address, int length)
         {
             if (length == 0)
             {

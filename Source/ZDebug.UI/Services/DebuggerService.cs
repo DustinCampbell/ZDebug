@@ -207,7 +207,7 @@ namespace ZDebug.UI.Services
             story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
             routineTable = new RoutineTable(story, cache);
-            reader = new InstructionReader(story.Processor.PC, story.Memory, cache);
+            reader = new InstructionReader(story.Processor.PC, story.Memory.Bytes, cache);
 
             DebuggerService.fileName = fileName;
 

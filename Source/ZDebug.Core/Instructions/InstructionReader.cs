@@ -1,5 +1,6 @@
 ﻿using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Instructions
 {
@@ -11,18 +12,18 @@ namespace ZDebug.Core.Instructions
         private const byte opKind_Omitted = 3;
 
         private int address;
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly OpcodeTable opcodeTable;
         private readonly InstructionCache cache;
 
         // This is used in instruction parsing
         private byte[] operandKinds = new byte[8];
 
-        public InstructionReader(int address, Memory memory, InstructionCache cache = null)
+        public InstructionReader(int address, byte[] memory, InstructionCache cache = null)
         {
             this.memory = memory;
             this.address = address;
-            this.opcodeTable = OpcodeTables.GetOpcodeTable(memory.ReadVersion());
+            this.opcodeTable = OpcodeTables.GetOpcodeTable(memory[0]);
             this.cache = cache ?? new InstructionCache();
         }
 
@@ -72,6 +73,57 @@ namespace ZDebug.Core.Instructions
             }
 
             return result;
+        }
+
+        private Variable ReadVariable(ref int address)
+        {
+            return Variable.FromByte(memory.ReadByte(ref address));
+        }
+
+        private Branch ReadBranch(ref int address)
+        {
+            var b1 = memory.ReadByte(ref address);
+
+            var condition = (b1 & 0x80) == 0x80;
+
+            short offset;
+            if ((b1 & 0x40) == 0x40) // is single byte
+            {
+                // bottom 6 bits
+                offset = (short)(b1 & 0x3f);
+            }
+            else // is two bytes
+            {
+                // OR bottom 6 bits with the next byte
+                b1 = (byte)(b1 & 0x3f);
+                var b2 = memory.ReadByte(ref address);
+                var tmp = (ushort)((b1 << 8) | b2);
+
+                // if bit 13, set bits 14 and 15 as well to produce proper signed value.
+                if ((tmp & 0x2000) == 0x2000)
+                {
+                    tmp = (ushort)(tmp | 0xc000);
+                }
+
+                offset = (short)tmp;
+            }
+
+            return new Branch(condition, offset);
+        }
+
+        private ushort[] ReadZWords(ref int address)
+        {
+            int count = 0;
+            while (true)
+            {
+                var zword = memory.ReadWord(address + (count++ * 2));
+                if ((zword & 0x8000) != 0)
+                {
+                    break;
+                }
+            }
+
+            return memory.ReadWords(ref address, count);
         }
 
         private static byte LongForm(byte opByte)
@@ -178,19 +230,19 @@ namespace ZDebug.Core.Instructions
             Variable storeVariable = null;
             if (opcode.HasStoreVariable)
             {
-                storeVariable = memory.ReadVariable(ref address);
+                storeVariable = ReadVariable(ref address);
             }
 
             Branch? branch = null;
             if (opcode.HasBranch)
             {
-                branch = memory.ReadBranch(ref address);
+                branch = ReadBranch(ref address);
             }
 
             ushort[] ztext = null;
             if (opcode.HasZText)
             {
-                ztext = memory.ReadZWords(ref address);
+                ztext = ReadZWords(ref address);
             }
 
             var length = address - startAddress;
