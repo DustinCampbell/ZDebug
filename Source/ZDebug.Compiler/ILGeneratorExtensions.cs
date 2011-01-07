@@ -40,6 +40,41 @@ namespace ZDebug.Compiler
         private readonly static ConstructorInfo exceptionCtor = typeof(ZMachineException).GetConstructor(
             types: new Type[] { typeof(string) });
 
+        public static LocalBuilder DeclareLocal(this ILGenerator il, string value)
+        {
+            var loc = il.DeclareLocal(typeof(string));
+            il.Emit(OpCodes.Ldstr, value);
+            il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
+
+        public static LocalBuilder DeclareLocal(this ILGenerator il, int value)
+        {
+            var loc = il.DeclareLocal(typeof(int));
+            il.Emit(OpCodes.Ldc_I4, value);
+            il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
+
+        public static LocalBuilder DeclareLocal(this ILGenerator il, bool value)
+        {
+            var loc = il.DeclareLocal(typeof(bool));
+            if (value)
+            {
+                il.Emit(OpCodes.Ldc_I4_1);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldc_I4_0);
+            }
+
+            il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
+
         public static void FormatString(this ILGenerator il, string format, LocalBuilder arg0)
         {
             il.Emit(OpCodes.Ldstr, format);
