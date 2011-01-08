@@ -75,15 +75,19 @@ namespace ZDebug.Compiler
             return loc;
         }
 
+        public static void LoadAndBox(this ILGenerator il, LocalBuilder loc)
+        {
+            il.Emit(OpCodes.Ldloc, loc);
+            if (loc.LocalType.IsValueType)
+            {
+                il.Emit(OpCodes.Box, loc.LocalType);
+            }
+        }
+
         public static void FormatString(this ILGenerator il, string format, LocalBuilder arg0)
         {
             il.Emit(OpCodes.Ldstr, format);
-
-            il.Emit(OpCodes.Ldloc, arg0);
-            if (arg0.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg0.LocalType);
-            }
+            il.LoadAndBox(arg0);
 
             il.Emit(OpCodes.Call, stringFormat1);
         }
@@ -91,18 +95,8 @@ namespace ZDebug.Compiler
         public static void FormatString(this ILGenerator il, string format, LocalBuilder arg0, LocalBuilder arg1)
         {
             il.Emit(OpCodes.Ldstr, format);
-
-            il.Emit(OpCodes.Ldloc, arg0);
-            if (arg0.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg0.LocalType);
-            }
-
-            il.Emit(OpCodes.Ldloc, arg1);
-            if (arg1.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg1.LocalType);
-            }
+            il.LoadAndBox(arg0);
+            il.LoadAndBox(arg1);
 
             il.Emit(OpCodes.Call, stringFormat2);
         }
@@ -110,24 +104,9 @@ namespace ZDebug.Compiler
         public static void FormatString(this ILGenerator il, string format, LocalBuilder arg0, LocalBuilder arg1, LocalBuilder arg2)
         {
             il.Emit(OpCodes.Ldstr, format);
-
-            il.Emit(OpCodes.Ldloc, arg0);
-            if (arg0.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg0.LocalType);
-            }
-
-            il.Emit(OpCodes.Ldloc, arg1);
-            if (arg1.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg1.LocalType);
-            }
-
-            il.Emit(OpCodes.Ldloc, arg2);
-            if (arg2.LocalType.IsValueType)
-            {
-                il.Emit(OpCodes.Box, arg2.LocalType);
-            }
+            il.LoadAndBox(arg0);
+            il.LoadAndBox(arg1);
+            il.LoadAndBox(arg2);
 
             il.Emit(OpCodes.Call, stringFormat3);
         }
@@ -145,11 +124,7 @@ namespace ZDebug.Compiler
 
                 il.Emit(OpCodes.Ldloc, locArgs);
                 il.Emit(OpCodes.Ldc_I4, i);
-                il.Emit(OpCodes.Ldloc, arg);
-                if (arg.LocalType.IsValueType)
-                {
-                    il.Emit(OpCodes.Box, arg.LocalType);
-                }
+                il.LoadAndBox(arg);
 
                 il.Emit(OpCodes.Stelem_Ref);
             }

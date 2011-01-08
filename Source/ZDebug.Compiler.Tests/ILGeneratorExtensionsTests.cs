@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection.Emit;
 using NUnit.Framework;
 
@@ -7,19 +8,42 @@ namespace ZDebug.Compiler.Tests
     [TestFixture]
     public class ILGeneratorExtensionsTests
     {
-        [Test]
-        public void TestFormatString1()
+        private Delegate CreateDynamicMethod(Type delegateType, Action<ILGenerator> codeGenerator)
         {
-            var dm = new DynamicMethod("Foo", typeof(string), new Type[0]);
+            if (delegateType.BaseType != typeof(MulticastDelegate))
+            {
+                throw new ArgumentException("'delegateType' does not represent a valid delegate", "delegateType");
+            }
+
+            var invokeMethod = delegateType.GetMethod("Invoke");
+            if (invokeMethod == null)
+            {
+                throw new ArgumentException("'delegateType' does not represent a valid delegate", "delegateType");
+            }
+
+            var returnType = invokeMethod.ReturnType;
+            var parameterTypes = Array.ConvertAll(invokeMethod.GetParameters(), pi => pi.ParameterType);
+
+            var dm = new DynamicMethod("TestMethod", returnType, parameterTypes);
             var il = dm.GetILGenerator();
 
-            var loc1 = il.DeclareLocal("world");
-
-            il.FormatString("Hello {0}!", loc1);
+            codeGenerator(il);
 
             il.Emit(OpCodes.Ret);
 
-            var del = (Func<string>)dm.CreateDelegate(typeof(Func<string>));
+            return dm.CreateDelegate(delegateType);
+        }
+
+        [Test]
+        public void TestFormatString1()
+        {
+            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            {
+                var loc1 = il.DeclareLocal("world");
+
+                il.FormatString("Hello {0}!", loc1);
+            });
+
             var res = del();
 
             Assert.That(res, Is.EqualTo("Hello world!"));
@@ -28,15 +52,13 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString2()
         {
-            var dm = new DynamicMethod("Foo", typeof(string), new Type[0]);
-            var il = dm.GetILGenerator();
+            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            {
+                var loc1 = il.DeclareLocal(42);
 
-            var loc1 = il.DeclareLocal(42);
-            il.FormatString("Hello {0}!", loc1);
+                il.FormatString("Hello {0}!", loc1);
+            });
 
-            il.Emit(OpCodes.Ret);
-
-            var del = (Func<string>)dm.CreateDelegate(typeof(Func<string>));
             var res = del();
 
             Assert.That(res, Is.EqualTo("Hello 42!"));
@@ -45,17 +67,14 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString3()
         {
-            var dm = new DynamicMethod("Foo", typeof(string), new Type[0]);
-            var il = dm.GetILGenerator();
+            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            {
+                var loc1 = il.DeclareLocal("world");
+                var loc2 = il.DeclareLocal(42);
 
-            var loc1 = il.DeclareLocal("world");
-            var loc2 = il.DeclareLocal(42);
+                il.FormatString("Hello {0} {1}!", loc1, loc2);
+            });
 
-            il.FormatString("Hello {0} {1}!", loc1, loc2);
-
-            il.Emit(OpCodes.Ret);
-
-            var del = (Func<string>)dm.CreateDelegate(typeof(Func<string>));
             var res = del();
 
             Assert.That(res, Is.EqualTo("Hello world 42!"));
@@ -64,18 +83,15 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString4()
         {
-            var dm = new DynamicMethod("Foo", typeof(string), new Type[0]);
-            var il = dm.GetILGenerator();
+            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            {
+                var loc1 = il.DeclareLocal("world");
+                var loc2 = il.DeclareLocal(42);
+                var loc3 = il.DeclareLocal(true);
 
-            var loc1 = il.DeclareLocal("world");
-            var loc2 = il.DeclareLocal(42);
-            var loc3 = il.DeclareLocal(true);
+                il.FormatString("Hello {0} {1} {2}!", loc1, loc2, loc3);
+            });
 
-            il.FormatString("Hello {0} {1} {2}!", loc1, loc2, loc3);
-
-            il.Emit(OpCodes.Ret);
-
-            var del = (Func<string>)dm.CreateDelegate(typeof(Func<string>));
             var res = del();
 
             Assert.That(res, Is.EqualTo("Hello world 42 True!"));
@@ -84,22 +100,84 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString5()
         {
-            var dm = new DynamicMethod("Foo", typeof(string), new Type[0]);
-            var il = dm.GetILGenerator();
+            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            {
+                var loc1 = il.DeclareLocal("world");
+                var loc2 = il.DeclareLocal(42);
+                var loc3 = il.DeclareLocal(true);
+                var loc4 = il.DeclareLocal("Foo");
 
-            var loc1 = il.DeclareLocal("world");
-            var loc2 = il.DeclareLocal(42);
-            var loc3 = il.DeclareLocal(true);
-            var loc4 = il.DeclareLocal("Foo");
+                il.FormatString("Hello {0} {1} {2} {3}!", loc1, loc2, loc3, loc4);
+            });
 
-            il.FormatString("Hello {0} {1} {2} {3}!", loc1, loc2, loc3, loc4);
-
-            il.Emit(OpCodes.Ret);
-
-            var del = (Func<string>)dm.CreateDelegate(typeof(Func<string>));
             var res = del();
 
             Assert.That(res, Is.EqualTo("Hello world 42 True Foo!"));
+        }
+
+        [Test]
+        public void TestThrowException1()
+        {
+            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            {
+                il.ThrowException("Oh dear!");
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Oh dear!"));
+        }
+
+        [Test]
+        public void TestThrowException2()
+        {
+            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            {
+                var loc1 = il.DeclareLocal("Oh dear");
+                il.ThrowException("{0}!", loc1);
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Oh dear!"));
+        }
+
+        [Test]
+        public void TestThrowException3()
+        {
+            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            {
+                var loc1 = il.DeclareLocal("Oh");
+                var loc2 = il.DeclareLocal("dear");
+                il.ThrowException("{0} {1}!", loc1, loc2);
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Oh dear!"));
+        }
+
+        [Test]
+        public void TestThrowException4()
+        {
+            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            {
+                var loc1 = il.DeclareLocal("Oh");
+                var loc2 = il.DeclareLocal(" ");
+                var loc3 = il.DeclareLocal("dear");
+                il.ThrowException("{0}{1}{2}!", loc1, loc2, loc3);
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Oh dear!"));
+        }
+
+        [Test]
+        public void TestThrowException5()
+        {
+            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            {
+                var loc1 = il.DeclareLocal("Oh");
+                var loc2 = il.DeclareLocal(" ");
+                var loc3 = il.DeclareLocal("dear");
+                var loc4 = il.DeclareLocal("!");
+                il.ThrowException("{0}{1}{2}{3}", loc1, loc2, loc3, loc4);
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Oh dear!"));
         }
     }
 }
