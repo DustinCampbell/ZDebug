@@ -16,16 +16,14 @@ namespace ZDebug.Compiler
             this.memory = memory;
         }
 
-        private ushort[] Mock(ushort[] values)
+        private byte ReadByte(int value)
         {
-            var result = new ushort[values.Length];
+            return memory[value];
+        }
 
-            for (int i = 0; i < values.Length; i++)
-            {
-                result[i] = values[i];
-            }
-
-            return result;
+        private byte ReadByte(ushort value)
+        {
+            return memory[value];
         }
     }
 }

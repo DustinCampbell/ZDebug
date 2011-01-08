@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection.Emit;
 
-namespace ZDebug.Compiler.Tests
+namespace ZDebug.Compiler.Tests.Utilities
 {
     internal static class DynamicMethodHelpers
     {

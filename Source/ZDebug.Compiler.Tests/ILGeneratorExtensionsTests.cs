@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection.Emit;
 using NUnit.Framework;
+using ZDebug.Compiler.Tests.Utilities;
 
 namespace ZDebug.Compiler.Tests
 {

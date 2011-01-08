@@ -64,6 +64,15 @@ namespace ZDebug.Compiler
             return loc;
         }
 
+        public static LocalBuilder DeclareLocal(this ILGenerator il, ushort value)
+        {
+            var loc = il.DeclareLocal(typeof(ushort));
+            il.Emit(OpCodes.Ldc_I4, value);
+            il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
+
         public static LocalBuilder DeclareLocal(this ILGenerator il, int value)
         {
             var loc = il.DeclareLocal(typeof(int));

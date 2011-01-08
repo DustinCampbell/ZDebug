@@ -49,19 +49,19 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Create local variables for local stack, sp and this routine's locals
+            // Create stack, sp and locals
             var stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;
             var sp = usesStack ? il.DeclareLocal(0) : null;
 
-            int localCount = routine.Locals.Length;
+            var localValues = routine.Locals;
+            int localCount = localValues.Length;
             var locals = new LocalBuilder[localCount];
             for (int i = 0; i < localCount; i++)
             {
-                locals[i] = il.DeclareLocal(typeof(ushort));
+                locals[i] = il.DeclareLocal(localValues[i]);
             }
 
             // Initalize locals
-
 
             il.Emit(OpCodes.Ret);
 
