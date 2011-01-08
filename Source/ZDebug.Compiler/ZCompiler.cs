@@ -120,5 +120,17 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldelem_U2);
             il.Emit(OpCodes.Stloc, result);
         }
+
+        internal static void PeekStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder result)
+        {
+            il.CheckStackEmpty(sp);
+
+            il.Emit(OpCodes.Ldloc, stack);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Ldelem_U2);
+            il.Emit(OpCodes.Stloc, result);
+        }
     }
 }

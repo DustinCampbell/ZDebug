@@ -131,5 +131,137 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Stack is empty."));
         }
+
+        [Test]
+        public void TestPopStack5()
+        {
+            var del = (Func<ushort[]>)DynamicMethodHelpers.Create(typeof(Func<ushort[]>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(3);
+                var result = il.DeclareLocal<ushort>();
+                var results = il.DeclareArrayLocal<ushort>(3);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    il.Emit(OpCodes.Ldloc, results);
+                    il.Emit(OpCodes.Ldc_I4, i);
+
+                    il.PopStack(stack, sp, result);
+                    il.Emit(OpCodes.Ldloc, result);
+
+                    il.Emit(OpCodes.Stelem_I2);
+                }
+
+                il.Emit(OpCodes.Ldloc, results);
+            });
+
+            var res = del();
+
+            Assert.That(res, Is.EqualTo(new ushort[] { 3, 2, 1 }));
+        }
+
+        [Test]
+        public void TestPeekStack1()
+        {
+            var del = (Func<ushort>)DynamicMethodHelpers.Create(typeof(Func<ushort>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(3);
+                var result = il.DeclareLocal<ushort>();
+
+                il.PeekStack(stack, sp, result);
+
+                il.Emit(OpCodes.Ldloc, result);
+            });
+
+            var res = del();
+
+            Assert.That(res, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void TestPeekStack2()
+        {
+            var del = (Func<ushort>)DynamicMethodHelpers.Create(typeof(Func<ushort>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(2);
+                var result = il.DeclareLocal<ushort>();
+
+                il.PeekStack(stack, sp, result);
+
+                il.Emit(OpCodes.Ldloc, result);
+            });
+
+            var res = del();
+
+            Assert.That(res, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void TestPeekStack3()
+        {
+            var del = (Func<ushort>)DynamicMethodHelpers.Create(typeof(Func<ushort>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(1);
+                var result = il.DeclareLocal<ushort>();
+
+                il.PeekStack(stack, sp, result);
+
+                il.Emit(OpCodes.Ldloc, result);
+            });
+
+            var res = del();
+
+            Assert.That(res, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TestPeekStack4()
+        {
+            var del = (Func<ushort>)DynamicMethodHelpers.Create(typeof(Func<ushort>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(0);
+                var result = il.DeclareLocal<ushort>();
+
+                il.PeekStack(stack, sp, result);
+
+                il.Emit(OpCodes.Ldloc, result);
+            });
+
+            Assert.That(() => del(), Throws.TypeOf<ZMachineException>().With.Property("Message").EqualTo("Stack is empty."));
+        }
+
+        [Test]
+        public void TestPeekStack5()
+        {
+            var del = (Func<ushort[]>)DynamicMethodHelpers.Create(typeof(Func<ushort[]>), il =>
+            {
+                var stack = il.DeclareLocal(new ushort[] { 1, 2, 3 });
+                var sp = il.DeclareLocal(3);
+                var result = il.DeclareLocal<ushort>();
+                var results = il.DeclareArrayLocal<ushort>(3);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    il.Emit(OpCodes.Ldloc, results);
+                    il.Emit(OpCodes.Ldc_I4, i);
+
+                    il.PeekStack(stack, sp, result);
+                    il.Emit(OpCodes.Ldloc, result);
+
+                    il.Emit(OpCodes.Stelem_I2);
+                }
+
+                il.Emit(OpCodes.Ldloc, results);
+            });
+
+            var res = del();
+
+            Assert.That(res, Is.EqualTo(new ushort[] { 3, 3, 3 }));
+        }
     }
 }

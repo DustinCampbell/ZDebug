@@ -44,6 +44,16 @@ namespace ZDebug.Compiler
         {
             return il.DeclareLocal(typeof(T));
         }
+        
+        public static LocalBuilder DeclareArrayLocal<T>(this ILGenerator il, int length)
+        {
+            var loc = il.DeclareLocal(typeof(T[]));
+            il.Emit(OpCodes.Ldc_I4, length);
+            il.Emit(OpCodes.Newarr, typeof(T));
+            il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
 
         public static LocalBuilder DeclareLocal(this ILGenerator il, string value)
         {
@@ -82,10 +92,7 @@ namespace ZDebug.Compiler
 
         public static LocalBuilder DeclareLocal(this ILGenerator il, ushort[] values)
         {
-            var loc = il.DeclareLocal(typeof(ushort[]));
-            il.Emit(OpCodes.Ldc_I4, values.Length);
-            il.Emit(OpCodes.Newarr, typeof(ushort));
-            il.Emit(OpCodes.Stloc, loc);
+            var loc = il.DeclareArrayLocal<ushort>(values.Length);
 
             for (int i = 0; i < values.Length; i++)
             {
