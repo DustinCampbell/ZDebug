@@ -50,24 +50,14 @@ namespace ZDebug.Compiler
             }
 
             // Create local variables for local stack, sp and this routine's locals
-            var stack = usesStack ? il.DeclareLocal(typeof(ushort[])) : null;
-            var sp = usesStack ? il.DeclareLocal(typeof(int)) : null;
+            var stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;
+            var sp = usesStack ? il.DeclareLocal(0) : null;
 
             int localCount = routine.Locals.Length;
             var locals = new LocalBuilder[localCount];
             for (int i = 0; i < localCount; i++)
             {
                 locals[i] = il.DeclareLocal(typeof(ushort));
-            }
-
-            // Initialize local stack if needed
-            if (usesStack)
-            {
-                il.Emit(OpCodes.Ldc_I4, STACK_SIZE);
-                il.Emit(OpCodes.Newarr, typeof(ushort));
-                il.Emit(OpCodes.Stloc, stack);
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Stloc, sp);
             }
 
             // Initalize locals
@@ -108,15 +98,16 @@ namespace ZDebug.Compiler
         {
             il.CheckStackEmpty(sp);
 
+            il.Emit(OpCodes.Ldloc, stack);
+
             // decrement sp
             il.Emit(OpCodes.Ldloc, sp);
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Dup);
             il.Emit(OpCodes.Stloc, sp);
 
             // store item from stack in result
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
             il.Emit(OpCodes.Ldelem_U2);
             il.Emit(OpCodes.Stloc, result);
         }
@@ -131,6 +122,35 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Sub);
             il.Emit(OpCodes.Ldelem_U2);
             il.Emit(OpCodes.Stloc, result);
+        }
+
+        internal static void PushStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder value)
+        {
+            il.CheckStackFull(sp);
+
+            // store value in stack
+            il.Emit(OpCodes.Ldloc, stack);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, value);
+            il.Emit(OpCodes.Stelem_I2);
+
+            // increment sp
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Add);
+            il.Emit(OpCodes.Stloc, sp);
+        }
+
+        internal static void SetStackTop(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder value)
+        {
+            il.CheckStackEmpty(sp);
+
+            il.Emit(OpCodes.Ldloc, stack);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Ldloc, value);
+            il.Emit(OpCodes.Stelem_I2);
         }
     }
 }
