@@ -63,29 +63,6 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
-        public void ReadByteThrowsArgOutOfRange()
-        {
-            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.ReadByte(-1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadByte(0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadByte(1023)),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.ReadByte(1024),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-        }
-
-        [Test, Category(Categories.Memory)]
         public void ReadBytesReturnsExpectedByteArrayAtIndex()
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
@@ -108,41 +85,6 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
-        public void ReadBytesThrowsArgOutOfRange()
-        {
-            byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.ReadBytes(0, -1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadBytes(-1, 0)),
-                Throws.Nothing); // returns empty array regardless of index parameter
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadBytes(6, 0)),
-                Throws.Nothing); // returns empty array regardless of index parameter
-
-            Assert.That(() =>
-                memory.ReadBytes(6, 1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadBytes(5, 0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadBytes(5, 1)),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.ReadBytes(5, 2),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-        }
-
-        [Test, Category(Categories.Memory)]
         public void ReadWordReturnsExpectedByteAtIndex()
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
@@ -155,33 +97,6 @@ namespace ZDebug.Core.Tests
                 var w = memory.ReadWord(i);
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
-        }
-
-        [Test, Category(Categories.Memory)]
-        public void ReadWordThrowsArgOutOfRange()
-        {
-            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.ReadWord(-1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWord(0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWord(1022)),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.ReadWord(1023),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(() =>
-                memory.ReadWord(1024),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test, Category(Categories.Memory)]
@@ -202,49 +117,6 @@ namespace ZDebug.Core.Tests
                 var w = memory.ReadWords(i, 2);
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
-        }
-
-        [Test, Category(Categories.Memory)]
-        public void ReadWordsThrowsArgOutOfRange()
-        {
-            byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.ReadWords(0, -1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWords(-1, 0)),
-                Throws.Nothing); // returns empty array regardless of index parameter
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWords(5, 0)),
-                Throws.Nothing); // returns empty array regardless of index parameter
-
-            Assert.That(() =>
-                memory.ReadWords(5, 1),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWords(4, 0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWords(4, 1)),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.ReadWords(4, 2),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(() =>
-                memory.ReadWords(3, 2),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.ReadWords(2, 2)),
-                Throws.Nothing);
         }
 
         [Test, Category(Categories.Memory)]
@@ -271,29 +143,6 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
-        public void WriteByteThrowsArgOutOfRange()
-        {
-            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.WriteByte(-1, 0),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteByte(0, 0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteByte(1023, 0)),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.WriteByte(1024, 0),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-        }
-
-        [Test, Category(Categories.Memory)]
         public void WriteBytesWritesExpectedByteArrayAtIndex()
         {
             byte[] bytes = new byte[6];
@@ -317,49 +166,6 @@ namespace ZDebug.Core.Tests
         }
 
         [Test, Category(Categories.Memory)]
-        public void WriteBytesThrowsArgOutOfRange()
-        {
-            byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.WriteBytes(0, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(() =>
-                memory.WriteBytes(-1, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(() =>
-                memory.WriteBytes(6, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteBytes(-1, ArrayEx.Empty<byte>())),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteBytes(6, ArrayEx.Empty<byte>())),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.WriteBytes(6, new byte[] { 0x00 }),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteBytes(5, ArrayEx.Empty<byte>())),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteBytes(5, new byte[] { 0x00 })),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.WriteBytes(5, new byte[] { 0x00, 0x01 }),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-        }
-
-        [Test, Category(Categories.Memory)]
         public void WriteWordWritesExpectedWordAtIndex()
         {
             byte[] bytes = new byte[6];
@@ -373,33 +179,6 @@ namespace ZDebug.Core.Tests
                 var w = memory.ReadWord(i);
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
-        }
-
-        [Test, Category(Categories.Memory)]
-        public void WriteWordThrowsArgOutOfRange()
-        {
-            var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.WriteWord(-1, 0),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWord(0, 0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWord(1022, 0)),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWord(1023, 0)),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(() =>
-                memory.WriteWord(1024, 0),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
         }
 
         [Test, Category(Categories.Memory)]
@@ -421,57 +200,6 @@ namespace ZDebug.Core.Tests
                 var w = memory.ReadWords(i, 2);
                 Assert.That(w, Is.EqualTo(expected[i]));
             }
-        }
-
-        [Test, Category(Categories.Memory)]
-        public void WriteWordsThrowsArgOutOfRange()
-        {
-            byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00 };
-            var memory = new Memory(bytes);
-
-            Assert.That(() =>
-                memory.WriteWords(0, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(() =>
-                memory.WriteWords(-1, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(() =>
-                memory.WriteWords(5, null),
-                Throws.InstanceOf<ArgumentNullException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWords(-1, ArrayEx.Empty<ushort>())),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWords(5, ArrayEx.Empty<ushort>())),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.WriteWords(5, new ushort[] { 0x0000 }),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWords(4, ArrayEx.Empty<ushort>())),
-                Throws.Nothing);
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWords(4, new ushort[] { 0x0000 })),
-                Throws.Nothing);
-
-            Assert.That(() =>
-                memory.WriteWords(4, new ushort[] { 0x0000, 0x0001 }),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(() =>
-                memory.WriteWords(3, new ushort[] { 0x0000, 0x0001 }),
-                Throws.InstanceOf<ArgumentOutOfRangeException>());
-
-            Assert.That(new TestDelegate(() =>
-                memory.WriteWords(2, new ushort[] { 0x0000, 0x0001 })),
-                Throws.Nothing);
         }
 
         [Test, Category(Categories.Memory)]
