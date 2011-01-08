@@ -40,6 +40,11 @@ namespace ZDebug.Compiler
         private readonly static ConstructorInfo exceptionCtor = typeof(ZMachineException).GetConstructor(
             types: new Type[] { typeof(string) });
 
+        public static LocalBuilder DeclareLocal<T>(this ILGenerator il)
+        {
+            return il.DeclareLocal(typeof(T));
+        }
+
         public static LocalBuilder DeclareLocal(this ILGenerator il, string value)
         {
             var loc = il.DeclareLocal(typeof(string));
@@ -71,6 +76,25 @@ namespace ZDebug.Compiler
             }
 
             il.Emit(OpCodes.Stloc, loc);
+
+            return loc;
+        }
+
+        public static LocalBuilder DeclareLocal(this ILGenerator il, ushort[] values)
+        {
+            var loc = il.DeclareLocal(typeof(ushort[]));
+            il.Emit(OpCodes.Ldc_I4, values.Length);
+            il.Emit(OpCodes.Newarr, typeof(ushort));
+            il.Emit(OpCodes.Stloc, loc);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                il.Emit(OpCodes.Ldloc, loc);
+                il.Emit(OpCodes.Ldc_I4, i);
+                il.Emit(OpCodes.Ldc_I4, values[i]);
+
+                il.Emit(OpCodes.Stelem_I2);
+            }
 
             return loc;
         }
@@ -120,11 +144,9 @@ namespace ZDebug.Compiler
 
             for (int i = 0; i < args.Length; i++)
             {
-                var arg = args[i];
-
                 il.Emit(OpCodes.Ldloc, locArgs);
                 il.Emit(OpCodes.Ldc_I4, i);
-                il.LoadAndBox(arg);
+                il.LoadAndBox(args[i]);
 
                 il.Emit(OpCodes.Stelem_Ref);
             }

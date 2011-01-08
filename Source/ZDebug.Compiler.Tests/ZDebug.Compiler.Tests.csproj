@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicMethodHelpers.cs" />
     <Compile Include="ILGeneratorExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ZCompilerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZDebug.Compiler\ZDebug.Compiler.csproj">

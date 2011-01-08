@@ -8,36 +8,10 @@ namespace ZDebug.Compiler.Tests
     [TestFixture]
     public class ILGeneratorExtensionsTests
     {
-        private Delegate CreateDynamicMethod(Type delegateType, Action<ILGenerator> codeGenerator)
-        {
-            if (delegateType.BaseType != typeof(MulticastDelegate))
-            {
-                throw new ArgumentException("'delegateType' does not represent a valid delegate", "delegateType");
-            }
-
-            var invokeMethod = delegateType.GetMethod("Invoke");
-            if (invokeMethod == null)
-            {
-                throw new ArgumentException("'delegateType' does not represent a valid delegate", "delegateType");
-            }
-
-            var returnType = invokeMethod.ReturnType;
-            var parameterTypes = Array.ConvertAll(invokeMethod.GetParameters(), pi => pi.ParameterType);
-
-            var dm = new DynamicMethod("TestMethod", returnType, parameterTypes);
-            var il = dm.GetILGenerator();
-
-            codeGenerator(il);
-
-            il.Emit(OpCodes.Ret);
-
-            return dm.CreateDelegate(delegateType);
-        }
-
         [Test]
         public void TestFormatString1()
         {
-            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            var del = (Func<string>)DynamicMethodHelpers.Create(typeof(Func<string>), il =>
             {
                 var loc1 = il.DeclareLocal("world");
 
@@ -52,7 +26,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString2()
         {
-            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            var del = (Func<string>)DynamicMethodHelpers.Create(typeof(Func<string>), il =>
             {
                 var loc1 = il.DeclareLocal(42);
 
@@ -67,7 +41,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString3()
         {
-            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            var del = (Func<string>)DynamicMethodHelpers.Create(typeof(Func<string>), il =>
             {
                 var loc1 = il.DeclareLocal("world");
                 var loc2 = il.DeclareLocal(42);
@@ -83,7 +57,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString4()
         {
-            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            var del = (Func<string>)DynamicMethodHelpers.Create(typeof(Func<string>), il =>
             {
                 var loc1 = il.DeclareLocal("world");
                 var loc2 = il.DeclareLocal(42);
@@ -100,7 +74,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestFormatString5()
         {
-            var del = (Func<string>)CreateDynamicMethod(typeof(Func<string>), il =>
+            var del = (Func<string>)DynamicMethodHelpers.Create(typeof(Func<string>), il =>
             {
                 var loc1 = il.DeclareLocal("world");
                 var loc2 = il.DeclareLocal(42);
@@ -118,7 +92,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestThrowException1()
         {
-            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            var del = (Action)DynamicMethodHelpers.Create(typeof(Action), il =>
             {
                 il.ThrowException("Oh dear!");
             });
@@ -129,7 +103,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestThrowException2()
         {
-            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            var del = (Action)DynamicMethodHelpers.Create(typeof(Action), il =>
             {
                 var loc1 = il.DeclareLocal("Oh dear");
                 il.ThrowException("{0}!", loc1);
@@ -141,7 +115,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestThrowException3()
         {
-            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            var del = (Action)DynamicMethodHelpers.Create(typeof(Action), il =>
             {
                 var loc1 = il.DeclareLocal("Oh");
                 var loc2 = il.DeclareLocal("dear");
@@ -154,7 +128,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestThrowException4()
         {
-            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            var del = (Action)DynamicMethodHelpers.Create(typeof(Action), il =>
             {
                 var loc1 = il.DeclareLocal("Oh");
                 var loc2 = il.DeclareLocal(" ");
@@ -168,7 +142,7 @@ namespace ZDebug.Compiler.Tests
         [Test]
         public void TestThrowException5()
         {
-            var del = (Action)CreateDynamicMethod(typeof(Action), il =>
+            var del = (Action)DynamicMethodHelpers.Create(typeof(Action), il =>
             {
                 var loc1 = il.DeclareLocal("Oh");
                 var loc2 = il.DeclareLocal(" ");

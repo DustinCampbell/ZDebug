@@ -8,7 +8,7 @@ namespace ZDebug.Compiler
 {
     public static class ZCompiler
     {
-        private const int STACK_SIZE = 1024;
+        internal const int STACK_SIZE = 1024;
 
         private readonly static FieldInfo memory = typeof(ZMachine).GetField("memory", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -78,35 +78,47 @@ namespace ZDebug.Compiler
             return (Action)dm.CreateDelegate(typeof(Action), machine);
         }
 
-        private static void CheckStackEmpty(this ILGenerator il, LocalBuilder sp)
+        internal static void CheckStackEmpty(this ILGenerator il, LocalBuilder sp)
         {
             il.Emit(OpCodes.Ldloc, sp);
             il.Emit(OpCodes.Ldc_I4_0);
             il.Emit(OpCodes.Ceq);
 
             var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse, ok);
+            il.Emit(OpCodes.Brfalse_S, ok);
             il.ThrowException("Stack is empty.");
 
             il.MarkLabel(ok);
         }
 
-        private static void CheckStackFull(this ILGenerator il, LocalBuilder sp)
+        internal static void CheckStackFull(this ILGenerator il, LocalBuilder sp)
         {
             il.Emit(OpCodes.Ldloc, sp);
             il.Emit(OpCodes.Ldc_I4, STACK_SIZE);
             il.Emit(OpCodes.Ceq);
 
             var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse, ok);
+            il.Emit(OpCodes.Brfalse_S, ok);
             il.ThrowException("Stack is full.");
 
             il.MarkLabel(ok);
         }
 
-        private static void PopStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp)
+        internal static void PopStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder result)
         {
-            
+            il.CheckStackEmpty(sp);
+
+            // decrement sp
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Stloc, sp);
+
+            // store item from stack in result
+            il.Emit(OpCodes.Ldloc, stack);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldelem_U2);
+            il.Emit(OpCodes.Stloc, result);
         }
     }
 }

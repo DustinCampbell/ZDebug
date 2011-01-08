@@ -16,18 +16,16 @@ namespace ZDebug.Compiler
             this.memory = memory;
         }
 
-        private ushort Init()
+        private ushort[] Mock(ushort[] values)
         {
-            bool b = true;
-            if (b)
-            {
-                var stack = new ushort[1024];
-                var sp = 0;
+            var result = new ushort[values.Length];
 
-                return stack[sp++];
+            for (int i = 0; i < values.Length; i++)
+            {
+                result[i] = values[i];
             }
-            else
-                return 0;
+
+            return result;
         }
     }
 }
