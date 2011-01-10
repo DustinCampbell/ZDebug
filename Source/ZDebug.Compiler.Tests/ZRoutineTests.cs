@@ -65,7 +65,7 @@ namespace ZDebug.Compiler.Tests
         }
 
         [Test]
-        public void CreateZork1Routine5472AndCompile()
+        public void CreateZork1Routine5472AndCompile1()
         {
             var memory = ZCode.ReadZork1();
             var routine = ZRoutine.Create(0x5472, memory);
@@ -82,6 +82,49 @@ namespace ZDebug.Compiler.Tests
             var res = zcode(new ushort[] { 0x8010, 0xffff });
 
             Assert.That(res, Is.EqualTo(0x2497));
+        }
+
+        [Test]
+        public void CreateZork1Routine5472AndCompile2()
+        {
+            var memory = ZCode.ReadZork1();
+            var routine = ZRoutine.Create(0x5472, memory);
+
+            Assert.That(routine.Address, Is.EqualTo(0x5472));
+            Assert.That(routine.Locals.Length, Is.EqualTo(3));
+            Assert.That(routine.Instructions.Length, Is.EqualTo(3));
+
+            var zmachine = new ZMachine(memory);
+
+            Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
+
+            var zcode = ZCompiler.Compile(routine, zmachine);
+            zcode(new ushort[] { 0x8010, 0xffff });
+            var res = zcode(new ushort[] { 0x807c, 0xffff });
+
+            Assert.That(res, Is.EqualTo(0x2491));
+        }
+
+        [Test]
+        public void CreateZork1Routine5472AndCompile3()
+        {
+            var memory = ZCode.ReadZork1();
+            var routine = ZRoutine.Create(0x5472, memory);
+
+            Assert.That(routine.Address, Is.EqualTo(0x5472));
+            Assert.That(routine.Locals.Length, Is.EqualTo(3));
+            Assert.That(routine.Instructions.Length, Is.EqualTo(3));
+
+            var zmachine = new ZMachine(memory);
+
+            Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
+
+            var zcode = ZCompiler.Compile(routine, zmachine);
+            zcode(new ushort[] { 0x8010, 0xffff });
+            zcode(new ushort[] { 0x807c, 0xffff });
+            var res = zcode(new ushort[] { 0x80f0, 0xffff });
+
+            Assert.That(res, Is.EqualTo(0x248b));
         }
 
         [Test]
