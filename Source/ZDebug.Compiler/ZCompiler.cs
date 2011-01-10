@@ -12,6 +12,13 @@ namespace ZDebug.Compiler
             name: "memory",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
 
+        private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
+            name: "Call",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int), typeof(ushort[]) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -198,6 +205,9 @@ namespace ZDebug.Compiler
                 case OpcodeKind.VarOp:
                     switch (i.Opcode.Number)
                     {
+                        case 0x00:
+                            op_call_s(i);
+                            return;
                         case 0x01:
                             op_storew(i);
                             return;

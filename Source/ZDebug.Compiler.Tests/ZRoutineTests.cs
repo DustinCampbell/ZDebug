@@ -65,6 +65,26 @@ namespace ZDebug.Compiler.Tests
         }
 
         [Test]
+        public void CreateZork1Routine5472AndCompile()
+        {
+            var memory = ZCode.ReadZork1();
+            var routine = ZRoutine.Create(0x5472, memory);
+
+            Assert.That(routine.Address, Is.EqualTo(0x5472));
+            Assert.That(routine.Locals.Length, Is.EqualTo(3));
+            Assert.That(routine.Instructions.Length, Is.EqualTo(3));
+
+            var zmachine = new ZMachine(memory);
+
+            Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
+
+            var zcode = ZCompiler.Compile(routine, zmachine);
+            var res = zcode(new ushort[] { 0x8010, 0xffff });
+
+            Assert.That(res, Is.EqualTo(0x2497));
+        }
+
+        [Test]
         public void CreateZork1Routine5486AndCompile()
         {
             var memory = ZCode.ReadZork1();

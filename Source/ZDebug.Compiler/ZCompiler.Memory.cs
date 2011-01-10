@@ -346,5 +346,80 @@ namespace ZDebug.Compiler
                     break;
             }
         }
+
+        private void UnpackRoutineAddress(Operand op)
+        {
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Emit(OpCodes.Ldc_I4, machine.UnpackRoutineAddress(op.Value));
+                    break;
+
+                default: // OperandKind.Variable
+                    ReadVariable((byte)op.Value);
+
+                    byte version = machine.Version;
+                    if (version < 4)
+                    {
+                        il.Emit(OpCodes.Ldc_I4_2);
+                    }
+                    else if (version < 8)
+                    {
+                        il.Emit(OpCodes.Ldc_I4_4);
+                    }
+                    else // 8
+                    {
+                        il.Emit(OpCodes.Ldc_I4_8);
+                    }
+
+                    il.Emit(OpCodes.Mul);
+
+                    if (version >= 6 && version <= 7)
+                    {
+                        il.Emit(OpCodes.Ldc_I4, machine.RoutinesOffset * 8);
+                        il.Emit(OpCodes.Add);
+                    }
+
+                    break;
+            }
+        }
+
+        private void UnpackStringAddress(Operand op)
+        {
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Emit(OpCodes.Ldc_I4, machine.UnpackStringAddress(op.Value));
+                    break;
+
+                default: // OperandKind.Variable
+                    ReadVariable((byte)op.Value);
+
+                    byte version = machine.Version;
+                    if (version < 4)
+                    {
+                        il.Emit(OpCodes.Ldc_I4_2);
+                    }
+                    else if (version < 8)
+                    {
+                        il.Emit(OpCodes.Ldc_I4_4);
+                    }
+                    else // 8
+                    {
+                        il.Emit(OpCodes.Ldc_I4_8);
+                    }
+
+                    il.Emit(OpCodes.Mul);
+
+                    if (version >= 6 && version <= 7)
+                    {
+                        il.Emit(OpCodes.Ldc_I4, machine.StringsOffset * 8);
+                        il.Emit(OpCodes.Add);
+                    }
+                    break;
+            }
+        }
     }
 }
