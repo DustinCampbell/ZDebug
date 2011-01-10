@@ -50,6 +50,7 @@
     <Compile Include="LocalManager.cs" />
     <Compile Include="ZCompiler.cs" />
     <Compile Include="ZCompiler.Memory.cs" />
+    <Compile Include="ZCompiler.Objects.cs" />
     <Compile Include="ZCompiler.OneOp.cs" />
     <Compile Include="ZCompiler.TwoOp.cs" />
     <Compile Include="ZCompiler.VarOp.cs" />

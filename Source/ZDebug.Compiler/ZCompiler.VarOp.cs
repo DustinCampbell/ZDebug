@@ -45,6 +45,11 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_put_prop(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_storew(Instruction i)
         {
             using (var address = localManager.AllocateTemp<int>())

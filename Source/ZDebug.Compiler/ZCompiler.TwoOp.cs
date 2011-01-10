@@ -52,6 +52,11 @@ namespace ZDebug.Compiler
             BinaryOp(i, OpCodes.Rem);
         }
 
+        private void op_insert_obj(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_je(Instruction i)
         {
             using (var x = localManager.AllocateTemp<ushort>())
@@ -104,6 +109,16 @@ namespace ZDebug.Compiler
 
                 WriteVariable(i.StoreVariable, value);
             }
+        }
+
+        private void op_store(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
+        private void op_test_attr(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
         }
     }
 }

@@ -154,6 +154,15 @@ namespace ZDebug.Compiler
                         case 0x01:
                             op_je(i);
                             return;
+                        case 0x0a:
+                            op_test_attr(i);
+                            return;
+                        case 0x0d:
+                            op_store(i);
+                            return;
+                        case 0x0e:
+                            op_insert_obj(i);
+                            return;
                         case 0x0f:
                             op_loadw(i);
                             return;
@@ -199,6 +208,9 @@ namespace ZDebug.Compiler
                         case 0x01:
                             op_rfalse(i);
                             return;
+                        case 0x0b:
+                            op_new_line(i);
+                            return;
                     }
 
                     break;
@@ -210,6 +222,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x01:
                             op_storew(i);
+                            return;
+                        case 0x03:
+                            op_put_prop(i);
                             return;
                     }
 
