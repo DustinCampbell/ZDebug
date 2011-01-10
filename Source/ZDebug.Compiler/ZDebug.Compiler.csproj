@@ -43,12 +43,21 @@
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="ILGeneratorExtensions.cs" />
     <Compile Include="InstructionExtensions.cs" />
+    <Compile Include="LocalManager.Temp.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ILGeneratorExtensions.Stack.cs" />
+    <Compile Include="LocalManager.cs" />
     <Compile Include="ZCompiler.cs" />
+    <Compile Include="ZCompiler.Memory.cs" />
+    <Compile Include="ZCompiler.OneOp.cs" />
+    <Compile Include="ZCompiler.TwoOp.cs" />
+    <Compile Include="ZCompiler.VarOp.cs" />
+    <Compile Include="ZCompiler.ZeroOp.cs" />
     <Compile Include="ZMachine.cs" />
     <Compile Include="ZMachineException.cs" />
     <Compile Include="ZRoutine.cs" />
+    <Compile Include="ZRoutineCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZDebug.Core\ZDebug.Core.csproj">

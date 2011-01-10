@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace ZDebug.Compiler
 {
-    internal static class ILGeneratorExtensions
+    internal static partial class ILGeneratorExtensions
     {
         private readonly static MethodInfo stringFormat1 = typeof(string).GetMethod(
             name: "Format",
@@ -35,6 +35,20 @@ namespace ZDebug.Compiler
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
             types: new Type[] { typeof(string), typeof(object[]) },
+            modifiers: null);
+
+        private readonly static MethodInfo arrayCopy = typeof(Array).GetMethod(
+            name: "Copy",
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: new Type[] { typeof(Array), typeof(Array), typeof(int) },
+            modifiers: null);
+
+        private readonly static MethodInfo mathMin = typeof(Math).GetMethod(
+            name: "Min",
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: new Type[] { typeof(uint), typeof(uint) },
             modifiers: null);
 
         private readonly static ConstructorInfo exceptionCtor = typeof(ZMachineException).GetConstructor(
@@ -85,14 +99,7 @@ namespace ZDebug.Compiler
         public static LocalBuilder DeclareLocal(this ILGenerator il, bool value)
         {
             var loc = il.DeclareLocal(typeof(bool));
-            if (value)
-            {
-                il.Emit(OpCodes.Ldc_I4_1);
-            }
-            else
-            {
-                il.Emit(OpCodes.Ldc_I4_0);
-            }
+            il.LoadBool(value);
 
             il.Emit(OpCodes.Stloc, loc);
 
@@ -121,6 +128,18 @@ namespace ZDebug.Compiler
             if (loc.LocalType.IsValueType)
             {
                 il.Emit(OpCodes.Box, loc.LocalType);
+            }
+        }
+
+        public static void LoadBool(this ILGenerator il, bool value)
+        {
+            if (value)
+            {
+                il.Emit(OpCodes.Ldc_I4_1);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldc_I4_0);
             }
         }
 
@@ -170,6 +189,30 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldstr, format);
             il.Emit(OpCodes.Ldloc, locArgs);
             il.Emit(OpCodes.Call, stringFormatAny);
+        }
+
+        public static void CopyArray(this ILGenerator il, LocalBuilder source, LocalBuilder destination, LocalBuilder length)
+        {
+            il.Emit(OpCodes.Ldloc, source);
+            il.Emit(OpCodes.Ldloc, destination);
+            il.Emit(OpCodes.Ldloc, length);
+
+            il.Emit(OpCodes.Call, arrayCopy);
+        }
+
+        public static void CopyArray(this ILGenerator il, LocalBuilder source, LocalBuilder destination)
+        {
+            il.Emit(OpCodes.Ldloc, source);
+            il.Emit(OpCodes.Ldloc, destination);
+
+            il.Emit(OpCodes.Ldloc, source);
+            il.Emit(OpCodes.Ldlen);
+            il.Emit(OpCodes.Ldloc, destination);
+            il.Emit(OpCodes.Ldlen);
+            il.Emit(OpCodes.Call, mathMin);
+            il.Emit(OpCodes.Conv_I4);
+
+            il.Emit(OpCodes.Call, arrayCopy);
         }
 
         public static void ThrowException(this ILGenerator il, string message)

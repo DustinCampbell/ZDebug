@@ -1,40 +1,72 @@
 ﻿using System;
-using System.Reflection.Emit;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
 using System.Reflection;
 
 namespace ZDebug.Compiler
 {
-    public static class ZCompiler
+    public partial class ZCompiler
     {
+        private readonly static FieldInfo memoryField = typeof(ZMachine).GetField(
+            name: "memory",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
+
         internal const int STACK_SIZE = 1024;
 
-        private readonly static FieldInfo memory = typeof(ZMachine).GetField("memory", BindingFlags.NonPublic | BindingFlags.Instance);
+        private readonly ZRoutine routine;
+        private readonly ZMachine machine;
+
+        private ILGenerator il;
+        private LocalManager localManager;
+        private Dictionary<int, Label> addressToLabelMap;
+
+        private LocalBuilder memory;
+
+        private LocalBuilder args;
+        private LocalBuilder argCount;
+
+        private LocalBuilder stack;
+        private LocalBuilder sp;
+
+        private LocalBuilder locals;
+
+        private ZCompiler(ZRoutine routine, ZMachine machine)
+        {
+            this.routine = routine;
+            this.machine = machine;
+        }
 
         private static string GetName(ZRoutine routine)
         {
             return "ZRoutine_" + routine.Address.ToString("x4");
         }
 
-        public static Action Compile(ZRoutine routine, ZMachine machine)
+        public ZRoutineCode Compile()
         {
-            var dm = new DynamicMethod(GetName(routine), typeof(void), new Type[] { typeof(ZMachine) });
-            var il = dm.GetILGenerator();
+            var dm = new DynamicMethod(
+                name: GetName(routine), 
+                returnType: typeof(ushort), 
+                parameterTypes: new Type[] { typeof(ZMachine), typeof(ushort[]) }, 
+                owner: typeof(ZMachine),
+                skipVisibility: true);
+
+            this.il = dm.GetILGenerator();
+            this.localManager = new LocalManager(il);
 
             // First pass: gather branches and labels
-            var addressToLabelMap = new Dictionary<int, Label>();
+            this.addressToLabelMap = new Dictionary<int, Label>();
             foreach (var i in routine.Instructions)
             {
                 if (i.HasBranch && i.Branch.Kind == BranchKind.Address)
                 {
                     var address = i.Address + i.Length + i.Branch.Offset - 2;
-                    addressToLabelMap.Add(address, il.DefineLabel());
+                    this.addressToLabelMap.Add(address, il.DefineLabel());
                 }
                 else if (i.Opcode.IsJump)
                 {
                     var address = i.Address + i.Length + (short)i.Operands[0].Value - 2;
-                    addressToLabelMap.Add(address, il.DefineLabel());
+                    this.addressToLabelMap.Add(address, il.DefineLabel());
                 }
             }
 
@@ -49,108 +81,172 @@ namespace ZDebug.Compiler
                 }
             }
 
+            // Third pass: determine whether memory is used
+            // TODO: Implement!
+
+            this.memory = il.DeclareLocal<byte[]>();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, memoryField);
+            il.Emit(OpCodes.Stloc, this.memory);
+
             // Create stack, sp and locals
-            var stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;
-            var sp = usesStack ? il.DeclareLocal(0) : null;
+            this.stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;
+            this.sp = usesStack ? il.DeclareLocal(0) : null;
 
             var localValues = routine.Locals;
             int localCount = localValues.Length;
-            var locals = new LocalBuilder[localCount];
+            this.locals = il.DeclareArrayLocal<ushort>(localCount);
             for (int i = 0; i < localCount; i++)
             {
-                locals[i] = il.DeclareLocal(localValues[i]);
+                if (localValues[i] != 0)
+                {
+                    il.Emit(OpCodes.Ldloc, this.locals);
+                    il.Emit(OpCodes.Ldc_I4, i);
+                    il.Emit(OpCodes.Ldc_I4, localValues[i]);
+                    il.Emit(OpCodes.Stelem_I2);
+                }
             }
 
-            // Initalize locals
+            // Copy arguments locally
+            this.argCount = il.DeclareLocal<int>();
+            this.args = il.DeclareLocal<ushort[]>();
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Stloc, args);
+            il.Emit(OpCodes.Ldloc, args);
+            il.Emit(OpCodes.Ldlen);
+            il.Emit(OpCodes.Conv_I4);
+            il.Emit(OpCodes.Stloc, argCount);
 
-            il.Emit(OpCodes.Ret);
+            // TODO: Don't copy args if there aren't any
 
-            return (Action)dm.CreateDelegate(typeof(Action), machine);
+            // Initialize locals with args
+            il.CopyArray(this.args, this.locals);
+
+            // Fourth pass: emit IL for instructions
+            foreach (var i in routine.Instructions)
+            {
+                Label label;
+                if (this.addressToLabelMap.TryGetValue(i.Address, out label))
+                {
+                    il.MarkLabel(label);
+                }
+
+                Assemble(i);
+            }
+
+            return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
         }
 
-        internal static void CheckStackEmpty(this ILGenerator il, LocalBuilder sp)
+        private void Assemble(Instruction i)
         {
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ceq);
+            switch (i.Opcode.Kind)
+            {
+                case OpcodeKind.TwoOp:
+                    switch (i.Opcode.Number)
+                    {
+                        case 0x01:
+                            op_je(i);
+                            return;
+                        case 0x0f:
+                            op_loadw(i);
+                            return;
+                        case 0x14:
+                            op_add(i);
+                            return;
+                        case 0x15:
+                            op_sub(i);
+                            return;
+                        case 0x16:
+                            op_mul(i);
+                            return;
+                        case 0x17:
+                            op_div(i);
+                            return;
+                        case 0x18:
+                            op_mod(i);
+                            return;
+                    }
 
-            var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse_S, ok);
-            il.ThrowException("Stack is empty.");
+                    break;
+                case OpcodeKind.OneOp:
+                    switch (i.Opcode.Number)
+                    {
+                        case 0x00:
+                            op_jz(i);
+                            return;
+                        case 0x0b:
+                            op_ret(i);
+                            return;
+                        case 0x0c:
+                            op_jump(i);
+                            return;
+                    }
 
-            il.MarkLabel(ok);
+                    break;
+                case OpcodeKind.ZeroOp:
+                    switch (i.Opcode.Number)
+                    {
+                        case 0x00:
+                            op_rtrue(i);
+                            return;
+                        case 0x01:
+                            op_rfalse(i);
+                            return;
+                    }
+
+                    break;
+                case OpcodeKind.VarOp:
+                    switch (i.Opcode.Number)
+                    {
+                        case 0x01:
+                            op_storew(i);
+                            return;
+                    }
+
+                    break;
+                case OpcodeKind.Ext:
+                    break;
+            }
+
+            throw new ZMachineException(
+                string.Format("Unsupported opcode: {0} ({1} {2:x2})", i.Opcode.Name, i.Opcode.Kind, i.Opcode.Number));
         }
 
-        internal static void CheckStackFull(this ILGenerator il, LocalBuilder sp)
+        private void Branch(Instruction i)
         {
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4, STACK_SIZE);
-            il.Emit(OpCodes.Ceq);
+            // It is expected that the value on the top of the evaluation stack
+            // is the boolean value to compare branch.Condition with.
 
-            var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse_S, ok);
-            il.ThrowException("Stack is full.");
+            var noJump = il.DefineLabel();
 
-            il.MarkLabel(ok);
+            il.LoadBool(i.Branch.Condition);
+            il.Emit(OpCodes.Bne_Un_S, noJump);
+
+            switch (i.Branch.Kind)
+            {
+                case BranchKind.RFalse:
+                    il.Emit(OpCodes.Ldc_I4_0);
+                    il.Emit(OpCodes.Ret);
+                    break;
+
+                case BranchKind.RTrue:
+                    il.Emit(OpCodes.Ldc_I4_1);
+                    il.Emit(OpCodes.Ret);
+                    break;
+
+                default: // BranchKind.Address
+                    var address = i.Address + i.Length + i.Branch.Offset - 2;
+                    var jump = addressToLabelMap[address];
+                    il.Emit(OpCodes.Br, jump);
+                    break;
+            }
+
+            il.MarkLabel(noJump);
         }
 
-        internal static void PopStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder result)
+        public static ZRoutineCode Compile(ZRoutine routine, ZMachine machine)
         {
-            il.CheckStackEmpty(sp);
-
-            il.Emit(OpCodes.Ldloc, stack);
-
-            // decrement sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Dup);
-            il.Emit(OpCodes.Stloc, sp);
-
-            // store item from stack in result
-            il.Emit(OpCodes.Ldelem_U2);
-            il.Emit(OpCodes.Stloc, result);
-        }
-
-        internal static void PeekStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder result)
-        {
-            il.CheckStackEmpty(sp);
-
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Ldelem_U2);
-            il.Emit(OpCodes.Stloc, result);
-        }
-
-        internal static void PushStack(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder value)
-        {
-            il.CheckStackFull(sp);
-
-            // store value in stack
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
-
-            // increment sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Add);
-            il.Emit(OpCodes.Stloc, sp);
-        }
-
-        internal static void SetStackTop(this ILGenerator il, LocalBuilder stack, LocalBuilder sp, LocalBuilder value)
-        {
-            il.CheckStackEmpty(sp);
-
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
+            return new ZCompiler(routine, machine).Compile();
         }
     }
 }
