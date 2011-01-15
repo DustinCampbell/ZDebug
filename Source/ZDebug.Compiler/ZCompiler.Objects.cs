@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection.Emit;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -66,6 +67,24 @@ namespace ZDebug.Compiler
             {
                 ReadWord();
             }
+        }
+
+        private void ReadValidObjectNumber(Operand op, Label failed)
+        {
+            ReadOperand(op);
+
+            // Check to see if object number is 0.
+            var objNumOk = il.DefineLabel();
+            il.Emit(OpCodes.Dup);
+            il.Emit(OpCodes.Brtrue_S, objNumOk);
+
+            // TODO: Emit warning messsage to log. For now, just pop the number off the stack.
+            il.Emit(OpCodes.Pop);
+
+            // Jump to failure branch
+            il.Emit(OpCodes.Br, failed);
+
+            il.MarkLabel(objNumOk);
         }
 
         /// <summary>
@@ -170,6 +189,51 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Add);
 
             ReadWord();
+        }
+
+        private void ObjectHasAttribute(LocalBuilder objNum, LocalBuilder attribute)
+        {
+            il.Emit(OpCodes.Ldloc, memory);
+
+            CalculateObjectAddress(objNum);
+
+            // byte index
+            il.Emit(OpCodes.Ldloc, attribute);
+            il.Emit(OpCodes.Ldc_I4_8);
+            il.Emit(OpCodes.Div);
+
+            // address + byte index
+            il.Emit(OpCodes.Add);
+
+            // read byte
+            il.Emit(OpCodes.Ldelem_U1);
+
+            // bit index
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Ldc_I4_7);
+            il.Emit(OpCodes.Ldloc, attribute);
+            il.Emit(OpCodes.Ldc_I4_8);
+            il.Emit(OpCodes.Rem);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Ldc_I4_S, 0x1f);
+            il.Emit(OpCodes.And);
+            il.Emit(OpCodes.Shl);
+
+            // (byte & bit index) != 0;
+            il.Emit(OpCodes.And);
+            il.Emit(OpCodes.Ldc_I4_0);
+            il.Emit(OpCodes.Ceq);
+            il.Emit(OpCodes.Ldc_I4_0);
+            il.Emit(OpCodes.Ceq);
+
+#if DEBUG
+            using (var result = localManager.AllocateTemp<bool>())
+            {
+                il.Emit(OpCodes.Stloc, result);
+                il.DebugWrite("Object {0} has attribute {1} = {2}", objNum, attribute, result);
+                il.Emit(OpCodes.Ldloc, result);
+            }
+#endif
         }
 
         /// <summary>

@@ -235,6 +235,13 @@ namespace ZDebug.Compiler
         }
 
         [Conditional("DEBUG")]
+        public static void DebugWrite(this ILGenerator il, string format, LocalBuilder arg0, LocalBuilder arg1, LocalBuilder arg2)
+        {
+            il.FormatString(format, arg0, arg1, arg2);
+            il.Emit(OpCodes.Call, debugWriteLine);
+        }
+
+        [Conditional("DEBUG")]
         public static void DebugIndent(this ILGenerator il)
         {
             il.Emit(OpCodes.Call, debugIndent);

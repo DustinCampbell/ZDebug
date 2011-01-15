@@ -253,11 +253,13 @@ namespace ZDebug.Compiler
             switch (i.Branch.Kind)
             {
                 case BranchKind.RFalse:
+                    il.DebugWrite("branching rfalse...");
                     il.Emit(OpCodes.Ldc_I4_0);
                     il.Emit(OpCodes.Ret);
                     break;
 
                 case BranchKind.RTrue:
+                    il.DebugWrite("branching rtrue...");
                     il.Emit(OpCodes.Ldc_I4_1);
                     il.Emit(OpCodes.Ret);
                     break;
@@ -265,6 +267,7 @@ namespace ZDebug.Compiler
                 default: // BranchKind.Address
                     var address = i.Address + i.Length + i.Branch.Offset - 2;
                     var jump = addressToLabelMap[address];
+                    il.DebugWrite(string.Format("branching to {0:x4}...", address));
                     il.Emit(OpCodes.Br, jump);
                     break;
             }

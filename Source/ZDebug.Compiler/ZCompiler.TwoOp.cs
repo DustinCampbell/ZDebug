@@ -113,12 +113,50 @@ namespace ZDebug.Compiler
 
         private void op_store(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            using (var variableIndex = localManager.AllocateTemp<byte>())
+            using (var value = localManager.AllocateTemp<ushort>())
+            {
+                ReadOperand(i.Operands[0]);
+                il.Emit(OpCodes.Conv_U1);
+                il.Emit(OpCodes.Stloc, variableIndex);
+
+                ReadOperand(i.Operands[1]);
+                il.Emit(OpCodes.Stloc, value);
+
+                WriteVariable(variableIndex, value, indirect: true);
+            }
         }
 
         private void op_test_attr(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            il.DebugIndent();
+
+            using (var objNum = localManager.AllocateTemp<ushort>())
+            using (var attribute = localManager.AllocateTemp<byte>())
+            {
+                // Read objNum
+                var invalidObjNum = il.DefineLabel();
+                ReadValidObjectNumber(i.Operands[0], invalidObjNum);
+                il.Emit(OpCodes.Stloc, objNum);
+
+                // Read attribute
+                ReadOperand(i.Operands[1]);
+                il.Emit(OpCodes.Stloc, attribute);
+
+                ObjectHasAttribute(objNum, attribute);
+                Branch(i);
+
+                var done = il.DefineLabel();
+                il.Emit(OpCodes.Br_S, done);
+
+                il.MarkLabel(invalidObjNum);
+                il.LoadBool(false);
+                Branch(i);
+
+                il.MarkLabel(done);
+            }
+
+            il.DebugUnindent();
         }
     }
 }

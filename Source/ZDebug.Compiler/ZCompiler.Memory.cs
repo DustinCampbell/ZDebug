@@ -238,9 +238,26 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Stelem_I2);
         }
 
+        private void WriteLocalVariable(LocalBuilder index, LocalBuilder value)
+        {
+            il.Emit(OpCodes.Ldloc, locals);
+            il.Emit(OpCodes.Ldloc, index);
+            il.Emit(OpCodes.Ldloc, value);
+            il.Emit(OpCodes.Stelem_I2);
+        }
+
         private int CalculateGlobalVariableAddress(int index)
         {
             return machine.GlobalVariableTableAddress + (index * 2);
+        }
+
+        private void CalculateGlobalVariableAddress(LocalBuilder index)
+        {
+            il.Emit(OpCodes.Ldloc, index);
+            il.Emit(OpCodes.Ldc_I4_2);
+            il.Emit(OpCodes.Mul);
+            il.Emit(OpCodes.Ldc_I4, machine.GlobalVariableTableAddress);
+            il.Emit(OpCodes.Add);
         }
 
         private void ReadGlobalVariable(int index)
@@ -249,10 +266,27 @@ namespace ZDebug.Compiler
             ReadWord(address);
         }
 
+        private void ReadGlobalVariable(LocalBuilder index)
+        {
+            CalculateGlobalVariableAddress(index);
+            ReadWord();
+        }
+
         private void WriteGlobalVariable(int index, LocalBuilder value)
         {
             var address = CalculateGlobalVariableAddress(index);
             WriteWord(address, value);
+        }
+
+        private void WriteGlobalVariable(LocalBuilder index, LocalBuilder value)
+        {
+            CalculateGlobalVariableAddress(index);
+
+            using (var address = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, address);
+                WriteWord(address, value);
+            }
         }
 
         private void ReadVariable(byte variableIndex, bool indirect = false)
@@ -301,6 +335,66 @@ namespace ZDebug.Compiler
                     ReadGlobalVariable(variable.Index);
                     break;
             }
+        }
+
+        private void WriteVariable(LocalBuilder variableIndex, LocalBuilder value, bool indirect = false)
+        {
+            il.DebugIndent();
+
+            var local = il.DefineLabel();
+            var global = il.DefineLabel();
+            var done = il.DefineLabel();
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Brtrue_S, local);
+
+            // stack
+
+            if (stack != null)
+            {
+                if (indirect)
+                {
+                    SetStackTop(value);
+                }
+                else
+                {
+                    PushStack(value);
+                }
+            }
+
+            il.Emit(OpCodes.Br_S, done);
+
+            // local
+
+            il.MarkLabel(local);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4, 16);
+            il.Emit(OpCodes.Bge_S, global);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Stloc, variableIndex);
+
+            WriteLocalVariable(variableIndex, value);
+
+            il.Emit(OpCodes.Br_S, done);
+
+            // global
+
+            il.MarkLabel(global);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4, 16);
+            il.Emit(OpCodes.Sub);
+            il.Emit(OpCodes.Stloc, variableIndex);
+
+            WriteGlobalVariable(variableIndex, value);
+
+            il.MarkLabel(done);
+
+            il.DebugUnindent();
         }
 
         private void WriteVariable(byte variableIndex, LocalBuilder value, bool indirect = false)

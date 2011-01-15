@@ -23,6 +23,8 @@ namespace ZDebug.Compiler
         private readonly byte objectSiblingOffset;
         private readonly byte objectChildOffset;
         private readonly byte objectPropertyTableAddressOffset;
+        private readonly byte objectAttributeByteCount;
+        private readonly byte objectAttributeCount;
 
         private readonly ushort globalVariableTableAddress;
 
@@ -45,6 +47,8 @@ namespace ZDebug.Compiler
             this.objectSiblingOffset = (byte)(this.version < 4 ? 5 : 8);
             this.objectChildOffset = (byte)(this.version < 4 ? 6 : 10);
             this.objectPropertyTableAddressOffset = (byte)(this.version < 4 ? 7 : 12);
+            this.objectAttributeByteCount = (byte)(version < 4 ? 4 : 6);
+            this.objectAttributeCount = (byte)(version < 4 ? 32 : 48);
 
             this.globalVariableTableAddress = memory.ReadWord(0x0c);
 
@@ -138,6 +142,16 @@ namespace ZDebug.Compiler
         public byte ObjectPropertyTableAddressOffset
         {
             get { return objectPropertyTableAddressOffset; }
+        }
+
+        public byte ObjectAttributesByteCount
+        {
+            get { return objectAttributeByteCount; }
+        }
+
+        public byte ObjectAttributeCount
+        {
+            get { return objectAttributeCount; }
         }
 
         public ushort GlobalVariableTableAddress

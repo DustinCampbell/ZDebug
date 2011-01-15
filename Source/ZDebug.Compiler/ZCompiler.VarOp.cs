@@ -11,6 +11,8 @@ namespace ZDebug.Compiler
     {
         private void op_call_s(Instruction i)
         {
+            il.DebugIndent();
+
             // TODO: Can we do better here? Allocating a new array to hold
             // every call's arguments might be expensive. We should share
             // this at some point in the future.
@@ -21,6 +23,8 @@ namespace ZDebug.Compiler
             {
                 UnpackRoutineAddress(i.Operands[0]);
                 il.Emit(OpCodes.Stloc, address);
+
+                il.DebugWrite("calling {0:x4}...", address);
 
                 il.Emit(OpCodes.Ldc_I4, i.OperandCount - 1);
                 il.Emit(OpCodes.Newarr, typeof(ushort));
@@ -43,6 +47,8 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Stloc, result);
                 WriteVariable(i.StoreVariable, result);
             }
+
+            il.DebugUnindent();
         }
 
         private void op_put_prop(Instruction i)
@@ -54,28 +60,12 @@ namespace ZDebug.Compiler
             using (var value = localManager.AllocateTemp<byte>())
             using (var propAddress = localManager.AllocateTemp<ushort>())
             {
-                // Read object number
-                ReadOperand(i.Operands[0]);
+                // Read objNum
+                var done = il.DefineLabel();
+                ReadValidObjectNumber(i.Operands[0], done);
                 il.Emit(OpCodes.Stloc, objNum);
 
-                il.DebugWrite("objNum: {0}", objNum);
-
-                // Check to see if object number is 0.
-                il.Emit(OpCodes.Ldloc, objNum);
-                var objNumOk = il.DefineLabel();
-                il.Emit(OpCodes.Brtrue_S, objNumOk);
-
-                // TODO: Emit warning messsage
-
-                // Jump to end
-                var done = il.DefineLabel();
-                il.Emit(OpCodes.Br, done);
-
-                il.MarkLabel(objNumOk);
-
-                il.DebugWrite("objNum is OK (not 0)");
-
-                // Read property number
+                // Read propNum
                 ReadOperand(i.Operands[1]);
                 il.Emit(OpCodes.Stloc, propNum);
 
@@ -87,8 +77,6 @@ namespace ZDebug.Compiler
                 FirstProperty(objNum);
                 il.Emit(OpCodes.Stloc, propAddress);
 
-                il.DebugWrite("first property address: {0:x4}", propAddress);
-
                 var loopStart = il.DefineLabel();
                 var loopDone = il.DefineLabel();
 
@@ -98,8 +86,6 @@ namespace ZDebug.Compiler
                 // Read first property byte and store in value
                 ReadByte(propAddress);
                 il.Emit(OpCodes.Stloc, value);
-
-                il.DebugWrite("property byte: {0:x2}", value);
 
                 // if ((value & mask) <= propNum) break;
                 il.Emit(OpCodes.Ldloc, value);
@@ -122,8 +108,6 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Ldloc, propAddress);
                 NextProperty();
                 il.Emit(OpCodes.Stloc, propAddress);
-
-                il.DebugWrite("next property address: {0:x4}", propAddress);
 
                 // Branch to start of loop
                 il.Emit(OpCodes.Br, loopStart);
