@@ -51,6 +51,16 @@ namespace ZDebug.Compiler
             il.DebugUnindent();
         }
 
+        private void op_print_char(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
+        private void op_print_num(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_put_prop(Instruction i)
         {
             il.DebugIndent();

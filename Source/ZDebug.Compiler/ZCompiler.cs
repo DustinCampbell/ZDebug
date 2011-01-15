@@ -157,6 +157,18 @@ namespace ZDebug.Compiler
                         case 0x01:
                             op_je(i);
                             return;
+                        case 0x04:
+                            op_dec_chk(i);
+                            return;
+                        case 0x05:
+                            op_inc_chk(i);
+                            return;
+                        case 0x08:
+                            op_or(i);
+                            return;
+                        case 0x09:
+                            op_and(i);
+                            return;
                         case 0x0a:
                             op_test_attr(i);
                             return;
@@ -168,6 +180,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x0f:
                             op_loadw(i);
+                            return;
+                        case 0x10:
+                            op_loadb(i);
                             return;
                         case 0x14:
                             op_add(i);
@@ -211,6 +226,9 @@ namespace ZDebug.Compiler
                         case 0x01:
                             op_rfalse(i);
                             return;
+                        case 0x02:
+                            op_print(i);
+                            return;
                         case 0x0b:
                             op_new_line(i);
                             return;
@@ -228,6 +246,12 @@ namespace ZDebug.Compiler
                             return;
                         case 0x03:
                             op_put_prop(i);
+                            return;
+                        case 0x05:
+                            op_print_char(i);
+                            return;
+                        case 0x06:
+                            op_print_num(i);
                             return;
                     }
 

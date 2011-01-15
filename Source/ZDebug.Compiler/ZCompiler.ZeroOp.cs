@@ -9,7 +9,12 @@ namespace ZDebug.Compiler
         {
             il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
         }
-        
+
+        private void op_print(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_rfalse(Instruction i)
         {
             il.Emit(OpCodes.Ldc_I4_0);

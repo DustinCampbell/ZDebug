@@ -52,6 +52,26 @@ namespace ZDebug.Compiler
             BinaryOp(i, OpCodes.Rem);
         }
 
+        private void op_or(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
+        private void op_and(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
+        private void op_dec_chk(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
+        private void op_inc_chk(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_insert_obj(Instruction i)
         {
             il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
@@ -90,6 +110,11 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Ldloc, result);
                 Branch(i);
             }
+        }
+
+        private void op_loadb(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
         }
 
         private void op_loadw(Instruction i)
