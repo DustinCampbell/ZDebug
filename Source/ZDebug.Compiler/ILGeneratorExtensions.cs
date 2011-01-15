@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Diagnostics;
 
 namespace ZDebug.Compiler
 {
@@ -35,6 +36,27 @@ namespace ZDebug.Compiler
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
             types: new Type[] { typeof(string), typeof(object[]) },
+            modifiers: null);
+
+        private readonly static MethodInfo debugIndent = typeof(Debug).GetMethod(
+            name: "Indent",
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: new Type[0],
+            modifiers: null);
+
+        private readonly static MethodInfo debugUnindent = typeof(Debug).GetMethod(
+            name: "Unindent",
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: new Type[0],
+            modifiers: null);
+
+        private readonly static MethodInfo debugWriteLine = typeof(Debug).GetMethod(
+            name: "WriteLine",
+            bindingAttr: BindingFlags.Public | BindingFlags.Static,
+            binder: null,
+            types: new Type[] { typeof(string) },
             modifiers: null);
 
         private readonly static MethodInfo arrayCopy = typeof(Array).GetMethod(
@@ -189,6 +211,39 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldstr, format);
             il.Emit(OpCodes.Ldloc, locArgs);
             il.Emit(OpCodes.Call, stringFormatAny);
+        }
+
+        [Conditional("DEBUG")]
+        public static void DebugWrite(this ILGenerator il, string text)
+        {
+            il.Emit(OpCodes.Ldstr, text);
+            il.Emit(OpCodes.Call, debugWriteLine);
+        }
+
+        [Conditional("DEBUG")]
+        public static void DebugWrite(this ILGenerator il, string format, LocalBuilder arg0)
+        {
+            il.FormatString(format, arg0);
+            il.Emit(OpCodes.Call, debugWriteLine);
+        }
+
+        [Conditional("DEBUG")]
+        public static void DebugWrite(this ILGenerator il, string format, LocalBuilder arg0, LocalBuilder arg1)
+        {
+            il.FormatString(format, arg0, arg1);
+            il.Emit(OpCodes.Call, debugWriteLine);
+        }
+
+        [Conditional("DEBUG")]
+        public static void DebugIndent(this ILGenerator il)
+        {
+            il.Emit(OpCodes.Call, debugIndent);
+        }
+
+        [Conditional("DEBUG")]
+        public static void DebugUnindent(this ILGenerator il)
+        {
+            il.Emit(OpCodes.Call, debugUnindent);
         }
 
         public static void CopyArray(this ILGenerator il, LocalBuilder source, LocalBuilder destination, LocalBuilder length)

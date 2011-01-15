@@ -14,8 +14,17 @@ namespace ZDebug.Compiler
         private readonly byte[] memory;
 
         private readonly byte version;
-        private readonly int objectTableAddress;
-        private readonly int globalVariableTableAddress;
+
+        private readonly ushort objectTableAddress;
+        private readonly byte propertyDefaultsTableSize;
+        private readonly ushort objectEntriesAddress;
+        private readonly byte objectEntrySize;
+        private readonly byte objectParentOffset;
+        private readonly byte objectSiblingOffset;
+        private readonly byte objectChildOffset;
+        private readonly byte objectPropertyTableAddressOffset;
+
+        private readonly ushort globalVariableTableAddress;
 
         private readonly int packResolution;
         private readonly int routinesOffset;
@@ -27,7 +36,16 @@ namespace ZDebug.Compiler
         {
             this.memory = memory;
             this.version = memory.ReadByte(0x00);
+
             this.objectTableAddress = memory.ReadWord(0x0a);
+            this.propertyDefaultsTableSize = (byte)(this.version < 4 ? 31 : 63);
+            this.objectEntriesAddress = (ushort)(this.objectTableAddress + (this.propertyDefaultsTableSize * 2));
+            this.objectEntrySize = (byte)(this.version < 4 ? 9 : 14);
+            this.objectParentOffset = (byte)(this.version < 4 ? 4 : 6);
+            this.objectSiblingOffset = (byte)(this.version < 4 ? 5 : 8);
+            this.objectChildOffset = (byte)(this.version < 4 ? 6 : 10);
+            this.objectPropertyTableAddressOffset = (byte)(this.version < 4 ? 7 : 12);
+
             this.globalVariableTableAddress = memory.ReadWord(0x0c);
 
             this.packResolution = this.version < 4 ? 2 : this.version < 8 ? 4 : 8;
@@ -66,17 +84,63 @@ namespace ZDebug.Compiler
             return (byteAddress * packResolution) + (stringsOffset * 8);
         }
 
+        public void Run()
+        {
+            var mainAddress = memory.ReadWord(0x06);
+            if (version != 6)
+            {
+                mainAddress--;
+            }
+
+            Call(mainAddress, new ushort[0]);
+        }
+
         public byte Version
         {
             get { return version; }
         }
 
-        public int ObjectTableAddress
+        public ushort ObjectTableAddress
         {
             get { return objectTableAddress; }
         }
 
-        public int GlobalVariableTableAddress
+        public byte PropertyDefaultsTableSize
+        {
+            get { return propertyDefaultsTableSize; }
+        }
+
+        public ushort ObjectEntriesAddress
+        {
+            get { return objectEntriesAddress; }
+        }
+
+        public byte ObjectEntrySize
+        {
+            get { return objectEntrySize; }
+        }
+
+        public byte ObjectParentOffset
+        {
+            get { return objectParentOffset; }
+        }
+
+        public byte ObjectSiblingOffset
+        {
+            get { return objectSiblingOffset; }
+        }
+
+        public byte ObjectChildOffset
+        {
+            get { return objectChildOffset; }
+        }
+
+        public byte ObjectPropertyTableAddressOffset
+        {
+            get { return objectPropertyTableAddressOffset; }
+        }
+
+        public ushort GlobalVariableTableAddress
         {
             get { return globalVariableTableAddress; }
         }

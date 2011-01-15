@@ -22,6 +22,16 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldloc, address);
             il.Emit(OpCodes.Ldelem_U1);
         }
+
+        private void ReadByte()
+        {
+            using (var address = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, address);
+                ReadByte(address);
+            }
+        }
+
         private void ReadWord(int address)
         {
             // shift memory[address] left 8 bits
@@ -60,6 +70,15 @@ namespace ZDebug.Compiler
             // or bytes together
             il.Emit(OpCodes.Or);
             il.Emit(OpCodes.Conv_U2);
+        }
+
+        private void ReadWord()
+        {
+            using (var address = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, address);
+                ReadWord(address);
+            }
         }
 
         private void WriteByte(LocalBuilder address, int value)

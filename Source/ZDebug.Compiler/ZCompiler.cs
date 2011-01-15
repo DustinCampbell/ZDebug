@@ -138,6 +138,9 @@ namespace ZDebug.Compiler
                     il.MarkLabel(label);
                 }
 
+                il.Emit(OpCodes.Nop);
+                il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
+
                 Assemble(i);
             }
 
