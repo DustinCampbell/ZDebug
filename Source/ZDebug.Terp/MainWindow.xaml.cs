@@ -41,7 +41,7 @@ namespace ZDebug.Terp
             if (dialog.ShowDialog(this) == true)
             {
                 var memory = File.ReadAllBytes(dialog.FileName);
-                var machine = new ZMachine(memory);
+                var machine = new ZMachine(memory, new DummyScreen());
                 machine.Run();
             }
         }

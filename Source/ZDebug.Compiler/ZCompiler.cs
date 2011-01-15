@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
 using System.Reflection;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.Compiler
 {
@@ -10,6 +11,10 @@ namespace ZDebug.Compiler
     {
         private readonly static FieldInfo memoryField = typeof(ZMachine).GetField(
             name: "memory",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private readonly static FieldInfo screenField = typeof(ZMachine).GetField(
+            name: "screen",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
 
         private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
@@ -29,6 +34,7 @@ namespace ZDebug.Compiler
         private Dictionary<int, Label> addressToLabelMap;
 
         private LocalBuilder memory;
+        private LocalBuilder screen;
 
         private LocalBuilder args;
         private LocalBuilder argCount;
@@ -52,9 +58,9 @@ namespace ZDebug.Compiler
         public ZRoutineCode Compile()
         {
             var dm = new DynamicMethod(
-                name: GetName(routine), 
-                returnType: typeof(ushort), 
-                parameterTypes: new Type[] { typeof(ZMachine), typeof(ushort[]) }, 
+                name: GetName(routine),
+                returnType: typeof(ushort),
+                parameterTypes: new Type[] { typeof(ZMachine), typeof(ushort[]) },
                 owner: typeof(ZMachine),
                 skipVisibility: true);
 
@@ -77,7 +83,7 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Second pass: determine whether local stack is used
+            // Third pass: determine whether local stack is used
             var usesStack = false;
             foreach (var i in routine.Instructions)
             {
@@ -88,13 +94,26 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Third pass: determine whether memory is used
+            // Fourth pass: determine whether memory is used
             // TODO: Implement!
 
             this.memory = il.DeclareLocal<byte[]>();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, memoryField);
             il.Emit(OpCodes.Stloc, this.memory);
+
+            // Second pass: determine whether screen is used
+            foreach (var i in routine.Instructions)
+            {
+                if (i.UsesScreen())
+                {
+                    this.screen = il.DeclareLocal<IScreen>();
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, screenField);
+                    il.Emit(OpCodes.Stloc, this.screen);
+                    break;
+                }
+            }
 
             // Create stack, sp and locals
             this.stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;

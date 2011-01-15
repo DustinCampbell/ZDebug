@@ -6,12 +6,16 @@ using ZDebug.Core;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Utilities;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Execution;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Compiler
 {
     public sealed class ZMachine
     {
         private readonly byte[] memory;
+        private readonly IScreen screen;
+        private readonly ZText ztext;
 
         private readonly byte version;
 
@@ -34,9 +38,11 @@ namespace ZDebug.Compiler
 
         private readonly IntegerMap<ZRoutineCode> compiledRoutines;
 
-        public ZMachine(byte[] memory)
+        public ZMachine(byte[] memory, IScreen screen = null)
         {
             this.memory = memory;
+            this.screen = screen;
+            this.ztext = new ZText(new Memory(memory));
             this.version = memory.ReadByte(0x00);
 
             this.objectTableAddress = memory.ReadWord(0x0a);
@@ -76,6 +82,11 @@ namespace ZDebug.Compiler
         {
             var code = GetRoutineCode(address);
             return code(args);
+        }
+
+        public string ConvertEmbeddedZText(ushort[] zwords)
+        {
+            return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
         public int UnpackRoutineAddress(ushort byteAddress)

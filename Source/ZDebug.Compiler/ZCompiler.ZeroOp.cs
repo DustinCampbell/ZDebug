@@ -1,5 +1,6 @@
 ﻿using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Text;
 
 namespace ZDebug.Compiler
 {
@@ -7,12 +8,13 @@ namespace ZDebug.Compiler
     {
         private void op_new_line(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            PrintChar('\n');
         }
 
         private void op_print(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            var text = machine.ConvertEmbeddedZText(i.ZText);
+            PrintText(text);
         }
 
         private void op_rfalse(Instruction i)
