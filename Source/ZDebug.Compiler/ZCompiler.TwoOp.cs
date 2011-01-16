@@ -9,13 +9,19 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void BinaryOp(Instruction i, OpCode op)
+        private void BinaryOp(Instruction i, OpCode op, bool signed = false)
         {
             ReadOperand(i.Operands[0]);
-            il.Emit(OpCodes.Conv_I2);
+            if (signed)
+            {
+                il.Emit(OpCodes.Conv_I2);
+            }
 
             ReadOperand(i.Operands[1]);
-            il.Emit(OpCodes.Conv_I2);
+            if (signed)
+            {
+                il.Emit(OpCodes.Conv_I2);
+            }
 
             il.Emit(op);
             il.Emit(OpCodes.Conv_U2);
@@ -29,47 +35,92 @@ namespace ZDebug.Compiler
 
         private void op_add(Instruction i)
         {
-            BinaryOp(i, OpCodes.Add);
+            BinaryOp(i, OpCodes.Add, signed: true);
         }
 
         private void op_sub(Instruction i)
         {
-            BinaryOp(i, OpCodes.Sub);
+            BinaryOp(i, OpCodes.Sub, signed: true);
         }
 
         private void op_mul(Instruction i)
         {
-            BinaryOp(i, OpCodes.Mul);
+            BinaryOp(i, OpCodes.Mul, signed: true);
         }
 
         private void op_div(Instruction i)
         {
-            BinaryOp(i, OpCodes.Div);
+            BinaryOp(i, OpCodes.Div, signed: true);
         }
 
         private void op_mod(Instruction i)
         {
-            BinaryOp(i, OpCodes.Rem);
+            BinaryOp(i, OpCodes.Rem, signed: true);
         }
 
         private void op_or(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            BinaryOp(i, OpCodes.Or, signed: false);
         }
 
         private void op_and(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            BinaryOp(i, OpCodes.And, signed: false);
         }
 
         private void op_dec_chk(Instruction i)
         {
             il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            //using (var variableIndex = localManager.AllocateTemp<byte>())
+            //using (var value = localManager.AllocateTemp<short>())
+            //{
+            //    ReadOperand(i.Operands[0]);
+            //    il.Emit(OpCodes.Conv_U1);
+            //    il.Emit(OpCodes.Stloc, variableIndex);
+
+            //    ReadVariable(variableIndex, indirect: true);
+            //    il.Emit(OpCodes.Conv_I1);
+            //    il.Emit(OpCodes.Ldc_I4_1);
+            //    il.Emit(OpCodes.Sub);
+            //    il.Emit(OpCodes.Stloc, value);
+
+            //    il.Emit(OpCodes.Ldloc, value);
+            //    il.Emit(OpCodes.Conv_U2);
+            //    WriteVariable(variableIndex, value, indirect: true);
+
+            //    il.Emit(OpCodes.Ldloc, value);
+            //    ReadOperand(i.Operands[1]);
+            //    il.Emit(OpCodes.Conv_I1);
+
+            //    il.Emit(OpCodes.Clt);
+            //    Branch(i);
+            //}
         }
 
         private void op_inc_chk(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            using (var variableIndex = localManager.AllocateTemp<byte>())
+            using (var value = localManager.AllocateTemp<short>())
+            {
+                ReadOperand(i.Operands[0]);
+                il.Emit(OpCodes.Conv_U1);
+                il.Emit(OpCodes.Stloc, variableIndex);
+
+                ReadVariable(variableIndex, indirect: true);
+                il.Emit(OpCodes.Conv_I2);
+                il.Emit(OpCodes.Ldc_I4_1);
+                il.Emit(OpCodes.Add);
+                il.Emit(OpCodes.Stloc, value);
+
+                WriteVariable(variableIndex, value, indirect: true);
+
+                il.Emit(OpCodes.Ldloc, value);
+                ReadOperand(i.Operands[1]);
+                il.Emit(OpCodes.Conv_I2);
+
+                il.Emit(OpCodes.Cgt);
+                Branch(i);
+            }
         }
 
         private void op_insert_obj(Instruction i)
@@ -114,7 +165,19 @@ namespace ZDebug.Compiler
 
         private void op_loadb(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            using (var address = localManager.AllocateTemp<int>())
+            using (var value = localManager.AllocateTemp<ushort>())
+            {
+                ReadOperand(i.Operands[0]);
+                ReadOperand(i.Operands[1]);
+                il.Emit(OpCodes.Add);
+                il.Emit(OpCodes.Stloc, address);
+
+                ReadByte(address);
+                il.Emit(OpCodes.Stloc, value);
+
+                WriteVariable(i.StoreVariable, value);
+            }
         }
 
         private void op_loadw(Instruction i)
@@ -154,8 +217,6 @@ namespace ZDebug.Compiler
 
         private void op_test_attr(Instruction i)
         {
-            il.DebugIndent();
-
             using (var objNum = localManager.AllocateTemp<ushort>())
             using (var attribute = localManager.AllocateTemp<byte>())
             {
@@ -180,8 +241,6 @@ namespace ZDebug.Compiler
 
                 il.MarkLabel(done);
             }
-
-            il.DebugUnindent();
         }
     }
 }

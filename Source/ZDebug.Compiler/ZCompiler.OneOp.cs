@@ -25,6 +25,11 @@ namespace ZDebug.Compiler
             Branch(i);
         }
 
+        private void op_print_paddr(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_ret(Instruction i)
         {
             ReadOperand(i.Operands[0]);

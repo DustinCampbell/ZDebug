@@ -17,6 +17,11 @@ namespace ZDebug.Compiler
             PrintText(text);
         }
 
+        private void op_quit(Instruction i)
+        {
+            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+        }
+
         private void op_rfalse(Instruction i)
         {
             il.Emit(OpCodes.Ldc_I4_0);

@@ -218,6 +218,14 @@ namespace ZDebug.Compiler
                         case 0x18:
                             op_mod(i);
                             return;
+                        case 0x1a:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n(i);
+                                return;
+                            }
+
+                            break;
                     }
 
                     break;
@@ -233,6 +241,17 @@ namespace ZDebug.Compiler
                         case 0x0c:
                             op_jump(i);
                             return;
+                        case 0x0d:
+                            op_print_paddr(i);
+                            return;
+                        case 0x0f:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n(i);
+                                return;
+                            }
+
+                            break;
                     }
 
                     break;
@@ -247,6 +266,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x02:
                             op_print(i);
+                            return;
+                        case 0x0a:
+                            op_quit(i);
                             return;
                         case 0x0b:
                             op_new_line(i);

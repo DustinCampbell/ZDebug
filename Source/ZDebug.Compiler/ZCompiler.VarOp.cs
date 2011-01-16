@@ -4,22 +4,23 @@ using System.Linq;
 using System.Text;
 using ZDebug.Core.Instructions;
 using System.Reflection.Emit;
+using System.Reflection;
 
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void op_call_s(Instruction i)
+        private readonly static MethodInfo shortToString = typeof(short).GetMethod(
+            name: "ToString",
+            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
+            binder: null,
+            types: new Type[0],
+            modifiers: null);
+
+        private void call(Instruction i)
         {
-            il.DebugIndent();
-
-            // TODO: Can we do better here? Allocating a new array to hold
-            // every call's arguments might be expensive. We should share
-            // this at some point in the future.
-
             using (var address = localManager.AllocateTemp<int>())
             using (var args = localManager.AllocateTemp<ushort[]>())
-            using (var result = localManager.AllocateTemp<ushort>())
             {
                 UnpackRoutineAddress(i.Operands[0]);
                 il.Emit(OpCodes.Stloc, address);
@@ -43,6 +44,29 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Ldloc, args);
 
                 il.Emit(OpCodes.Call, callHelper);
+            }
+
+        }
+
+        private void op_call_n(Instruction i)
+        {
+            il.DebugIndent();
+
+            call(i);
+
+            // discard result...
+            il.Emit(OpCodes.Pop);
+
+            il.DebugUnindent();
+        }
+
+        private void op_call_s(Instruction i)
+        {
+            il.DebugIndent();
+
+            using (var result = localManager.AllocateTemp<ushort>())
+            {
+                call(i);
 
                 il.Emit(OpCodes.Stloc, result);
                 WriteVariable(i.StoreVariable, result);
@@ -53,18 +77,27 @@ namespace ZDebug.Compiler
 
         private void op_print_char(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            ReadOperand(i.Operands[0]);
+            PrintChar();
         }
 
         private void op_print_num(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            using (var number = localManager.AllocateTemp<short>())
+            {
+                ReadOperand(i.Operands[0]);
+                il.Emit(OpCodes.Conv_I2);
+                il.Emit(OpCodes.Stloc, number);
+
+                il.Emit(OpCodes.Ldloca_S, number);
+                il.Emit(OpCodes.Call, shortToString);
+
+                PrintText();
+            }
         }
 
         private void op_put_prop(Instruction i)
         {
-            il.DebugIndent();
-
             using (var objNum = localManager.AllocateTemp<ushort>())
             using (var propNum = localManager.AllocateTemp<ushort>())
             using (var value = localManager.AllocateTemp<byte>())
@@ -183,8 +216,6 @@ namespace ZDebug.Compiler
 
                 il.MarkLabel(done);
             }
-
-            il.DebugUnindent();
         }
 
         private void op_storew(Instruction i)

@@ -169,6 +169,8 @@ namespace ZDebug.Compiler
 
         private void PopStack()
         {
+            il.DebugWrite("PopStack (sp = {0})", sp);
+
             il.CheckStackEmpty(sp);
 
             il.Emit(OpCodes.Ldloc, stack);
@@ -185,6 +187,8 @@ namespace ZDebug.Compiler
 
         private void PeekStack()
         {
+            il.DebugWrite("PeekStack (sp = {0})", sp);
+
             il.CheckStackEmpty(sp);
 
             il.Emit(OpCodes.Ldloc, stack);
@@ -196,6 +200,8 @@ namespace ZDebug.Compiler
 
         private void PushStack(LocalBuilder value)
         {
+            il.DebugWrite("PushStack {0} (sp = {1})", value, sp);
+
             il.CheckStackFull(sp);
 
             // store value in stack
@@ -213,6 +219,8 @@ namespace ZDebug.Compiler
 
         private void SetStackTop(LocalBuilder value)
         {
+            il.DebugWrite("SetStackTop {0} (sp = {1})", value, sp);
+
             il.CheckStackEmpty(sp);
 
             il.Emit(OpCodes.Ldloc, stack);
@@ -228,6 +236,22 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldloc, locals);
             il.Emit(OpCodes.Ldc_I4, index);
             il.Emit(OpCodes.Ldelem_U2);
+        }
+
+        private void ReadLocalVariable(LocalBuilder index)
+        {
+            il.Emit(OpCodes.Ldloc, locals);
+            il.Emit(OpCodes.Ldloc, index);
+            il.Emit(OpCodes.Ldelem_U2);
+        }
+
+        private void ReadLocalVariable()
+        {
+            using (var index = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, index);
+                ReadLocalVariable(index);
+            }
         }
 
         private void WriteLocalVariable(int index, LocalBuilder value)
@@ -246,14 +270,26 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Stelem_I2);
         }
 
+        private void WriteLocalVariable(LocalBuilder value)
+        {
+            using (var index = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, index);
+                WriteLocalVariable(index, value);
+            }
+        }
+
         private int CalculateGlobalVariableAddress(int index)
         {
             return machine.GlobalVariableTableAddress + (index * 2);
         }
 
-        private void CalculateGlobalVariableAddress(LocalBuilder index)
+        private void CalculateGlobalVariableAddress(LocalBuilder index = null)
         {
-            il.Emit(OpCodes.Ldloc, index);
+            if (index != null)
+            {
+                il.Emit(OpCodes.Ldloc, index);
+            }
             il.Emit(OpCodes.Ldc_I4_2);
             il.Emit(OpCodes.Mul);
             il.Emit(OpCodes.Ldc_I4, machine.GlobalVariableTableAddress);
@@ -272,6 +308,12 @@ namespace ZDebug.Compiler
             ReadWord();
         }
 
+        private void ReadGlobalVariable()
+        {
+            CalculateGlobalVariableAddress();
+            ReadWord();
+        }
+
         private void WriteGlobalVariable(int index, LocalBuilder value)
         {
             var address = CalculateGlobalVariableAddress(index);
@@ -287,6 +329,75 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Stloc, address);
                 WriteWord(address, value);
             }
+        }
+
+        private void WriteGlobalVariable(LocalBuilder value)
+        {
+            CalculateGlobalVariableAddress();
+
+            using (var address = localManager.AllocateTemp<int>())
+            {
+                il.Emit(OpCodes.Stloc, address);
+                WriteWord(address, value);
+            }
+        }
+
+        private void ReadVariable(LocalBuilder variableIndex, bool indirect = false)
+        {
+            il.DebugIndent();
+
+            var local = il.DefineLabel();
+            var global = il.DefineLabel();
+            var done = il.DefineLabel();
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Brtrue_S, local);
+
+            // stack
+
+            if (stack != null)
+            {
+                if (indirect)
+                {
+                    PeekStack();
+                }
+                else
+                {
+                    PopStack();
+                }
+            }
+
+            il.Emit(OpCodes.Br_S, done);
+
+            // local
+
+            il.MarkLabel(local);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4, 16);
+            il.Emit(OpCodes.Bge_S, global);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Sub);
+
+            ReadLocalVariable();
+
+            il.Emit(OpCodes.Br_S, done);
+
+            // global
+
+            il.MarkLabel(global);
+
+            il.Emit(OpCodes.Ldloc, variableIndex);
+            il.Emit(OpCodes.Ldc_I4, 16);
+            il.Emit(OpCodes.Sub);
+
+            ReadGlobalVariable();
+
+            il.MarkLabel(done);
+
+            il.DebugUnindent();
         }
 
         private void ReadVariable(byte variableIndex, bool indirect = false)
@@ -375,9 +486,8 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldloc, variableIndex);
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Stloc, variableIndex);
 
-            WriteLocalVariable(variableIndex, value);
+            WriteLocalVariable(value);
 
             il.Emit(OpCodes.Br_S, done);
 
@@ -388,9 +498,8 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ldloc, variableIndex);
             il.Emit(OpCodes.Ldc_I4, 16);
             il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Stloc, variableIndex);
 
-            WriteGlobalVariable(variableIndex, value);
+            WriteGlobalVariable(value);
 
             il.MarkLabel(done);
 
