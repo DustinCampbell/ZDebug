@@ -70,31 +70,28 @@ namespace ZDebug.Compiler
 
         private void op_dec_chk(Instruction i)
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
-            //using (var variableIndex = localManager.AllocateTemp<byte>())
-            //using (var value = localManager.AllocateTemp<short>())
-            //{
-            //    ReadOperand(i.Operands[0]);
-            //    il.Emit(OpCodes.Conv_U1);
-            //    il.Emit(OpCodes.Stloc, variableIndex);
+            using (var variableIndex = localManager.AllocateTemp<byte>())
+            using (var value = localManager.AllocateTemp<short>())
+            {
+                ReadOperand(i.Operands[0]);
+                il.Emit(OpCodes.Conv_U1);
+                il.Emit(OpCodes.Stloc, variableIndex);
 
-            //    ReadVariable(variableIndex, indirect: true);
-            //    il.Emit(OpCodes.Conv_I1);
-            //    il.Emit(OpCodes.Ldc_I4_1);
-            //    il.Emit(OpCodes.Sub);
-            //    il.Emit(OpCodes.Stloc, value);
+                ReadVariable(variableIndex, indirect: true);
+                il.Emit(OpCodes.Conv_I2);
+                il.Emit(OpCodes.Ldc_I4_1);
+                il.Emit(OpCodes.Sub);
+                il.Emit(OpCodes.Stloc, value);
 
-            //    il.Emit(OpCodes.Ldloc, value);
-            //    il.Emit(OpCodes.Conv_U2);
-            //    WriteVariable(variableIndex, value, indirect: true);
+                WriteVariable(variableIndex, value, indirect: true);
 
-            //    il.Emit(OpCodes.Ldloc, value);
-            //    ReadOperand(i.Operands[1]);
-            //    il.Emit(OpCodes.Conv_I1);
+                il.Emit(OpCodes.Ldloc, value);
+                ReadOperand(i.Operands[1]);
+                il.Emit(OpCodes.Conv_I2);
 
-            //    il.Emit(OpCodes.Clt);
-            //    Branch(i);
-            //}
+                il.Emit(OpCodes.Clt);
+                Branch(i);
+            }
         }
 
         private void op_inc_chk(Instruction i)
