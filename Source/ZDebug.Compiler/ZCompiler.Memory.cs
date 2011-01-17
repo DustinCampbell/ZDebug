@@ -9,20 +9,43 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
+        /// <summary>
+        /// Reads a byte from memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// </summary>
+        /// <param name="getAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        private void ReadByte(Action getAddress)
+        {
+            il.Emit(OpCodes.Ldloc, memory);
+            getAddress();
+            il.Emit(OpCodes.Ldelem_U1);
+        }
+
+        /// <summary>
+        /// Reads a byte from memory at the specified address.
+        /// </summary>
         private void ReadByte(int address)
         {
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address);
-            il.Emit(OpCodes.Ldelem_U1);
+            ReadByte(() =>
+            {
+                il.Emit(OpCodes.Ldc_I4, address);
+            });
         }
 
+        /// <summary>
+        /// Reads a byte from memory at the address stored in the given local.
+        /// </summary>
         private void ReadByte(LocalBuilder address)
         {
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldelem_U1);
+            ReadByte(() =>
+            {
+                il.Emit(OpCodes.Ldloc, address);
+            });
         }
 
+        /// <summary>
+        /// Reads a byte from memory at the address on top of the evaluation stack.
+        /// </summary>
         private void ReadByte()
         {
             using (var address = AllocateTemp<int>())
@@ -32,46 +55,69 @@ namespace ZDebug.Compiler
             }
         }
 
+        /// <summary>
+        /// Reads a word from memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// </summary>
+        /// <param name="getAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        /// <param name="getAddressPlusOne">An Action delegate that pushes the address + 1 to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        private void ReadWord(Action getAddress, Action getAddressPlusOne)
+        {
+            // shift memory[address] left 8 bits
+            il.Emit(OpCodes.Ldloc, memory);
+            getAddress();
+            il.Emit(OpCodes.Ldelem_U1);
+            il.Emit(OpCodes.Ldc_I4_8);
+            il.Emit(OpCodes.Shl);
+
+            // read memory[address + 1]
+            il.Emit(OpCodes.Ldloc, memory);
+            getAddressPlusOne();
+            il.Emit(OpCodes.Ldelem_U1);
+
+            // or bytes together
+            il.Emit(OpCodes.Or);
+            il.Emit(OpCodes.Conv_U2);
+        }
+
+        /// <summary>
+        /// Reads a word from memory at the specified address.
+        /// </summary>
         private void ReadWord(int address)
         {
-            // shift memory[address] left 8 bits
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address);
-            il.Emit(OpCodes.Ldelem_U1);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shl);
-
-            // read memory[address + 1]
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address + 1);
-            il.Emit(OpCodes.Ldelem_U1);
-
-            // or bytes together
-            il.Emit(OpCodes.Or);
-            il.Emit(OpCodes.Conv_U2);
+            ReadWord(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldc_I4, address);
+                },
+                getAddressPlusOne: () =>
+                {
+                    il.Emit(OpCodes.Ldc_I4, address + 1);
+                });
         }
 
+        /// <summary>
+        /// Reads a word from memory at the address stored in the given local.
+        /// </summary>
         private void ReadWord(LocalBuilder address)
         {
-            // shift memory[address] left 8 bits
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldelem_U1);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shl);
-
-            // read memory[address + 1]
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Add);
-            il.Emit(OpCodes.Ldelem_U1);
-
-            // or bytes together
-            il.Emit(OpCodes.Or);
-            il.Emit(OpCodes.Conv_U2);
+            ReadWord(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, address);
+                },
+                getAddressPlusOne: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, address);
+                    il.Emit(OpCodes.Ldc_I4_1);
+                    il.Emit(OpCodes.Add);
+                });
         }
 
+        /// <summary>
+        /// Reads a word from memory at the address on top of the evaluation stack.
+        /// </summary>
         private void ReadWord()
         {
             using (var address = AllocateTemp<int>())
@@ -81,64 +127,117 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteByte(LocalBuilder address, int value)
+        /// <summary>
+        /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// </summary>
+        /// <param name="getAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        /// <param name="getValue">An Action delegate that pushes the value to be written to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        private void WriteByte(Action getAddress, Action getValue)
         {
             il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address);
-            il.Emit(OpCodes.Ldloc, value);
+            getAddress();
+            getValue();
             il.Emit(OpCodes.Stelem_I1);
         }
 
+        /// <summary>
+        /// Writes a byte to memory at the specified address.
+        /// </summary>
+        private void WriteByte(int address, LocalBuilder value)
+        {
+            WriteByte(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldc_I4, address);
+                },
+                getValue: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, value);
+                });
+        }
+
+        /// <summary>
+        /// Writes a byte to memory at the address stored in the given local.
+        /// </summary>
         private void WriteByte(LocalBuilder address, LocalBuilder value)
         {
+            WriteByte(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, address);
+                },
+                getValue: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, value);
+                });
+        }
+
+        /// <summary>
+        /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// </summary>
+        /// <param name="getAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        /// <param name="getAddressPlusOne">An Action delegate that pushes the address + 1 to be written to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        /// <param name="getValue">An Action delegate that pushes the value to be written to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when it is called.</param>
+        private void WriteWord(Action getAddress, Action getAddressPlusOne, Action getValue)
+        {
+            // memory[address] = (byte)(value >> 8);
             il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldloc, value);
+            getAddress();
+            getValue();
+            il.Emit(OpCodes.Ldc_I4_8);
+            il.Emit(OpCodes.Shr);
+            il.Emit(OpCodes.Conv_U1);
+            il.Emit(OpCodes.Stelem_I1);
+
+            // memory[address + 1] = (byte)(value & 0xff);
+            il.Emit(OpCodes.Ldloc, memory);
+            getAddressPlusOne();
+            getValue();
+            il.Emit(OpCodes.Ldc_I4, 0xff);
+            il.Emit(OpCodes.And);
+            il.Emit(OpCodes.Conv_U1);
             il.Emit(OpCodes.Stelem_I1);
         }
 
         private void WriteWord(int address, LocalBuilder value)
         {
-            // memory[address] = (byte)(value >> 8);
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shr);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
-
-            // memory[address + 1] = (byte)(value & 0xff);
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldc_I4, address + 1);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Ldc_I4, 0xff);
-            il.Emit(OpCodes.And);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
+            WriteWord(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldc_I4, address);
+                },
+                getAddressPlusOne: () =>
+                {
+                    il.Emit(OpCodes.Ldc_I4, address + 1);
+                },
+                getValue: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, value);
+                });
         }
 
         private void WriteWord(LocalBuilder address, LocalBuilder value)
         {
-            // memory[address] = (byte)(value >> 8);
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shr);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
-
-            // memory[address + 1] = (byte)(value & 0xff);
-            il.Emit(OpCodes.Ldloc, memory);
-            il.Emit(OpCodes.Ldloc, address);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Add);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Ldc_I4, 0xff);
-            il.Emit(OpCodes.And);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
+            WriteWord(
+                getAddress: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, address);
+                },
+                getAddressPlusOne: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, address);
+                    il.Emit(OpCodes.Ldc_I4_1);
+                    il.Emit(OpCodes.Add);
+                },
+                getValue: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, value);
+                });
         }
 
         private void CheckStackEmpty()
