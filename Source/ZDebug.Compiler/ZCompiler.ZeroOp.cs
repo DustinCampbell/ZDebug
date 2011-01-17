@@ -6,29 +6,29 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void op_new_line(Instruction i)
+        private void op_new_line()
         {
             PrintChar('\n');
         }
 
-        private void op_print(Instruction i)
+        private void op_print()
         {
-            var text = machine.ConvertEmbeddedZText(i.ZText);
+            var text = machine.ConvertEmbeddedZText(currentInstruction.ZText);
             PrintText(text);
         }
 
-        private void op_quit(Instruction i)
+        private void op_quit()
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            NotImplemented();
         }
 
-        private void op_rfalse(Instruction i)
+        private void op_rfalse()
         {
             il.Emit(OpCodes.Ldc_I4_0);
             il.Emit(OpCodes.Ret);
         }
 
-        private void op_rtrue(Instruction i)
+        private void op_rtrue()
         {
             il.Emit(OpCodes.Ldc_I4_1);
             il.Emit(OpCodes.Ret);

@@ -9,30 +9,30 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void op_jump(Instruction i)
+        private void op_jump()
         {
-            var address = i.Address + i.Length + (short)(i.Operands[0].Value) - 2;
+            var address = currentInstruction.Address + currentInstruction.Length + (short)(currentInstruction.Operands[0].Value) - 2;
             var jump = addressToLabelMap[address];
             il.Emit(OpCodes.Br, jump);
         }
 
-        private void op_jz(Instruction i)
+        private void op_jz()
         {
-            ReadOperand(i.Operands[0]);
+            ReadOperand(currentInstruction.Operands[0]);
             il.Emit(OpCodes.Ldc_I4_0);
             il.Emit(OpCodes.Ceq);
 
-            Branch(i);
+            Branch();
         }
 
-        private void op_print_paddr(Instruction i)
+        private void op_print_paddr()
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            NotImplemented();
         }
 
-        private void op_ret(Instruction i)
+        private void op_ret()
         {
-            ReadOperand(i.Operands[0]);
+            ReadOperand(currentInstruction.Operands[0]);
             il.Emit(OpCodes.Ret);
         }
     }

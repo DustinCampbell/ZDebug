@@ -32,6 +32,7 @@ namespace ZDebug.Compiler
         private ILGenerator il;
         private LocalManager localManager;
         private Dictionary<int, Label> addressToLabelMap;
+        private Instruction currentInstruction;
 
         private LocalBuilder memory;
         private LocalBuilder screen;
@@ -160,162 +161,29 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Nop);
                 il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
 
-                Assemble(i);
+                currentInstruction = i;
+                Assemble();
             }
 
             return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
         }
 
-        private void Assemble(Instruction i)
+        private void NotImplemented()
         {
-            switch (i.Opcode.Kind)
-            {
-                case OpcodeKind.TwoOp:
-                    switch (i.Opcode.Number)
-                    {
-                        case 0x01:
-                            op_je(i);
-                            return;
-                        case 0x04:
-                            op_dec_chk(i);
-                            return;
-                        case 0x05:
-                            op_inc_chk(i);
-                            return;
-                        case 0x08:
-                            op_or(i);
-                            return;
-                        case 0x09:
-                            op_and(i);
-                            return;
-                        case 0x0a:
-                            op_test_attr(i);
-                            return;
-                        case 0x0d:
-                            op_store(i);
-                            return;
-                        case 0x0e:
-                            op_insert_obj(i);
-                            return;
-                        case 0x0f:
-                            op_loadw(i);
-                            return;
-                        case 0x10:
-                            op_loadb(i);
-                            return;
-                        case 0x14:
-                            op_add(i);
-                            return;
-                        case 0x15:
-                            op_sub(i);
-                            return;
-                        case 0x16:
-                            op_mul(i);
-                            return;
-                        case 0x17:
-                            op_div(i);
-                            return;
-                        case 0x18:
-                            op_mod(i);
-                            return;
-                        case 0x1a:
-                            if (machine.Version >= 5)
-                            {
-                                op_call_n(i);
-                                return;
-                            }
-
-                            break;
-                    }
-
-                    break;
-                case OpcodeKind.OneOp:
-                    switch (i.Opcode.Number)
-                    {
-                        case 0x00:
-                            op_jz(i);
-                            return;
-                        case 0x0b:
-                            op_ret(i);
-                            return;
-                        case 0x0c:
-                            op_jump(i);
-                            return;
-                        case 0x0d:
-                            op_print_paddr(i);
-                            return;
-                        case 0x0f:
-                            if (machine.Version >= 5)
-                            {
-                                op_call_n(i);
-                                return;
-                            }
-
-                            break;
-                    }
-
-                    break;
-                case OpcodeKind.ZeroOp:
-                    switch (i.Opcode.Number)
-                    {
-                        case 0x00:
-                            op_rtrue(i);
-                            return;
-                        case 0x01:
-                            op_rfalse(i);
-                            return;
-                        case 0x02:
-                            op_print(i);
-                            return;
-                        case 0x0a:
-                            op_quit(i);
-                            return;
-                        case 0x0b:
-                            op_new_line(i);
-                            return;
-                    }
-
-                    break;
-                case OpcodeKind.VarOp:
-                    switch (i.Opcode.Number)
-                    {
-                        case 0x00:
-                            op_call_s(i);
-                            return;
-                        case 0x01:
-                            op_storew(i);
-                            return;
-                        case 0x03:
-                            op_put_prop(i);
-                            return;
-                        case 0x05:
-                            op_print_char(i);
-                            return;
-                        case 0x06:
-                            op_print_num(i);
-                            return;
-                    }
-
-                    break;
-                case OpcodeKind.Ext:
-                    break;
-            }
-
-            throw new ZMachineException(
-                string.Format("Unsupported opcode: {0} ({1} {2:x2})", i.Opcode.Name, i.Opcode.Kind, i.Opcode.Number));
+            il.ThrowException("'" + currentInstruction.Opcode.Name + "' not implemented.");
         }
 
-        private void Branch(Instruction i)
+        private void Branch()
         {
             // It is expected that the value on the top of the evaluation stack
             // is the boolean value to compare branch.Condition with.
 
             var noJump = il.DefineLabel();
 
-            il.LoadBool(i.Branch.Condition);
+            il.LoadBool(currentInstruction.Branch.Condition);
             il.Emit(OpCodes.Bne_Un_S, noJump);
 
-            switch (i.Branch.Kind)
+            switch (currentInstruction.Branch.Kind)
             {
                 case BranchKind.RFalse:
                     il.DebugWrite("branching rfalse...");
@@ -330,7 +198,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // BranchKind.Address
-                    var address = i.Address + i.Length + i.Branch.Offset - 2;
+                    var address = currentInstruction.Address + currentInstruction.Length + currentInstruction.Branch.Offset - 2;
                     var jump = addressToLabelMap[address];
                     il.DebugWrite(string.Format("branching to {0:x4}...", address));
                     il.Emit(OpCodes.Br, jump);
@@ -338,6 +206,145 @@ namespace ZDebug.Compiler
             }
 
             il.MarkLabel(noJump);
+        }
+
+        private void Assemble()
+        {
+            switch (currentInstruction.Opcode.Kind)
+            {
+                case OpcodeKind.TwoOp:
+                    switch (currentInstruction.Opcode.Number)
+                    {
+                        case 0x01:
+                            op_je();
+                            return;
+                        case 0x04:
+                            op_dec_chk();
+                            return;
+                        case 0x05:
+                            op_inc_chk();
+                            return;
+                        case 0x08:
+                            op_or();
+                            return;
+                        case 0x09:
+                            op_and();
+                            return;
+                        case 0x0a:
+                            op_test_attr();
+                            return;
+                        case 0x0d:
+                            op_store();
+                            return;
+                        case 0x0e:
+                            op_insert_obj();
+                            return;
+                        case 0x0f:
+                            op_loadw();
+                            return;
+                        case 0x10:
+                            op_loadb();
+                            return;
+                        case 0x14:
+                            op_add();
+                            return;
+                        case 0x15:
+                            op_sub();
+                            return;
+                        case 0x16:
+                            op_mul();
+                            return;
+                        case 0x17:
+                            op_div();
+                            return;
+                        case 0x18:
+                            op_mod();
+                            return;
+                        case 0x1a:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n();
+                                return;
+                            }
+
+                            break;
+                    }
+
+                    break;
+                case OpcodeKind.OneOp:
+                    switch (currentInstruction.Opcode.Number)
+                    {
+                        case 0x00:
+                            op_jz();
+                            return;
+                        case 0x0b:
+                            op_ret();
+                            return;
+                        case 0x0c:
+                            op_jump();
+                            return;
+                        case 0x0d:
+                            op_print_paddr();
+                            return;
+                        case 0x0f:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n();
+                                return;
+                            }
+
+                            break;
+                    }
+
+                    break;
+                case OpcodeKind.ZeroOp:
+                    switch (currentInstruction.Opcode.Number)
+                    {
+                        case 0x00:
+                            op_rtrue();
+                            return;
+                        case 0x01:
+                            op_rfalse();
+                            return;
+                        case 0x02:
+                            op_print();
+                            return;
+                        case 0x0a:
+                            op_quit();
+                            return;
+                        case 0x0b:
+                            op_new_line();
+                            return;
+                    }
+
+                    break;
+                case OpcodeKind.VarOp:
+                    switch (currentInstruction.Opcode.Number)
+                    {
+                        case 0x00:
+                            op_call_s();
+                            return;
+                        case 0x01:
+                            op_storew();
+                            return;
+                        case 0x03:
+                            op_put_prop();
+                            return;
+                        case 0x05:
+                            op_print_char();
+                            return;
+                        case 0x06:
+                            op_print_num();
+                            return;
+                    }
+
+                    break;
+                case OpcodeKind.Ext:
+                    break;
+            }
+
+            throw new ZCompilerException(
+                string.Format("Unsupported opcode: {0} ({1} {2:x2})", currentInstruction.Opcode.Name, currentInstruction.Opcode.Kind, currentInstruction.Opcode.Number));
         }
 
         public static ZRoutineCode Compile(ZRoutine routine, ZMachine machine)

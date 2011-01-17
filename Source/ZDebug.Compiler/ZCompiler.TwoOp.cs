@@ -9,15 +9,15 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void BinaryOp(Instruction i, OpCode op, bool signed = false)
+        private void BinaryOp(OpCode op, bool signed = false)
         {
-            ReadOperand(i.Operands[0]);
+            ReadOperand(currentInstruction.Operands[0]);
             if (signed)
             {
                 il.Emit(OpCodes.Conv_I2);
             }
 
-            ReadOperand(i.Operands[1]);
+            ReadOperand(currentInstruction.Operands[1]);
             if (signed)
             {
                 il.Emit(OpCodes.Conv_I2);
@@ -29,51 +29,51 @@ namespace ZDebug.Compiler
             using (var temp = localManager.AllocateTemp<ushort>())
             {
                 il.Emit(OpCodes.Stloc, temp);
-                WriteVariable(i.StoreVariable, temp);
+                WriteVariable(currentInstruction.StoreVariable, temp);
             }
         }
 
-        private void op_add(Instruction i)
+        private void op_add()
         {
-            BinaryOp(i, OpCodes.Add, signed: true);
+            BinaryOp(OpCodes.Add, signed: true);
         }
 
-        private void op_sub(Instruction i)
+        private void op_sub()
         {
-            BinaryOp(i, OpCodes.Sub, signed: true);
+            BinaryOp(OpCodes.Sub, signed: true);
         }
 
-        private void op_mul(Instruction i)
+        private void op_mul()
         {
-            BinaryOp(i, OpCodes.Mul, signed: true);
+            BinaryOp(OpCodes.Mul, signed: true);
         }
 
-        private void op_div(Instruction i)
+        private void op_div()
         {
-            BinaryOp(i, OpCodes.Div, signed: true);
+            BinaryOp(OpCodes.Div, signed: true);
         }
 
-        private void op_mod(Instruction i)
+        private void op_mod()
         {
-            BinaryOp(i, OpCodes.Rem, signed: true);
+            BinaryOp(OpCodes.Rem, signed: true);
         }
 
-        private void op_or(Instruction i)
+        private void op_or()
         {
-            BinaryOp(i, OpCodes.Or, signed: false);
+            BinaryOp(OpCodes.Or, signed: false);
         }
 
-        private void op_and(Instruction i)
+        private void op_and()
         {
-            BinaryOp(i, OpCodes.And, signed: false);
+            BinaryOp(OpCodes.And, signed: false);
         }
 
-        private void op_dec_chk(Instruction i)
+        private void op_dec_chk()
         {
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<short>())
             {
-                ReadOperand(i.Operands[0]);
+                ReadOperand(currentInstruction.Operands[0]);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
@@ -86,20 +86,20 @@ namespace ZDebug.Compiler
                 WriteVariable(variableIndex, value, indirect: true);
 
                 il.Emit(OpCodes.Ldloc, value);
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Conv_I2);
 
                 il.Emit(OpCodes.Clt);
-                Branch(i);
+                Branch();
             }
         }
 
-        private void op_inc_chk(Instruction i)
+        private void op_inc_chk()
         {
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<short>())
             {
-                ReadOperand(i.Operands[0]);
+                ReadOperand(currentInstruction.Operands[0]);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
@@ -112,25 +112,25 @@ namespace ZDebug.Compiler
                 WriteVariable(variableIndex, value, indirect: true);
 
                 il.Emit(OpCodes.Ldloc, value);
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Conv_I2);
 
                 il.Emit(OpCodes.Cgt);
-                Branch(i);
+                Branch();
             }
         }
 
-        private void op_insert_obj(Instruction i)
+        private void op_insert_obj()
         {
-            il.ThrowException("'" + i.Opcode.Name + "' not implemented.");
+            NotImplemented();
         }
 
-        private void op_je(Instruction i)
+        private void op_je()
         {
             using (var x = localManager.AllocateTemp<ushort>())
             using (var result = localManager.AllocateTemp<bool>())
             {
-                ReadOperand(i.Operands[0]);
+                ReadOperand(currentInstruction.Operands[0]);
                 il.Emit(OpCodes.Stloc, x);
 
                 il.Emit(OpCodes.Ldc_I4_0);
@@ -138,16 +138,16 @@ namespace ZDebug.Compiler
 
                 var done = il.DefineLabel();
 
-                for (int j = 1; j < i.OperandCount; j++)
+                for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
-                    ReadOperand(i.Operands[j]);
+                    ReadOperand(currentInstruction.Operands[j]);
                     il.Emit(OpCodes.Ldloc, x);
 
                     il.Emit(OpCodes.Ceq);
                     il.Emit(OpCodes.Stloc, result);
 
                     // no need to write a branch for the last test
-                    if (j < i.OperandCount - 1)
+                    if (j < currentInstruction.OperandCount - 1)
                     {
                         il.Emit(OpCodes.Ldloc, result);
                         il.Emit(OpCodes.Brtrue_S, done);
@@ -156,34 +156,34 @@ namespace ZDebug.Compiler
 
                 il.MarkLabel(done);
                 il.Emit(OpCodes.Ldloc, result);
-                Branch(i);
+                Branch();
             }
         }
 
-        private void op_loadb(Instruction i)
+        private void op_loadb()
         {
             using (var address = localManager.AllocateTemp<int>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(i.Operands[0]);
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Add);
                 il.Emit(OpCodes.Stloc, address);
 
                 ReadByte(address);
                 il.Emit(OpCodes.Stloc, value);
 
-                WriteVariable(i.StoreVariable, value);
+                WriteVariable(currentInstruction.StoreVariable, value);
             }
         }
 
-        private void op_loadw(Instruction i)
+        private void op_loadw()
         {
             using (var address = localManager.AllocateTemp<int>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(i.Operands[0]);
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Ldc_I4_2);
                 il.Emit(OpCodes.Mul);
                 il.Emit(OpCodes.Add);
@@ -192,49 +192,49 @@ namespace ZDebug.Compiler
                 ReadWord(address);
                 il.Emit(OpCodes.Stloc, value);
 
-                WriteVariable(i.StoreVariable, value);
+                WriteVariable(currentInstruction.StoreVariable, value);
             }
         }
 
-        private void op_store(Instruction i)
+        private void op_store()
         {
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(i.Operands[0]);
+                ReadOperand(currentInstruction.Operands[0]);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Stloc, value);
 
                 WriteVariable(variableIndex, value, indirect: true);
             }
         }
 
-        private void op_test_attr(Instruction i)
+        private void op_test_attr()
         {
             using (var objNum = localManager.AllocateTemp<ushort>())
             using (var attribute = localManager.AllocateTemp<byte>())
             {
                 // Read objNum
                 var invalidObjNum = il.DefineLabel();
-                ReadValidObjectNumber(i.Operands[0], invalidObjNum);
+                ReadValidObjectNumber(currentInstruction.Operands[0], invalidObjNum);
                 il.Emit(OpCodes.Stloc, objNum);
 
                 // Read attribute
-                ReadOperand(i.Operands[1]);
+                ReadOperand(currentInstruction.Operands[1]);
                 il.Emit(OpCodes.Stloc, attribute);
 
                 ObjectHasAttribute(objNum, attribute);
-                Branch(i);
+                Branch();
 
                 var done = il.DefineLabel();
                 il.Emit(OpCodes.Br_S, done);
 
                 il.MarkLabel(invalidObjNum);
                 il.LoadBool(false);
-                Branch(i);
+                Branch();
 
                 il.MarkLabel(done);
             }

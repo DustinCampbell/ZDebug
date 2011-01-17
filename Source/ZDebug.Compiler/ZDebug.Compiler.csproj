@@ -56,6 +56,7 @@
     <Compile Include="ZCompiler.TwoOp.cs" />
     <Compile Include="ZCompiler.VarOp.cs" />
     <Compile Include="ZCompiler.ZeroOp.cs" />
+    <Compile Include="ZCompilerException.cs" />
     <Compile Include="ZMachine.cs" />
     <Compile Include="ZMachineException.cs" />
     <Compile Include="ZRoutine.cs" />
