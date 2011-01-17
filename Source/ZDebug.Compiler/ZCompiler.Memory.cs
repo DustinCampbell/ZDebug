@@ -554,8 +554,22 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void ReadOperand(Operand op)
+        /// <summary>
+        /// Reads the specified operand and places the value on the stack.
+        /// </summary>
+        private void ReadOperand(int operandIndex)
         {
+            if (operandIndex < 0 || operandIndex >= currentInstruction.OperandCount)
+            {
+                throw new ZCompilerException(
+                    string.Format(
+                        "Attempted to read operand {0}, but only 0 through {1} are valid.",
+                        operandIndex,
+                        currentInstruction.OperandCount - 1));
+            }
+
+            var op = currentInstruction.Operands[operandIndex];
+
             switch (op.Kind)
             {
                 case OperandKind.LargeConstant:

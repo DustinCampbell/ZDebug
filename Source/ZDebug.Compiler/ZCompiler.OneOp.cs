@@ -18,7 +18,7 @@ namespace ZDebug.Compiler
 
         private void op_jz()
         {
-            ReadOperand(currentInstruction.Operands[0]);
+            ReadOperand(0);
             il.Emit(OpCodes.Ldc_I4_0);
             il.Emit(OpCodes.Ceq);
 
@@ -32,7 +32,7 @@ namespace ZDebug.Compiler
 
         private void op_ret()
         {
-            ReadOperand(currentInstruction.Operands[0]);
+            ReadOperand(0);
             il.Emit(OpCodes.Ret);
         }
     }

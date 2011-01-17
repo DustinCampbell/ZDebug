@@ -69,9 +69,9 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void ReadValidObjectNumber(Operand op, Label failed)
+        private void ReadValidObjectNumber(int operandIndex, Label failed)
         {
-            ReadOperand(op);
+            ReadOperand(operandIndex);
 
             // Check to see if object number is 0.
             var objNumOk = il.DefineLabel();

@@ -35,7 +35,7 @@ namespace ZDebug.Compiler
                 {
                     il.Emit(OpCodes.Ldloc, args);
                     il.Emit(OpCodes.Ldc_I4, j - 1);
-                    ReadOperand(currentInstruction.Operands[j]);
+                    ReadOperand(j);
                     il.Emit(OpCodes.Stelem_I2);
                 }
 
@@ -77,7 +77,7 @@ namespace ZDebug.Compiler
 
         private void op_print_char()
         {
-            ReadOperand(currentInstruction.Operands[0]);
+            ReadOperand(0);
             PrintChar();
         }
 
@@ -85,7 +85,7 @@ namespace ZDebug.Compiler
         {
             using (var number = localManager.AllocateTemp<short>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(0);
                 il.Emit(OpCodes.Conv_I2);
                 il.Emit(OpCodes.Stloc, number);
 
@@ -105,11 +105,11 @@ namespace ZDebug.Compiler
             {
                 // Read objNum
                 var done = il.DefineLabel();
-                ReadValidObjectNumber(currentInstruction.Operands[0], done);
+                ReadValidObjectNumber(0, done);
                 il.Emit(OpCodes.Stloc, objNum);
 
                 // Read propNum
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(1);
                 il.Emit(OpCodes.Stloc, propNum);
 
                 il.DebugWrite("propNum: {0}", propNum);
@@ -190,7 +190,7 @@ namespace ZDebug.Compiler
                 // write byte
                 using (var temp = localManager.AllocateTemp<byte>())
                 {
-                    ReadOperand(currentInstruction.Operands[2]);
+                    ReadOperand(2);
                     il.Emit(OpCodes.Conv_U1);
                     il.Emit(OpCodes.Stloc, temp);
 
@@ -206,7 +206,7 @@ namespace ZDebug.Compiler
 
                 using (var temp = localManager.AllocateTemp<ushort>())
                 {
-                    ReadOperand(currentInstruction.Operands[2]);
+                    ReadOperand(2);
                     il.Emit(OpCodes.Stloc, temp);
 
                     WriteWord(propAddress, temp);
@@ -223,14 +223,14 @@ namespace ZDebug.Compiler
             using (var address = localManager.AllocateTemp<int>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(0);
+                ReadOperand(1);
                 il.Emit(OpCodes.Ldc_I4_2);
                 il.Emit(OpCodes.Mul);
                 il.Emit(OpCodes.Add);
                 il.Emit(OpCodes.Stloc, address);
 
-                ReadOperand(currentInstruction.Operands[2]);
+                ReadOperand(2);
                 il.Emit(OpCodes.Stloc, value);
 
                 WriteWord(address, value);

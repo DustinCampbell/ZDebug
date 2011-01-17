@@ -11,13 +11,13 @@ namespace ZDebug.Compiler
     {
         private void BinaryOp(OpCode op, bool signed = false)
         {
-            ReadOperand(currentInstruction.Operands[0]);
+            ReadOperand(0);
             if (signed)
             {
                 il.Emit(OpCodes.Conv_I2);
             }
 
-            ReadOperand(currentInstruction.Operands[1]);
+            ReadOperand(1);
             if (signed)
             {
                 il.Emit(OpCodes.Conv_I2);
@@ -73,7 +73,7 @@ namespace ZDebug.Compiler
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<short>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
@@ -86,7 +86,7 @@ namespace ZDebug.Compiler
                 WriteVariable(variableIndex, value, indirect: true);
 
                 il.Emit(OpCodes.Ldloc, value);
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(1);
                 il.Emit(OpCodes.Conv_I2);
 
                 il.Emit(OpCodes.Clt);
@@ -99,7 +99,7 @@ namespace ZDebug.Compiler
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<short>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
@@ -112,7 +112,7 @@ namespace ZDebug.Compiler
                 WriteVariable(variableIndex, value, indirect: true);
 
                 il.Emit(OpCodes.Ldloc, value);
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(1);
                 il.Emit(OpCodes.Conv_I2);
 
                 il.Emit(OpCodes.Cgt);
@@ -130,7 +130,7 @@ namespace ZDebug.Compiler
             using (var x = localManager.AllocateTemp<ushort>())
             using (var result = localManager.AllocateTemp<bool>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(0);
                 il.Emit(OpCodes.Stloc, x);
 
                 il.Emit(OpCodes.Ldc_I4_0);
@@ -140,7 +140,7 @@ namespace ZDebug.Compiler
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
-                    ReadOperand(currentInstruction.Operands[j]);
+                    ReadOperand(j);
                     il.Emit(OpCodes.Ldloc, x);
 
                     il.Emit(OpCodes.Ceq);
@@ -165,8 +165,8 @@ namespace ZDebug.Compiler
             using (var address = localManager.AllocateTemp<int>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(0);
+                ReadOperand(1);
                 il.Emit(OpCodes.Add);
                 il.Emit(OpCodes.Stloc, address);
 
@@ -182,8 +182,8 @@ namespace ZDebug.Compiler
             using (var address = localManager.AllocateTemp<int>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(0);
+                ReadOperand(1);
                 il.Emit(OpCodes.Ldc_I4_2);
                 il.Emit(OpCodes.Mul);
                 il.Emit(OpCodes.Add);
@@ -201,11 +201,11 @@ namespace ZDebug.Compiler
             using (var variableIndex = localManager.AllocateTemp<byte>())
             using (var value = localManager.AllocateTemp<ushort>())
             {
-                ReadOperand(currentInstruction.Operands[0]);
+                ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Stloc, variableIndex);
 
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(1);
                 il.Emit(OpCodes.Stloc, value);
 
                 WriteVariable(variableIndex, value, indirect: true);
@@ -219,11 +219,11 @@ namespace ZDebug.Compiler
             {
                 // Read objNum
                 var invalidObjNum = il.DefineLabel();
-                ReadValidObjectNumber(currentInstruction.Operands[0], invalidObjNum);
+                ReadValidObjectNumber(0, invalidObjNum);
                 il.Emit(OpCodes.Stloc, objNum);
 
                 // Read attribute
-                ReadOperand(currentInstruction.Operands[1]);
+                ReadOperand(1);
                 il.Emit(OpCodes.Stloc, attribute);
 
                 ObjectHasAttribute(objNum, attribute);
