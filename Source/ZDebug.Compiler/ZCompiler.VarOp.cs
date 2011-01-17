@@ -19,8 +19,8 @@ namespace ZDebug.Compiler
 
         private void call()
         {
-            using (var address = localManager.AllocateTemp<int>())
-            using (var args = localManager.AllocateTemp<ushort[]>())
+            using (var address = AllocateTemp<int>())
+            using (var args = AllocateTemp<ushort[]>())
             {
                 UnpackRoutineAddress(currentInstruction.Operands[0]);
                 il.Emit(OpCodes.Stloc, address);
@@ -64,7 +64,7 @@ namespace ZDebug.Compiler
         {
             il.DebugIndent();
 
-            using (var result = localManager.AllocateTemp<ushort>())
+            using (var result = AllocateTemp<ushort>())
             {
                 call();
 
@@ -83,7 +83,7 @@ namespace ZDebug.Compiler
 
         private void op_print_num()
         {
-            using (var number = localManager.AllocateTemp<short>())
+            using (var number = AllocateTemp<short>())
             {
                 ReadOperand(0);
                 il.Emit(OpCodes.Conv_I2);
@@ -98,10 +98,10 @@ namespace ZDebug.Compiler
 
         private void op_put_prop()
         {
-            using (var objNum = localManager.AllocateTemp<ushort>())
-            using (var propNum = localManager.AllocateTemp<ushort>())
-            using (var value = localManager.AllocateTemp<byte>())
-            using (var propAddress = localManager.AllocateTemp<ushort>())
+            using (var objNum = AllocateTemp<ushort>())
+            using (var propNum = AllocateTemp<ushort>())
+            using (var value = AllocateTemp<byte>())
+            using (var propAddress = AllocateTemp<ushort>())
             {
                 // Read objNum
                 var done = il.DefineLabel();
@@ -136,7 +136,7 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.And);
 
 #if DEBUG
-                using (var temp = localManager.AllocateTemp<ushort>())
+                using (var temp = AllocateTemp<ushort>())
                 {
                     il.Emit(OpCodes.Stloc, temp);
                     il.DebugWrite("property number at address: {0} {1:x4}", temp, propAddress);
@@ -188,7 +188,7 @@ namespace ZDebug.Compiler
                 il.Emit(OpCodes.Brtrue_S, sizeIsWord);
 
                 // write byte
-                using (var temp = localManager.AllocateTemp<byte>())
+                using (var temp = AllocateTemp<byte>())
                 {
                     ReadOperand(2);
                     il.Emit(OpCodes.Conv_U1);
@@ -204,7 +204,7 @@ namespace ZDebug.Compiler
                 // write word
                 il.MarkLabel(sizeIsWord);
 
-                using (var temp = localManager.AllocateTemp<ushort>())
+                using (var temp = AllocateTemp<ushort>())
                 {
                     ReadOperand(2);
                     il.Emit(OpCodes.Stloc, temp);
@@ -220,8 +220,8 @@ namespace ZDebug.Compiler
 
         private void op_storew()
         {
-            using (var address = localManager.AllocateTemp<int>())
-            using (var value = localManager.AllocateTemp<ushort>())
+            using (var address = AllocateTemp<int>())
+            using (var value = AllocateTemp<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);

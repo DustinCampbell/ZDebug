@@ -42,7 +42,7 @@ namespace ZDebug.Compiler
 
         private void PrintChar()
         {
-            using (var ch = localManager.AllocateTemp<char>())
+            using (var ch = AllocateTemp<char>())
             {
                 il.Emit(OpCodes.Stloc, ch);
                 PrintChar(ch);
@@ -65,7 +65,7 @@ namespace ZDebug.Compiler
 
         private void PrintText()
         {
-            using (var text = localManager.AllocateTemp<string>())
+            using (var text = AllocateTemp<string>())
             {
                 il.Emit(OpCodes.Stloc, text);
                 PrintText(text);

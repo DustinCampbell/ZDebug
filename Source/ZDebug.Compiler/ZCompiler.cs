@@ -173,6 +173,11 @@ namespace ZDebug.Compiler
             il.ThrowException("'" + currentInstruction.Opcode.Name + "' not implemented.");
         }
 
+        private LocalManager.Temp<T> AllocateTemp<T>()
+        {
+            return localManager.AllocateTemp<T>();
+        }
+
         private void Branch()
         {
             // It is expected that the value on the top of the evaluation stack

@@ -26,7 +26,7 @@ namespace ZDebug.Compiler
             il.Emit(op);
             il.Emit(OpCodes.Conv_U2);
 
-            using (var temp = localManager.AllocateTemp<ushort>())
+            using (var temp = AllocateTemp<ushort>())
             {
                 il.Emit(OpCodes.Stloc, temp);
                 WriteVariable(currentInstruction.StoreVariable, temp);
@@ -70,8 +70,8 @@ namespace ZDebug.Compiler
 
         private void op_dec_chk()
         {
-            using (var variableIndex = localManager.AllocateTemp<byte>())
-            using (var value = localManager.AllocateTemp<short>())
+            using (var variableIndex = AllocateTemp<byte>())
+            using (var value = AllocateTemp<short>())
             {
                 ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
@@ -96,8 +96,8 @@ namespace ZDebug.Compiler
 
         private void op_inc_chk()
         {
-            using (var variableIndex = localManager.AllocateTemp<byte>())
-            using (var value = localManager.AllocateTemp<short>())
+            using (var variableIndex = AllocateTemp<byte>())
+            using (var value = AllocateTemp<short>())
             {
                 ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
@@ -127,8 +127,8 @@ namespace ZDebug.Compiler
 
         private void op_je()
         {
-            using (var x = localManager.AllocateTemp<ushort>())
-            using (var result = localManager.AllocateTemp<bool>())
+            using (var x = AllocateTemp<ushort>())
+            using (var result = AllocateTemp<bool>())
             {
                 ReadOperand(0);
                 il.Emit(OpCodes.Stloc, x);
@@ -162,8 +162,8 @@ namespace ZDebug.Compiler
 
         private void op_loadb()
         {
-            using (var address = localManager.AllocateTemp<int>())
-            using (var value = localManager.AllocateTemp<ushort>())
+            using (var address = AllocateTemp<int>())
+            using (var value = AllocateTemp<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);
@@ -179,8 +179,8 @@ namespace ZDebug.Compiler
 
         private void op_loadw()
         {
-            using (var address = localManager.AllocateTemp<int>())
-            using (var value = localManager.AllocateTemp<ushort>())
+            using (var address = AllocateTemp<int>())
+            using (var value = AllocateTemp<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);
@@ -198,8 +198,8 @@ namespace ZDebug.Compiler
 
         private void op_store()
         {
-            using (var variableIndex = localManager.AllocateTemp<byte>())
-            using (var value = localManager.AllocateTemp<ushort>())
+            using (var variableIndex = AllocateTemp<byte>())
+            using (var value = AllocateTemp<ushort>())
             {
                 ReadOperand(0);
                 il.Emit(OpCodes.Conv_U1);
@@ -214,8 +214,8 @@ namespace ZDebug.Compiler
 
         private void op_test_attr()
         {
-            using (var objNum = localManager.AllocateTemp<ushort>())
-            using (var attribute = localManager.AllocateTemp<byte>())
+            using (var objNum = AllocateTemp<ushort>())
+            using (var attribute = AllocateTemp<byte>())
             {
                 // Read objNum
                 var invalidObjNum = il.DefineLabel();

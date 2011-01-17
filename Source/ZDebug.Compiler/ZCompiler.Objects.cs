@@ -227,7 +227,7 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Ceq);
 
 #if DEBUG
-            using (var result = localManager.AllocateTemp<bool>())
+            using (var result = AllocateTemp<bool>())
             {
                 il.Emit(OpCodes.Stloc, result);
                 il.DebugWrite("Object {0} has attribute {1} = {2}", objNum, attribute, result);
@@ -242,7 +242,7 @@ namespace ZDebug.Compiler
         /// </summary>
         private void GetAddressOfFirstProperty()
         {
-            using (var propAddress = localManager.AllocateTemp<ushort>())
+            using (var propAddress = AllocateTemp<ushort>())
             {
                 il.Emit(OpCodes.Stloc, propAddress);
 
@@ -274,8 +274,8 @@ namespace ZDebug.Compiler
 
         private void NextProperty()
         {
-            using (var propAddress = localManager.AllocateTemp<ushort>())
-            using (var size = localManager.AllocateTemp<byte>())
+            using (var propAddress = AllocateTemp<ushort>())
+            using (var size = AllocateTemp<byte>())
             {
                 // Stack should contain last property address
                 il.Emit(OpCodes.Stloc, propAddress);

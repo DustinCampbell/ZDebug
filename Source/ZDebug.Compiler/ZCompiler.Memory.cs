@@ -25,7 +25,7 @@ namespace ZDebug.Compiler
 
         private void ReadByte()
         {
-            using (var address = localManager.AllocateTemp<int>())
+            using (var address = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, address);
                 ReadByte(address);
@@ -74,7 +74,7 @@ namespace ZDebug.Compiler
 
         private void ReadWord()
         {
-            using (var address = localManager.AllocateTemp<int>())
+            using (var address = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, address);
                 ReadWord(address);
@@ -247,7 +247,7 @@ namespace ZDebug.Compiler
 
         private void ReadLocalVariable()
         {
-            using (var index = localManager.AllocateTemp<int>())
+            using (var index = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, index);
                 ReadLocalVariable(index);
@@ -272,7 +272,7 @@ namespace ZDebug.Compiler
 
         private void WriteLocalVariable(LocalBuilder value)
         {
-            using (var index = localManager.AllocateTemp<int>())
+            using (var index = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, index);
                 WriteLocalVariable(index, value);
@@ -324,7 +324,7 @@ namespace ZDebug.Compiler
         {
             CalculateGlobalVariableAddress(index);
 
-            using (var address = localManager.AllocateTemp<int>())
+            using (var address = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, address);
                 WriteWord(address, value);
@@ -335,7 +335,7 @@ namespace ZDebug.Compiler
         {
             CalculateGlobalVariableAddress();
 
-            using (var address = localManager.AllocateTemp<int>())
+            using (var address = AllocateTemp<int>())
             {
                 il.Emit(OpCodes.Stloc, address);
                 WriteWord(address, value);
