@@ -69,7 +69,11 @@ namespace ZDebug.Compiler
 
         private void op_print_paddr()
         {
-            il.DebugWrite("print_paddr not implemented -- skipping...");
+            il.LoadArgument(0);
+            var op = GetOperand(0);
+            UnpackStringAddress(op);
+            il.Call(readZTextHelper);
+            PrintText();
         }
 
         private void op_ret()

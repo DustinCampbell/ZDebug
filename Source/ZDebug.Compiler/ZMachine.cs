@@ -84,6 +84,12 @@ namespace ZDebug.Compiler
             return code(args);
         }
 
+        internal string ReadZText(int address)
+        {
+            var zwords = ztext.ReadZWords(address);
+            return ConvertEmbeddedZText(zwords);
+        }
+
         public string ConvertEmbeddedZText(ushort[] zwords)
         {
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);

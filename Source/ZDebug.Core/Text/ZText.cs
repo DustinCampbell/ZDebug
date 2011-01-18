@@ -167,6 +167,26 @@ namespace ZDebug.Core.Text
             return ZWordsAsString(zwords, flags, alphabetTable, builder);
         }
 
+
+        /// <summary>
+        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="Memory"/>.
+        /// </summary>
+        public ushort[] ReadZWords(int address)
+        {
+            int count = 0;
+            while (true)
+            {
+                var zword = memory.ReadWord(address + (count++ * 2));
+                if ((zword & 0x8000) != 0)
+                {
+                    break;
+                }
+            }
+
+            return memory.ReadWords(address, count);
+        }
+
+
         private string ExpandCommonAbbreviations(string text)
         {
             // Some older games don't define these common abbreviations

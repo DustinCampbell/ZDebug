@@ -25,6 +25,13 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(int), typeof(ushort[]) },
             modifiers: null);
 
+        private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
+            name: "ReadZText",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
