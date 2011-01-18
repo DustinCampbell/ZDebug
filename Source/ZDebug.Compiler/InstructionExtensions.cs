@@ -16,7 +16,9 @@ namespace ZDebug.Compiler
             var op = i.Opcode;
 
             return op.Is(OpcodeKind.ZeroOp, 0x02)  // print
-                || op.Is(OpcodeKind.ZeroOp, 0x0b); // new_line
+                || op.Is(OpcodeKind.ZeroOp, 0x0b)  // new_line
+                || op.Is(OpcodeKind.OneOp, 0x0a)   // print_obj
+                || op.Is(OpcodeKind.ZeroOp, 0x03); // print_ret
         }
 
         public static bool UsesStack(this Instruction i)

@@ -17,6 +17,13 @@ namespace ZDebug.Compiler
             PrintText(text);
         }
 
+        private void op_print_ret()
+        {
+            var text = machine.ConvertEmbeddedZText(currentInstruction.ZText);
+            PrintText(text);
+            il.Return(1);
+        }
+
         private void op_quit()
         {
             NotImplemented();

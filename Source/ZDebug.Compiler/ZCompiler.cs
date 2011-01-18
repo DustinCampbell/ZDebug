@@ -342,6 +342,9 @@ namespace ZDebug.Compiler
                         case 0x09:
                             op_remove_obj();
                             return;
+                        case 0x0a:
+                            op_print_obj();
+                            return;
                         case 0x0b:
                             op_ret();
                             return;
@@ -376,6 +379,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x02:
                             op_print();
+                            return;
+                        case 0x03:
+                            op_print_ret();
                             return;
                         case 0x08:
                             op_ret_popped();

@@ -23,7 +23,7 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var args = il.NewArrayLocal<ushort>(currentInstruction.OperandCount - 1))
             {
-                UnpackRoutineAddress(currentInstruction.Operands[0]);
+                UnpackRoutineAddress(GetOperand(0));
                 address.Store();
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
@@ -37,11 +37,23 @@ namespace ZDebug.Compiler
                             ReadOperand(index)));
                 }
 
+                var legalCall = il.NewLabel();
+                address.Load();
+                legalCall.BranchIf(Condition.True, @short: true);
+
+                var done = il.NewLabel();
+                il.LoadConstant(0);
+
+                done.Branch(@short: true);
+
+                legalCall.Mark();
                 il.LoadArgument(0);
                 address.Load();
                 args.Load();
 
                 il.Call(callHelper);
+
+                done.Mark();
             }
 
         }

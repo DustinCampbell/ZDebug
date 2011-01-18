@@ -31,41 +31,41 @@ namespace ZDebug.Compiler.Generate
             types: new Type[] { typeof(string) },
             modifiers: null);
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugWrite(string text)
         {
             LoadConstant(text);
             Call(debugWriteLine);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugWrite(string format, ILocal arg0)
         {
             FormatString(format, arg0);
             Call(debugWriteLine);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugWrite(string format, ILocal arg0, ILocal arg1)
         {
             FormatString(format, arg0, arg1);
             Call(debugWriteLine);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugWrite(string format, ILocal arg0, ILocal arg1, ILocal arg2)
         {
             FormatString(format, arg0, arg1, arg2);
             Call(debugWriteLine);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugIndent()
         {
             Call(debugIndent);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("LOG")]
         public void DebugUnindent()
         {
             Call(debugUnindent);

@@ -205,6 +205,11 @@ namespace ZDebug.Compiler
             PrintText();
         }
 
+        private void op_print_obj()
+        {
+            NotImplemented();
+        }
+
         private void op_ret()
         {
             ReadOperand(0);
