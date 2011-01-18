@@ -297,6 +297,14 @@ namespace ZDebug.Compiler
                         case 0x06:
                             op_dec();
                             return;
+                        case 0x08:
+                            if (machine.Version >= 4)
+                            {
+                                op_call_s();
+                                return;
+                            }
+
+                            break;
                         case 0x0b:
                             op_ret();
                             return;
@@ -350,6 +358,9 @@ namespace ZDebug.Compiler
                         case 0x01:
                             op_storew();
                             return;
+                        case 0x02:
+                            op_storeb();
+                            return;
                         case 0x03:
                             op_put_prop();
                             return;
@@ -366,6 +377,14 @@ namespace ZDebug.Compiler
                             if (machine.Version != 6)
                             {
                                 op_pull();
+                                return;
+                            }
+
+                            break;
+                        case 0x0c:
+                            if (machine.Version >= 4)
+                            {
+                                op_call_s();
                                 return;
                             }
 

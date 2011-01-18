@@ -255,6 +255,24 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_storeb()
+        {
+            using (var address = il.NewLocal<int>())
+            using (var value = il.NewLocal<byte>())
+            {
+                ReadOperand(0);
+                ReadOperand(1);
+                il.Add();
+                address.Store();
+
+                ReadOperand(2);
+                il.ConvertToUInt8();
+                value.Store();
+
+                WriteByte(address, value);
+            }
+        }
+
         private void op_storew()
         {
             using (var address = il.NewLocal<int>())
