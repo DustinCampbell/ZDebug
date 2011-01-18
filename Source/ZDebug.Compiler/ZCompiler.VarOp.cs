@@ -98,9 +98,6 @@ namespace ZDebug.Compiler
 
         private void op_put_prop()
         {
-            NotImplemented();
-            return;
-
             using (var objNum = il.NewLocal<ushort>())
             using (var propNum = il.NewLocal<ushort>())
             using (var value = il.NewLocal<byte>())

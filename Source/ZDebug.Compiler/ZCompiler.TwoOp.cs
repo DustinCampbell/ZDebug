@@ -190,9 +190,6 @@ namespace ZDebug.Compiler
 
         private void op_store()
         {
-            NotImplemented();
-            return;
-
             using (var value = il.NewLocal<ushort>())
             {
                 var variable = ReadByRefVariableOperand();
@@ -206,9 +203,6 @@ namespace ZDebug.Compiler
 
         private void op_test_attr()
         {
-            NotImplemented();
-            return;
-
             using (var objNum = il.NewLocal<ushort>())
             using (var attribute = il.NewLocal<byte>())
             {

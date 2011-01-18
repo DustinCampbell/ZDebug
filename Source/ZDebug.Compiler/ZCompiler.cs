@@ -152,12 +152,13 @@ namespace ZDebug.Compiler
                     label.Mark();
                 }
 
-                //il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
+                il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
 
                 currentInstruction = i;
-                //Assemble();
+                Assemble();
             }
 
+            il.LoadConstant(0);
             il.Return();
 
             return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);

@@ -31,11 +31,11 @@ namespace ZDebug.Compiler.Generate
             {
                 if (@short)
                 {
-                    builder.il.Emit(OpCodes.Br_S);
+                    builder.il.Emit(OpCodes.Br_S, label);
                 }
                 else
                 {
-                    builder.il.Emit(OpCodes.Br);
+                    builder.il.Emit(OpCodes.Br, label);
                 }
             }
 
