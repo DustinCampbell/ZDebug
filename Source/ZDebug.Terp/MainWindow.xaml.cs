@@ -51,17 +51,31 @@ namespace ZDebug.Terp
 
             if (dialog.ShowDialog(this) == true)
             {
-                var memory = File.ReadAllBytes(dialog.FileName);
-                machine = new ZMachine(memory, this);
-
-                mainWindow = windowManager.Open(ZWindowType.TextBuffer);
-                windowContainer.Children.Add(mainWindow);
-                upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 0);
-
-                windowManager.Activate(mainWindow);
-
-                Dispatcher.BeginInvoke(new Action(Run), DispatcherPriority.Background);
+                OpenStory(dialog.FileName);
             }
+        }
+
+        private void OpenStory(string fileName)
+        {
+            if (machine != null)
+            {
+                windowManager.Root.Close();
+
+                mainWindow = null;
+                upperWindow = null;
+                machine = null;
+            }
+
+            var memory = File.ReadAllBytes(fileName);
+            machine = new ZMachine(memory, this);
+
+            mainWindow = windowManager.Open(ZWindowType.TextBuffer);
+            windowContainer.Children.Add(mainWindow);
+            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above);
+
+            windowManager.Activate(mainWindow);
+
+            Dispatcher.BeginInvoke(new Action(Run), DispatcherPriority.Background);
         }
 
         private void Run()
@@ -70,8 +84,14 @@ namespace ZDebug.Terp
             {
                 machine.Run();
             }
-            catch
+            catch (Exception ex)
             {
+                Print("\n");
+                Print(ex.GetType().FullName);
+                Print("\n");
+                Print(ex.Message);
+                Print("\n");
+                Print(ex.StackTrace);
             }
         }
 

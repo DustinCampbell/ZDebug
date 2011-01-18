@@ -30,8 +30,8 @@ namespace ZDebug.IO.Windows
         public ZWindow Open(
             ZWindowType windowType,
             ZWindow split = null,
-            ZWindowPosition position = 0,
-            ZWindowSizeType sizeType = 0,
+            ZWindowPosition position = ZWindowPosition.Left,
+            ZWindowSizeType sizeType = ZWindowSizeType.Fixed,
             int size = 0)
         {
             if (windowType == ZWindowType.Pair)
