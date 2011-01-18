@@ -424,6 +424,25 @@ namespace ZDebug.Compiler
 
                     break;
                 case OpcodeKind.Ext:
+                    switch (currentInstruction.Opcode.Number)
+                    {
+                        case 0x02:
+                            if (machine.Version >= 5)
+                            {
+                                op_log_shift();
+                                return;
+                            }
+
+                            break;
+                        case 0x03:
+                            if (machine.Version >= 5)
+                            {
+                                op_art_shift();
+                                return;
+                            }
+
+                            break;
+                    }
                     break;
             }
 

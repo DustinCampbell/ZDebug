@@ -12,6 +12,8 @@ namespace ZDebug.Compiler.Generate
         Equal,
         NotEqual,
         AtLeast,
-        AtMost
+        AtMost,
+        LessThan,
+        GreaterThan
     }
 }

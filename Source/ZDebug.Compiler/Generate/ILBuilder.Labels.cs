@@ -115,6 +115,30 @@ namespace ZDebug.Compiler.Generate
 
                         break;
 
+                    case Condition.LessThan:
+                        if (@short)
+                        {
+                            builder.il.Emit(OpCodes.Blt_S, label);
+                        }
+                        else
+                        {
+                            builder.il.Emit(OpCodes.Blt, label);
+                        }
+
+                        break;
+
+                    case Condition.GreaterThan:
+                        if (@short)
+                        {
+                            builder.il.Emit(OpCodes.Bgt_S, label);
+                        }
+                        else
+                        {
+                            builder.il.Emit(OpCodes.Bgt, label);
+                        }
+
+                        break;
+
                     default:
                         throw new ZCompilerException(string.Format("Unsupported branch condition: {0} (short = {1})", condition, @short));
                 }

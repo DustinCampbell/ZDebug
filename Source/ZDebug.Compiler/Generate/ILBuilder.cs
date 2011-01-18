@@ -167,6 +167,11 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
+        public void Negate()
+        {
+            il.Emit(OpCodes.Neg);
+        }
+
         public void Add()
         {
             il.Emit(OpCodes.Add);
