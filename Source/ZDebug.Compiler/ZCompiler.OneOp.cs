@@ -39,6 +39,33 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_get_child()
+        {
+            using (var result = il.NewLocal<ushort>())
+            {
+                ReadObjectChildFromOperand(0);
+                result.Store();
+
+                WriteVariable(currentInstruction.StoreVariable, result);
+
+                result.Load();
+                il.LoadConstant(0);
+                il.CompareGreaterThan();
+                Branch();
+            }
+        }
+
+        private void op_get_parent()
+        {
+            using (var result = il.NewLocal<ushort>())
+            {
+                ReadObjectParentFromOperand(0);
+                result.Store();
+
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
         private void op_jump()
         {
             var address = currentInstruction.Address + currentInstruction.Length + (short)(currentInstruction.Operands[0].Value) - 2;

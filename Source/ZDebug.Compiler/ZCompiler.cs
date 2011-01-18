@@ -298,6 +298,12 @@ namespace ZDebug.Compiler
                         case 0x00:
                             op_jz();
                             return;
+                        case 0x02:
+                            op_get_child();
+                            return;
+                        case 0x03:
+                            op_get_parent();
+                            return;
                         case 0x05:
                             op_inc();
                             return;
