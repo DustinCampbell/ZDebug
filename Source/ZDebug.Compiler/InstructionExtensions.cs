@@ -21,6 +21,16 @@ namespace ZDebug.Compiler
 
         public static bool UsesStack(this Instruction i)
         {
+            // TODO: Need to check Z-Machine version
+            var op = i.Opcode;
+            if (op.Is(OpcodeKind.VarOp, 0x08) ||  // push
+                op.Is(OpcodeKind.VarOp, 0x09) ||  // pull
+                op.Is(OpcodeKind.ZeroOp, 0x08) || // ret_popped
+                op.Is(OpcodeKind.ZeroOp, 0x09))   // pop
+            {
+                return true;
+            }
+
             if (i.HasStoreVariable && i.StoreVariable.Kind == VariableKind.Stack)
             {
                 return true;
@@ -31,9 +41,9 @@ namespace ZDebug.Compiler
                 return true;
             }
 
-            foreach (var op in i.Operands)
+            foreach (var o in i.Operands)
             {
-                if (op.Kind == OperandKind.Variable && op.Value == 0)
+                if (o.Kind == OperandKind.Variable && o.Value == 0)
                 {
                     return true;
                 }

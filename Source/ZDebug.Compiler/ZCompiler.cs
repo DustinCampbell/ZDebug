@@ -347,6 +347,9 @@ namespace ZDebug.Compiler
                         case 0x02:
                             op_print();
                             return;
+                        case 0x08:
+                            op_ret_popped();
+                            return;
                         case 0x0a:
                             op_quit();
                             return;
@@ -405,6 +408,14 @@ namespace ZDebug.Compiler
 
                             break;
                         case 0x19:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n();
+                                return;
+                            }
+
+                            break;
+                        case 0x1a:
                             if (machine.Version >= 5)
                             {
                                 op_call_n();

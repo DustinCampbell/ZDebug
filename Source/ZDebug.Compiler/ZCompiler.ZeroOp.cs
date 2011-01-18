@@ -22,6 +22,12 @@ namespace ZDebug.Compiler
             NotImplemented();
         }
 
+        private void op_ret_popped()
+        {
+            PopStack();
+            il.Return();
+        }
+
         private void op_rfalse()
         {
             il.Return(0);

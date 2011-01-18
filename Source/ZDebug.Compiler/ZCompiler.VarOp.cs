@@ -26,8 +26,6 @@ namespace ZDebug.Compiler
                 UnpackRoutineAddress(currentInstruction.Operands[0]);
                 address.Store();
 
-                il.DebugWrite("calling {0:x4}...", address);
-
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
                     // don't close over the iterator variable
