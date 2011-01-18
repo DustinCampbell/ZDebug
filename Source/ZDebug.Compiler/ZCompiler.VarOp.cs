@@ -5,6 +5,7 @@ using System.Text;
 using ZDebug.Core.Instructions;
 using System.Reflection.Emit;
 using System.Reflection;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -19,31 +20,30 @@ namespace ZDebug.Compiler
 
         private void call()
         {
-            using (var address = AllocateTemp<int>())
-            using (var args = AllocateTemp<ushort[]>())
+            using (var address = il.NewLocal<int>())
+            using (var args = il.NewArrayLocal<ushort>(currentInstruction.OperandCount - 1))
             {
                 UnpackRoutineAddress(currentInstruction.Operands[0]);
-                il.Emit(OpCodes.Stloc, address);
+                address.Store();
 
                 il.DebugWrite("calling {0:x4}...", address);
 
-                il.Emit(OpCodes.Ldc_I4, currentInstruction.OperandCount - 1);
-                il.Emit(OpCodes.Newarr, typeof(ushort));
-                il.Emit(OpCodes.Stloc, args);
-
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
-                    il.Emit(OpCodes.Ldloc, args);
-                    il.Emit(OpCodes.Ldc_I4, j - 1);
-                    ReadOperand(j);
-                    il.Emit(OpCodes.Stelem_I2);
+                    // don't close over the iterator variable
+                    int index = j;
+
+                    args.StoreElement(
+                        il.GenerateLoadConstant(index - 1),
+                        il.Generate(() =>
+                            ReadOperand(index)));
                 }
 
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldloc, address);
-                il.Emit(OpCodes.Ldloc, args);
+                il.LoadArgument(0);
+                address.Load();
+                args.Load();
 
-                il.Emit(OpCodes.Call, callHelper);
+                il.Call(callHelper);
             }
 
         }
@@ -55,7 +55,7 @@ namespace ZDebug.Compiler
             call();
 
             // discard result...
-            il.Emit(OpCodes.Pop);
+            il.Pop();
 
             il.DebugUnindent();
         }
@@ -64,11 +64,11 @@ namespace ZDebug.Compiler
         {
             il.DebugIndent();
 
-            using (var result = AllocateTemp<ushort>())
+            using (var result = il.NewLocal<ushort>())
             {
                 call();
 
-                il.Emit(OpCodes.Stloc, result);
+                result.Store();
                 WriteVariable(currentInstruction.StoreVariable, result);
             }
 
@@ -83,14 +83,14 @@ namespace ZDebug.Compiler
 
         private void op_print_num()
         {
-            using (var number = AllocateTemp<short>())
+            using (var number = il.NewLocal<short>())
             {
                 ReadOperand(0);
-                il.Emit(OpCodes.Conv_I2);
-                il.Emit(OpCodes.Stloc, number);
+                il.ConvertToInt16();
+                number.Store();
 
-                il.Emit(OpCodes.Ldloca_S, number);
-                il.Emit(OpCodes.Call, shortToString);
+                number.LoadAddress();
+                il.Call(shortToString);
 
                 PrintText();
             }
@@ -98,19 +98,22 @@ namespace ZDebug.Compiler
 
         private void op_put_prop()
         {
-            using (var objNum = AllocateTemp<ushort>())
-            using (var propNum = AllocateTemp<ushort>())
-            using (var value = AllocateTemp<byte>())
-            using (var propAddress = AllocateTemp<ushort>())
+            NotImplemented();
+            return;
+
+            using (var objNum = il.NewLocal<ushort>())
+            using (var propNum = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<byte>())
+            using (var propAddress = il.NewLocal<ushort>())
             {
                 // Read objNum
-                var done = il.DefineLabel();
+                var done = il.NewLabel();
                 ReadValidObjectNumber(0, done);
-                il.Emit(OpCodes.Stloc, objNum);
+                objNum.Store();
 
                 // Read propNum
                 ReadOperand(1);
-                il.Emit(OpCodes.Stloc, propNum);
+                propNum.Store();
 
                 il.DebugWrite("propNum: {0}", propNum);
 
@@ -118,120 +121,115 @@ namespace ZDebug.Compiler
 
                 // Read first property address into propAddress
                 FirstProperty(objNum);
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Store();
 
-                var loopStart = il.DefineLabel();
-                var loopDone = il.DefineLabel();
+                var loopStart = il.NewLabel();
+                var loopDone = il.NewLabel();
 
                 il.DebugIndent();
-                il.MarkLabel(loopStart);
+                loopStart.Mark();
 
                 // Read first property byte and store in value
                 ReadByte(propAddress);
-                il.Emit(OpCodes.Stloc, value);
+                value.Store();
 
                 // if ((value & mask) <= propNum) break;
-                il.Emit(OpCodes.Ldloc, value);
-                il.Emit(OpCodes.Ldc_I4, mask);
-                il.Emit(OpCodes.And);
+                value.Load();
+                il.And(mask);
 
 #if DEBUG
-                using (var temp = AllocateTemp<ushort>())
+                using (var temp = il.NewLocal<ushort>())
                 {
-                    il.Emit(OpCodes.Stloc, temp);
+                    temp.Store();
                     il.DebugWrite("property number at address: {0} {1:x4}", temp, propAddress);
-                    il.Emit(OpCodes.Ldloc, temp);
+                    temp.Load();
                 }
 #endif
 
-                il.Emit(OpCodes.Ldloc, propNum);
-                il.Emit(OpCodes.Ble_S, loopDone);
+                propNum.Load();
+                loopDone.BranchIf(Condition.AtMost, @short: true);
 
                 // Read next property address into propAddress
-                il.Emit(OpCodes.Ldloc, propAddress);
+                propAddress.Load();
                 NextProperty();
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Store();
 
                 // Branch to start of loop
-                il.Emit(OpCodes.Br, loopStart);
+                loopStart.Branch();
 
-                il.MarkLabel(loopDone);
+                loopDone.Mark();
                 il.DebugUnindent();
 
                 // if ((value & mask) != propNum) throw;
-                var propNumFound = il.DefineLabel();
-                il.Emit(OpCodes.Ldloc, value);
-                il.Emit(OpCodes.Ldc_I4, mask);
-                il.Emit(OpCodes.And);
-                il.Emit(OpCodes.Ldloc, propNum);
-                il.Emit(OpCodes.Beq_S, propNumFound);
-                il.ThrowException("Object {0} does not contain property {1}", objNum, propNum);
+                var propNumFound = il.NewLabel();
+                value.Load();
+                il.And(mask);
+                propNum.Load();
+                propNumFound.BranchIf(Condition.Equal, @short: true);
+                il.RuntimeError("Object {0} does not contain property {1}", objNum, propNum);
 
-                il.MarkLabel(propNumFound);
+                propNumFound.Mark();
 
                 il.DebugWrite("Found property {0} at address {1:x4}", propNum, propAddress);
 
                 // propAddress++;
-                il.Emit(OpCodes.Ldloc, propAddress);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Conv_U2);
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Load();
+                il.Add(1);
+                il.ConvertToUInt16();
+                propAddress.Store();
 
-                var sizeIsWord = il.DefineLabel();
+                var sizeIsWord = il.NewLabel();
 
                 // if ((this.version <= 3 && (value & 0xe0) != 0) && (this.version >= 4) && (value & 0xc0) != 0)
                 int sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
-                il.Emit(OpCodes.Ldloc, value);
-                il.Emit(OpCodes.Ldc_I4, sizeMask);
-                il.Emit(OpCodes.And);
-                il.Emit(OpCodes.Brtrue_S, sizeIsWord);
+                value.Load();
+                il.And(sizeMask);
+                sizeIsWord.BranchIf(Condition.True, @short: true);
 
                 // write byte
-                using (var temp = AllocateTemp<byte>())
+                using (var temp = il.NewLocal<byte>())
                 {
                     ReadOperand(2);
-                    il.Emit(OpCodes.Conv_U1);
-                    il.Emit(OpCodes.Stloc, temp);
+                    il.ConvertToUInt8();
+                    temp.Store();
 
                     WriteByte(propAddress, temp);
 
                     il.DebugWrite("Wrote byte {0:x2} to {1:x4}", temp, propAddress);
 
-                    il.Emit(OpCodes.Br_S, done);
+                    done.Branch(@short: true);
                 }
 
                 // write word
-                il.MarkLabel(sizeIsWord);
+                sizeIsWord.Mark();
 
-                using (var temp = AllocateTemp<ushort>())
+                using (var temp = il.NewLocal<ushort>())
                 {
                     ReadOperand(2);
-                    il.Emit(OpCodes.Stloc, temp);
+                    temp.Store();
 
                     WriteWord(propAddress, temp);
 
                     il.DebugWrite("Wrote word {0:x2} to {1:x4}", temp, propAddress);
                 }
 
-                il.MarkLabel(done);
+                done.Mark();
             }
         }
 
         private void op_storew()
         {
-            using (var address = AllocateTemp<int>())
-            using (var value = AllocateTemp<ushort>())
+            using (var address = il.NewLocal<int>())
+            using (var value = il.NewLocal<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);
-                il.Emit(OpCodes.Ldc_I4_2);
-                il.Emit(OpCodes.Mul);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Stloc, address);
+                il.Multiply(2);
+                il.Add();
+                address.Store();
 
                 ReadOperand(2);
-                il.Emit(OpCodes.Stloc, value);
+                value.Store();
 
                 WriteWord(address, value);
             }

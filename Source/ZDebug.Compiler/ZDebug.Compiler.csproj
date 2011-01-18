@@ -41,13 +41,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
-    <Compile Include="ILGeneratorExtensions.cs" />
+    <Compile Include="Generate\CodeBuilders.cs" />
+    <Compile Include="Generate\Condition.cs" />
+    <Compile Include="Generate\IArrayLocal.cs" />
+    <Compile Include="Generate\ILabel.cs" />
+    <Compile Include="Generate\ILBuilder.cs" />
+    <Compile Include="Generate\ILBuilder.FormatString.cs" />
+    <Compile Include="Generate\ILBuilder.Labels.cs" />
+    <Compile Include="Generate\ILocal.cs" />
     <Compile Include="InstructionExtensions.cs" />
-    <Compile Include="LocalManager.Temp.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ILGeneratorExtensions.Stack.cs" />
-    <Compile Include="LocalManager.cs" />
     <Compile Include="ZCompiler.cs" />
     <Compile Include="ZCompiler.Memory.cs" />
     <Compile Include="ZCompiler.Objects.cs" />
@@ -68,7 +72,12 @@
       <Name>ZDebug.Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Generate\ILBuilder.Locals.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Generate\ILBuilder.Debug.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

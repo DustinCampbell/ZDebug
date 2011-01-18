@@ -13,14 +13,14 @@ namespace ZDebug.Compiler
         {
             var address = currentInstruction.Address + currentInstruction.Length + (short)(currentInstruction.Operands[0].Value) - 2;
             var jump = addressToLabelMap[address];
-            il.Emit(OpCodes.Br, jump);
+            jump.Branch();
         }
 
         private void op_jz()
         {
             ReadOperand(0);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ceq);
+            il.LoadConstant(0);
+            il.CompareEqual();
 
             Branch();
         }
@@ -33,7 +33,7 @@ namespace ZDebug.Compiler
         private void op_ret()
         {
             ReadOperand(0);
-            il.Emit(OpCodes.Ret);
+            il.Return();
         }
     }
 }

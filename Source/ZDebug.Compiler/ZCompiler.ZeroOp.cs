@@ -24,14 +24,12 @@ namespace ZDebug.Compiler
 
         private void op_rfalse()
         {
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ret);
+            il.Return(0);
         }
 
         private void op_rtrue()
         {
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Ret);
+            il.Return(1);
         }
     }
 }

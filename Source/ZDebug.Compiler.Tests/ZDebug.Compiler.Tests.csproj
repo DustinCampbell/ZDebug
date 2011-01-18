@@ -47,11 +47,9 @@
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\ByteArrayExtensions.cs" />
     <Compile Include="Utilities\DynamicMethodHelpers.cs" />
-    <Compile Include="ILGeneratorExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
     <Compile Include="Utilities\ZCode.cs" />
-    <Compile Include="ZCompilerTests.cs" />
     <Compile Include="ZRoutineTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
 using System.Reflection;
 using ZDebug.Core.Execution;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -29,21 +30,20 @@ namespace ZDebug.Compiler
         private readonly ZRoutine routine;
         private readonly ZMachine machine;
 
-        private ILGenerator il;
-        private LocalManager localManager;
-        private Dictionary<int, Label> addressToLabelMap;
+        private ILBuilder il;
+        private Dictionary<int, ILabel> addressToLabelMap;
         private Instruction currentInstruction;
 
-        private LocalBuilder memory;
-        private LocalBuilder screen;
+        private IArrayLocal memory;
+        private ILocal screen;
 
-        private LocalBuilder args;
-        private LocalBuilder argCount;
+        private IArrayLocal args;
+        private ILocal argCount;
 
-        private LocalBuilder stack;
-        private LocalBuilder sp;
+        private IArrayLocal stack;
+        private ILocal sp;
 
-        private LocalBuilder locals;
+        private IArrayLocal locals;
 
         private ZCompiler(ZRoutine routine, ZMachine machine)
         {
@@ -65,22 +65,22 @@ namespace ZDebug.Compiler
                 owner: typeof(ZMachine),
                 skipVisibility: true);
 
-            this.il = dm.GetILGenerator();
-            this.localManager = new LocalManager(il);
+            var ilGen = dm.GetILGenerator();
+            this.il = new ILBuilder(ilGen);
 
             // First pass: gather branches and labels
-            this.addressToLabelMap = new Dictionary<int, Label>();
+            this.addressToLabelMap = new Dictionary<int, ILabel>();
             foreach (var i in routine.Instructions)
             {
                 if (i.HasBranch && i.Branch.Kind == BranchKind.Address)
                 {
                     var address = i.Address + i.Length + i.Branch.Offset - 2;
-                    this.addressToLabelMap.Add(address, il.DefineLabel());
+                    this.addressToLabelMap.Add(address, il.NewLabel());
                 }
                 else if (i.Opcode.IsJump)
                 {
                     var address = i.Address + i.Length + (short)i.Operands[0].Value - 2;
-                    this.addressToLabelMap.Add(address, il.DefineLabel());
+                    this.addressToLabelMap.Add(address, il.NewLabel());
                 }
             }
 
@@ -98,84 +98,74 @@ namespace ZDebug.Compiler
             // Fourth pass: determine whether memory is used
             // TODO: Implement!
 
-            this.memory = il.DeclareLocal<byte[]>();
-            il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldfld, memoryField);
-            il.Emit(OpCodes.Stloc, this.memory);
+            this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
             // Second pass: determine whether screen is used
             foreach (var i in routine.Instructions)
             {
                 if (i.UsesScreen())
                 {
-                    this.screen = il.DeclareLocal<IScreen>();
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldfld, screenField);
-                    il.Emit(OpCodes.Stloc, this.screen);
+                    this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
                     break;
                 }
             }
 
-            // Create stack, sp and locals
-            this.stack = usesStack ? il.DeclareArrayLocal<ushort>(STACK_SIZE) : null;
-            this.sp = usesStack ? il.DeclareLocal(0) : null;
-
-            var localValues = routine.Locals;
-            int localCount = localValues.Length;
-            this.locals = il.DeclareArrayLocal<ushort>(localCount);
-            for (int i = 0; i < localCount; i++)
-            {
-                if (localValues[i] != 0)
-                {
-                    il.Emit(OpCodes.Ldloc, this.locals);
-                    il.Emit(OpCodes.Ldc_I4, i);
-                    il.Emit(OpCodes.Ldc_I4, localValues[i]);
-                    il.Emit(OpCodes.Stelem_I2);
-                }
-            }
+            // Create stack and sp
+            this.stack = usesStack ? il.NewArrayLocal<ushort>(STACK_SIZE) : null;
+            this.sp = usesStack ? il.NewLocal(0) : null;
 
             // Copy arguments locally
-            this.argCount = il.DeclareLocal<int>();
-            this.args = il.DeclareLocal<ushort[]>();
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Stloc, args);
-            il.Emit(OpCodes.Ldloc, args);
-            il.Emit(OpCodes.Ldlen);
-            il.Emit(OpCodes.Conv_I4);
-            il.Emit(OpCodes.Stloc, argCount);
+            this.argCount = il.NewLocal<int>();
+            this.args = il.NewArrayLocal<ushort>(il.GenerateLoadArgument(1));
+            this.args.LoadLength();
+            il.ConvertToInt32();
+            this.argCount.Store();
 
-            // TODO: Don't copy args if there aren't any
+            // Copy locals
+            var localValues = routine.Locals;
+            int localCount = localValues.Length;
+            if (localCount > 0)
+            {
+                this.locals = il.NewArrayLocal<ushort>(localCount);
+                for (int i = 0; i < localCount; i++)
+                {
+                    if (localValues[i] != 0)
+                    {
+                        this.locals.StoreElement(
+                            loadIndex: il.GenerateLoadConstant(i),
+                            loadValue: il.GenerateLoadConstant(localValues[i]));
+                    }
+                }
 
-            // Initialize locals with args
-            il.CopyArray(this.args, this.locals);
+                // TODO: Don't copy args if there aren't any
+
+                // Initialize locals with args
+                il.CopyArray(this.args, this.locals);
+            }
 
             // Fourth pass: emit IL for instructions
             foreach (var i in routine.Instructions)
             {
-                Label label;
+                ILabel label;
                 if (this.addressToLabelMap.TryGetValue(i.Address, out label))
                 {
-                    il.MarkLabel(label);
+                    label.Mark();
                 }
 
-                il.Emit(OpCodes.Nop);
-                il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
+                //il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
 
                 currentInstruction = i;
-                Assemble();
+                //Assemble();
             }
+
+            il.Return();
 
             return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
         }
 
         private void NotImplemented()
         {
-            il.ThrowException("'" + currentInstruction.Opcode.Name + "' not implemented.");
-        }
-
-        private LocalManager.Temp<T> AllocateTemp<T>()
-        {
-            return localManager.AllocateTemp<T>();
+            il.RuntimeError(string.Format("Opcode '{0}' not implemented.", currentInstruction.Opcode.Name));
         }
 
         private void Branch()
@@ -183,34 +173,32 @@ namespace ZDebug.Compiler
             // It is expected that the value on the top of the evaluation stack
             // is the boolean value to compare branch.Condition with.
 
-            var noJump = il.DefineLabel();
+            var noJump = il.NewLabel();
 
-            il.LoadBool(currentInstruction.Branch.Condition);
-            il.Emit(OpCodes.Bne_Un_S, noJump);
+            il.LoadConstant(currentInstruction.Branch.Condition);
+            noJump.BranchIf(Condition.NotEqual, @short: true);
 
             switch (currentInstruction.Branch.Kind)
             {
                 case BranchKind.RFalse:
                     il.DebugWrite("branching rfalse...");
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Ret);
+                    il.Return(0);
                     break;
 
                 case BranchKind.RTrue:
                     il.DebugWrite("branching rtrue...");
-                    il.Emit(OpCodes.Ldc_I4_1);
-                    il.Emit(OpCodes.Ret);
+                    il.Return(1);
                     break;
 
                 default: // BranchKind.Address
                     var address = currentInstruction.Address + currentInstruction.Length + currentInstruction.Branch.Offset - 2;
                     var jump = addressToLabelMap[address];
                     il.DebugWrite(string.Format("branching to {0:x4}...", address));
-                    il.Emit(OpCodes.Br, jump);
+                    jump.Branch();
                     break;
             }
 
-            il.MarkLabel(noJump);
+            noJump.Mark();
         }
 
         private void Assemble()
@@ -349,7 +337,11 @@ namespace ZDebug.Compiler
             }
 
             throw new ZCompilerException(
-                string.Format("Unsupported opcode: {0} ({1} {2:x2})", currentInstruction.Opcode.Name, currentInstruction.Opcode.Kind, currentInstruction.Opcode.Number));
+                string.Format(
+                    "Unsupported opcode: {0} ({1} {2:x2})",
+                    currentInstruction.Opcode.Name,
+                    currentInstruction.Opcode.Kind,
+                    currentInstruction.Opcode.Number));
         }
 
         public static ZRoutineCode Compile(ZRoutine routine, ZMachine machine)

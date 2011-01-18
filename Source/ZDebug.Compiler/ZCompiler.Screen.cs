@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection.Emit;
 using System.Reflection;
+using System.Reflection.Emit;
+using ZDebug.Compiler.Generate;
 using ZDebug.Core.Execution;
 
 namespace ZDebug.Compiler
@@ -26,48 +24,48 @@ namespace ZDebug.Compiler
 
         private void PrintChar(char ch)
         {
-            il.Emit(OpCodes.Ldloc, screen);
-            il.Emit(OpCodes.Ldc_I4, ch);
-            il.Emit(OpCodes.Callvirt, print1);
+            screen.Load();
+            il.LoadConstant(ch);
+            il.CallVirt(print1);
         }
 
-        private void PrintChar(LocalBuilder ch)
+        private void PrintChar(ILocal ch)
         {
             il.DebugWrite("PrintChar: {0}", ch);
 
-            il.Emit(OpCodes.Ldloc, screen);
-            il.Emit(OpCodes.Ldloc, ch);
-            il.Emit(OpCodes.Callvirt, print1);
+            screen.Load();
+            ch.Load();
+            il.CallVirt(print1);
         }
 
         private void PrintChar()
         {
-            using (var ch = AllocateTemp<char>())
+            using (var ch = il.NewLocal<char>())
             {
-                il.Emit(OpCodes.Stloc, ch);
+                ch.Store();
                 PrintChar(ch);
             }
         }
 
         private void PrintText(string text)
         {
-            il.Emit(OpCodes.Ldloc, screen);
-            il.Emit(OpCodes.Ldstr, text);
-            il.Emit(OpCodes.Callvirt, print2);
+            screen.Load();
+            il.LoadConstant(text);
+            il.CallVirt(print2);
         }
 
-        private void PrintText(LocalBuilder text)
+        private void PrintText(ILocal text)
         {
-            il.Emit(OpCodes.Ldloc, screen);
-            il.Emit(OpCodes.Ldloc, text);
-            il.Emit(OpCodes.Callvirt, print2);
+            screen.Load();
+            text.Load();
+            il.CallVirt(print2);
         }
 
         private void PrintText()
         {
-            using (var text = AllocateTemp<string>())
+            using (var text = il.NewLocal<string>())
             {
-                il.Emit(OpCodes.Stloc, text);
+                text.Store();
                 PrintText(text);
             }
         }

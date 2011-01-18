@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -22,27 +23,17 @@ namespace ZDebug.Compiler
         /// </summary>
         /// <param name="objNum">The local variable containing the object number.
         /// If null, the object number is retrieved from the top of the evaluation stack.</param>
-        private void CalculateObjectAddress(LocalBuilder objNum = null)
+        private void CalculateObjectAddress(ILocal objNum = null)
         {
             if (objNum != null)
             {
-                il.Emit(OpCodes.Ldloc, objNum);
+                objNum.Load();
             }
 
-            // subtract 1 from object number
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-
-            // multiply by the object entry size
-            il.Emit(OpCodes.Ldc_I4, (int)machine.ObjectEntrySize);
-            il.Emit(OpCodes.Mul);
-
-            // add the object entries table address
-            il.Emit(OpCodes.Ldc_I4, machine.ObjectEntriesAddress);
-            il.Emit(OpCodes.Add);
-
-            // finally, convert to an unsigned short
-            il.Emit(OpCodes.Conv_U2);
+            il.Subtract(1);
+            il.Multiply(machine.ObjectEntrySize);
+            il.Add(machine.ObjectEntriesAddress);
+            il.ConvertToUInt16();
         }
 
         private void ReadObjectNumber(ushort address)
@@ -69,22 +60,22 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void ReadValidObjectNumber(int operandIndex, Label failed)
+        private void ReadValidObjectNumber(int operandIndex, ILabel failed)
         {
             ReadOperand(operandIndex);
 
             // Check to see if object number is 0.
-            var objNumOk = il.DefineLabel();
-            il.Emit(OpCodes.Dup);
-            il.Emit(OpCodes.Brtrue_S, objNumOk);
+            var objNumOk = il.NewLabel();
+            il.Duplicate();
+            objNumOk.BranchIf(Condition.True, @short: true);
 
             // TODO: Emit warning messsage to log. For now, just pop the number off the stack.
-            il.Emit(OpCodes.Pop);
+            il.Pop();
 
             // Jump to failure branch
-            il.Emit(OpCodes.Br, failed);
+            failed.Branch();
 
-            il.MarkLabel(objNumOk);
+            objNumOk.Mark();
         }
 
         /// <summary>
@@ -102,13 +93,12 @@ namespace ZDebug.Compiler
         /// </summary>
         /// <param name="objNum">The local variable containing the object number.
         /// If null, the object number is retrieved from the top of the evaluation stack.</param>
-        private void ReadObjectParent(LocalBuilder objNum = null)
+        private void ReadObjectParent(ILocal objNum = null)
         {
             CalculateObjectAddress(objNum);
 
             // Add parent number offset to the address on the evaluation stack.
-            il.Emit(OpCodes.Ldc_I4, (int)machine.ObjectParentOffset);
-            il.Emit(OpCodes.Add);
+            il.Add(machine.ObjectParentOffset);
 
             ReadObjectNumber();
         }
@@ -128,13 +118,12 @@ namespace ZDebug.Compiler
         /// </summary>
         /// <param name="objNum">The local variable containing the object number.
         /// If null, the object number is retrieved from the top of the evaluation stack.</param>
-        private void ReadObjectSibling(LocalBuilder objNum = null)
+        private void ReadObjectSibling(ILocal objNum = null)
         {
             CalculateObjectAddress(objNum);
 
             // Add sibling number offset to the address on the evaluation stack.
-            il.Emit(OpCodes.Ldc_I4, (int)machine.ObjectSiblingOffset);
-            il.Emit(OpCodes.Add);
+            il.Add(machine.ObjectSiblingOffset);
 
             ReadObjectNumber();
         }
@@ -154,13 +143,12 @@ namespace ZDebug.Compiler
         /// </summary>
         /// <param name="objNum">The local variable containing the object number.
         /// If null, the object number is retrieved from the top of the evaluation stack.</param>
-        private void ReadObjectChild(LocalBuilder objNum = null)
+        private void ReadObjectChild(ILocal objNum = null)
         {
             CalculateObjectAddress(objNum);
 
             // Add child number offset to the address on the evaluation stack.
-            il.Emit(OpCodes.Ldc_I4, (int)machine.ObjectChildOffset);
-            il.Emit(OpCodes.Add);
+            il.Add(machine.ObjectChildOffset);
 
             ReadObjectNumber();
         }
@@ -180,58 +168,50 @@ namespace ZDebug.Compiler
         /// </summary>
         /// <param name="objNum">The local variable containing the object number.
         /// If null, the object number is retrieved from the top of the evaluation stack.</param>
-        private void ReadObjectPropertyTableAddress(LocalBuilder objNum = null)
+        private void ReadObjectPropertyTableAddress(ILocal objNum = null)
         {
             CalculateObjectAddress(objNum);
 
             // Add property table address offset to the address on the evaluation stack.
-            il.Emit(OpCodes.Ldc_I4, (int)machine.ObjectPropertyTableAddressOffset);
-            il.Emit(OpCodes.Add);
+            il.Add(machine.ObjectPropertyTableAddressOffset);
 
             ReadWord();
         }
 
-        private void ObjectHasAttribute(LocalBuilder objNum, LocalBuilder attribute)
+        private void ObjectHasAttribute(ILocal objNum, ILocal attribute)
         {
-            il.Emit(OpCodes.Ldloc, memory);
-
-            CalculateObjectAddress(objNum);
-
-            // byte index
-            il.Emit(OpCodes.Ldloc, attribute);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Div);
-
-            // address + byte index
-            il.Emit(OpCodes.Add);
-
-            // read byte
-            il.Emit(OpCodes.Ldelem_U1);
+            memory.LoadElement(
+                loadIndex: il.Generate(() =>
+                {
+                    CalculateObjectAddress(objNum);
+                    attribute.Load();
+                    il.Divide(8);
+                    il.Add();
+                }));
 
             // bit index
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Ldc_I4_7);
-            il.Emit(OpCodes.Ldloc, attribute);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Rem);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Ldc_I4_S, 0x1f);
-            il.Emit(OpCodes.And);
-            il.Emit(OpCodes.Shl);
+            il.LoadConstant(1);
+            il.LoadConstant(7);
+            attribute.Load();
+            il.LoadConstant(8);
+            il.Remainder();
+            il.Subtract();
+            il.And(0x1f);
+            il.Shl();
 
             // (byte & bit index) != 0;
-            il.Emit(OpCodes.And);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ceq);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ceq);
+            il.And();
+            il.LoadConstant(0);
+            il.CompareEqual();
+            il.LoadConstant(0);
+            il.CompareEqual();
 
 #if DEBUG
-            using (var result = AllocateTemp<bool>())
+            using (var result = il.NewLocal<bool>())
             {
-                il.Emit(OpCodes.Stloc, result);
+                result.Store();
                 il.DebugWrite("Object {0} has attribute {1} = {2}", objNum, attribute, result);
-                il.Emit(OpCodes.Ldloc, result);
+                result.Load();
             }
 #endif
         }
@@ -242,19 +222,17 @@ namespace ZDebug.Compiler
         /// </summary>
         private void GetAddressOfFirstProperty()
         {
-            using (var propAddress = AllocateTemp<ushort>())
+            using (var propAddress = il.NewLocal<ushort>())
             {
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Store();
 
                 ReadByte(propAddress); // name-length
-                il.Emit(OpCodes.Conv_U2);
-                il.Emit(OpCodes.Ldc_I4_2);
-                il.Emit(OpCodes.Mul);
-                il.Emit(OpCodes.Ldloc, propAddress);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Conv_U2);
+                il.ConvertToUInt16();
+                il.Multiply(2);
+                propAddress.Load();
+                il.Add();
+                il.Add(1);
+                il.ConvertToUInt16();
             }
         }
 
@@ -265,7 +243,7 @@ namespace ZDebug.Compiler
             GetAddressOfFirstProperty();
         }
 
-        private void FirstProperty(LocalBuilder objNum = null)
+        private void FirstProperty(ILocal objNum = null)
         {
             ReadObjectPropertyTableAddress(objNum);
 
@@ -274,83 +252,77 @@ namespace ZDebug.Compiler
 
         private void NextProperty()
         {
-            using (var propAddress = AllocateTemp<ushort>())
-            using (var size = AllocateTemp<byte>())
+            using (var propAddress = il.NewLocal<ushort>())
+            using (var size = il.NewLocal<byte>())
             {
                 // Stack should contain last property address
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Store();
 
                 // read size byte
                 ReadByte(propAddress);
-                il.Emit(OpCodes.Stloc, size);
+                size.Store();
 
                 // increment propAddress
-                il.Emit(OpCodes.Ldloc, propAddress);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Stloc, propAddress);
+                propAddress.Load();
+                il.Add(1);
+                propAddress.Store();
 
                 if (machine.Version < 4)
                 {
                     // size >>= 5
-                    il.Emit(OpCodes.Ldloc, size);
-                    il.Emit(OpCodes.Ldc_I4_5);
-                    il.Emit(OpCodes.Shr);
-                    il.Emit(OpCodes.Conv_U1);
-                    il.Emit(OpCodes.Stloc, size);
+                    size.Load();
+                    il.Shr(5);
+                    il.ConvertToUInt8();
+                    size.Store();
                 }
                 else
                 {
                     // if ((size & 0x80) != 0x80)
-                    il.Emit(OpCodes.Ldloc, size);
-                    il.Emit(OpCodes.Ldc_I4, 0x80);
-                    il.Emit(OpCodes.And);
-                    il.Emit(OpCodes.Ldc_I4, 0x80);
+                    size.Store();
+                    il.And(0x80);
+                    il.LoadConstant(0x80);
 
-                    var secondSizeByte = il.DefineLabel();
-                    il.Emit(OpCodes.Beq_S, secondSizeByte);
+                    var secondSizeByte = il.NewLabel();
+                    secondSizeByte.BranchIf(Condition.Equal, @short: true);
 
                     // size >>= 6
-                    il.Emit(OpCodes.Ldloc, size);
-                    il.Emit(OpCodes.Ldc_I4_6);
-                    il.Emit(OpCodes.Shr);
-                    il.Emit(OpCodes.Conv_U1);
-                    il.Emit(OpCodes.Stloc, size);
+                    size.Load();
+                    il.Shr(6);
+                    il.ConvertToUInt8();
+                    size.Store();
 
-                    var done = il.DefineLabel();
-                    il.Emit(OpCodes.Br_S, done);
+                    var done = il.NewLabel();
+                    done.Branch(@short: true);
 
-                    il.MarkLabel(secondSizeByte);
+                    secondSizeByte.Mark();
 
                     // read second size byte
                     ReadByte(propAddress);
-                    il.Emit(OpCodes.Stloc, size);
+                    size.Store();
 
                     // size &= 0x3f
-                    il.Emit(OpCodes.Ldloc, size);
-                    il.Emit(OpCodes.Ldc_I4_S, 0x3f);
-                    il.Emit(OpCodes.And);
-                    il.Emit(OpCodes.Conv_U1);
-                    il.Emit(OpCodes.Stloc, size);
+                    size.Load();
+                    il.And(0x3f);
+                    il.ConvertToUInt8();
+                    size.Store();
 
                     // if (size == 0)
-                    il.Emit(OpCodes.Ldloc, size);
-                    il.Emit(OpCodes.Brtrue_S, done);
+                    size.Load();
+                    done.BranchIf(Condition.True, @short: true);
 
                     // size = 64
-                    il.Emit(OpCodes.Ldc_I4_S, 64);
-                    il.Emit(OpCodes.Stloc, size);
+                    il.LoadConstant(64);
+                    size.Store();
 
-                    il.MarkLabel(done);
+                    done.Mark();
                 }
 
                 // (ushort)(propAddress + size + 1)
-                il.Emit(OpCodes.Ldloc, propAddress);
-                il.Emit(OpCodes.Ldloc, size);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Conv_U2);
+                propAddress.Load();
+                size.Load();
+                il.Add();
+                il.Add(1);
+                il.ConvertToUInt16();
             }
         }
     }

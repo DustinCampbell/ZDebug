@@ -4,118 +4,111 @@ using System.Linq;
 using System.Text;
 using ZDebug.Core.Instructions;
 using System.Reflection.Emit;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private void BinaryOp(OpCode op, bool signed = false)
+        private void BinaryOp(CodeBuilder operation, bool signed = false)
         {
             ReadOperand(0);
             if (signed)
             {
-                il.Emit(OpCodes.Conv_I2);
+                il.ConvertToInt16();
             }
 
             ReadOperand(1);
             if (signed)
             {
-                il.Emit(OpCodes.Conv_I2);
+                il.ConvertToInt16();
             }
 
-            il.Emit(op);
-            il.Emit(OpCodes.Conv_U2);
+            operation();
+            il.ConvertToUInt16();
 
-            using (var temp = AllocateTemp<ushort>())
+            using (var temp = il.NewLocal<ushort>())
             {
-                il.Emit(OpCodes.Stloc, temp);
+                temp.Store();
                 WriteVariable(currentInstruction.StoreVariable, temp);
             }
         }
 
         private void op_add()
         {
-            BinaryOp(OpCodes.Add, signed: true);
+            BinaryOp(il.GenerateAdd(), signed: true);
         }
 
         private void op_sub()
         {
-            BinaryOp(OpCodes.Sub, signed: true);
+            BinaryOp(il.GenerateSubtract(), signed: true);
         }
 
         private void op_mul()
         {
-            BinaryOp(OpCodes.Mul, signed: true);
+            BinaryOp(il.GenerateMultiply(), signed: true);
         }
 
         private void op_div()
         {
-            BinaryOp(OpCodes.Div, signed: true);
+            BinaryOp(il.GenerateDivide(), signed: true);
         }
 
         private void op_mod()
         {
-            BinaryOp(OpCodes.Rem, signed: true);
+            BinaryOp(il.GenerateRemainder(), signed: true);
         }
 
         private void op_or()
         {
-            BinaryOp(OpCodes.Or, signed: false);
+            BinaryOp(il.GenerateOr(), signed: false);
         }
 
         private void op_and()
         {
-            BinaryOp(OpCodes.And, signed: false);
+            BinaryOp(il.GenerateAnd(), signed: false);
         }
 
         private void op_dec_chk()
         {
-            using (var variableIndex = AllocateTemp<byte>())
-            using (var value = AllocateTemp<short>())
+            using (var value = il.NewLocal<short>())
             {
-                ReadOperand(0);
-                il.Emit(OpCodes.Conv_U1);
-                il.Emit(OpCodes.Stloc, variableIndex);
+                var variable = ReadByRefVariableOperand();
 
-                ReadVariable(variableIndex, indirect: true);
-                il.Emit(OpCodes.Conv_I2);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Sub);
-                il.Emit(OpCodes.Stloc, value);
+                ReadVariable(variable, indirect: true);
+                il.ConvertToInt16();
+                il.Subtract(1);
+                value.Store();
 
-                WriteVariable(variableIndex, value, indirect: true);
+                WriteVariable(variable, value, indirect: true);
 
-                il.Emit(OpCodes.Ldloc, value);
+                value.Load();
                 ReadOperand(1);
-                il.Emit(OpCodes.Conv_I2);
+                il.ConvertToInt16();
 
-                il.Emit(OpCodes.Clt);
+                il.CompareLessThan();
                 Branch();
             }
         }
 
         private void op_inc_chk()
         {
-            using (var variableIndex = AllocateTemp<byte>())
-            using (var value = AllocateTemp<short>())
+            using (var value = il.NewLocal<short>())
             {
-                ReadOperand(0);
-                il.Emit(OpCodes.Conv_U1);
-                il.Emit(OpCodes.Stloc, variableIndex);
+                var variable = ReadByRefVariableOperand();
 
-                ReadVariable(variableIndex, indirect: true);
-                il.Emit(OpCodes.Conv_I2);
-                il.Emit(OpCodes.Ldc_I4_1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Stloc, value);
+                ReadVariable(variable, indirect: true);
+                il.ConvertToInt16();
+                il.Add(1);
+                value.Store();
 
-                WriteVariable(variableIndex, value, indirect: true);
+                WriteVariable(variable, value, indirect: true);
 
-                il.Emit(OpCodes.Ldloc, value);
+                value.Load();
                 ReadOperand(1);
-                il.Emit(OpCodes.Conv_I2);
+                il.ConvertToInt16();
 
-                il.Emit(OpCodes.Cgt);
+                il.CompareGreaterThan();
                 Branch();
             }
         }
@@ -127,51 +120,51 @@ namespace ZDebug.Compiler
 
         private void op_je()
         {
-            using (var x = AllocateTemp<ushort>())
-            using (var result = AllocateTemp<bool>())
+            using (var x = il.NewLocal<ushort>())
+            using (var result = il.NewLocal<bool>())
             {
                 ReadOperand(0);
-                il.Emit(OpCodes.Stloc, x);
+                x.Store();
 
-                il.Emit(OpCodes.Ldc_I4_0);
-                il.Emit(OpCodes.Stloc, result);
+                il.LoadConstant(0);
+                result.Store();
 
-                var done = il.DefineLabel();
+                var done = il.NewLabel();
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
                     ReadOperand(j);
-                    il.Emit(OpCodes.Ldloc, x);
+                    x.Load();
 
-                    il.Emit(OpCodes.Ceq);
-                    il.Emit(OpCodes.Stloc, result);
+                    il.CompareEqual();
+                    result.Store();
 
                     // no need to write a branch for the last test
                     if (j < currentInstruction.OperandCount - 1)
                     {
-                        il.Emit(OpCodes.Ldloc, result);
-                        il.Emit(OpCodes.Brtrue_S, done);
+                        result.Load();
+                        done.BranchIf(Condition.True, @short: true);
                     }
                 }
 
-                il.MarkLabel(done);
-                il.Emit(OpCodes.Ldloc, result);
+                done.Mark();
+                result.Load();
                 Branch();
             }
         }
 
         private void op_loadb()
         {
-            using (var address = AllocateTemp<int>())
-            using (var value = AllocateTemp<ushort>())
+            using (var address = il.NewLocal<int>())
+            using (var value = il.NewLocal<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Stloc, address);
+                il.Add();
+                address.Store();
 
                 ReadByte(address);
-                il.Emit(OpCodes.Stloc, value);
+                value.Store();
 
                 WriteVariable(currentInstruction.StoreVariable, value);
             }
@@ -179,18 +172,17 @@ namespace ZDebug.Compiler
 
         private void op_loadw()
         {
-            using (var address = AllocateTemp<int>())
-            using (var value = AllocateTemp<ushort>())
+            using (var address = il.NewLocal<int>())
+            using (var value = il.NewLocal<ushort>())
             {
                 ReadOperand(0);
                 ReadOperand(1);
-                il.Emit(OpCodes.Ldc_I4_2);
-                il.Emit(OpCodes.Mul);
-                il.Emit(OpCodes.Add);
-                il.Emit(OpCodes.Stloc, address);
+                il.Multiply(2);
+                il.Add();
+                address.Store();
 
                 ReadWord(address);
-                il.Emit(OpCodes.Stloc, value);
+                value.Store();
 
                 WriteVariable(currentInstruction.StoreVariable, value);
             }
@@ -198,45 +190,48 @@ namespace ZDebug.Compiler
 
         private void op_store()
         {
-            using (var variableIndex = AllocateTemp<byte>())
-            using (var value = AllocateTemp<ushort>())
+            NotImplemented();
+            return;
+
+            using (var value = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
-                il.Emit(OpCodes.Conv_U1);
-                il.Emit(OpCodes.Stloc, variableIndex);
+                var variable = ReadByRefVariableOperand();
 
                 ReadOperand(1);
-                il.Emit(OpCodes.Stloc, value);
+                value.Store();
 
-                WriteVariable(variableIndex, value, indirect: true);
+                WriteVariable(variable, value, indirect: true);
             }
         }
 
         private void op_test_attr()
         {
-            using (var objNum = AllocateTemp<ushort>())
-            using (var attribute = AllocateTemp<byte>())
+            NotImplemented();
+            return;
+
+            using (var objNum = il.NewLocal<ushort>())
+            using (var attribute = il.NewLocal<byte>())
             {
                 // Read objNum
-                var invalidObjNum = il.DefineLabel();
+                var invalidObjNum = il.NewLabel();
                 ReadValidObjectNumber(0, invalidObjNum);
-                il.Emit(OpCodes.Stloc, objNum);
+                objNum.Store();
 
                 // Read attribute
                 ReadOperand(1);
-                il.Emit(OpCodes.Stloc, attribute);
+                attribute.Store();
 
                 ObjectHasAttribute(objNum, attribute);
                 Branch();
 
-                var done = il.DefineLabel();
-                il.Emit(OpCodes.Br_S, done);
+                var done = il.NewLabel();
+                done.Branch(@short: true);
 
-                il.MarkLabel(invalidObjNum);
-                il.LoadBool(false);
+                invalidObjNum.Mark();
+                il.LoadConstant(false);
                 Branch();
 
-                il.MarkLabel(done);
+                done.Mark();
             }
         }
     }

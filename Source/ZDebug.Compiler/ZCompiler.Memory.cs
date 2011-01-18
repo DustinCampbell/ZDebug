@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection.Emit;
 using ZDebug.Core.Instructions;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -12,13 +13,11 @@ namespace ZDebug.Compiler
         /// <summary>
         /// Reads a byte from memory at the address pushed onto the evaluation stack by the specified code generator.
         /// </summary>
-        /// <param name="getAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
+        /// <param name="loadAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void ReadByte(Action getAddress)
+        private void ReadByte(CodeBuilder loadAddress)
         {
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddress();
-            il.Emit(OpCodes.Ldelem_U1);
+            memory.LoadElement(loadAddress);
         }
 
         /// <summary>
@@ -26,21 +25,17 @@ namespace ZDebug.Compiler
         /// </summary>
         private void ReadByte(int address)
         {
-            ReadByte(() =>
-            {
-                il.Emit(OpCodes.Ldc_I4, address);
-            });
+            ReadByte(
+                loadAddress: il.GenerateLoadConstant(address));
         }
 
         /// <summary>
         /// Reads a byte from memory at the address stored in the given local.
         /// </summary>
-        private void ReadByte(LocalBuilder address)
+        private void ReadByte(ILocal addressLocal)
         {
-            ReadByte(() =>
-            {
-                il.Emit(OpCodes.Ldloc, address);
-            });
+            ReadByte(
+                loadAddress: il.GenerateLoad(addressLocal));
         }
 
         /// <summary>
@@ -48,9 +43,9 @@ namespace ZDebug.Compiler
         /// </summary>
         private void ReadByte()
         {
-            using (var address = AllocateTemp<int>())
+            using (var address = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, address);
+                address.Store();
                 ReadByte(address);
             }
         }
@@ -58,27 +53,22 @@ namespace ZDebug.Compiler
         /// <summary>
         /// Reads a word from memory at the address pushed onto the evaluation stack by the specified code generator.
         /// </summary>
-        /// <param name="getAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
+        /// <param name="loadAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="getAddressPlusOne">An Action delegate that pushes the address + 1 to be read from to the evaluation stack.
+        /// <param name="loadAddressPlusOne">An Action delegate that pushes the address + 1 to be read from to the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void ReadWord(Action getAddress, Action getAddressPlusOne)
+        private void ReadWord(CodeBuilder loadAddress, CodeBuilder loadAddressPlusOne)
         {
             // shift memory[address] left 8 bits
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddress();
-            il.Emit(OpCodes.Ldelem_U1);
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shl);
+            memory.LoadElement(loadAddress);
+            il.Shl(8);
 
             // read memory[address + 1]
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddressPlusOne();
-            il.Emit(OpCodes.Ldelem_U1);
+            memory.LoadElement(loadAddressPlusOne);
 
             // or bytes together
-            il.Emit(OpCodes.Or);
-            il.Emit(OpCodes.Conv_U2);
+            il.Or();
+            il.ConvertToUInt16();
         }
 
         /// <summary>
@@ -87,32 +77,21 @@ namespace ZDebug.Compiler
         private void ReadWord(int address)
         {
             ReadWord(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldc_I4, address);
-                },
-                getAddressPlusOne: () =>
-                {
-                    il.Emit(OpCodes.Ldc_I4, address + 1);
-                });
+                loadAddress: il.GenerateLoadConstant(address),
+                loadAddressPlusOne: il.GenerateLoadConstant(address + 1));
         }
 
         /// <summary>
         /// Reads a word from memory at the address stored in the given local.
         /// </summary>
-        private void ReadWord(LocalBuilder address)
+        private void ReadWord(ILocal address)
         {
             ReadWord(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, address);
-                },
-                getAddressPlusOne: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, address);
-                    il.Emit(OpCodes.Ldc_I4_1);
-                    il.Emit(OpCodes.Add);
-                });
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne:
+                    il.Combine(
+                        il.GenerateLoad(address),
+                        il.GenerateAdd(1)));
         }
 
         /// <summary>
@@ -120,9 +99,9 @@ namespace ZDebug.Compiler
         /// </summary>
         private void ReadWord()
         {
-            using (var address = AllocateTemp<int>())
+            using (var address = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, address);
+                address.Store();
                 ReadWord(address);
             }
         }
@@ -130,250 +109,209 @@ namespace ZDebug.Compiler
         /// <summary>
         /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
         /// </summary>
-        /// <param name="getAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
+        /// <param name="loadAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="getValue">An Action delegate that pushes the value to be written to the evaluation stack.
+        /// <param name="loadValue">An Action delegate that pushes the value to be written to the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void WriteByte(Action getAddress, Action getValue)
+        private void WriteByte(CodeBuilder loadAddress, CodeBuilder loadValue)
         {
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddress();
-            getValue();
-            il.Emit(OpCodes.Stelem_I1);
+            memory.StoreElement(loadAddress, loadValue);
         }
 
         /// <summary>
         /// Writes a byte to memory at the specified address.
         /// </summary>
-        private void WriteByte(int address, LocalBuilder value)
+        private void WriteByte(int address, ILocal value)
         {
             WriteByte(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldc_I4, address);
-                },
-                getValue: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, value);
-                });
+                loadAddress: il.GenerateLoadConstant(address),
+                loadValue: il.GenerateLoad(value));
         }
 
         /// <summary>
         /// Writes a byte to memory at the address stored in the given local.
         /// </summary>
-        private void WriteByte(LocalBuilder address, LocalBuilder value)
+        private void WriteByte(ILocal address, ILocal value)
         {
             WriteByte(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, address);
-                },
-                getValue: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, value);
-                });
+                loadAddress: il.GenerateLoad(address),
+                loadValue: il.GenerateLoad(value));
         }
 
         /// <summary>
         /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
         /// </summary>
-        /// <param name="getAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
+        /// <param name="loadAddress">An Action delegate that loads the address to be written to onto the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="getAddressPlusOne">An Action delegate that pushes the address + 1 to be written to on the evaluation stack.
+        /// <param name="loadAddressPlusOne">An Action delegate that loads the address + 1 to be written to onto the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="getValue">An Action delegate that pushes the value to be written to the evaluation stack.
+        /// <param name="loadValue">An Action delegate that loads the value to be written to onto the evaluation stack.
         /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void WriteWord(Action getAddress, Action getAddressPlusOne, Action getValue)
+        private void WriteWord(CodeBuilder loadAddress, CodeBuilder loadAddressPlusOne, CodeBuilder loadValue)
         {
             // memory[address] = (byte)(value >> 8);
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddress();
-            getValue();
-            il.Emit(OpCodes.Ldc_I4_8);
-            il.Emit(OpCodes.Shr);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
+            memory.StoreElement(
+                loadAddress,
+                il.Combine(
+                    loadValue,
+                    il.GenerateShr(8),
+                    il.GenerateConvertToUInt8()));
 
             // memory[address + 1] = (byte)(value & 0xff);
-            il.Emit(OpCodes.Ldloc, memory);
-            getAddressPlusOne();
-            getValue();
-            il.Emit(OpCodes.Ldc_I4, 0xff);
-            il.Emit(OpCodes.And);
-            il.Emit(OpCodes.Conv_U1);
-            il.Emit(OpCodes.Stelem_I1);
+            memory.StoreElement(
+                loadAddressPlusOne,
+                il.Combine(
+                    loadValue,
+                    il.GenerateAnd(0xff),
+                    il.GenerateConvertToUInt8()));
         }
 
-        private void WriteWord(int address, LocalBuilder value)
+        private void WriteWord(int address, ILocal value)
         {
             WriteWord(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldc_I4, address);
-                },
-                getAddressPlusOne: () =>
-                {
-                    il.Emit(OpCodes.Ldc_I4, address + 1);
-                },
-                getValue: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, value);
-                });
+                loadAddress: il.GenerateLoadConstant(address),
+                loadAddressPlusOne: il.GenerateLoadConstant(address + 1),
+                loadValue: il.GenerateLoad(value));
         }
 
-        private void WriteWord(LocalBuilder address, LocalBuilder value)
+        private void WriteWord(ILocal address, ILocal value)
         {
             WriteWord(
-                getAddress: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, address);
-                },
-                getAddressPlusOne: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, address);
-                    il.Emit(OpCodes.Ldc_I4_1);
-                    il.Emit(OpCodes.Add);
-                },
-                getValue: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, value);
-                });
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
+                loadValue: il.GenerateLoad(value));
         }
 
         private void CheckStackEmpty()
         {
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_0);
-            il.Emit(OpCodes.Ceq);
+            sp.Load();
+            il.LoadConstant(0);
+            il.CompareEqual();
 
-            var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse_S, ok);
-            il.ThrowException("Stack is empty.");
+            var ok = il.NewLabel();
+            ok.BranchIf(Condition.False, @short: true);
+            il.RuntimeError("Stack is empty.");
 
-            il.MarkLabel(ok);
+            ok.Mark();
         }
 
         private void CheckStackFull()
         {
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4, STACK_SIZE);
-            il.Emit(OpCodes.Ceq);
+            sp.Load();
+            il.LoadConstant(STACK_SIZE);
+            il.CompareEqual();
 
-            var ok = il.DefineLabel();
-            il.Emit(OpCodes.Brfalse_S, ok);
-            il.ThrowException("Stack is full.");
+            var ok = il.NewLabel();
+            ok.BranchIf(Condition.False, @short: true);
+            il.RuntimeError("Stack is full.");
 
-            il.MarkLabel(ok);
+            ok.Mark();
         }
 
         private void PopStack()
         {
             il.DebugWrite("PopStack (sp = {0})", sp);
 
-            il.CheckStackEmpty(sp);
+            CheckStackEmpty();
 
-            il.Emit(OpCodes.Ldloc, stack);
+            stack.LoadElement(
+                il.Combine(
+                    il.GenerateLoad(sp),
+                    il.GenerateSubtract(1)));
 
             // decrement sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Dup);
-            il.Emit(OpCodes.Stloc, sp);
-
-            il.Emit(OpCodes.Ldelem_U2);
+            sp.Load();
+            il.Subtract(1);
+            sp.Store();
         }
 
         private void PeekStack()
         {
             il.DebugWrite("PeekStack (sp = {0})", sp);
 
-            il.CheckStackEmpty(sp);
+            CheckStackEmpty();
 
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Ldelem_U2);
+            stack.LoadElement(
+                il.Combine(
+                    il.GenerateLoad(sp),
+                    il.GenerateSubtract(1)));
         }
 
-        private void PushStack(LocalBuilder value)
+        private void PushStack(ILocal value)
         {
             il.DebugWrite("PushStack {0} (sp = {1})", value, sp);
 
-            il.CheckStackFull(sp);
+            CheckStackFull();
 
-            // store value in stack
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
+            stack.StoreElement(
+                il.GenerateLoad(sp),
+                il.GenerateLoad(value));
 
             // increment sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Add);
-            il.Emit(OpCodes.Stloc, sp);
+            sp.Load();
+            il.Add(1);
+            sp.Store();
         }
 
-        private void SetStackTop(LocalBuilder value)
+        private void SetStackTop(ILocal value)
         {
             il.DebugWrite("SetStackTop {0} (sp = {1})", value, sp);
 
-            il.CheckStackEmpty(sp);
+            CheckStackEmpty();
 
-            il.Emit(OpCodes.Ldloc, stack);
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
+            stack.StoreElement(
+                il.Combine(
+                    il.GenerateLoad(sp),
+                    il.GenerateSubtract(1)),
+                il.GenerateLoad(value));
         }
 
+        /// <summary>
+        /// Reads a value from the locals array
+        /// </summary>
         private void ReadLocalVariable(int index)
         {
-            il.Emit(OpCodes.Ldloc, locals);
-            il.Emit(OpCodes.Ldc_I4, index);
-            il.Emit(OpCodes.Ldelem_U2);
+            locals.LoadElement(
+                il.GenerateLoadConstant(index));
         }
 
-        private void ReadLocalVariable(LocalBuilder index)
+        /// <summary>
+        /// Reads a value from the locals array
+        /// </summary>
+        private void ReadLocalVariable(ILocal index)
         {
-            il.Emit(OpCodes.Ldloc, locals);
-            il.Emit(OpCodes.Ldloc, index);
-            il.Emit(OpCodes.Ldelem_U2);
+            locals.LoadElement(
+                il.GenerateLoad(index));
         }
 
         private void ReadLocalVariable()
         {
-            using (var index = AllocateTemp<int>())
+            using (var index = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, index);
+                index.Store();
                 ReadLocalVariable(index);
             }
         }
 
-        private void WriteLocalVariable(int index, LocalBuilder value)
+        private void WriteLocalVariable(int index, ILocal value)
         {
-            il.Emit(OpCodes.Ldloc, locals);
-            il.Emit(OpCodes.Ldc_I4, index);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
+            locals.StoreElement(
+                loadIndex: il.GenerateLoadConstant(index),
+                loadValue: il.GenerateLoad(value));
         }
 
-        private void WriteLocalVariable(LocalBuilder index, LocalBuilder value)
+        private void WriteLocalVariable(ILocal index, ILocal value)
         {
-            il.Emit(OpCodes.Ldloc, locals);
-            il.Emit(OpCodes.Ldloc, index);
-            il.Emit(OpCodes.Ldloc, value);
-            il.Emit(OpCodes.Stelem_I2);
+            locals.StoreElement(
+                loadIndex: il.GenerateLoad(index),
+                loadValue: il.GenerateLoad(value));
         }
 
-        private void WriteLocalVariable(LocalBuilder value)
+        private void WriteLocalVariable(ILocal value)
         {
-            using (var index = AllocateTemp<int>())
+            using (var index = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, index);
+                index.Store();
                 WriteLocalVariable(index, value);
             }
         }
@@ -383,16 +321,15 @@ namespace ZDebug.Compiler
             return machine.GlobalVariableTableAddress + (index * 2);
         }
 
-        private void CalculateGlobalVariableAddress(LocalBuilder index = null)
+        private void CalculateGlobalVariableAddress(ILocal index = null)
         {
             if (index != null)
             {
-                il.Emit(OpCodes.Ldloc, index);
+                index.Load();
             }
-            il.Emit(OpCodes.Ldc_I4_2);
-            il.Emit(OpCodes.Mul);
-            il.Emit(OpCodes.Ldc_I4, machine.GlobalVariableTableAddress);
-            il.Emit(OpCodes.Add);
+
+            il.Multiply(2);
+            il.Add(machine.GlobalVariableTableAddress);
         }
 
         private void ReadGlobalVariable(int index)
@@ -401,7 +338,7 @@ namespace ZDebug.Compiler
             ReadWord(address);
         }
 
-        private void ReadGlobalVariable(LocalBuilder index)
+        private void ReadGlobalVariable(ILocal index)
         {
             CalculateGlobalVariableAddress(index);
             ReadWord();
@@ -413,44 +350,45 @@ namespace ZDebug.Compiler
             ReadWord();
         }
 
-        private void WriteGlobalVariable(int index, LocalBuilder value)
+        private void WriteGlobalVariable(int index, ILocal value)
         {
             var address = CalculateGlobalVariableAddress(index);
             WriteWord(address, value);
         }
 
-        private void WriteGlobalVariable(LocalBuilder index, LocalBuilder value)
+        private void WriteGlobalVariable(ILocal index, ILocal value)
         {
             CalculateGlobalVariableAddress(index);
 
-            using (var address = AllocateTemp<int>())
+            using (var address = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, address);
+                address.Store();
                 WriteWord(address, value);
             }
         }
 
-        private void WriteGlobalVariable(LocalBuilder value)
+        private void WriteGlobalVariable(ILocal value)
         {
             CalculateGlobalVariableAddress();
 
-            using (var address = AllocateTemp<int>())
+            using (var address = il.NewLocal<int>())
             {
-                il.Emit(OpCodes.Stloc, address);
+                address.Store();
                 WriteWord(address, value);
             }
         }
 
-        private void ReadVariable(LocalBuilder variableIndex, bool indirect = false)
+        private void ReadVariable(ILocal variableIndex, bool indirect = false)
         {
             il.DebugIndent();
 
-            var local = il.DefineLabel();
-            var global = il.DefineLabel();
-            var done = il.DefineLabel();
+            var tryLocal = il.NewLabel();
+            var tryGlobal = il.NewLabel();
+            var done = il.NewLabel();
 
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Brtrue_S, local);
+            // branch if this is not the stack (variableIndex > 0)
+            variableIndex.Load();
+            tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
 
@@ -466,35 +404,30 @@ namespace ZDebug.Compiler
                 }
             }
 
-            il.Emit(OpCodes.Br_S, done);
+            done.Branch(@short: true);
 
             // local
+            tryLocal.Mark();
 
-            il.MarkLabel(local);
+            // branch if this is not a local (variableIndex >= 16)
+            variableIndex.Load();
+            il.LoadConstant(16);
+            tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4, 16);
-            il.Emit(OpCodes.Bge_S, global);
-
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-
+            variableIndex.Load();
+            il.Subtract(1);
             ReadLocalVariable();
 
-            il.Emit(OpCodes.Br_S, done);
+            done.Branch(@short: true);
 
             // global
+            tryGlobal.Mark();
 
-            il.MarkLabel(global);
-
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4, 16);
-            il.Emit(OpCodes.Sub);
-
+            variableIndex.Load();
+            il.Subtract(16);
             ReadGlobalVariable();
 
-            il.MarkLabel(done);
+            done.Mark();
 
             il.DebugUnindent();
         }
@@ -547,16 +480,17 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteVariable(LocalBuilder variableIndex, LocalBuilder value, bool indirect = false)
+        private void WriteVariable(ILocal variableIndex, ILocal value, bool indirect = false)
         {
             il.DebugIndent();
 
-            var local = il.DefineLabel();
-            var global = il.DefineLabel();
-            var done = il.DefineLabel();
+            var tryLocal = il.NewLabel();
+            var tryGlobal = il.NewLabel();
+            var done = il.NewLabel();
 
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Brtrue_S, local);
+            // branch if this is not the stack (variableIndex > 0)
+            variableIndex.Load();
+            tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
 
@@ -572,40 +506,35 @@ namespace ZDebug.Compiler
                 }
             }
 
-            il.Emit(OpCodes.Br_S, done);
+            done.Branch(@short: true);
 
             // local
+            tryLocal.Mark();
 
-            il.MarkLabel(local);
+            // branch if this is not a local (variableIndex >= 16)
+            variableIndex.Load();
+            il.LoadConstant(16);
+            tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4, 16);
-            il.Emit(OpCodes.Bge_S, global);
-
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4_1);
-            il.Emit(OpCodes.Sub);
-
+            variableIndex.Load();
+            il.Subtract(1);
             WriteLocalVariable(value);
 
-            il.Emit(OpCodes.Br_S, done);
+            done.Branch(@short: true);
 
             // global
+            tryGlobal.Mark();
 
-            il.MarkLabel(global);
-
-            il.Emit(OpCodes.Ldloc, variableIndex);
-            il.Emit(OpCodes.Ldc_I4, 16);
-            il.Emit(OpCodes.Sub);
-
+            variableIndex.Load();
+            il.Subtract(16);
             WriteGlobalVariable(value);
 
-            il.MarkLabel(done);
+            done.Mark();
 
             il.DebugUnindent();
         }
 
-        private void WriteVariable(byte variableIndex, LocalBuilder value, bool indirect = false)
+        private void WriteVariable(byte variableIndex, ILocal value, bool indirect = false)
         {
             if (variableIndex == 0)
             {
@@ -628,7 +557,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteVariable(Variable variable, LocalBuilder value, bool indirect = false)
+        private void WriteVariable(Variable variable, ILocal value, bool indirect = false)
         {
             switch (variable.Kind)
             {
@@ -673,7 +602,7 @@ namespace ZDebug.Compiler
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.Emit(OpCodes.Ldc_I4, op.Value);
+                    il.LoadConstant(op.Value);
                     break;
 
                 default: // OperandKind.Variable
@@ -682,13 +611,49 @@ namespace ZDebug.Compiler
             }
         }
 
+        /// <summary>
+        /// Reads the specified operand as a small constant and places the value on the stack.
+        /// </summary>
+        private byte ReadSmallConstant(int operandIndex)
+        {
+            if (operandIndex < 0 || operandIndex >= currentInstruction.OperandCount)
+            {
+                throw new ZCompilerException(
+                    string.Format(
+                        "Attempted to read operand {0}, but only 0 through {1} are valid.",
+                        operandIndex,
+                        currentInstruction.OperandCount - 1));
+            }
+
+            var op = currentInstruction.Operands[operandIndex];
+
+            if (op.Kind != OperandKind.SmallConstant)
+            {
+                throw new ZCompilerException(
+                    string.Format(
+                        "Expected a small constnat operand but found a {0}.",
+                        op.Kind));
+            }
+
+            return (byte)op.Value;
+        }
+
+        /// <summary>
+        /// Reads the first operand as a by ref variable.
+        /// </summary>
+        private Variable ReadByRefVariableOperand()
+        {
+            byte variableIndex = ReadSmallConstant(0);
+            return Variable.FromByte(variableIndex);
+        }
+
         private void UnpackRoutineAddress(Operand op)
         {
             switch (op.Kind)
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.Emit(OpCodes.Ldc_I4, machine.UnpackRoutineAddress(op.Value));
+                    il.LoadConstant(machine.UnpackRoutineAddress(op.Value));
                     break;
 
                 default: // OperandKind.Variable
@@ -697,23 +662,22 @@ namespace ZDebug.Compiler
                     byte version = machine.Version;
                     if (version < 4)
                     {
-                        il.Emit(OpCodes.Ldc_I4_2);
+                        il.LoadConstant(2);
                     }
                     else if (version < 8)
                     {
-                        il.Emit(OpCodes.Ldc_I4_4);
+                        il.LoadConstant(4);
                     }
                     else // 8
                     {
-                        il.Emit(OpCodes.Ldc_I4_8);
+                        il.LoadConstant(8);
                     }
 
-                    il.Emit(OpCodes.Mul);
+                    il.Multiply();
 
                     if (version >= 6 && version <= 7)
                     {
-                        il.Emit(OpCodes.Ldc_I4, machine.RoutinesOffset * 8);
-                        il.Emit(OpCodes.Add);
+                        il.Add(machine.RoutinesOffset * 8);
                     }
 
                     break;
@@ -726,7 +690,7 @@ namespace ZDebug.Compiler
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.Emit(OpCodes.Ldc_I4, machine.UnpackStringAddress(op.Value));
+                    il.LoadConstant(machine.UnpackStringAddress(op.Value));
                     break;
 
                 default: // OperandKind.Variable
@@ -735,23 +699,22 @@ namespace ZDebug.Compiler
                     byte version = machine.Version;
                     if (version < 4)
                     {
-                        il.Emit(OpCodes.Ldc_I4_2);
+                        il.LoadConstant(2);
                     }
                     else if (version < 8)
                     {
-                        il.Emit(OpCodes.Ldc_I4_4);
+                        il.LoadConstant(4);
                     }
                     else // 8
                     {
-                        il.Emit(OpCodes.Ldc_I4_8);
+                        il.LoadConstant(8);
                     }
 
-                    il.Emit(OpCodes.Mul);
+                    il.Multiply();
 
                     if (version >= 6 && version <= 7)
                     {
-                        il.Emit(OpCodes.Ldc_I4, machine.StringsOffset * 8);
-                        il.Emit(OpCodes.Add);
+                        il.Add(machine.StringsOffset * 8);
                     }
                     break;
             }
