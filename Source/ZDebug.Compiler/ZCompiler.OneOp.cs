@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ZDebug.Core.Instructions;
 using System.Reflection.Emit;
+using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -63,6 +64,107 @@ namespace ZDebug.Compiler
                 result.Store();
 
                 WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
+        private void op_get_sibling()
+        {
+            using (var result = il.NewLocal<ushort>())
+            {
+                ReadObjectSiblingFromOperand(0);
+                result.Store();
+
+                WriteVariable(currentInstruction.StoreVariable, result);
+
+                result.Load();
+                il.LoadConstant(0);
+                il.CompareGreaterThan();
+                Branch();
+            }
+        }
+
+        private void op_remove_obj()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            {
+                ReadOperand(0);
+                objNum.Store();
+
+                RemoveObjectFromParent(objNum);
+            }
+        }
+
+        private void op_get_prop_len()
+        {
+            using (var dataAddress = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<byte>())
+            {
+                ReadOperand(0);
+                dataAddress.Store();
+
+                var done = il.NewLabel();
+                var isNotZero = il.NewLabel();
+
+                dataAddress.Load();
+                isNotZero.BranchIf(Condition.True, @short: true);
+
+                il.LoadConstant(0);
+                value.Store();
+                done.Branch();
+
+                isNotZero.Mark();
+
+                dataAddress.Load();
+                il.Subtract(1);
+                il.ConvertToUInt16();
+                dataAddress.Store();
+
+                ReadByte(dataAddress);
+                value.Store();
+
+                var checkForZero = il.NewLabel();
+
+                if (machine.Version < 4)
+                {
+                    value.Load();
+                    il.Shr(5);
+                    il.Add(1);
+                    il.ConvertToUInt8();
+                    value.Store();
+                    checkForZero.Branch();
+                }
+
+                var secondBranch = il.NewLabel();
+
+                value.Load();
+                il.And(0x80);
+                secondBranch.BranchIf(Condition.True, @short: true);
+
+                value.Load();
+                il.Shr(6);
+                il.Add(1);
+                il.ConvertToUInt8();
+                value.Store();
+                checkForZero.Branch();
+
+                secondBranch.Mark();
+
+                value.Load();
+                il.And(0x3f);
+                il.ConvertToUInt8();
+                value.Store();
+
+                checkForZero.Mark();
+
+                value.Load();
+                done.BranchIf(Condition.True, @short: true);
+
+                il.LoadConstant(64);
+                value.Store();
+
+                done.Mark();
+
+                WriteVariable(currentInstruction.StoreVariable, value);
             }
         }
 

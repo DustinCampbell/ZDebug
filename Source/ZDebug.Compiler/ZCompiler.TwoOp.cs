@@ -115,7 +115,21 @@ namespace ZDebug.Compiler
 
         private void op_insert_obj()
         {
-            NotImplemented();
+            using (var objNum = il.NewLocal<ushort>())
+            using (var destNum = il.NewLocal<ushort>())
+            {
+                var done = il.NewLabel();
+
+                ReadValidObjectNumber(0, done);
+                objNum.Store();
+
+                ReadValidObjectNumber(1, done);
+                destNum.Store();
+
+                MoveObjectToDestination(objNum, destNum);
+
+                done.Mark();
+            }
         }
 
         private void op_je()
@@ -177,6 +191,15 @@ namespace ZDebug.Compiler
             Branch();
         }
 
+        private void op_jin()
+        {
+            ReadObjectParentFromOperand(0);
+            ReadOperand(1);
+
+            il.CompareEqual();
+            Branch();
+        }
+
         private void op_loadb()
         {
             using (var address = il.NewLocal<int>())
@@ -225,6 +248,277 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_get_prop()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            using (var propNum = il.NewLocal<ushort>())
+            using (var propAddress = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<ushort>())
+            using (var result = il.NewLocal<ushort>())
+            {
+                var done = il.NewLabel();
+
+                // Read objNum
+                var invalidObjNum = il.NewLabel();
+                ReadValidObjectNumber(0, invalidObjNum);
+                objNum.Store();
+
+                // Read propNum
+                ReadOperand(1);
+                propNum.Store();
+
+                int mask = machine.Version < 4 ? 0x1f : 0x3f;
+
+                // Read first property address into propAddress
+                FirstProperty(objNum);
+                propAddress.Store();
+
+                var loopStart = il.NewLabel();
+                var loopDone = il.NewLabel();
+
+                loopStart.Mark();
+
+                ReadByte(propAddress);
+                value.Store();
+
+                value.Load();
+                il.And(mask);
+                il.ConvertToUInt16();
+                propNum.Load();
+                loopDone.BranchIf(Condition.AtMost, @short: true);
+
+                propAddress.Load();
+                NextProperty();
+                propAddress.Store();
+
+                loopStart.Branch();
+
+                loopDone.Mark();
+
+                var propNotFound = il.NewLabel();
+
+                value.Load();
+                il.And(mask);
+                propNum.Load();
+                propNotFound.BranchIf(Condition.NotEqual);
+
+                propAddress.Load();
+                il.Add(1);
+                il.ConvertToUInt16();
+                propAddress.Store();
+
+                var sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
+
+                var secondBranch = il.NewLabel();
+
+                value.Load();
+                il.And(sizeMask);
+                secondBranch.BranchIf(Condition.True, @short: true);
+
+                ReadByte(propAddress);
+                result.Store();
+
+                done.Branch();
+
+                secondBranch.Mark();
+
+                ReadWord(propAddress);
+                result.Store();
+
+                done.Branch();
+
+                propNotFound.Mark();
+
+                propNum.Load();
+                il.Subtract(1);
+                il.Multiply(2);
+                il.Add(machine.ObjectTableAddress);
+                il.ConvertToUInt16();
+                propAddress.Store();
+
+                ReadWord(propAddress);
+                result.Store();
+
+                done.Branch();
+
+                invalidObjNum.Mark();
+
+                il.LoadConstant(0);
+                result.Store();
+
+                done.Mark();
+
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
+        private void op_get_next_prop()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            using (var propNum = il.NewLocal<ushort>())
+            using (var propAddress = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<ushort>())
+            {
+                var done = il.NewLabel();
+
+                // Read objNum
+                var invalidObjNum = il.NewLabel();
+                ReadValidObjectNumber(0, invalidObjNum);
+                objNum.Store();
+
+                // Read propNum
+                ReadOperand(1);
+                propNum.Store();
+
+                int mask = machine.Version < 4 ? 0x1f : 0x3f;
+
+                // Read first property address into propAddress
+                FirstProperty(objNum);
+                propAddress.Store();
+
+                var storePropNum = il.NewLabel();
+
+                // propNum == 0?
+                propNum.Load();
+                storePropNum.BranchIf(Condition.False);
+
+                var loopStart = il.NewLabel();
+
+                // start of the loop
+                loopStart.Mark();
+
+                ReadByte(propAddress);
+                value.Store();
+
+                propAddress.Load();
+                NextProperty();
+                propAddress.Store();
+
+                value.Load();
+                il.LoadConstant(mask);
+                il.And();
+                il.ConvertToUInt16();
+                propNum.Load();
+                loopStart.BranchIf(Condition.GreaterThan);
+
+                // loop complete - check if propNum and value match.
+                value.Load();
+                il.LoadConstant(mask);
+                il.And();
+                il.ConvertToUInt16();
+                propNum.Load();
+                storePropNum.BranchIf(Condition.Equal, @short: true);
+
+                il.RuntimeError("Could not find property {0} on object {1}.", propNum, objNum);
+
+                // At this point, we're done - store the value
+                storePropNum.Mark();
+
+                ReadByte(propAddress);
+                il.LoadConstant(mask);
+                il.And();
+                il.ConvertToUInt16();
+                value.Store();
+                WriteVariable(currentInstruction.StoreVariable, value);
+
+                done.Branch(@short: true);
+
+                // invalid object encountered
+                invalidObjNum.Mark();
+
+                il.LoadConstant(0);
+                value.Store();
+                WriteVariable(currentInstruction.StoreVariable, value);
+
+                done.Mark();
+            }
+        }
+
+        private void op_get_prop_addr()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            using (var propNum = il.NewLocal<ushort>())
+            using (var propAddress = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<ushort>())
+            {
+                var done = il.NewLabel();
+
+                // Read objNum
+                var storeZero = il.NewLabel();
+                ReadValidObjectNumber(0, storeZero);
+                objNum.Store();
+
+                // Read propNum
+                ReadOperand(1);
+                propNum.Store();
+
+                int mask = machine.Version < 4 ? 0x1f : 0x3f;
+
+                // Read first property address into propAddress
+                FirstProperty(objNum);
+                propAddress.Store();
+
+                var loopStart = il.NewLabel();
+                var loopDone = il.NewLabel();
+
+                loopStart.Mark();
+
+                ReadByte(propAddress);
+                value.Store();
+
+                value.Load();
+                il.And(mask);
+                il.ConvertToUInt16();
+                propNum.Load();
+                loopDone.BranchIf(Condition.AtMost, @short: true);
+
+                propAddress.Load();
+                NextProperty();
+                propAddress.Store();
+
+                loopStart.Branch();
+
+                loopDone.Mark();
+
+                var storeAddress = il.NewLabel();
+
+                value.Load();
+                il.And(mask);
+                propNum.Load();
+                storeZero.BranchIf(Condition.NotEqual, @short: true);
+
+                if (machine.Version > 3)
+                {
+                    value.Load();
+                    il.And(0x80);
+                    storeAddress.BranchIf(Condition.False, @short: true);
+
+                    propAddress.Load();
+                    il.Add(1);
+                    il.ConvertToUInt16();
+                    propAddress.Store();
+                }
+
+                storeAddress.Mark();
+
+                propAddress.Load();
+                il.Add(1);
+                il.ConvertToUInt16();
+                propAddress.Store();
+                WriteVariable(currentInstruction.StoreVariable, propAddress);
+
+                done.Branch(@short: true);
+
+                storeZero.Mark();
+
+                il.LoadConstant(0);
+                value.Store();
+                WriteVariable(currentInstruction.StoreVariable, value);
+
+                done.Mark();
+            }
+        }
+
         private void op_test_attr()
         {
             using (var objNum = il.NewLocal<ushort>())
@@ -250,6 +544,46 @@ namespace ZDebug.Compiler
                 Branch();
 
                 done.Mark();
+            }
+        }
+
+        private void op_set_attr()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            using (var attribute = il.NewLocal<byte>())
+            {
+                // Read objNum
+                var invalidObjNum = il.NewLabel();
+                ReadValidObjectNumber(0, invalidObjNum);
+                objNum.Store();
+
+                // Read attribute
+                ReadOperand(1);
+                attribute.Store();
+
+                ObjectSetAttribute(objNum, attribute, true);
+
+                invalidObjNum.Mark();
+            }
+        }
+
+        private void op_clear_attr()
+        {
+            using (var objNum = il.NewLocal<ushort>())
+            using (var attribute = il.NewLocal<byte>())
+            {
+                // Read objNum
+                var invalidObjNum = il.NewLabel();
+                ReadValidObjectNumber(0, invalidObjNum);
+                objNum.Store();
+
+                // Read attribute
+                ReadOperand(1);
+                attribute.Store();
+
+                ObjectSetAttribute(objNum, attribute, false);
+
+                invalidObjNum.Mark();
             }
         }
     }

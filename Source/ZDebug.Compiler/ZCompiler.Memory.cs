@@ -121,6 +121,16 @@ namespace ZDebug.Compiler
         /// <summary>
         /// Writes a byte to memory at the specified address.
         /// </summary>
+        private void WriteByte(int address, ushort value)
+        {
+            WriteByte(
+                loadAddress: il.GenerateLoadConstant(address),
+                loadValue: il.GenerateLoadConstant(value));
+        }
+
+        /// <summary>
+        /// Writes a byte to memory at the specified address.
+        /// </summary>
         private void WriteByte(int address, ILocal value)
         {
             WriteByte(
@@ -136,6 +146,16 @@ namespace ZDebug.Compiler
             WriteByte(
                 loadAddress: il.GenerateLoad(address),
                 loadValue: il.GenerateLoad(value));
+        }
+
+        /// <summary>
+        /// Writes a byte to memory at the address stored in the given local.
+        /// </summary>
+        private void WriteByte(ILocal address, ushort value)
+        {
+            WriteByte(
+                loadAddress: il.GenerateLoad(address),
+                loadValue: il.GenerateLoadConstant(value));
         }
 
         /// <summary>
@@ -166,6 +186,14 @@ namespace ZDebug.Compiler
                     il.GenerateConvertToUInt8()));
         }
 
+        private void WriteWord(int address, ushort value)
+        {
+            WriteWord(
+                loadAddress: il.GenerateLoadConstant(address),
+                loadAddressPlusOne: il.GenerateLoadConstant(address + 1),
+                loadValue: il.GenerateLoadConstant(value));
+        }
+
         private void WriteWord(int address, ILocal value)
         {
             WriteWord(
@@ -180,6 +208,14 @@ namespace ZDebug.Compiler
                 loadAddress: il.GenerateLoad(address),
                 loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
                 loadValue: il.GenerateLoad(value));
+        }
+
+        private void WriteWord(ILocal address, ushort value)
+        {
+            WriteWord(
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
+                loadValue: il.GenerateLoadConstant(value));
         }
 
         private void CheckStackEmpty()

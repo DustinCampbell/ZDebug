@@ -60,6 +60,54 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void WriteObjectNumber(ushort address, ushort value)
+        {
+            if (machine.Version < 4)
+            {
+                WriteByte(address, value);
+            }
+            else
+            {
+                WriteWord(address, value);
+            }
+        }
+
+        private void WriteObjectNumber(ushort address, ILocal value)
+        {
+            if (machine.Version < 4)
+            {
+                WriteByte(address, value);
+            }
+            else
+            {
+                WriteWord(address, value);
+            }
+        }
+
+        private void WriteObjectNumber(ILocal address, ILocal value)
+        {
+            if (machine.Version < 4)
+            {
+                WriteByte(address, value);
+            }
+            else
+            {
+                WriteWord(address, value);
+            }
+        }
+
+        private void WriteObjectNumber(ILocal address, ushort value)
+        {
+            if (machine.Version < 4)
+            {
+                WriteByte(address, value);
+            }
+            else
+            {
+                WriteWord(address, value);
+            }
+        }
+
         private void ReadValidObjectNumber(int operandIndex, ILabel failed)
         {
             ReadOperand(operandIndex);
@@ -122,6 +170,71 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
+        /// Writes the number of an object's parent, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectParent(int objNum, ILocal value)
+        {
+            var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectParentOffset);
+
+            WriteObjectNumber(address, value);
+        }
+
+        /// <summary>
+        /// Writes the number of an object's parent, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectParent(ILocal objNum, ILocal value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add parent number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectParentOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        /// <summary>
+        /// Writes the number of an object's parent, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectParent(ILocal objNum, ushort value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add parent number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectParentOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        private void WriteObjectParentFromOperand(int operandIndex, ILocal value)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    WriteObjectParent(op.Value, value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    using (var objNum = il.NewLocal<ushort>())
+                    {
+                        WriteObjectParent(objNum, value);
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Reads the number of an object's sibling, given its 1-based object number.
         /// </summary>
         private void ReadObjectSibling(int objNum)
@@ -165,6 +278,71 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
+        /// Writes the number of an object's sibling, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectSibling(int objNum, ILocal value)
+        {
+            var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectSiblingOffset);
+
+            WriteObjectNumber(address, value);
+        }
+
+        /// <summary>
+        /// Writes the number of an object's sibling, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectSibling(ILocal objNum, ILocal value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add sibling number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectSiblingOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        /// <summary>
+        /// Writes the number of an object's sibling, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectSibling(ILocal objNum, ushort value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add sibling number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectSiblingOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        private void WriteObjectSiblingFromOperand(int operandIndex, ILocal value)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    WriteObjectSibling(op.Value, value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    using (var objNum = il.NewLocal<ushort>())
+                    {
+                        WriteObjectSibling(objNum, value);
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Reads the number of an object's child, given its 1-based object number.
         /// </summary>
         private void ReadObjectChild(int objNum)
@@ -203,6 +381,71 @@ namespace ZDebug.Compiler
                 case OperandKind.Variable:
                     ReadOperand(operandIndex);
                     ReadObjectChild();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Writes the number of an object's child, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectChild(int objNum, ILocal value)
+        {
+            var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectChildOffset);
+
+            WriteObjectNumber(address, value);
+        }
+
+        /// <summary>
+        /// Writes the number of an object's child, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectChild(ILocal objNum, ILocal value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add child number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectChildOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        /// <summary>
+        /// Writes the number of an object's child, given its 1-based object number.
+        /// </summary>
+        private void WriteObjectChild(ILocal objNum, ushort value)
+        {
+            CalculateObjectAddress(objNum);
+
+            // Add child number offset to the address on the evaluation stack.
+            il.Add(machine.ObjectChildOffset);
+
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+                WriteObjectNumber(address, value);
+            }
+        }
+
+        private void WriteObjectChildFromOperand(int operandIndex, ILocal value)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    WriteObjectChild(op.Value, value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    using (var objNum = il.NewLocal<ushort>())
+                    {
+                        WriteObjectChild(objNum, value);
+                    }
                     break;
             }
         }
@@ -270,6 +513,57 @@ namespace ZDebug.Compiler
 #endif
         }
 
+        private void ObjectSetAttribute(ILocal objNum, ILocal attribute, bool value)
+        {
+            using (var address = il.NewLocal<int>())
+            using (var bitMask = il.NewLocal<int>())
+            using (var byteValue = il.NewLocal<byte>())
+            {
+                // address
+                CalculateObjectAddress(objNum);
+                attribute.Load();
+                il.Divide(8);
+                il.Add();
+                address.Store();
+
+                // bit mask
+                il.LoadConstant(1);
+                il.LoadConstant(7);
+                attribute.Load();
+                il.LoadConstant(8);
+                il.Remainder();
+                il.Subtract();
+                il.And(0x1f);
+                il.Shl();
+                bitMask.Store();
+
+                // load byte value
+                memory.LoadElement(il.GenerateLoad(address));
+                byteValue.Store();
+
+                // calculate
+                byteValue.Load();
+                bitMask.Load();
+
+                if (value)
+                {
+                    il.Or();
+                }
+                else
+                {
+                    il.Not();
+                    il.And();
+                }
+
+                il.ConvertToUInt8();
+
+                byteValue.Store();
+                memory.StoreElement(
+                    loadIndex: il.GenerateLoad(address), 
+                    loadValue: il.GenerateLoad(byteValue));
+            }
+        }
+
         /// <summary>
         /// Given a property table address on the evaluation stack, puts the address of
         /// its first property on the stack.
@@ -332,7 +626,7 @@ namespace ZDebug.Compiler
                 else
                 {
                     // if ((size & 0x80) != 0x80)
-                    size.Store();
+                    size.Load();
                     il.And(0x80);
                     il.LoadConstant(0x80);
 
@@ -378,6 +672,142 @@ namespace ZDebug.Compiler
                 il.Add(1);
                 il.ConvertToUInt16();
             }
+        }
+
+        private void ReadObjectLeftSibling(ILocal objNum)
+        {
+            var done = il.NewLabel();
+
+            using (var parentNum = il.NewLocal<ushort>())
+            using (var parentChildNum = il.NewLocal<ushort>())
+            using (var next = il.NewLocal<ushort>())
+            using (var siblingNum = il.NewLocal<ushort>())
+            {
+                ReadObjectParent(objNum);
+                parentNum.Store();
+
+                var hasParent = il.NewLabel();
+
+                // parentNum != 0?
+                parentNum.Load();
+                hasParent.BranchIf(Condition.True, @short: true);
+
+                il.LoadConstant(0);
+                done.Branch();
+
+                hasParent.Mark();
+
+                ReadObjectChild(parentNum);
+                parentChildNum.Store();
+
+                var isNotFirstChild = il.NewLabel();
+                parentChildNum.Load();
+                objNum.Load();
+                isNotFirstChild.BranchIf(Condition.NotEqual, @short: true);
+
+                il.LoadConstant(0);
+                done.Branch();
+
+                isNotFirstChild.Mark();
+
+                parentChildNum.Load();
+                next.Store();
+
+                var loopStart = il.NewLabel();
+                loopStart.Mark();
+
+                ReadObjectSibling(next);
+                siblingNum.Store();
+
+                var continueLoop = il.NewLabel();
+                siblingNum.Load();
+                objNum.Load();
+                continueLoop.BranchIf(Condition.NotEqual, @short: true);
+
+                next.Load();
+                done.Branch();
+
+                continueLoop.Mark();
+
+                siblingNum.Load();
+                next.Store();
+
+                next.Load();
+                loopStart.BranchIf(Condition.True);
+
+                next.Load();
+
+                done.Mark();
+            }
+        }
+
+        private void RemoveObjectFromParent(ILocal objNum)
+        {
+            using (var leftSiblingNum = il.NewLocal<ushort>())
+            using (var rightSiblingNum = il.NewLocal<ushort>())
+            using (var parentNum = il.NewLocal<ushort>())
+            {
+                ReadObjectLeftSibling(objNum);
+                leftSiblingNum.Store();
+
+                ReadObjectSibling(objNum);
+                rightSiblingNum.Store();
+
+                // leftSiblingNum != 0?
+                var secondStep = il.NewLabel();
+                leftSiblingNum.Load();
+                secondStep.BranchIf(Condition.False, @short: true);
+
+                // first, unhook left sibling from right sibling
+                WriteObjectSibling(leftSiblingNum, rightSiblingNum);
+
+                secondStep.Mark();
+
+                // next, unhook obj from parent, if it is the first child
+                ReadObjectParent(objNum);
+                parentNum.Store();
+
+                // parentNum != 0?
+                var thirdStep = il.NewLabel();
+                parentNum.Load();
+                thirdStep.BranchIf(Condition.False, @short: true);
+
+                // objNum == parentNum.Child
+                objNum.Load();
+                ReadObjectChild(parentNum);
+                thirdStep.BranchIf(Condition.NotEqual, @short: true);
+
+                WriteObjectChild(parentNum, rightSiblingNum);
+
+                thirdStep.Mark();
+
+                // finally, set parent and sibling to 0
+                WriteObjectParent(objNum, 0);
+                WriteObjectSibling(objNum, 0);
+            }
+        }
+
+        private void MoveObjectToDestination(ILocal objNum, ILocal destNum)
+        {
+            RemoveObjectFromParent(objNum);
+
+            var done = il.NewLabel();
+
+            destNum.Load();
+            done.BranchIf(Condition.False);
+
+            WriteObjectParent(objNum, destNum);
+
+            using (var parentChildNum = il.NewLocal<ushort>())
+            {
+                ReadObjectChild(destNum);
+                parentChildNum.Store();
+
+                WriteObjectSibling(objNum, parentChildNum);
+                WriteObjectChild(destNum, objNum);
+            }
+
+            done.Mark();
         }
     }
 }

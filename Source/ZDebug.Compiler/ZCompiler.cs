@@ -171,15 +171,12 @@ namespace ZDebug.Compiler
                 Assemble();
             }
 
-            il.LoadConstant(0);
-            il.Return();
-
             return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
         }
 
         private void NotImplemented()
         {
-            il.RuntimeError(string.Format("Opcode '{0}' not implemented.", currentInstruction.Opcode.Name));
+            il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", currentInstruction.Address, currentInstruction.Opcode.Name));
         }
 
         private void Branch()
@@ -237,6 +234,9 @@ namespace ZDebug.Compiler
                         case 0x05:
                             op_inc_chk();
                             return;
+                        case 0x06:
+                            op_jin();
+                            return;
                         case 0x08:
                             op_or();
                             return;
@@ -245,6 +245,12 @@ namespace ZDebug.Compiler
                             return;
                         case 0x0a:
                             op_test_attr();
+                            return;
+                        case 0x0b:
+                            op_set_attr();
+                            return;
+                        case 0x0c:
+                            op_clear_attr();
                             return;
                         case 0x0d:
                             op_store();
@@ -257,6 +263,15 @@ namespace ZDebug.Compiler
                             return;
                         case 0x10:
                             op_loadb();
+                            return;
+                        case 0x11:
+                            op_get_prop();
+                            return;
+                        case 0x12:
+                            op_get_prop_addr();
+                            return;
+                        case 0x13:
+                            op_get_next_prop();
                             return;
                         case 0x14:
                             op_add();
@@ -298,11 +313,17 @@ namespace ZDebug.Compiler
                         case 0x00:
                             op_jz();
                             return;
+                        case 0x01:
+                            op_get_sibling();
+                            return;
                         case 0x02:
                             op_get_child();
                             return;
                         case 0x03:
                             op_get_parent();
+                            return;
+                        case 0x04:
+                            op_get_prop_len();
                             return;
                         case 0x05:
                             op_inc();
@@ -318,6 +339,9 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+                        case 0x09:
+                            op_remove_obj();
+                            return;
                         case 0x0b:
                             op_ret();
                             return;
