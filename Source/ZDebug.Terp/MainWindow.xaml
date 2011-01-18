@@ -1,7 +1,12 @@
 ﻿<Window x:Class="ZDebug.Terp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="480" Width="640">
+
+    <Window.Resources>
+        <BitmapImage x:Key="openImage" UriSource="Images/open.png"/>
+    </Window.Resources>
+
     <Grid>
 
         <Grid.RowDefinitions>
@@ -13,7 +18,11 @@
 
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open Story File..." Click="MenuItem_Click"/>
+                <MenuItem Header="_Open Story File..." Click="Open_Click">
+                    <MenuItem.Icon>
+                        <Image Height="16" Width="16" Source="{StaticResource openImage}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="E_xit"/>
             </MenuItem>
@@ -21,8 +30,15 @@
 
         <ToolBarTray Grid.Row="1">
             <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
+                <Button ToolTip="Open a Z-Code File" Click="Open_Click">
+                    <Image Height="16" Width="16" Source="{StaticResource openImage}"/>
+                </Button>
             </ToolBar>
         </ToolBarTray>
+
+        <Grid Grid.Row="2" Name="windowContainer">
+
+        </Grid>
 
         <StatusBar Grid.Row="3">
             <StatusBarItem Content="Z-Debug"/>
