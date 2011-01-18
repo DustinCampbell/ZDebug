@@ -75,6 +75,28 @@ namespace ZDebug.Compiler
             il.DebugUnindent();
         }
 
+        private void op_check_arg_count()
+        {
+            ReadOperand(0);
+            argCount.Load();
+
+            il.CompareAtMost();
+            Branch();
+        }
+
+        private void op_not()
+        {
+            ReadOperand(0);
+            il.Not();
+            il.ConvertToUInt16();
+
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
         private void op_print_char()
         {
             ReadOperand(0);
@@ -94,6 +116,25 @@ namespace ZDebug.Compiler
 
                 PrintText();
             }
+        }
+
+        private void op_pull()
+        {
+            var variable = ReadByRefVariableOperand();
+
+            PopStack();
+
+            using (var value = il.NewLocal<ushort>())
+            {
+                value.Store();
+                WriteVariable(variable, value, indirect: true);
+            }
+        }
+
+        private void op_push()
+        {
+            ReadOperand(0);
+            PushStack();
         }
 
         private void op_put_prop()

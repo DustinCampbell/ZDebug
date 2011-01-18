@@ -9,6 +9,36 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
+        private void op_dec()
+        {
+            using (var value = il.NewLocal<short>())
+            {
+                var variable = ReadByRefVariableOperand();
+
+                ReadVariable(variable, indirect: true);
+                il.ConvertToInt16();
+                il.Subtract(1);
+                value.Store();
+
+                WriteVariable(variable, value, indirect: true);
+            }
+        }
+
+        private void op_inc()
+        {
+            using (var value = il.NewLocal<short>())
+            {
+                var variable = ReadByRefVariableOperand();
+
+                ReadVariable(variable, indirect: true);
+                il.ConvertToInt16();
+                il.Add(1);
+                value.Store();
+
+                WriteVariable(variable, value, indirect: true);
+            }
+        }
+
         private void op_jump()
         {
             var address = currentInstruction.Address + currentInstruction.Length + (short)(currentInstruction.Operands[0].Value) - 2;
@@ -25,9 +55,21 @@ namespace ZDebug.Compiler
             Branch();
         }
 
+        private void op_load()
+        {
+            var variable = ReadByRefVariableOperand();
+
+            ReadVariable(variable, indirect: true);
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
         private void op_print_paddr()
         {
-            NotImplemented();
+            il.DebugWrite("print_paddr not implemented -- skipping...");
         }
 
         private void op_ret()

@@ -210,8 +210,6 @@ namespace ZDebug.Compiler
 
         private void PopStack()
         {
-            il.DebugWrite("PopStack (sp = {0})", sp);
-
             CheckStackEmpty();
 
             stack.LoadElement(
@@ -227,8 +225,6 @@ namespace ZDebug.Compiler
 
         private void PeekStack()
         {
-            il.DebugWrite("PeekStack (sp = {0})", sp);
-
             CheckStackEmpty();
 
             stack.LoadElement(
@@ -239,8 +235,6 @@ namespace ZDebug.Compiler
 
         private void PushStack(ILocal value)
         {
-            il.DebugWrite("PushStack {0} (sp = {1})", value, sp);
-
             CheckStackFull();
 
             stack.StoreElement(
@@ -253,10 +247,17 @@ namespace ZDebug.Compiler
             sp.Store();
         }
 
+        private void PushStack()
+        {
+            using (var value = il.NewLocal<ushort>())
+            {
+                value.Store();
+                PushStack(value);
+            }
+        }
+
         private void SetStackTop(ILocal value)
         {
-            il.DebugWrite("SetStackTop {0} (sp = {1})", value, sp);
-
             CheckStackEmpty();
 
             stack.StoreElement(
@@ -264,6 +265,15 @@ namespace ZDebug.Compiler
                     il.GenerateLoad(sp),
                     il.GenerateSubtract(1)),
                 il.GenerateLoad(value));
+        }
+
+        private void SetStackTop()
+        {
+            using (var value = il.NewLocal<ushort>())
+            {
+                value.Store();
+                SetStackTop(value);
+            }
         }
 
         /// <summary>
@@ -582,10 +592,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        /// <summary>
-        /// Reads the specified operand and places the value on the stack.
-        /// </summary>
-        private void ReadOperand(int operandIndex)
+        private Operand GetOperand(int operandIndex)
         {
             if (operandIndex < 0 || operandIndex >= currentInstruction.OperandCount)
             {
@@ -596,7 +603,15 @@ namespace ZDebug.Compiler
                         currentInstruction.OperandCount - 1));
             }
 
-            var op = currentInstruction.Operands[operandIndex];
+            return currentInstruction.Operands[operandIndex];
+        }
+
+        /// <summary>
+        /// Reads the specified operand and places the value on the stack.
+        /// </summary>
+        private void ReadOperand(int operandIndex)
+        {
+            var op = GetOperand(operandIndex);
 
             switch (op.Kind)
             {
@@ -616,16 +631,7 @@ namespace ZDebug.Compiler
         /// </summary>
         private byte ReadSmallConstant(int operandIndex)
         {
-            if (operandIndex < 0 || operandIndex >= currentInstruction.OperandCount)
-            {
-                throw new ZCompilerException(
-                    string.Format(
-                        "Attempted to read operand {0}, but only 0 through {1} are valid.",
-                        operandIndex,
-                        currentInstruction.OperandCount - 1));
-            }
-
-            var op = currentInstruction.Operands[operandIndex];
+            var op = GetOperand(operandIndex);
 
             if (op.Kind != OperandKind.SmallConstant)
             {

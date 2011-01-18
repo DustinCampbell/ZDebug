@@ -103,6 +103,24 @@ namespace ZDebug.Compiler
             ReadObjectNumber();
         }
 
+        private void ReadObjectParentFromOperand(int operandIndex)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectParent(op.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    ReadObjectParent();
+                    break;
+            }
+        }
+
         /// <summary>
         /// Reads the number of an object's sibling, given its 1-based object number.
         /// </summary>
@@ -128,6 +146,24 @@ namespace ZDebug.Compiler
             ReadObjectNumber();
         }
 
+        private void ReadObjectSiblingFromOperand(int operandIndex)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectSibling(op.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    ReadObjectSibling();
+                    break;
+            }
+        }
+
         /// <summary>
         /// Reads the number of an object's child, given its 1-based object number.
         /// </summary>
@@ -151,6 +187,24 @@ namespace ZDebug.Compiler
             il.Add(machine.ObjectChildOffset);
 
             ReadObjectNumber();
+        }
+
+        private void ReadObjectChildFromOperand(int operandIndex)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectChild(op.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadOperand(operandIndex);
+                    ReadObjectChild();
+                    break;
+            }
         }
 
         /// <summary>

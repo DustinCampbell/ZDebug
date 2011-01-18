@@ -75,12 +75,18 @@ namespace ZDebug.Compiler
                 if (i.HasBranch && i.Branch.Kind == BranchKind.Address)
                 {
                     var address = i.Address + i.Length + i.Branch.Offset - 2;
-                    this.addressToLabelMap.Add(address, il.NewLabel());
+                    if (!this.addressToLabelMap.ContainsKey(address))
+                    {
+                        this.addressToLabelMap.Add(address, il.NewLabel());
+                    }
                 }
                 else if (i.Opcode.IsJump)
                 {
                     var address = i.Address + i.Length + (short)i.Operands[0].Value - 2;
-                    this.addressToLabelMap.Add(address, il.NewLabel());
+                    if (!this.addressToLabelMap.ContainsKey(address))
+                    {
+                        this.addressToLabelMap.Add(address, il.NewLabel());
+                    }
                 }
             }
 
@@ -152,7 +158,7 @@ namespace ZDebug.Compiler
                     label.Mark();
                 }
 
-                il.DebugWrite(string.Format("{0:x4}: {1}", i.Address, i.Opcode.Name));
+                il.DebugWrite(i.PrettyPrint(machine));
 
                 currentInstruction = i;
                 Assemble();
@@ -182,19 +188,19 @@ namespace ZDebug.Compiler
             switch (currentInstruction.Branch.Kind)
             {
                 case BranchKind.RFalse:
-                    il.DebugWrite("branching rfalse...");
+                    il.DebugWrite("  > branching rfalse...");
                     il.Return(0);
                     break;
 
                 case BranchKind.RTrue:
-                    il.DebugWrite("branching rtrue...");
+                    il.DebugWrite("  > branching rtrue...");
                     il.Return(1);
                     break;
 
                 default: // BranchKind.Address
                     var address = currentInstruction.Address + currentInstruction.Length + currentInstruction.Branch.Offset - 2;
                     var jump = addressToLabelMap[address];
-                    il.DebugWrite(string.Format("branching to {0:x4}...", address));
+                    il.DebugWrite(string.Format("  > branching to {0:x4}...", address));
                     jump.Branch();
                     break;
             }
@@ -211,6 +217,12 @@ namespace ZDebug.Compiler
                     {
                         case 0x01:
                             op_je();
+                            return;
+                        case 0x02:
+                            op_jl();
+                            return;
+                        case 0x03:
+                            op_jg();
                             return;
                         case 0x04:
                             op_dec_chk();
@@ -254,6 +266,14 @@ namespace ZDebug.Compiler
                         case 0x18:
                             op_mod();
                             return;
+                        case 0x19:
+                            if (machine.Version >= 4)
+                            {
+                                op_call_s();
+                                return;
+                            }
+
+                            break;
                         case 0x1a:
                             if (machine.Version >= 5)
                             {
@@ -271,6 +291,12 @@ namespace ZDebug.Compiler
                         case 0x00:
                             op_jz();
                             return;
+                        case 0x05:
+                            op_inc();
+                            return;
+                        case 0x06:
+                            op_dec();
+                            return;
                         case 0x0b:
                             op_ret();
                             return;
@@ -279,6 +305,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x0d:
                             op_print_paddr();
+                            return;
+                        case 0x0e:
+                            op_load();
                             return;
                         case 0x0f:
                             if (machine.Version >= 5)
@@ -330,6 +359,41 @@ namespace ZDebug.Compiler
                         case 0x06:
                             op_print_num();
                             return;
+                        case 0x08:
+                            op_push();
+                            return;
+                        case 0x09:
+                            if (machine.Version != 6)
+                            {
+                                op_pull();
+                                return;
+                            }
+
+                            break;
+                        case 0x18:
+                            if (machine.Version >= 5)
+                            {
+                                op_not();
+                                return;
+                            }
+
+                            break;
+                        case 0x19:
+                            if (machine.Version >= 5)
+                            {
+                                op_call_n();
+                                return;
+                            }
+
+                            break;
+                        case 0x1f:
+                            if (machine.Version >= 5)
+                            {
+                                op_check_arg_count();
+                                return;
+                            }
+
+                            break;
                     }
 
                     break;

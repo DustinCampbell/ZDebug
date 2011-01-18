@@ -11,5 +11,18 @@ namespace ZDebug.Core.Instructions
             this.Kind = kind;
             this.Value = value;
         }
+
+        public override string ToString()
+        {
+            switch (Kind)
+            {
+                case OperandKind.LargeConstant:
+                    return "#" + Value.ToString("x4");
+                case OperandKind.SmallConstant:
+                    return "#" + Value.ToString("x2");
+                default: // OperandKind.Variable
+                    return Variable.FromByte((byte)Value).ToString();
+            }
+        }
     }
 }

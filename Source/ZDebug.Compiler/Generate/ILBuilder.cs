@@ -67,6 +67,20 @@ namespace ZDebug.Compiler.Generate
             il.Emit(OpCodes.Clt);
         }
 
+        public void CompareAtLeast()
+        {
+            il.Emit(OpCodes.Clt);
+            LoadConstant(0);
+            CompareEqual();
+        }
+
+        public void CompareAtMost()
+        {
+            il.Emit(OpCodes.Cgt);
+            LoadConstant(0);
+            CompareEqual();
+        }
+
         public void Duplicate()
         {
             il.Emit(OpCodes.Dup);
@@ -270,6 +284,11 @@ namespace ZDebug.Compiler.Generate
         {
             local.Load();
             Or();
+        }
+
+        public void Not()
+        {
+            il.Emit(OpCodes.Not);
         }
 
         public void Shl()

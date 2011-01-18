@@ -153,6 +153,30 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_jg()
+        {
+            ReadOperand(0);
+            il.ConvertToInt16();
+
+            ReadOperand(1);
+            il.ConvertToInt16();
+
+            il.CompareGreaterThan();
+            Branch();
+        }
+
+        private void op_jl()
+        {
+            ReadOperand(0);
+            il.ConvertToInt16();
+
+            ReadOperand(1);
+            il.ConvertToInt16();
+
+            il.CompareLessThan();
+            Branch();
+        }
+
         private void op_loadb()
         {
             using (var address = il.NewLocal<int>())
