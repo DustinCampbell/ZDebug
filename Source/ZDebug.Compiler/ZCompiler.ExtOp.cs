@@ -94,5 +94,15 @@ namespace ZDebug.Compiler
                 WriteVariable(currentInstruction.StoreVariable, result);
             }
         }
+
+        private void op_save_undo()
+        {
+            NotImplemented();
+        }
+
+        private void op_restore_undo()
+        {
+            NotImplemented();
+        }
     }
 }

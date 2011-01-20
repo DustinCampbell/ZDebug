@@ -24,6 +24,11 @@ namespace ZDebug.Compiler
             il.Return(1);
         }
 
+        private void op_restart()
+        {
+            NotImplemented();
+        }
+
         private void op_quit()
         {
             NotImplemented();

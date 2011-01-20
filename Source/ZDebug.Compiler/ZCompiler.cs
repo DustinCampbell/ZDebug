@@ -417,6 +417,9 @@ namespace ZDebug.Compiler
                         case 0x03:
                             op_print_ret();
                             return;
+                        case 0x07:
+                            op_restart();
+                            return;
                         case 0x08:
                             op_ret_popped();
                             return;
@@ -595,6 +598,22 @@ namespace ZDebug.Compiler
                             if (machine.Version >= 5)
                             {
                                 op_art_shift();
+                                return;
+                            }
+
+                            break;
+                        case 0x09:
+                            if (machine.Version >= 5)
+                            {
+                                op_save_undo();
+                                return;
+                            }
+
+                            break;
+                        case 0x0a:
+                            if (machine.Version >= 5)
+                            {
+                                op_restore_undo();
                                 return;
                             }
 
