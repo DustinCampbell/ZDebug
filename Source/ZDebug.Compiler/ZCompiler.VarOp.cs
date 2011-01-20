@@ -265,6 +265,43 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_random()
+        {
+            using (var range = il.NewLocal<short>())
+            using (var result = il.NewLocal<ushort>())
+            {
+                var seed = il.NewLabel();
+                var done = il.NewLabel();
+
+                ReadOperand(0);
+                il.ConvertToInt16();
+                range.Store();
+
+                range.Load();
+                il.LoadConstant(0);
+                seed.BranchIf(Condition.GreaterThan, @short: true);
+
+                il.LoadArgument(0);
+                range.Load();
+                il.Call(nextRandomHelper);
+                done.Branch(@short: true);
+
+                seed.Mark();
+
+                il.LoadArgument(0);
+                range.Load();
+                il.Call(seedRandomHelper);
+                il.LoadConstant(0);
+
+                done.Mark();
+
+                il.ConvertToUInt16();
+
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
         private void op_storeb()
         {
             using (var address = il.NewLocal<int>())

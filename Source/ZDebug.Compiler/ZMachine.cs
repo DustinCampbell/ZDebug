@@ -38,6 +38,8 @@ namespace ZDebug.Compiler
 
         private readonly IntegerMap<ZRoutineCode> compiledRoutines;
 
+        private Random random;
+
         public ZMachine(byte[] memory, IScreen screen = null)
         {
             this.memory = memory;
@@ -63,6 +65,8 @@ namespace ZDebug.Compiler
             this.stringsOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x2a) : 0;
 
             this.compiledRoutines = new IntegerMap<ZRoutineCode>(1024);
+
+            this.random = new Random();
         }
 
         private ZRoutineCode GetRoutineCode(int address)
@@ -88,6 +92,26 @@ namespace ZDebug.Compiler
         {
             var zwords = ztext.ReadZWords(address);
             return ConvertEmbeddedZText(zwords);
+        }
+
+        internal int NextRandom(short range)
+        {
+            // range should be inclusive, so we need to subtract 1 since System.Random.Next makes it exclusive
+            const int minValue = 1;
+            int maxValue = Math.Max(minValue, range - 1);
+            return random.Next(minValue, maxValue);
+        }
+
+        internal void SeedRandom(short range)
+        {
+            if (range == 0)
+            {
+                random = new Random((int)DateTime.Now.Ticks);
+            }
+            else
+            {
+                random = new Random(+range);
+            }
         }
 
         public string ConvertEmbeddedZText(ushort[] zwords)

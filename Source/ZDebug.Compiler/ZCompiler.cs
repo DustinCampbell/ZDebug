@@ -32,6 +32,20 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(int) },
             modifiers: null);
 
+        private readonly static MethodInfo nextRandomHelper = typeof(ZMachine).GetMethod(
+            name: "NextRandom",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(short) },
+            modifiers: null);
+
+        private readonly static MethodInfo seedRandomHelper = typeof(ZMachine).GetMethod(
+            name: "SeedRandom",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(short) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -415,6 +429,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x06:
                             op_print_num();
+                            return;
+                        case 0x07:
+                            op_random();
                             return;
                         case 0x08:
                             op_push();
