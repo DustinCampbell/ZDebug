@@ -17,6 +17,8 @@ using ZDebug.Compiler;
 using ZDebug.IO.Windows;
 using ZDebug.Core.Execution;
 using System.Windows.Threading;
+using ZDebug.IO.Services;
+using System.Globalization;
 
 namespace ZDebug.Terp
 {
@@ -28,6 +30,9 @@ namespace ZDebug.Terp
         private ZWindowManager windowManager;
         private ZWindow mainWindow;
         private ZWindow upperWindow;
+
+        private int currStatusHeight;
+        private int machStatusHeight;
 
         private ZMachine machine;
 
@@ -95,6 +100,17 @@ namespace ZDebug.Terp
             }
         }
 
+        private FormattedText GetFixedFontMeasureText()
+        {
+            return new FormattedText(
+                textToFormat: "0",
+                culture: CultureInfo.CurrentUICulture,
+                flowDirection: FlowDirection.LeftToRight,
+                typeface: new Typeface(FontsAndColorsService.FixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+                emSize: FontsAndColorsService.FontSize,
+                foreground: Brushes.Black);
+        }
+
         public void Clear(int window)
         {
             throw new NotImplementedException();
@@ -105,9 +121,29 @@ namespace ZDebug.Terp
             throw new NotImplementedException();
         }
 
-        public void Split(int height)
+        public void Split(int lines)
         {
-            throw new NotImplementedException();
+            if (upperWindow == null)
+            {
+                return;
+            }
+
+            if (lines == 0 || lines > currStatusHeight)
+            {
+                int height = upperWindow.GetHeight();
+                if (lines != height)
+                {
+                    upperWindow.SetHeight(lines);
+                    currStatusHeight = lines;
+                }
+            }
+
+            machStatusHeight = lines;
+
+            if (machine.Version == 3)
+            {
+                upperWindow.Clear();
+            }
         }
 
         public void Unsplit()
@@ -117,7 +153,14 @@ namespace ZDebug.Terp
 
         public void SetWindow(int window)
         {
-            throw new NotImplementedException();
+            if (window == 0)
+            {
+                mainWindow.Activate();
+            }
+            else if (window == 1)
+            {
+                upperWindow.Activate();
+            }
         }
 
         public int GetCursorLine()
@@ -132,22 +175,82 @@ namespace ZDebug.Terp
 
         public void SetCursor(int line, int column)
         {
-            throw new NotImplementedException();
+            windowManager.ActiveWindow.SetCursor(column, line);
         }
 
         public void SetTextStyle(ZTextStyle style)
         {
-            throw new NotImplementedException();
+            var activeWindow = windowManager.ActiveWindow;
+
+            if (style == ZTextStyle.Roman)
+            {
+                activeWindow.SetBold(false);
+                activeWindow.SetItalic(false);
+                activeWindow.SetFixedPitch(false);
+                activeWindow.SetReverse(false);
+            }
+            else if (style == ZTextStyle.Bold)
+            {
+                activeWindow.SetBold(true);
+            }
+            else if (style == ZTextStyle.Italic)
+            {
+                activeWindow.SetItalic(true);
+            }
+            else if (style == ZTextStyle.FixedPitch)
+            {
+                activeWindow.SetFixedPitch(true);
+            }
+            else if (style == ZTextStyle.Reverse)
+            {
+                activeWindow.SetReverse(true);
+            }
+        }
+
+        private Brush GetZColorBrush(ZColor color)
+        {
+            switch (color)
+            {
+                case ZColor.Black:
+                    return Brushes.Black;
+                case ZColor.Red:
+                    return Brushes.Red;
+                case ZColor.Green:
+                    return Brushes.Green;
+                case ZColor.Yellow:
+                    return Brushes.Yellow;
+                case ZColor.Blue:
+                    return Brushes.Blue;
+                case ZColor.Magenta:
+                    return Brushes.Magenta;
+                case ZColor.Cyan:
+                    return Brushes.Cyan;
+                case ZColor.White:
+                    return Brushes.White;
+                case ZColor.Gray:
+                    return Brushes.Gray;
+
+                default:
+                    throw new ArgumentException("Unexpected color: " + color, "color");
+            }
         }
 
         public void SetForegroundColor(ZColor color)
         {
-            throw new NotImplementedException();
+            var brush = color == ZColor.Default
+                ? FontsAndColorsService.DefaultForeground
+                : GetZColorBrush(color);
+
+            FontsAndColorsService.Foreground = brush;
         }
 
         public void SetBackgroundColor(ZColor color)
         {
-            throw new NotImplementedException();
+            var brush = color == ZColor.Default
+                ? FontsAndColorsService.DefaultBackground
+                : GetZColorBrush(color);
+
+            FontsAndColorsService.Background = brush;
         }
 
         public ZFont SetFont(ZFont font)
@@ -162,42 +265,42 @@ namespace ZDebug.Terp
 
         public byte ScreenHeightInLines
         {
-            get { throw new NotImplementedException(); }
+            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height); }
         }
 
         public byte ScreenWidthInColumns
         {
-            get { throw new NotImplementedException(); }
+            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width); }
         }
 
         public ushort ScreenHeightInUnits
         {
-            get { throw new NotImplementedException(); }
+            get { return (ushort)windowContainer.ActualHeight; }
         }
 
         public ushort ScreenWidthInUnits
         {
-            get { throw new NotImplementedException(); }
+            get { return (ushort)windowContainer.ActualWidth; }
         }
 
         public byte FontHeightInUnits
         {
-            get { throw new NotImplementedException(); }
+            get { return (byte)GetFixedFontMeasureText().Height; }
         }
 
         public byte FontWidthInUnits
         {
-            get { throw new NotImplementedException(); }
+            get { return (byte)GetFixedFontMeasureText().Width; }
         }
 
         public ZColor DefaultBackgroundColor
         {
-            get { throw new NotImplementedException(); }
+            get { return ZColor.White; }
         }
 
         public ZColor DefaultForegroundColor
         {
-            get { throw new NotImplementedException(); }
+            get { return ZColor.Black; }
         }
 
         public void Print(string text)

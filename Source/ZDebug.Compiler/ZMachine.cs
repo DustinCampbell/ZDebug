@@ -11,10 +11,11 @@ using ZDebug.Core.Text;
 
 namespace ZDebug.Compiler
 {
-    public sealed class ZMachine
+    public sealed partial class ZMachine
     {
         private readonly byte[] memory;
         private readonly IScreen screen;
+        private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
 
         private readonly byte version;
@@ -44,6 +45,8 @@ namespace ZDebug.Compiler
         {
             this.memory = memory;
             this.screen = screen;
+            this.outputStreams = new OutputStreams(memory);
+            this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
             this.version = memory.ReadByte(0x00);
 
@@ -67,6 +70,37 @@ namespace ZDebug.Compiler
             this.compiledRoutines = new IntegerMap<ZRoutineCode>(1024);
 
             this.random = new Random();
+
+            if (version >= 4)
+            {
+                memory.WriteByte(0x20, screen.ScreenHeightInLines);
+                memory.WriteByte(0x21, screen.ScreenWidthInColumns);
+            }
+
+            if (version >= 5)
+            {
+                memory.WriteWord(0x24, screen.ScreenHeightInUnits);
+                memory.WriteWord(0x22, screen.ScreenWidthInUnits);
+
+                if (version == 6)
+                {
+                    memory.WriteByte(0x26, screen.FontHeightInUnits);
+                }
+                else
+                {
+                    memory.WriteByte(0x27, screen.FontHeightInUnits);
+                }
+
+                if (version == 6)
+                {
+                    memory.WriteByte(0x27, screen.FontWidthInUnits);
+                }
+                else
+                {
+                    memory.WriteByte(0x26, screen.FontWidthInUnits);
+                }
+            }
+
         }
 
         private ZRoutineCode GetRoutineCode(int address)

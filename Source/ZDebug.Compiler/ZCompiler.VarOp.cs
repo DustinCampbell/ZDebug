@@ -6,6 +6,7 @@ using ZDebug.Core.Instructions;
 using System.Reflection.Emit;
 using System.Reflection;
 using ZDebug.Compiler.Generate;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.Compiler
 {
@@ -302,6 +303,64 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_text_style()
+        {
+            ReadOperand(0);
+            SetTextStyle();
+        }
+
+        private void op_split_window()
+        {
+            ReadOperand(0);
+            SplitWindow();
+        }
+
+        private void op_set_window()
+        {
+            ReadOperand(0);
+            SetWindow();
+        }
+
+        private void op_set_color()
+        {
+            using (var foreground = il.NewLocal<ZColor>())
+            using (var background = il.NewLocal<ZColor>())
+            {
+                ReadOperand(0);
+                foreground.Store();
+
+                ReadOperand(1);
+                background.Store();
+
+                SetColor(foreground, background);
+            }
+        }
+
+        private void op_set_color6()
+        {
+            NotImplemented();
+        }
+
+        private void op_set_cursor()
+        {
+            using (var line = il.NewLocal<ushort>())
+            using (var column = il.NewLocal<ushort>())
+            {
+                ReadOperand(0);
+                line.Store();
+
+                ReadOperand(1);
+                column.Store();
+
+                SetCursor(line, column);
+            }
+        }
+
+        private void op_set_cursor6()
+        {
+            NotImplemented();
+        }
+
         private void op_storeb()
         {
             using (var address = il.NewLocal<int>())
@@ -336,6 +395,70 @@ namespace ZDebug.Compiler
 
                 WriteWord(address, value);
             }
+        }
+
+        private void op_output_stream()
+        {
+            var op = GetOperand(0);
+
+            if (op.Kind == OperandKind.Variable)
+            {
+                throw new ZCompilerException("Expected non-variable operand.");
+            }
+
+            switch ((short)op.Value)
+            {
+                case 1:
+                    SelectScreenStream();
+                    break;
+
+                case 2:
+                    SelectTranscriptStream();
+                    break;
+
+                case 3:
+                    using (var address = il.NewLocal<ushort>())
+                    {
+                        ReadOperand(1);
+                        address.Store();
+                        SelectMemoryStream(address);
+                    }
+                    break;
+
+                case -1:
+                    DeselectScreenStream();
+                    break;
+
+                case -2:
+                    DeselectTranscriptStream();
+                    break;
+
+                case -3:
+                    DeselectMemoryStream();
+                    break;
+
+                case 4:
+                case -4:
+                    throw new ZCompilerException("Stream 4 is not supported.");
+
+                default:
+                    throw new ZCompilerException(string.Format("Illegal stream value: {0}", op.Value));
+            }
+        }
+
+        private void op_sread1()
+        {
+            NotImplemented();
+        }
+
+        private void op_sread4()
+        {
+            NotImplemented();
+        }
+
+        private void op_aread()
+        {
+            NotImplemented();
         }
     }
 }

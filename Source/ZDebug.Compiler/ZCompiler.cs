@@ -18,6 +18,10 @@ namespace ZDebug.Compiler
             name: "screen",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
 
+        private readonly static FieldInfo outputStreamsField = typeof(ZMachine).GetField(
+            name: "outputStreams",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
+
         private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
             name: "Call",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
@@ -57,6 +61,7 @@ namespace ZDebug.Compiler
 
         private IArrayLocal memory;
         private ILocal screen;
+        private ILocal outputStreams;
 
         private IArrayLocal args;
         private ILocal argCount;
@@ -136,6 +141,8 @@ namespace ZDebug.Compiler
                     break;
                 }
             }
+
+            this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
 
             // Create stack and sp
             this.stack = usesStack ? il.NewArrayLocal<ushort>(STACK_SIZE) : null;
@@ -318,6 +325,19 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+                        case 0x1b:
+                            if (machine.Version == 6)
+                            {
+                                op_set_color6();
+                                return;
+                            }
+                            if (machine.Version >= 5)
+                            {
+                                op_set_color();
+                                return;
+                            }
+
+                            break;
                     }
 
                     break;
@@ -424,6 +444,24 @@ namespace ZDebug.Compiler
                         case 0x03:
                             op_put_prop();
                             return;
+                        case 0x04:
+                            if (machine.Version < 4)
+                            {
+                                op_sread1();
+                                return;
+                            }
+                            if (machine.Version == 4)
+                            {
+                                op_sread4();
+                                return;
+                            }
+                            if (machine.Version > 4)
+                            {
+                                op_aread();
+                                return;
+                            }
+
+                            break;
                         case 0x05:
                             op_print_char();
                             return;
@@ -444,10 +482,65 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+                        case 0x0a:
+                            if (machine.Version >= 3)
+                            {
+                                op_split_window();
+                                return;
+                            }
+
+                            break;
+                        case 0x0b:
+                            if (machine.Version >= 3)
+                            {
+                                op_set_window();
+                                return;
+                            }
+
+                            break;
+                        case 0x11:
+                            if (machine.Version >= 4)
+                            {
+                                op_text_style();
+                                return;
+                            }
+
+                            break;
+                        case 0x13:
+                            if (machine.Version >= 3 && machine.Version < 5)
+                            {
+                                op_output_stream();
+                                return;
+                            }
+                            if (machine.Version == 6)
+                            {
+                                op_output_stream();
+                                return;
+                            }
+                            if (machine.Version >= 5)
+                            {
+                                op_output_stream();
+                                return;
+                            }
+
+                            break;
                         case 0x0c:
                             if (machine.Version >= 4)
                             {
                                 op_call_s();
+                                return;
+                            }
+
+                            break;
+                        case 0x0f:
+                            if (machine.Version == 6)
+                            {
+                                op_set_cursor6();
+                                return;
+                            }
+                            if (machine.Version >= 4)
+                            {
+                                op_set_cursor();
                                 return;
                             }
 
