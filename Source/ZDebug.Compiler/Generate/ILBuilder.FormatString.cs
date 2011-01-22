@@ -39,7 +39,7 @@ namespace ZDebug.Compiler.Generate
 
         public void FormatString(string format, ILocal arg0)
         {
-            LoadConstant(format);
+            Load(format);
             arg0.LoadAndBox();
 
             Call(stringFormat1);
@@ -47,7 +47,7 @@ namespace ZDebug.Compiler.Generate
 
         public void FormatString(string format, ILocal arg0, ILocal arg1)
         {
-            LoadConstant(format);
+            Load(format);
             arg0.LoadAndBox();
             arg1.LoadAndBox();
 
@@ -56,7 +56,7 @@ namespace ZDebug.Compiler.Generate
 
         public void FormatString(string format, ILocal arg0, ILocal arg1, ILocal arg2)
         {
-            LoadConstant(format);
+            Load(format);
             arg0.LoadAndBox();
             arg1.LoadAndBox();
             arg2.LoadAndBox();
@@ -71,11 +71,11 @@ namespace ZDebug.Compiler.Generate
             for (int i = 0; i < args.Length; i++)
             {
                 locArgs.StoreElement(
-                    loadIndex: this.GenerateLoadConstant(i),
+                    loadIndex: this.GenerateLoad(i),
                     loadValue: this.GenerateLoadAndBox(args[i]));
             }
 
-            LoadConstant(format);
+            Load(format);
             locArgs.Load();
 
             Call(stringFormatAny);

@@ -15,24 +15,24 @@ namespace ZDebug.Compiler
             using (var result = il.NewLocal<ushort>())
             {
                 ReadOperand(0);
-                il.ConvertToInt16();
+                il.Convert.ToInt16();
                 number.Store();
 
                 ReadOperand(1);
-                il.ConvertToInt16();
+                il.Convert.ToInt16();
                 places.Store();
 
                 var positivePlaces = il.NewLabel();
                 places.Load();
-                il.LoadConstant(0);
+                il.Load(0);
                 positivePlaces.BranchIf(Condition.GreaterThan, @short: true);
 
                 number.Load();
                 places.Load();
-                il.Negate();
-                il.And(0x1f);
-                il.Shr();
-                il.ConvertToUInt16();
+                il.Math.Negate();
+                il.Math.And(0x1f);
+                il.Math.Shr();
+                il.Convert.ToUInt16();
 
                 var done = il.NewLabel();
                 done.Branch(@short: true);
@@ -41,9 +41,9 @@ namespace ZDebug.Compiler
 
                 number.Load();
                 places.Load();
-                il.And(0x1f);
-                il.Shl();
-                il.ConvertToUInt16();
+                il.Math.And(0x1f);
+                il.Math.Shl();
+                il.Convert.ToUInt16();
 
                 done.Mark();
 
@@ -62,20 +62,20 @@ namespace ZDebug.Compiler
                 number.Store();
 
                 ReadOperand(1);
-                il.ConvertToInt16();
+                il.Convert.ToInt16();
                 places.Store();
 
                 var positivePlaces = il.NewLabel();
                 places.Load();
-                il.LoadConstant(0);
+                il.Load(0);
                 positivePlaces.BranchIf(Condition.GreaterThan, @short: true);
 
                 number.Load();
                 places.Load();
-                il.Negate();
-                il.And(0x1f);
-                il.Shr();
-                il.ConvertToUInt16();
+                il.Math.Negate();
+                il.Math.And(0x1f);
+                il.Math.Shr();
+                il.Convert.ToUInt16();
 
                 var done = il.NewLabel();
                 done.Branch(@short: true);
@@ -84,9 +84,9 @@ namespace ZDebug.Compiler
 
                 number.Load();
                 places.Load();
-                il.And(0x1f);
-                il.Shl();
-                il.ConvertToUInt16();
+                il.Math.And(0x1f);
+                il.Math.Shl();
+                il.Convert.ToUInt16();
 
                 done.Mark();
 

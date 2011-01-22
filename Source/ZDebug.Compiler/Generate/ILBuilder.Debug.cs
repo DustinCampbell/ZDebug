@@ -34,7 +34,7 @@ namespace ZDebug.Compiler.Generate
         [Conditional("LOG")]
         public void DebugWrite(string text)
         {
-            LoadConstant(text);
+            Load(text);
             Call(debugWriteLine);
         }
 

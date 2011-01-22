@@ -26,7 +26,7 @@ namespace ZDebug.Compiler
         private void ReadByte(int address)
         {
             ReadByte(
-                loadAddress: il.GenerateLoadConstant(address));
+                loadAddress: il.GenerateLoad(address));
         }
 
         /// <summary>
@@ -61,14 +61,14 @@ namespace ZDebug.Compiler
         {
             // shift memory[address] left 8 bits
             memory.LoadElement(loadAddress);
-            il.Shl(8);
+            il.Math.Shl(8);
 
             // read memory[address + 1]
             memory.LoadElement(loadAddressPlusOne);
 
             // or bytes together
-            il.Or();
-            il.ConvertToUInt16();
+            il.Math.Or();
+            il.Convert.ToUInt16();
         }
 
         /// <summary>
@@ -77,8 +77,8 @@ namespace ZDebug.Compiler
         private void ReadWord(int address)
         {
             ReadWord(
-                loadAddress: il.GenerateLoadConstant(address),
-                loadAddressPlusOne: il.GenerateLoadConstant(address + 1));
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne: il.GenerateLoad(address + 1));
         }
 
         /// <summary>
@@ -124,8 +124,8 @@ namespace ZDebug.Compiler
         private void WriteByte(int address, ushort value)
         {
             WriteByte(
-                loadAddress: il.GenerateLoadConstant(address),
-                loadValue: il.GenerateLoadConstant(value));
+                loadAddress: il.GenerateLoad(address),
+                loadValue: il.GenerateLoad(value));
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace ZDebug.Compiler
         private void WriteByte(int address, ILocal value)
         {
             WriteByte(
-                loadAddress: il.GenerateLoadConstant(address),
+                loadAddress: il.GenerateLoad(address),
                 loadValue: il.GenerateLoad(value));
         }
 
@@ -155,7 +155,7 @@ namespace ZDebug.Compiler
         {
             WriteByte(
                 loadAddress: il.GenerateLoad(address),
-                loadValue: il.GenerateLoadConstant(value));
+                loadValue: il.GenerateLoad(value));
         }
 
         /// <summary>
@@ -189,16 +189,16 @@ namespace ZDebug.Compiler
         private void WriteWord(int address, ushort value)
         {
             WriteWord(
-                loadAddress: il.GenerateLoadConstant(address),
-                loadAddressPlusOne: il.GenerateLoadConstant(address + 1),
-                loadValue: il.GenerateLoadConstant(value));
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne: il.GenerateLoad(address + 1),
+                loadValue: il.GenerateLoad(value));
         }
 
         private void WriteWord(int address, ILocal value)
         {
             WriteWord(
-                loadAddress: il.GenerateLoadConstant(address),
-                loadAddressPlusOne: il.GenerateLoadConstant(address + 1),
+                loadAddress: il.GenerateLoad(address),
+                loadAddressPlusOne: il.GenerateLoad(address + 1),
                 loadValue: il.GenerateLoad(value));
         }
 
@@ -215,14 +215,14 @@ namespace ZDebug.Compiler
             WriteWord(
                 loadAddress: il.GenerateLoad(address),
                 loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
-                loadValue: il.GenerateLoadConstant(value));
+                loadValue: il.GenerateLoad(value));
         }
 
         private void CheckStackEmpty()
         {
             sp.Load();
-            il.LoadConstant(0);
-            il.CompareEqual();
+            il.Load(0);
+            il.Compare.Equal();
 
             var ok = il.NewLabel();
             ok.BranchIf(Condition.False, @short: true);
@@ -234,8 +234,8 @@ namespace ZDebug.Compiler
         private void CheckStackFull()
         {
             sp.Load();
-            il.LoadConstant(STACK_SIZE);
-            il.CompareEqual();
+            il.Load(STACK_SIZE);
+            il.Compare.Equal();
 
             var ok = il.NewLabel();
             ok.BranchIf(Condition.False, @short: true);
@@ -255,7 +255,7 @@ namespace ZDebug.Compiler
 
             // decrement sp
             sp.Load();
-            il.Subtract(1);
+            il.Math.Subtract(1);
             sp.Store();
         }
 
@@ -279,7 +279,7 @@ namespace ZDebug.Compiler
 
             // increment sp
             sp.Load();
-            il.Add(1);
+            il.Math.Add(1);
             sp.Store();
         }
 
@@ -318,7 +318,7 @@ namespace ZDebug.Compiler
         private void ReadLocalVariable(int index)
         {
             locals.LoadElement(
-                il.GenerateLoadConstant(index));
+                il.GenerateLoad(index));
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace ZDebug.Compiler
         private void WriteLocalVariable(int index, ILocal value)
         {
             locals.StoreElement(
-                loadIndex: il.GenerateLoadConstant(index),
+                loadIndex: il.GenerateLoad(index),
                 loadValue: il.GenerateLoad(value));
         }
 
@@ -374,8 +374,8 @@ namespace ZDebug.Compiler
                 index.Load();
             }
 
-            il.Multiply(2);
-            il.Add(machine.GlobalVariableTableAddress);
+            il.Math.Multiply(2);
+            il.Math.Add(machine.GlobalVariableTableAddress);
         }
 
         private void ReadGlobalVariable(int index)
@@ -448,29 +448,40 @@ namespace ZDebug.Compiler
                 {
                     PopStack();
                 }
-            }
 
-            done.Branch(@short: true);
+                done.Branch(@short: true);
+            }
+            else
+            {
+                il.RuntimeError("Unexpected read from stack.");
+            }
 
             // local
             tryLocal.Mark();
 
             // branch if this is not a local (variableIndex >= 16)
             variableIndex.Load();
-            il.LoadConstant(16);
+            il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            variableIndex.Load();
-            il.Subtract(1);
-            ReadLocalVariable();
+            if (locals != null)
+            {
+                variableIndex.Load();
+                il.Math.Subtract(1);
+                ReadLocalVariable();
 
-            done.Branch(@short: true);
+                done.Branch(@short: true);
+            }
+            else
+            {
+                il.RuntimeError("Unexpected read from local variable {0}.", variableIndex);
+            }
 
             // global
             tryGlobal.Mark();
 
             variableIndex.Load();
-            il.Subtract(16);
+            il.Math.Subtract(16);
             ReadGlobalVariable();
 
             done.Mark();
@@ -550,29 +561,40 @@ namespace ZDebug.Compiler
                 {
                     PushStack(value);
                 }
-            }
 
-            done.Branch(@short: true);
+                done.Branch(@short: true);
+            }
+            else
+            {
+                il.RuntimeError("Unexpected write to stack.");
+            }
 
             // local
             tryLocal.Mark();
 
             // branch if this is not a local (variableIndex >= 16)
             variableIndex.Load();
-            il.LoadConstant(16);
+            il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            variableIndex.Load();
-            il.Subtract(1);
-            WriteLocalVariable(value);
+            if (locals != null)
+            {
+                variableIndex.Load();
+                il.Math.Subtract(1);
+                WriteLocalVariable(value);
 
-            done.Branch(@short: true);
+                done.Branch(@short: true);
+            }
+            else
+            {
+                il.RuntimeError("Unexpected write to local variable {0}.", variableIndex);
+            }
 
             // global
             tryGlobal.Mark();
 
             variableIndex.Load();
-            il.Subtract(16);
+            il.Math.Subtract(16);
             WriteGlobalVariable(value);
 
             done.Mark();
@@ -653,7 +675,7 @@ namespace ZDebug.Compiler
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.LoadConstant(op.Value);
+                    il.Load(op.Value);
                     break;
 
                 default: // OperandKind.Variable
@@ -663,30 +685,26 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
-        /// Reads the specified operand as a small constant and places the value on the stack.
-        /// </summary>
-        private byte ReadSmallConstant(int operandIndex)
-        {
-            var op = GetOperand(operandIndex);
-
-            if (op.Kind != OperandKind.SmallConstant)
-            {
-                throw new ZCompilerException(
-                    string.Format(
-                        "Expected a small constnat operand but found a {0}.",
-                        op.Kind));
-            }
-
-            return (byte)op.Value;
-        }
-
-        /// <summary>
         /// Reads the first operand as a by ref variable.
         /// </summary>
-        private Variable ReadByRefVariableOperand()
+        private void ReadByRefVariableOperand()
         {
-            byte variableIndex = ReadSmallConstant(0);
-            return Variable.FromByte(variableIndex);
+            var op = GetOperand(0);
+
+            switch (op.Kind)
+            {
+                case OperandKind.SmallConstant:
+                    il.Load((byte)op.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    ReadVariable((byte)op.Value);
+
+                    break;
+
+                default:
+                    throw new ZCompilerException("Expected small constant or variable, but was " + op.Kind);
+            }
         }
 
         private void UnpackRoutineAddress(Operand op)
@@ -695,7 +713,7 @@ namespace ZDebug.Compiler
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.LoadConstant(machine.UnpackRoutineAddress(op.Value));
+                    il.Load(machine.UnpackRoutineAddress(op.Value));
                     break;
 
                 default: // OperandKind.Variable
@@ -704,22 +722,20 @@ namespace ZDebug.Compiler
                     byte version = machine.Version;
                     if (version < 4)
                     {
-                        il.LoadConstant(2);
+                        il.Math.Multiply(2);
                     }
                     else if (version < 8)
                     {
-                        il.LoadConstant(4);
+                        il.Math.Multiply(4);
                     }
                     else // 8
                     {
-                        il.LoadConstant(8);
+                        il.Math.Multiply(8);
                     }
-
-                    il.Multiply();
 
                     if (version >= 6 && version <= 7)
                     {
-                        il.Add(machine.RoutinesOffset * 8);
+                        il.Math.Add(machine.RoutinesOffset * 8);
                     }
 
                     break;
@@ -732,7 +748,7 @@ namespace ZDebug.Compiler
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
-                    il.LoadConstant(machine.UnpackStringAddress(op.Value));
+                    il.Load(machine.UnpackStringAddress(op.Value));
                     break;
 
                 default: // OperandKind.Variable
@@ -741,22 +757,20 @@ namespace ZDebug.Compiler
                     byte version = machine.Version;
                     if (version < 4)
                     {
-                        il.LoadConstant(2);
+                        il.Math.Multiply(2);
                     }
                     else if (version < 8)
                     {
-                        il.LoadConstant(4);
+                        il.Math.Multiply(4);
                     }
                     else // 8
                     {
-                        il.LoadConstant(8);
+                        il.Math.Multiply(8);
                     }
-
-                    il.Multiply();
 
                     if (version >= 6 && version <= 7)
                     {
-                        il.Add(machine.StringsOffset * 8);
+                        il.Math.Add(machine.StringsOffset * 8);
                     }
                     break;
             }

@@ -7,6 +7,9 @@ namespace ZDebug.Compiler.Generate
 {
     public interface IArrayLocal : ILocal
     {
+        void Create(int length);
+        void Create(ILocal length);
+
         void LoadLength();
 
         void LoadElement(CodeBuilder loadIndex);

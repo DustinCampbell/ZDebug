@@ -50,6 +50,13 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(short) },
             modifiers: null);
 
+        private readonly static MethodInfo convertZTextHelper = typeof(ZMachine).GetMethod(
+            name: "ConvertZText",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(ushort[]) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -150,9 +157,9 @@ namespace ZDebug.Compiler
 
             // Copy arguments locally
             this.argCount = il.NewLocal<int>();
-            this.args = il.NewArrayLocal<ushort>(il.GenerateLoadArgument(1));
+            this.args = il.NewArrayLocal<ushort>(il.GenerateLoadArg(1));
             this.args.LoadLength();
-            il.ConvertToInt32();
+            il.Convert.ToInt32();
             this.argCount.Store();
 
             // Copy locals
@@ -166,8 +173,8 @@ namespace ZDebug.Compiler
                     if (localValues[i] != 0)
                     {
                         this.locals.StoreElement(
-                            loadIndex: il.GenerateLoadConstant(i),
-                            loadValue: il.GenerateLoadConstant(localValues[i]));
+                            loadIndex: il.GenerateLoad(i),
+                            loadValue: il.GenerateLoad(localValues[i]));
                     }
                 }
 
@@ -207,7 +214,7 @@ namespace ZDebug.Compiler
 
             var noJump = il.NewLabel();
 
-            il.LoadConstant(currentInstruction.Branch.Condition);
+            il.Load(currentInstruction.Branch.Condition);
             noJump.BranchIf(Condition.NotEqual, @short: true);
 
             switch (currentInstruction.Branch.Kind)
@@ -257,6 +264,9 @@ namespace ZDebug.Compiler
                             return;
                         case 0x06:
                             op_jin();
+                            return;
+                        case 0x07:
+                            op_test();
                             return;
                         case 0x08:
                             op_or();
@@ -365,6 +375,9 @@ namespace ZDebug.Compiler
                         case 0x06:
                             op_dec();
                             return;
+                        case 0x07:
+                            op_print_addr();
+                            return;
                         case 0x08:
                             if (machine.Version >= 4)
                             {
@@ -429,6 +442,30 @@ namespace ZDebug.Compiler
                         case 0x0b:
                             op_new_line();
                             return;
+                        case 0x0c:
+                            if (machine.Version == 3)
+                            {
+                                op_show_status();
+                                return;
+                            }
+
+                            break;
+                        case 0x0d:
+                            if (machine.Version >= 3)
+                            {
+                                op_verify();
+                                return;
+                            }
+
+                            break;
+                        case 0x0f:
+                            if (machine.Version >= 5)
+                            {
+                                op_piracy();
+                                return;
+                            }
+
+                            break;
                     }
 
                     break;
@@ -501,10 +538,26 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+                        case 0x0d:
+                            if (machine.Version >= 4)
+                            {
+                                op_erase_window();
+                                return;
+                            }
+
+                            break;
                         case 0x11:
                             if (machine.Version >= 4)
                             {
                                 op_text_style();
+                                return;
+                            }
+
+                            break;
+                        case 0x12:
+                            if (machine.Version >= 4)
+                            {
+                                op_buffer_mode();
                                 return;
                             }
 

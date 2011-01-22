@@ -71,6 +71,20 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(ZTextStyle) },
             modifiers: null);
 
+        private readonly static MethodInfo clear = typeof(IScreen).GetMethod(
+            name: "Clear",
+            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
+            modifiers: null);
+
+        private readonly static MethodInfo clearAll = typeof(IScreen).GetMethod(
+            name: "ClearAll",
+            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(bool) },
+            modifiers: null);
+
         private readonly static MethodInfo split = typeof(IScreen).GetMethod(
             name: "Split",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
@@ -83,6 +97,13 @@ namespace ZDebug.Compiler
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
             types: new Type[] { typeof(int) },
+            modifiers: null);
+
+        private readonly static MethodInfo showStatus = typeof(IScreen).GetMethod(
+            name: "ShowStatus",
+            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] {  },
             modifiers: null);
 
         private readonly static MethodInfo setForegroundColor = typeof(IScreen).GetMethod(
@@ -109,7 +130,7 @@ namespace ZDebug.Compiler
         private void PrintChar(char ch)
         {
             outputStreams.Load();
-            il.LoadConstant(ch);
+            il.Load(ch);
             il.CallVirt(print1);
         }
 
@@ -134,7 +155,7 @@ namespace ZDebug.Compiler
         private void PrintText(string text)
         {
             outputStreams.Load();
-            il.LoadConstant(text);
+            il.Load(text);
             il.CallVirt(print2);
         }
 
@@ -166,6 +187,40 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void EraseWindow()
+        {
+            using (var window = il.NewLocal<short>())
+            {
+                il.Convert.ToInt16();
+                window.Store();
+
+                var clearAllWindows = il.NewLabel();
+                var done = il.NewLabel();
+
+                window.Load();
+                il.Load(0);
+                clearAllWindows.BranchIf(Condition.LessThan, @short: true);
+
+                screen.Load();
+                window.Load();
+                il.CallVirt(clear);
+
+                done.Branch(@short: true);
+
+                clearAllWindows.Mark();
+
+                screen.Load();
+
+                window.Load();
+                il.Load(-1);
+                il.Compare.Equal();
+
+                il.CallVirt(clearAll);
+
+                done.Mark();
+            }
+        }
+
         private void SplitWindow()
         {
             using (var lines = il.NewLocal<int>())
@@ -188,6 +243,12 @@ namespace ZDebug.Compiler
                 window.Load();
                 il.CallVirt(setWindow);
             }
+        }
+
+        private void ShowStatus()
+        {
+            screen.Load();
+            il.CallVirt(showStatus);
         }
 
         private void SetColor(ILocal foreground, ILocal background)
@@ -217,9 +278,9 @@ namespace ZDebug.Compiler
         {
             screen.Load();
             line.Load();
-            il.Subtract(1);
+            il.Math.Subtract(1);
             column.Load();
-            il.Subtract(1);
+            il.Math.Subtract(1);
             il.Call(setCursor);
         }
 

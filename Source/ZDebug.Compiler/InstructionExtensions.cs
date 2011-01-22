@@ -19,6 +19,7 @@ namespace ZDebug.Compiler
                 || op.Is(OpcodeKind.ZeroOp, 0x0b)  // new_line
                 || op.Is(OpcodeKind.VarOp, 0x05)   // print_char
                 || op.Is(OpcodeKind.VarOp, 0x06)   // print_num
+                || op.Is(OpcodeKind.OneOp, 0x07)   // print_addr
                 || op.Is(OpcodeKind.OneOp, 0x0a)   // print_obj
                 || op.Is(OpcodeKind.OneOp, 0x0d)   // print_paddr
                 || op.Is(OpcodeKind.ZeroOp, 0x03)  // print_ret
@@ -154,7 +155,7 @@ namespace ZDebug.Compiler
 
             if (i.HasZText)
             {
-                var ztext = machine.ConvertEmbeddedZText(i.ZText);
+                var ztext = machine.ConvertZText(i.ZText);
                 ztext = ztext.Replace("\n", @"\n").Replace(' ', '\u00b7').Replace("\t", @"\t");
                 builder.Append(" ");
                 builder.Append(ztext);

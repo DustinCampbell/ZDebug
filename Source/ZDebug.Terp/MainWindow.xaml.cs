@@ -111,14 +111,47 @@ namespace ZDebug.Terp
                 foreground: Brushes.Black);
         }
 
-        public void Clear(int window)
+        private void ResetStatusHeight()
         {
-            throw new NotImplementedException();
+            if (upperWindow != null)
+            {
+                int height = upperWindow.GetHeight();
+                if (machStatusHeight != height)
+                {
+                    upperWindow.SetHeight(machStatusHeight);
+                }
+            }
         }
 
-        public void ClearAll(bool unsplit = false)
+        public void Clear(int window)
         {
-            throw new NotImplementedException();
+            if (window == 0)
+            {
+                mainWindow.Clear();
+            }
+            else if (window == 1 && upperWindow != null)
+            {
+                upperWindow.Clear();
+                ResetStatusHeight();
+                currStatusHeight = 0;
+            }
+        }
+
+        public void ClearAll(bool unsplit)
+        {
+            mainWindow.Clear();
+
+            if (upperWindow != null)
+            {
+                if (unsplit)
+                {
+                    Unsplit();
+                }
+                else
+                {
+                    upperWindow.Clear();
+                }
+            }
         }
 
         public void Split(int lines)
@@ -148,7 +181,13 @@ namespace ZDebug.Terp
 
         public void Unsplit()
         {
-            throw new NotImplementedException();
+            if (upperWindow != null)
+            {
+                upperWindow.SetHeight(0);
+                upperWindow.Clear();
+                ResetStatusHeight();
+                currStatusHeight = 0;
+            }
         }
 
         public void SetWindow(int window)
@@ -260,7 +299,74 @@ namespace ZDebug.Terp
 
         public void ShowStatus()
         {
-            throw new NotImplementedException();
+            //var story = DebuggerService.Story;
+            //if (story.Version > 3)
+            //{
+            //    return;
+            //}
+
+            //if (upperWindow == null)
+            //{
+            //    upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
+            //}
+            //else
+            //{
+            //    int height = upperWindow.GetHeight();
+            //    if (height != 1)
+            //    {
+            //        upperWindow.SetHeight(1);
+            //        currStatusHeight = 1;
+            //        machStatusHeight = 1;
+            //    }
+            //}
+
+            //upperWindow.Clear();
+
+            //var charWidth = ScreenWidthInColumns;
+            //var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
+
+            //upperWindow.SetReverse(true);
+
+            //if (charWidth < 5)
+            //{
+            //    upperWindow.PutString(new string(' ', charWidth));
+            //    return;
+            //}
+
+            //if (locationText.Length > charWidth)
+            //{
+            //    locationText = locationText.Substring(0, charWidth - 3) + "...";
+            //    upperWindow.PutString(locationText);
+            //    return;
+            //}
+
+            //upperWindow.PutString(locationText);
+
+            //string rightText;
+            //if (IsScoreGame())
+            //{
+            //    int score = (short)story.GlobalVariablesTable[1];
+            //    int moves = (ushort)story.GlobalVariablesTable[2];
+            //    rightText = string.Format("Score: {0,-8} Moves: {1,-6} ", score, moves);
+            //}
+            //else
+            //{
+            //    int hours = (ushort)story.GlobalVariablesTable[1];
+            //    int minutes = (ushort)story.GlobalVariablesTable[2];
+            //    var pm = (hours / 12) > 0;
+            //    if (pm)
+            //    {
+            //        hours = hours % 12;
+            //    }
+
+            //    rightText = string.Format("{0}:{1:n2} {2}", hours, minutes, (pm ? "pm" : "am"));
+            //}
+
+            //if (rightText.Length < charWidth - locationText.Length - 1)
+            //{
+            //    upperWindow.PutString(new string(' ', charWidth - locationText.Length - rightText.Length));
+            //    upperWindow.PutString(rightText);
+            //}
         }
 
         public byte ScreenHeightInLines

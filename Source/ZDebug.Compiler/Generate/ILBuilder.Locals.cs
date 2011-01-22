@@ -92,15 +92,16 @@ namespace ZDebug.Compiler.Generate
 
         private class ArrayLocalWrapper : LocalWrapper, IArrayLocal
         {
+            private readonly Type elementType;
             private readonly OpCode loadOpCode;
             private readonly OpCode storeOpCode;
 
             public ArrayLocalWrapper(ILBuilder builder, LocalBuilder local)
                 : base(builder, local)
             {
-                var elementType = local.LocalType.GetElementType();
-                loadOpCode = GetLoadOpCode(elementType);
-                storeOpCode = GetStoreOpCode(elementType);
+                this.elementType = local.LocalType.GetElementType();
+                this.loadOpCode = GetLoadOpCode(elementType);
+                this.storeOpCode = GetStoreOpCode(elementType);
             }
 
             private static OpCode GetLoadOpCode(Type type)
@@ -149,6 +150,20 @@ namespace ZDebug.Compiler.Generate
                 {
                     throw new ZCompilerException("Unsupported array type: " + type.FullName);
                 }
+            }
+
+            public void Create(int length)
+            {
+                builder.Load(length);
+                builder.il.Emit(OpCodes.Newarr, elementType);
+                this.Store();
+            }
+
+            public void Create(ILocal length)
+            {
+                length.Load();
+                builder.il.Emit(OpCodes.Newarr, elementType);
+                this.Store();
             }
 
             public void LoadLength()
@@ -223,7 +238,7 @@ namespace ZDebug.Compiler.Generate
         public ILocal NewLocal(int value)
         {
             var local = AllocateLocal<int, LocalWrapper>(CreateLocal);
-            LoadConstant(value);
+            Load(value);
             local.Store();
             return local;
         }
@@ -236,9 +251,7 @@ namespace ZDebug.Compiler.Generate
         public IArrayLocal NewArrayLocal<T>(int length)
         {
             var local = AllocateLocal<T[], ArrayLocalWrapper>(CreateArrayLocal);
-            LoadConstant(length);
-            il.Emit(OpCodes.Newarr, typeof(T));
-            local.Store();
+            local.Create(length);
 
             return local;
         }

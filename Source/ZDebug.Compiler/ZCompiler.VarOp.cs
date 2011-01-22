@@ -33,7 +33,7 @@ namespace ZDebug.Compiler
                     int index = j;
 
                     args.StoreElement(
-                        il.GenerateLoadConstant(index - 1),
+                        il.GenerateLoad(index - 1),
                         il.Generate(() =>
                             ReadOperand(index)));
                 }
@@ -43,12 +43,12 @@ namespace ZDebug.Compiler
                 legalCall.BranchIf(Condition.True, @short: true);
 
                 var done = il.NewLabel();
-                il.LoadConstant(0);
+                il.Load(0);
 
                 done.Branch(@short: true);
 
                 legalCall.Mark();
-                il.LoadArgument(0);
+                il.LoadArg(0);
                 address.Load();
                 args.Load();
 
@@ -91,15 +91,15 @@ namespace ZDebug.Compiler
             ReadOperand(0);
             argCount.Load();
 
-            il.CompareAtMost();
+            il.Compare.AtMost();
             Branch();
         }
 
         private void op_not()
         {
             ReadOperand(0);
-            il.Not();
-            il.ConvertToUInt16();
+            il.Math.Not();
+            il.Convert.ToUInt16();
 
             using (var result = il.NewLocal<ushort>())
             {
@@ -119,7 +119,7 @@ namespace ZDebug.Compiler
             using (var number = il.NewLocal<short>())
             {
                 ReadOperand(0);
-                il.ConvertToInt16();
+                il.Convert.ToInt16();
                 number.Store();
 
                 number.LoadAddress();
@@ -131,15 +131,18 @@ namespace ZDebug.Compiler
 
         private void op_pull()
         {
-            var variable = ReadByRefVariableOperand();
-
-            PopStack();
-
+            using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<ushort>())
             {
+                ReadByRefVariableOperand();
+                varIndex.Store();
+
+                PopStack();
+
                 value.Store();
-                WriteVariable(variable, value, indirect: true);
+                WriteVariable(varIndex, value, indirect: true);
             }
+
         }
 
         private void op_push()
@@ -184,7 +187,7 @@ namespace ZDebug.Compiler
 
                 // if ((value & mask) <= propNum) break;
                 value.Load();
-                il.And(mask);
+                il.Math.And(mask);
 
 #if DEBUG
                 using (var temp = il.NewLocal<ushort>())
@@ -212,7 +215,7 @@ namespace ZDebug.Compiler
                 // if ((value & mask) != propNum) throw;
                 var propNumFound = il.NewLabel();
                 value.Load();
-                il.And(mask);
+                il.Math.And(mask);
                 propNum.Load();
                 propNumFound.BranchIf(Condition.Equal, @short: true);
                 il.RuntimeError("Object {0} does not contain property {1}", objNum, propNum);
@@ -223,8 +226,8 @@ namespace ZDebug.Compiler
 
                 // propAddress++;
                 propAddress.Load();
-                il.Add(1);
-                il.ConvertToUInt16();
+                il.Math.Add(1);
+                il.Convert.ToUInt16();
                 propAddress.Store();
 
                 var sizeIsWord = il.NewLabel();
@@ -232,14 +235,14 @@ namespace ZDebug.Compiler
                 // if ((this.version <= 3 && (value & 0xe0) != 0) && (this.version >= 4) && (value & 0xc0) != 0)
                 int sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
                 value.Load();
-                il.And(sizeMask);
+                il.Math.And(sizeMask);
                 sizeIsWord.BranchIf(Condition.True, @short: true);
 
                 // write byte
                 using (var temp = il.NewLocal<byte>())
                 {
                     ReadOperand(2);
-                    il.ConvertToUInt8();
+                    il.Convert.ToUInt8();
                     temp.Store();
 
                     WriteByte(propAddress, temp);
@@ -275,28 +278,28 @@ namespace ZDebug.Compiler
                 var done = il.NewLabel();
 
                 ReadOperand(0);
-                il.ConvertToInt16();
+                il.Convert.ToInt16();
                 range.Store();
 
                 range.Load();
-                il.LoadConstant(0);
+                il.Load(0);
                 seed.BranchIf(Condition.GreaterThan, @short: true);
 
-                il.LoadArgument(0);
+                il.LoadArg(0);
                 range.Load();
                 il.Call(nextRandomHelper);
                 done.Branch(@short: true);
 
                 seed.Mark();
 
-                il.LoadArgument(0);
+                il.LoadArg(0);
                 range.Load();
                 il.Call(seedRandomHelper);
-                il.LoadConstant(0);
+                il.Load(0);
 
                 done.Mark();
 
-                il.ConvertToUInt16();
+                il.Convert.ToUInt16();
 
                 result.Store();
                 WriteVariable(currentInstruction.StoreVariable, result);
@@ -307,6 +310,20 @@ namespace ZDebug.Compiler
         {
             ReadOperand(0);
             SetTextStyle();
+        }
+
+        private void op_buffer_mode()
+        {
+            ReadOperand(0);
+
+            // TODO: What does buffer_mode mean in this terp?
+            il.Pop();
+        }
+
+        private void op_erase_window()
+        {
+            ReadOperand(0);
+            EraseWindow();
         }
 
         private void op_split_window()
@@ -368,11 +385,11 @@ namespace ZDebug.Compiler
             {
                 ReadOperand(0);
                 ReadOperand(1);
-                il.Add();
+                il.Math.Add();
                 address.Store();
 
                 ReadOperand(2);
-                il.ConvertToUInt8();
+                il.Convert.ToUInt8();
                 value.Store();
 
                 WriteByte(address, value);
@@ -386,8 +403,8 @@ namespace ZDebug.Compiler
             {
                 ReadOperand(0);
                 ReadOperand(1);
-                il.Multiply(2);
-                il.Add();
+                il.Math.Multiply(2);
+                il.Math.Add();
                 address.Store();
 
                 ReadOperand(2);

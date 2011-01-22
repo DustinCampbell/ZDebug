@@ -125,7 +125,7 @@ namespace ZDebug.Compiler
         internal string ReadZText(int address)
         {
             var zwords = ztext.ReadZWords(address);
-            return ConvertEmbeddedZText(zwords);
+            return ConvertZText(zwords);
         }
 
         internal int NextRandom(short range)
@@ -148,7 +148,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public string ConvertEmbeddedZText(ushort[] zwords)
+        internal string ConvertZText(ushort[] zwords)
         {
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);
         }

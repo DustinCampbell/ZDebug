@@ -19,11 +19,11 @@ namespace ZDebug.Compiler.Generate
             };
         }
 
-        public static CodeBuilder GenerateLoadArgument(this ILBuilder il, int index)
+        public static CodeBuilder GenerateLoadArg(this ILBuilder il, int index)
         {
             return () =>
             {
-                il.LoadArgument(index);
+                il.LoadArg(index);
             };
         }
 
@@ -31,16 +31,16 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.LoadArgument(0);
-                il.LoadField(field);
+                il.LoadArg(0);
+                il.Load(field);
             };
         }
 
-        public static CodeBuilder GenerateLoadConstant(this ILBuilder il, int value)
+        public static CodeBuilder GenerateLoad(this ILBuilder il, int value)
         {
             return () =>
             {
-                il.LoadConstant(value);
+                il.Load(value);
             };
         }
 
@@ -72,7 +72,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Add(value);
+                il.Math.Add(value);
             };
         }
 
@@ -80,7 +80,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Add();
+                il.Math.Add();
             };
         }
 
@@ -88,7 +88,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Subtract(value);
+                il.Math.Subtract(value);
             };
         }
 
@@ -96,7 +96,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Subtract();
+                il.Math.Subtract();
             };
         }
 
@@ -104,7 +104,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Multiply(value);
+                il.Math.Multiply(value);
             };
         }
 
@@ -112,7 +112,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Multiply();
+                il.Math.Multiply();
             };
         }
 
@@ -120,7 +120,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Divide(value);
+                il.Math.Divide(value);
             };
         }
 
@@ -128,7 +128,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Divide();
+                il.Math.Divide();
             };
         }
 
@@ -136,7 +136,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Remainder(value);
+                il.Math.Remainder(value);
             };
         }
 
@@ -144,7 +144,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Remainder();
+                il.Math.Remainder();
             };
         }
 
@@ -152,7 +152,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.And(value);
+                il.Math.And(value);
             };
         }
 
@@ -160,7 +160,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.And();
+                il.Math.And();
             };
         }
 
@@ -168,7 +168,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Or(value);
+                il.Math.Or(value);
             };
         }
 
@@ -176,7 +176,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Or();
+                il.Math.Or();
             };
         }
 
@@ -184,7 +184,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Shr(value);
+                il.Math.Shr(value);
             };
         }
 
@@ -192,7 +192,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.ConvertToUInt8();
+                il.Convert.ToUInt8();
             };
         }
 

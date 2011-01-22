@@ -10,6 +10,10 @@ namespace ZDebug.Compiler.Generate
         private readonly ILGenerator il;
         private readonly Dictionary<Type, Stack<ILocal>> locals = new Dictionary<Type, Stack<ILocal>>();
 
+        private readonly CompareFunctions compare;
+        private readonly ConvertFunctions convert;
+        private readonly MathFunctions math;
+
         private readonly static MethodInfo arrayCopy = typeof(Array).GetMethod(
             name: "Copy",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
@@ -30,55 +34,24 @@ namespace ZDebug.Compiler.Generate
         public ILBuilder(ILGenerator il)
         {
             this.il = il;
+            compare = new CompareFunctions(this);
+            convert = new ConvertFunctions(this);
+            math = new MathFunctions(this);
         }
 
-        public void ConvertToUInt8()
+        public CompareFunctions Compare
         {
-            il.Emit(OpCodes.Conv_U1);
+            get { return compare; }
         }
 
-        public void ConvertToInt16()
+        public ConvertFunctions Convert
         {
-            il.Emit(OpCodes.Conv_I2);
+            get { return convert; }
         }
 
-        public void ConvertToUInt16()
+        public MathFunctions Math
         {
-            il.Emit(OpCodes.Conv_U2);
-        }
-
-        public void ConvertToInt32()
-        {
-            il.Emit(OpCodes.Conv_I4);
-        }
-
-        public void CompareEqual()
-        {
-            il.Emit(OpCodes.Ceq);
-        }
-
-        public void CompareGreaterThan()
-        {
-            il.Emit(OpCodes.Cgt);
-        }
-
-        public void CompareLessThan()
-        {
-            il.Emit(OpCodes.Clt);
-        }
-
-        public void CompareAtLeast()
-        {
-            il.Emit(OpCodes.Clt);
-            LoadConstant(0);
-            CompareEqual();
-        }
-
-        public void CompareAtMost()
-        {
-            il.Emit(OpCodes.Cgt);
-            LoadConstant(0);
-            CompareEqual();
+            get { return math; }
         }
 
         public void Duplicate()
@@ -91,7 +64,7 @@ namespace ZDebug.Compiler.Generate
             il.Emit(OpCodes.Pop);
         }
 
-        public void LoadArgument(int index)
+        public void LoadArg(int index)
         {
             switch (index)
             {
@@ -108,17 +81,17 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
-        public void LoadField(FieldInfo field)
+        public void Load(FieldInfo field)
         {
             il.Emit(OpCodes.Ldfld, field);
         }
 
-        public void LoadConstant(string value)
+        public void Load(string value)
         {
             il.Emit(OpCodes.Ldstr, value);
         }
 
-        public void LoadConstant(bool value)
+        public void Load(bool value)
         {
             if (value)
             {
@@ -130,7 +103,7 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
-        public void LoadConstant(int value)
+        public void Load(int value)
         {
             switch (value)
             {
@@ -161,173 +134,13 @@ namespace ZDebug.Compiler.Generate
                 case 8:
                     il.Emit(OpCodes.Ldc_I4_8);
                     break;
+                case -1:
+                    il.Emit(OpCodes.Ldc_I4_M1);
+                    break;
                 default:
                     il.Emit(OpCodes.Ldc_I4, value);
                     break;
             }
-        }
-
-        public void Negate()
-        {
-            il.Emit(OpCodes.Neg);
-        }
-
-        public void Add()
-        {
-            il.Emit(OpCodes.Add);
-        }
-
-        public void Add(int value)
-        {
-            LoadConstant(value);
-            Add();
-        }
-
-        public void Add(ILocal local)
-        {
-            local.Load();
-            Add();
-        }
-
-        public void Subtract()
-        {
-            il.Emit(OpCodes.Sub);
-        }
-
-        public void Subtract(int value)
-        {
-            LoadConstant(value);
-            Subtract();
-        }
-
-        public void Subtract(ILocal local)
-        {
-            local.Load();
-            Subtract();
-        }
-
-        public void And()
-        {
-            il.Emit(OpCodes.And);
-        }
-
-        public void And(int value)
-        {
-            LoadConstant(value);
-            And();
-        }
-
-        public void And(ILocal local)
-        {
-            local.Load();
-            And();
-        }
-
-        public void Multiply()
-        {
-            il.Emit(OpCodes.Mul);
-        }
-
-        public void Multiply(int value)
-        {
-            LoadConstant(value);
-            Multiply();
-        }
-
-        public void Multiply(ILocal local)
-        {
-            local.Load();
-            Multiply();
-        }
-
-        public void Divide()
-        {
-            il.Emit(OpCodes.Div);
-        }
-
-        public void Divide(int value)
-        {
-            LoadConstant(value);
-            Divide();
-        }
-
-        public void Divide(ILocal local)
-        {
-            local.Load();
-            Divide();
-        }
-
-        public void Remainder()
-        {
-            il.Emit(OpCodes.Rem);
-        }
-
-        public void Remainder(int value)
-        {
-            LoadConstant(value);
-            Remainder();
-        }
-
-        public void Remainder(ILocal local)
-        {
-            local.Load();
-            Remainder();
-        }
-
-        public void Or()
-        {
-            il.Emit(OpCodes.Or);
-        }
-
-        public void Or(int value)
-        {
-            LoadConstant(value);
-            Or();
-        }
-
-        public void Or(ILocal local)
-        {
-            local.Load();
-            Or();
-        }
-
-        public void Not()
-        {
-            il.Emit(OpCodes.Not);
-        }
-
-        public void Shl()
-        {
-            il.Emit(OpCodes.Shl);
-        }
-
-        public void Shl(int value)
-        {
-            LoadConstant(value);
-            Shl();
-        }
-
-        public void Shl(ILocal local)
-        {
-            local.Load();
-            Shl();
-        }
-
-        public void Shr()
-        {
-            il.Emit(OpCodes.Shr);
-        }
-
-        public void Shr(int value)
-        {
-            LoadConstant(value);
-            Shr();
-        }
-
-        public void Shr(ILocal local)
-        {
-            local.Load();
-            Shr();
         }
 
         public void Call(MethodInfo method)
@@ -347,7 +160,7 @@ namespace ZDebug.Compiler.Generate
 
         public void Return(int value)
         {
-            LoadConstant(value);
+            Load(value);
             Return();
         }
 
@@ -369,14 +182,14 @@ namespace ZDebug.Compiler.Generate
             destination.LoadLength();
 
             Call(mathMin);
-            ConvertToInt32();
+            convert.ToInt32();
 
             Call(arrayCopy);
         }
 
         public void RuntimeError(string message)
         {
-            LoadConstant(message);
+            Load(message);
             il.Emit(OpCodes.Newobj, exceptionCtor);
             il.Emit(OpCodes.Throw);
         }

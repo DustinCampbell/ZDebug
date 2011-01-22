@@ -30,10 +30,10 @@ namespace ZDebug.Compiler
                 objNum.Load();
             }
 
-            il.Subtract(1);
-            il.Multiply(machine.ObjectEntrySize);
-            il.Add(machine.ObjectEntriesAddress);
-            il.ConvertToUInt16();
+            il.Math.Subtract(1);
+            il.Math.Multiply(machine.ObjectEntrySize);
+            il.Math.Add(machine.ObjectEntriesAddress);
+            il.Convert.ToUInt16();
         }
 
         private void ReadObjectNumber(ushort address)
@@ -146,7 +146,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add parent number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectParentOffset);
+            il.Math.Add(machine.ObjectParentOffset);
 
             ReadObjectNumber();
         }
@@ -187,7 +187,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add parent number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectParentOffset);
+            il.Math.Add(machine.ObjectParentOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -204,7 +204,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add parent number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectParentOffset);
+            il.Math.Add(machine.ObjectParentOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -254,7 +254,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add sibling number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectSiblingOffset);
+            il.Math.Add(machine.ObjectSiblingOffset);
 
             ReadObjectNumber();
         }
@@ -295,7 +295,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add sibling number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectSiblingOffset);
+            il.Math.Add(machine.ObjectSiblingOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -312,7 +312,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add sibling number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectSiblingOffset);
+            il.Math.Add(machine.ObjectSiblingOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -362,7 +362,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add child number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectChildOffset);
+            il.Math.Add(machine.ObjectChildOffset);
 
             ReadObjectNumber();
         }
@@ -403,7 +403,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add child number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectChildOffset);
+            il.Math.Add(machine.ObjectChildOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -420,7 +420,7 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add child number offset to the address on the evaluation stack.
-            il.Add(machine.ObjectChildOffset);
+            il.Math.Add(machine.ObjectChildOffset);
 
             using (var address = il.NewLocal<ushort>())
             {
@@ -470,9 +470,94 @@ namespace ZDebug.Compiler
             CalculateObjectAddress(objNum);
 
             // Add property table address offset to the address on the evaluation stack.
-            il.Add(machine.ObjectPropertyTableAddressOffset);
+            il.Math.Add(machine.ObjectPropertyTableAddressOffset);
 
             ReadWord();
+        }
+
+        private void ReadObjectPropertyTableAddressFromOperand(int operandIndex)
+        {
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectPropertyTableAddress(op.Value);
+                    break;
+
+                default: // OperandKind.Variable
+                    ReadVariable((byte)op.Value);
+                    ReadObjectPropertyTableAddress();
+                    break;
+            }
+        }
+
+        private void ReadObjectShortName()
+        {
+            // An object's short name is the first thing store in its property table.
+            // It is simply a byte indicated the length in words of the short name,
+            // followed immediately the words.
+
+            using (var address = il.NewLocal<ushort>())
+            using (var length = il.NewLocal<byte>())
+            using (var zwords = il.NewArrayLocal<ushort>())
+            using (var index = il.NewArrayLocal<int>())
+            using (var value = il.NewArrayLocal<ushort>())
+            {
+                address.Store();
+
+                ReadByte(address);
+                length.Store();
+                zwords.Create(length);
+
+                il.Math.Increment(address);
+
+                var loopStart = il.NewLabel();
+                var loopDone = il.NewLabel();
+
+                il.Load(0);
+                index.Store();
+
+                loopStart.Mark();
+
+                index.Load();
+                length.Load();
+                loopDone.BranchIf(Condition.AtLeast);
+
+                ReadWord(address);
+                value.Store();
+
+                zwords.StoreElement(
+                    loadIndex: il.GenerateLoad(index),
+                    loadValue: il.GenerateLoad(value));
+
+                il.Math.Increment(index);
+                il.Math.Increment(address, 2);
+                loopStart.Branch();
+
+                loopDone.Mark();
+
+                zwords.Load();
+            }
+        }
+
+        private void ReadObjectShortName(int objNum)
+        {
+            ReadObjectPropertyTableAddress(objNum);
+            ReadObjectShortName();
+        }
+
+        private void ReadObjectShortName(ILocal objNum)
+        {
+            ReadObjectPropertyTableAddress(objNum);
+            ReadObjectShortName();
+        }
+
+        private void ReadObjectShortNameFromOperand(int operandIndex)
+        {
+            ReadObjectPropertyTableAddressFromOperand(operandIndex);
+            ReadObjectShortName();
         }
 
         private void ObjectHasAttribute(ILocal objNum, ILocal attribute)
@@ -482,26 +567,26 @@ namespace ZDebug.Compiler
                 {
                     CalculateObjectAddress(objNum);
                     attribute.Load();
-                    il.Divide(8);
-                    il.Add();
+                    il.Math.Divide(8);
+                    il.Math.Add();
                 }));
 
             // bit index
-            il.LoadConstant(1);
-            il.LoadConstant(7);
+            il.Load(1);
+            il.Load(7);
             attribute.Load();
-            il.LoadConstant(8);
-            il.Remainder();
-            il.Subtract();
-            il.And(0x1f);
-            il.Shl();
+            il.Load(8);
+            il.Math.Remainder();
+            il.Math.Subtract();
+            il.Math.And(0x1f);
+            il.Math.Shl();
 
             // (byte & bit index) != 0;
-            il.And();
-            il.LoadConstant(0);
-            il.CompareEqual();
-            il.LoadConstant(0);
-            il.CompareEqual();
+            il.Math.And();
+            il.Load(0);
+            il.Compare.Equal();
+            il.Load(0);
+            il.Compare.Equal();
 
 #if DEBUG
             using (var result = il.NewLocal<bool>())
@@ -522,19 +607,19 @@ namespace ZDebug.Compiler
                 // address
                 CalculateObjectAddress(objNum);
                 attribute.Load();
-                il.Divide(8);
-                il.Add();
+                il.Math.Divide(8);
+                il.Math.Add();
                 address.Store();
 
                 // bit mask
-                il.LoadConstant(1);
-                il.LoadConstant(7);
+                il.Load(1);
+                il.Load(7);
                 attribute.Load();
-                il.LoadConstant(8);
-                il.Remainder();
-                il.Subtract();
-                il.And(0x1f);
-                il.Shl();
+                il.Load(8);
+                il.Math.Remainder();
+                il.Math.Subtract();
+                il.Math.And(0x1f);
+                il.Math.Shl();
                 bitMask.Store();
 
                 // load byte value
@@ -547,15 +632,15 @@ namespace ZDebug.Compiler
 
                 if (value)
                 {
-                    il.Or();
+                    il.Math.Or();
                 }
                 else
                 {
-                    il.Not();
-                    il.And();
+                    il.Math.Not();
+                    il.Math.And();
                 }
 
-                il.ConvertToUInt8();
+                il.Convert.ToUInt8();
 
                 byteValue.Store();
                 memory.StoreElement(
@@ -575,12 +660,12 @@ namespace ZDebug.Compiler
                 propAddress.Store();
 
                 ReadByte(propAddress); // name-length
-                il.ConvertToUInt16();
-                il.Multiply(2);
+                il.Convert.ToUInt16();
+                il.Math.Multiply(2);
                 propAddress.Load();
-                il.Add();
-                il.Add(1);
-                il.ConvertToUInt16();
+                il.Math.Add();
+                il.Math.Add(1);
+                il.Convert.ToUInt16();
             }
         }
 
@@ -612,31 +697,31 @@ namespace ZDebug.Compiler
 
                 // increment propAddress
                 propAddress.Load();
-                il.Add(1);
+                il.Math.Add(1);
                 propAddress.Store();
 
                 if (machine.Version < 4)
                 {
                     // size >>= 5
                     size.Load();
-                    il.Shr(5);
-                    il.ConvertToUInt8();
+                    il.Math.Shr(5);
+                    il.Convert.ToUInt8();
                     size.Store();
                 }
                 else
                 {
                     // if ((size & 0x80) != 0x80)
                     size.Load();
-                    il.And(0x80);
-                    il.LoadConstant(0x80);
+                    il.Math.And(0x80);
+                    il.Load(0x80);
 
                     var secondSizeByte = il.NewLabel();
                     secondSizeByte.BranchIf(Condition.Equal, @short: true);
 
                     // size >>= 6
                     size.Load();
-                    il.Shr(6);
-                    il.ConvertToUInt8();
+                    il.Math.Shr(6);
+                    il.Convert.ToUInt8();
                     size.Store();
 
                     var done = il.NewLabel();
@@ -650,8 +735,8 @@ namespace ZDebug.Compiler
 
                     // size &= 0x3f
                     size.Load();
-                    il.And(0x3f);
-                    il.ConvertToUInt8();
+                    il.Math.And(0x3f);
+                    il.Convert.ToUInt8();
                     size.Store();
 
                     // if (size == 0)
@@ -659,7 +744,7 @@ namespace ZDebug.Compiler
                     done.BranchIf(Condition.True, @short: true);
 
                     // size = 64
-                    il.LoadConstant(64);
+                    il.Load(64);
                     size.Store();
 
                     done.Mark();
@@ -668,9 +753,9 @@ namespace ZDebug.Compiler
                 // (ushort)(propAddress + size + 1)
                 propAddress.Load();
                 size.Load();
-                il.Add();
-                il.Add(1);
-                il.ConvertToUInt16();
+                il.Math.Add();
+                il.Math.Add(1);
+                il.Convert.ToUInt16();
             }
         }
 
@@ -692,7 +777,7 @@ namespace ZDebug.Compiler
                 parentNum.Load();
                 hasParent.BranchIf(Condition.True, @short: true);
 
-                il.LoadConstant(0);
+                il.Load(0);
                 done.Branch();
 
                 hasParent.Mark();
@@ -705,7 +790,7 @@ namespace ZDebug.Compiler
                 objNum.Load();
                 isNotFirstChild.BranchIf(Condition.NotEqual, @short: true);
 
-                il.LoadConstant(0);
+                il.Load(0);
                 done.Branch();
 
                 isNotFirstChild.Mark();
