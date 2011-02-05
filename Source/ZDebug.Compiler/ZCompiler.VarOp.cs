@@ -465,17 +465,53 @@ namespace ZDebug.Compiler
 
         private void op_sread1()
         {
-            NotImplemented();
+            il.LoadArg(0);
+            ReadOperand(0);
+            ReadOperand(1);
+
+            il.Call(readZ3Helper);
         }
 
         private void op_sread4()
         {
-            NotImplemented();
+            il.LoadArg(0);
+            ReadOperand(0);
+            ReadOperand(1);
+
+            if (currentInstruction.OperandCount > 2)
+            {
+                il.RuntimeError("Timed input not supported");
+            }
+
+            il.Call(readZ4Helper);
         }
 
         private void op_aread()
         {
-            NotImplemented();
+            il.LoadArg(0);
+            ReadOperand(0);
+
+            if (currentInstruction.OperandCount > 1)
+            {
+                ReadOperand(1);
+            }
+            else
+            {
+                il.Load(0);
+            }
+
+            if (currentInstruction.OperandCount > 2)
+            {
+                il.RuntimeError("Timed input not supported");
+            }
+
+            using (var result = il.NewLocal<ushort>())
+            {
+                il.Call(readZ5Helper);
+
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
         }
     }
 }

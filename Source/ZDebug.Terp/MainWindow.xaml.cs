@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Win32;
-using System.IO;
-using ZDebug.Compiler;
-using ZDebug.IO.Windows;
-using ZDebug.Core.Execution;
-using System.Windows.Threading;
-using ZDebug.IO.Services;
 using System.Globalization;
+using System.IO;
+using System.Threading;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Microsoft.Win32;
+using ZDebug.Compiler;
+using ZDebug.Core.Execution;
+using ZDebug.IO.Services;
+using ZDebug.IO.Windows;
+using System.ComponentModel;
 
 namespace ZDebug.Terp
 {
@@ -35,6 +27,7 @@ namespace ZDebug.Terp
         private int machStatusHeight;
 
         private ZMachine machine;
+        private Thread machineThread;
 
         public MainWindow()
         {
@@ -60,6 +53,14 @@ namespace ZDebug.Terp
             }
         }
 
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (machineThread != null)
+            {
+                machineThread.Abort();
+            }
+        }
+
         private void OpenStory(string fileName)
         {
             if (machine != null)
@@ -80,7 +81,8 @@ namespace ZDebug.Terp
 
             windowManager.Activate(mainWindow);
 
-            Dispatcher.BeginInvoke(new Action(Run), DispatcherPriority.Background);
+            machineThread = new Thread(new ThreadStart(Run));
+            machineThread.Start();
         }
 
         private void Run()
@@ -111,95 +113,118 @@ namespace ZDebug.Terp
                 foreground: Brushes.Black);
         }
 
+        private void Dispatch(Action method)
+        {
+            Dispatcher.BeginInvoke(method, DispatcherPriority.Send);
+        }
+
         private void ResetStatusHeight()
         {
-            if (upperWindow != null)
+            Dispatch(() =>
             {
-                int height = upperWindow.GetHeight();
-                if (machStatusHeight != height)
+                if (upperWindow != null)
                 {
-                    upperWindow.SetHeight(machStatusHeight);
+                    int height = upperWindow.GetHeight();
+                    if (machStatusHeight != height)
+                    {
+                        upperWindow.SetHeight(machStatusHeight);
+                    }
                 }
-            }
+            });
         }
 
         public void Clear(int window)
         {
-            if (window == 0)
+            Dispatch(() =>
             {
-                mainWindow.Clear();
-            }
-            else if (window == 1 && upperWindow != null)
-            {
-                upperWindow.Clear();
-                ResetStatusHeight();
-                currStatusHeight = 0;
-            }
+                if (window == 0)
+                {
+                    mainWindow.Clear();
+                }
+                else if (window == 1 && upperWindow != null)
+                {
+                    upperWindow.Clear();
+                    ResetStatusHeight();
+                    currStatusHeight = 0;
+                }
+            });
         }
 
         public void ClearAll(bool unsplit)
         {
-            mainWindow.Clear();
-
-            if (upperWindow != null)
+            Dispatch(() =>
             {
-                if (unsplit)
+                mainWindow.Clear();
+
+                if (upperWindow != null)
                 {
-                    Unsplit();
+                    if (unsplit)
+                    {
+                        Unsplit();
+                    }
+                    else
+                    {
+                        upperWindow.Clear();
+                    }
                 }
-                else
-                {
-                    upperWindow.Clear();
-                }
-            }
+            });
         }
 
         public void Split(int lines)
         {
-            if (upperWindow == null)
+            Dispatch(() =>
             {
-                return;
-            }
-
-            if (lines == 0 || lines > currStatusHeight)
-            {
-                int height = upperWindow.GetHeight();
-                if (lines != height)
+                if (upperWindow == null)
                 {
-                    upperWindow.SetHeight(lines);
-                    currStatusHeight = lines;
+                    return;
                 }
-            }
 
-            machStatusHeight = lines;
+                if (lines == 0 || lines > currStatusHeight)
+                {
+                    int height = upperWindow.GetHeight();
+                    if (lines != height)
+                    {
+                        upperWindow.SetHeight(lines);
+                        currStatusHeight = lines;
+                    }
+                }
 
-            if (machine.Version == 3)
-            {
-                upperWindow.Clear();
-            }
+                machStatusHeight = lines;
+
+                if (machine.Version == 3)
+                {
+                    upperWindow.Clear();
+                }
+            });
         }
 
         public void Unsplit()
         {
-            if (upperWindow != null)
+            Dispatch(() =>
             {
-                upperWindow.SetHeight(0);
-                upperWindow.Clear();
-                ResetStatusHeight();
-                currStatusHeight = 0;
-            }
+                if (upperWindow != null)
+                {
+                    upperWindow.SetHeight(0);
+                    upperWindow.Clear();
+                    ResetStatusHeight();
+                    currStatusHeight = 0;
+                }
+            });
         }
 
         public void SetWindow(int window)
         {
-            if (window == 0)
+            Dispatch(() =>
             {
-                mainWindow.Activate();
-            }
-            else if (window == 1)
-            {
-                upperWindow.Activate();
-            }
+                if (window == 0)
+                {
+                    mainWindow.Activate();
+                }
+                else if (window == 1)
+                {
+                    upperWindow.Activate();
+                }
+            });
         }
 
         public int GetCursorLine()
@@ -214,36 +239,42 @@ namespace ZDebug.Terp
 
         public void SetCursor(int line, int column)
         {
-            windowManager.ActiveWindow.SetCursor(column, line);
+            Dispatch(() =>
+            {
+                windowManager.ActiveWindow.SetCursor(column, line);
+            });
         }
 
         public void SetTextStyle(ZTextStyle style)
         {
-            var activeWindow = windowManager.ActiveWindow;
+            Dispatch(() =>
+            {
+                var activeWindow = windowManager.ActiveWindow;
 
-            if (style == ZTextStyle.Roman)
-            {
-                activeWindow.SetBold(false);
-                activeWindow.SetItalic(false);
-                activeWindow.SetFixedPitch(false);
-                activeWindow.SetReverse(false);
-            }
-            else if (style == ZTextStyle.Bold)
-            {
-                activeWindow.SetBold(true);
-            }
-            else if (style == ZTextStyle.Italic)
-            {
-                activeWindow.SetItalic(true);
-            }
-            else if (style == ZTextStyle.FixedPitch)
-            {
-                activeWindow.SetFixedPitch(true);
-            }
-            else if (style == ZTextStyle.Reverse)
-            {
-                activeWindow.SetReverse(true);
-            }
+                if (style == ZTextStyle.Roman)
+                {
+                    activeWindow.SetBold(false);
+                    activeWindow.SetItalic(false);
+                    activeWindow.SetFixedPitch(false);
+                    activeWindow.SetReverse(false);
+                }
+                else if (style == ZTextStyle.Bold)
+                {
+                    activeWindow.SetBold(true);
+                }
+                else if (style == ZTextStyle.Italic)
+                {
+                    activeWindow.SetItalic(true);
+                }
+                else if (style == ZTextStyle.FixedPitch)
+                {
+                    activeWindow.SetFixedPitch(true);
+                }
+                else if (style == ZTextStyle.Reverse)
+                {
+                    activeWindow.SetReverse(true);
+                }
+            });
         }
 
         private Brush GetZColorBrush(ZColor color)
@@ -276,20 +307,26 @@ namespace ZDebug.Terp
 
         public void SetForegroundColor(ZColor color)
         {
-            var brush = color == ZColor.Default
-                ? FontsAndColorsService.DefaultForeground
-                : GetZColorBrush(color);
+            Dispatch(() =>
+            {
+                var brush = color == ZColor.Default
+                    ? FontsAndColorsService.DefaultForeground
+                    : GetZColorBrush(color);
 
-            FontsAndColorsService.Foreground = brush;
+                FontsAndColorsService.Foreground = brush;
+            });
         }
 
         public void SetBackgroundColor(ZColor color)
         {
-            var brush = color == ZColor.Default
-                ? FontsAndColorsService.DefaultBackground
-                : GetZColorBrush(color);
+            Dispatch(() =>
+            {
+                var brush = color == ZColor.Default
+                    ? FontsAndColorsService.DefaultBackground
+                    : GetZColorBrush(color);
 
-            FontsAndColorsService.Background = brush;
+                FontsAndColorsService.Background = brush;
+            });
         }
 
         public ZFont SetFont(ZFont font)
@@ -411,22 +448,46 @@ namespace ZDebug.Terp
 
         public void Print(string text)
         {
-            windowManager.ActiveWindow.PutString(text);
+            Dispatch(() =>
+            {
+                windowManager.ActiveWindow.PutString(text);
+            });
         }
 
         public void Print(char ch)
         {
-            windowManager.ActiveWindow.PutChar(ch);
+            Dispatch(() =>
+            {
+                windowManager.ActiveWindow.PutChar(ch);
+            });
         }
 
         public void ReadChar(Action<char> callback)
         {
-            throw new NotImplementedException();
+            Dispatch(() =>
+            {
+                mainWindow.ReadChar(ch =>
+                {
+                    ResetStatusHeight();
+                    currStatusHeight = 0;
+
+                    callback(ch);
+                });
+            });
         }
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            throw new NotImplementedException();
+            Dispatch(() =>
+            {
+                mainWindow.ReadCommand(maxChars, text =>
+                {
+                    ResetStatusHeight();
+                    currStatusHeight = 0;
+
+                    callback(text);
+                });
+            });
         }
     }
 }

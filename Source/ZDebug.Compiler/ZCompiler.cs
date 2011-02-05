@@ -57,6 +57,27 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(ushort[]) },
             modifiers: null);
 
+        private readonly static MethodInfo readZ3Helper = typeof(ZMachine).GetMethod(
+            name: "Read_Z3",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(ushort), typeof(ushort) },
+            modifiers: null);
+
+        private readonly static MethodInfo readZ4Helper = typeof(ZMachine).GetMethod(
+            name: "Read_Z4",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(ushort), typeof(ushort) },
+            modifiers: null);
+
+        private readonly static MethodInfo readZ5Helper = typeof(ZMachine).GetMethod(
+            name: "Read_Z5",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(ushort), typeof(ushort) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;

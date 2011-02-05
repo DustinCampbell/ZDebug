@@ -31,6 +31,7 @@ namespace ZDebug.Compiler
         private readonly byte objectAttributeByteCount;
         private readonly byte objectAttributeCount;
 
+        private readonly ushort dictionaryAddress;
         private readonly ushort globalVariableTableAddress;
 
         private readonly int packResolution;
@@ -61,6 +62,7 @@ namespace ZDebug.Compiler
             this.objectAttributeByteCount = (byte)(version < 4 ? 4 : 6);
             this.objectAttributeCount = (byte)(version < 4 ? 32 : 48);
 
+            this.dictionaryAddress = memory.ReadWord(0x08);
             this.globalVariableTableAddress = memory.ReadWord(0x0c);
 
             this.packResolution = this.version < 4 ? 2 : this.version < 8 ? 4 : 8;
@@ -151,6 +153,184 @@ namespace ZDebug.Compiler
         internal string ConvertZText(ushort[] zwords)
         {
             return ztext.ZWordsAsString(zwords, ZTextFlags.All);
+        }
+
+        internal void Read_Z3(ushort textBuffer, ushort parseBuffer)
+        {
+            bool done = false;
+
+            screen.ShowStatus();
+
+            byte maxChars = memory.ReadByte(textBuffer);
+
+            screen.ReadCommand(maxChars, s =>
+            {
+                string text = s.ToLower();
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                }
+
+                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+
+                // TODO: Use ztext.TokenizeLine.
+
+                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+
+                byte maxWords = memory.ReadByte(parseBuffer);
+                byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
+
+                memory.WriteByte(parseBuffer + 1, parsedWords);
+
+                for (int i = 0; i < parsedWords; i++)
+                {
+                    ZCommandToken token = tokens[i];
+
+                    ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                    if (address > 0)
+                    {
+                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                    }
+                    else
+                    {
+                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                    }
+
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                }
+
+                done = true;
+            });
+
+            while (!done)
+            {
+            }
+        }
+
+        internal void Read_Z4(ushort textBuffer, ushort parseBuffer)
+        {
+            // TODO: Support timed input
+
+            bool done = false;
+
+            byte maxChars = memory.ReadByte(textBuffer);
+
+            screen.ReadCommand(maxChars, s =>
+            {
+                string text = s.ToLower();
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                }
+
+                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+
+                // TODO: Use ztext.TokenizeLine.
+
+                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+
+                byte maxWords = memory.ReadByte(parseBuffer);
+                byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
+
+                memory.WriteByte(parseBuffer + 1, parsedWords);
+
+                for (int i = 0; i < parsedWords; i++)
+                {
+                    ZCommandToken token = tokens[i];
+
+                    ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                    if (address > 0)
+                    {
+                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                    }
+                    else
+                    {
+                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                    }
+
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                }
+
+                done = true;
+            });
+
+            while (!done)
+            {
+            }
+        }
+
+        internal ushort Read_Z5(ushort textBuffer, ushort parseBuffer)
+        {
+            // TODO: Support timed input
+
+            bool done = false;
+            ushort result = 0;
+
+            byte maxChars = memory.ReadByte(textBuffer);
+
+            screen.ReadCommand(maxChars, s =>
+            {
+                string text = s.ToLower();
+
+                byte existingTextCount = memory.ReadByte(textBuffer + 1);
+
+                memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
+                }
+
+                if (parseBuffer > 0)
+                {
+                    // TODO: Use ztext.TokenizeLine.
+
+                    ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+
+                    byte maxWords = memory.ReadByte(parseBuffer);
+                    byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
+
+                    memory.WriteByte(parseBuffer + 1, parsedWords);
+
+                    for (int i = 0; i < parsedWords; i++)
+                    {
+                        ZCommandToken token = tokens[i];
+
+                        ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                        if (address > 0)
+                        {
+                            memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                        }
+                        else
+                        {
+                            memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                        }
+
+                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                    }
+                }
+
+                // TODO: Update this when timed input is supported
+                result = 10;
+
+                done = true;
+            });
+
+            while (!done)
+            {
+            }
+
+            return result;
+        }
+
+        internal void Tick()
+        {
+
         }
 
         public int UnpackRoutineAddress(ushort byteAddress)

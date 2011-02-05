@@ -1,7 +1,8 @@
 ﻿<Window x:Class="ZDebug.Terp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="960" Width="1280">
+        Title="MainWindow" Height="960" Width="1280"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <BitmapImage x:Key="openImage" UriSource="Images/open.png"/>
