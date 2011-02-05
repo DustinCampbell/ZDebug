@@ -463,6 +463,36 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void op_read_char()
+        {
+            if (currentInstruction.OperandCount > 0)
+            {
+                var inputStreamOp = GetOperand(0);
+                if (inputStreamOp.Kind == OperandKind.Variable)
+                {
+                    throw new ZCompilerException("op_read_char: Expected a single non-variable operand");
+                }
+
+                if (inputStreamOp.Value != 1)
+                {
+                    throw new ZCompilerException("op_read_char: Expected a single non-variable operand with value 1, but was " + inputStreamOp.Value);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("op_read_char: Expected a single non-variable operand");
+            }
+
+            using (var result = il.NewLocal<ushort>())
+            {
+                il.LoadArg(0);
+                il.Call(readCharHelper);
+
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
+        }
+
         private void op_sread1()
         {
             il.LoadArg(0);

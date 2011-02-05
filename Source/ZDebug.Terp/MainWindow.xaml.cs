@@ -115,7 +115,7 @@ namespace ZDebug.Terp
 
         private void Dispatch(Action method)
         {
-            Dispatcher.BeginInvoke(method, DispatcherPriority.Send);
+            Dispatcher.BeginInvoke(method, DispatcherPriority.Normal);
         }
 
         private void ResetStatusHeight()

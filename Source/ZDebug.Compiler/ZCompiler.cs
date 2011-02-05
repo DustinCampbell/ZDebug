@@ -78,6 +78,13 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(ushort), typeof(ushort) },
             modifiers: null);
 
+        private readonly static MethodInfo readCharHelper = typeof(ZMachine).GetMethod(
+            name: "ReadChar",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -618,6 +625,14 @@ namespace ZDebug.Compiler
                             if (machine.Version >= 4)
                             {
                                 op_set_cursor();
+                                return;
+                            }
+
+                            break;
+                        case 0x16:
+                            if (machine.Version >= 4)
+                            {
+                                op_read_char();
                                 return;
                             }
 

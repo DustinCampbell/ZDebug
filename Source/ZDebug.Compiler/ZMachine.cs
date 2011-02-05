@@ -328,6 +328,24 @@ namespace ZDebug.Compiler
             return result;
         }
 
+        internal ushort ReadChar()
+        {
+            bool done = false;
+            ushort result = 0;
+
+            screen.ReadChar(ch =>
+            {
+                result = (ushort)ch;
+                done = true;
+            });
+
+            while (!done)
+            {
+            }
+
+            return result;
+        }
+
         internal void Tick()
         {
 
