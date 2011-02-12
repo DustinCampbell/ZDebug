@@ -14,6 +14,9 @@ namespace ZDebug.Compiler.Generate
         private readonly ConvertFunctions convert;
         private readonly MathFunctions math;
 
+        private int opcodeCount;
+        private int localCount;
+
         private readonly static MethodInfo arrayCopy = typeof(Array).GetMethod(
             name: "Copy",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
@@ -39,6 +42,16 @@ namespace ZDebug.Compiler.Generate
             math = new MathFunctions(this);
         }
 
+        public int OpcodeCount
+        {
+            get { return opcodeCount; }
+        }
+
+        public int LocalCount
+        {
+            get { return localCount; }
+        }
+
         public CompareFunctions Compare
         {
             get { return compare; }
@@ -54,14 +67,74 @@ namespace ZDebug.Compiler.Generate
             get { return math; }
         }
 
+        private void Emit(OpCode opcode)
+        {
+            il.Emit(opcode);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, int value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, string value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, Type value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, FieldInfo value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, MethodInfo value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, ConstructorInfo value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, Label value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private void Emit(OpCode opcode, LocalBuilder value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        private LocalBuilder DeclareLocal(Type localType)
+        {
+            return il.DeclareLocal(localType);
+            localCount++;
+        }
+
         public void Duplicate()
         {
-            il.Emit(OpCodes.Dup);
+            Emit(OpCodes.Dup);
         }
 
         public void Pop()
         {
-            il.Emit(OpCodes.Pop);
+            Emit(OpCodes.Pop);
         }
 
         public void LoadArg(int index)
@@ -69,11 +142,11 @@ namespace ZDebug.Compiler.Generate
             switch (index)
             {
                 case 0:
-                    il.Emit(OpCodes.Ldarg_0);
+                    Emit(OpCodes.Ldarg_0);
                     break;
 
                 case 1:
-                    il.Emit(OpCodes.Ldarg_1);
+                    Emit(OpCodes.Ldarg_1);
                     break;
 
                 default:
@@ -83,23 +156,23 @@ namespace ZDebug.Compiler.Generate
 
         public void Load(FieldInfo field)
         {
-            il.Emit(OpCodes.Ldfld, field);
+            Emit(OpCodes.Ldfld, field);
         }
 
         public void Load(string value)
         {
-            il.Emit(OpCodes.Ldstr, value);
+            Emit(OpCodes.Ldstr, value);
         }
 
         public void Load(bool value)
         {
             if (value)
             {
-                il.Emit(OpCodes.Ldc_I4_1);
+                Emit(OpCodes.Ldc_I4_1);
             }
             else
             {
-                il.Emit(OpCodes.Ldc_I4_0);
+                Emit(OpCodes.Ldc_I4_0);
             }
         }
 
@@ -108,54 +181,54 @@ namespace ZDebug.Compiler.Generate
             switch (value)
             {
                 case 0:
-                    il.Emit(OpCodes.Ldc_I4_0);
+                    Emit(OpCodes.Ldc_I4_0);
                     break;
                 case 1:
-                    il.Emit(OpCodes.Ldc_I4_1);
+                    Emit(OpCodes.Ldc_I4_1);
                     break;
                 case 2:
-                    il.Emit(OpCodes.Ldc_I4_2);
+                    Emit(OpCodes.Ldc_I4_2);
                     break;
                 case 3:
-                    il.Emit(OpCodes.Ldc_I4_3);
+                    Emit(OpCodes.Ldc_I4_3);
                     break;
                 case 4:
-                    il.Emit(OpCodes.Ldc_I4_4);
+                    Emit(OpCodes.Ldc_I4_4);
                     break;
                 case 5:
-                    il.Emit(OpCodes.Ldc_I4_5);
+                    Emit(OpCodes.Ldc_I4_5);
                     break;
                 case 6:
-                    il.Emit(OpCodes.Ldc_I4_6);
+                    Emit(OpCodes.Ldc_I4_6);
                     break;
                 case 7:
-                    il.Emit(OpCodes.Ldc_I4_7);
+                    Emit(OpCodes.Ldc_I4_7);
                     break;
                 case 8:
-                    il.Emit(OpCodes.Ldc_I4_8);
+                    Emit(OpCodes.Ldc_I4_8);
                     break;
                 case -1:
-                    il.Emit(OpCodes.Ldc_I4_M1);
+                    Emit(OpCodes.Ldc_I4_M1);
                     break;
                 default:
-                    il.Emit(OpCodes.Ldc_I4, value);
+                    Emit(OpCodes.Ldc_I4, value);
                     break;
             }
         }
 
         public void Call(MethodInfo method)
         {
-            il.Emit(OpCodes.Call, method);
+            Emit(OpCodes.Call, method);
         }
 
         public void CallVirt(MethodInfo method)
         {
-            il.Emit(OpCodes.Callvirt, method);
+            Emit(OpCodes.Callvirt, method);
         }
 
         public void Return()
         {
-            il.Emit(OpCodes.Ret);
+            Emit(OpCodes.Ret);
         }
 
         public void Return(int value)
@@ -170,7 +243,7 @@ namespace ZDebug.Compiler.Generate
             destination.Load();
             length.Load();
 
-            il.Emit(OpCodes.Call, arrayCopy);
+            Emit(OpCodes.Call, arrayCopy);
         }
 
         public void CopyArray(IArrayLocal source, IArrayLocal destination)
@@ -190,36 +263,36 @@ namespace ZDebug.Compiler.Generate
         public void RuntimeError(string message)
         {
             Load(message);
-            il.Emit(OpCodes.Newobj, exceptionCtor);
-            il.Emit(OpCodes.Throw);
+            Emit(OpCodes.Newobj, exceptionCtor);
+            Emit(OpCodes.Throw);
         }
 
         public void RuntimeError(string format, ILocal arg0)
         {
             FormatString(format, arg0);
-            il.Emit(OpCodes.Newobj, exceptionCtor);
-            il.Emit(OpCodes.Throw);
+            Emit(OpCodes.Newobj, exceptionCtor);
+            Emit(OpCodes.Throw);
         }
 
         public void RuntimeError(string format, ILocal arg0, ILocal arg1)
         {
             FormatString(format, arg0, arg1);
-            il.Emit(OpCodes.Newobj, exceptionCtor);
-            il.Emit(OpCodes.Throw);
+            Emit(OpCodes.Newobj, exceptionCtor);
+            Emit(OpCodes.Throw);
         }
 
         public void RuntimeError(string format, ILocal arg0, ILocal arg1, ILocal arg2)
         {
             FormatString(format, arg0, arg1, arg2);
-            il.Emit(OpCodes.Newobj, exceptionCtor);
-            il.Emit(OpCodes.Throw);
+            Emit(OpCodes.Newobj, exceptionCtor);
+            Emit(OpCodes.Throw);
         }
 
         public void RuntimeError(string format, params ILocal[] args)
         {
             FormatString(format, args);
-            il.Emit(OpCodes.Newobj, exceptionCtor);
-            il.Emit(OpCodes.Throw);
+            Emit(OpCodes.Newobj, exceptionCtor);
+            Emit(OpCodes.Throw);
         }
 
     }

@@ -8,6 +8,7 @@ using ZDebug.Core.Utilities;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Text;
+using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.Compiler
 {
@@ -15,6 +16,7 @@ namespace ZDebug.Compiler
     {
         private readonly byte[] memory;
         private readonly IScreen screen;
+        private readonly IZMachineProfiler profiler;
         private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
 
@@ -42,10 +44,11 @@ namespace ZDebug.Compiler
 
         private Random random;
 
-        public ZMachine(byte[] memory, IScreen screen = null)
+        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null)
         {
             this.memory = memory;
             this.screen = screen;
+            this.profiler = profiler;
             this.outputStreams = new OutputStreams(memory);
             this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
@@ -113,6 +116,11 @@ namespace ZDebug.Compiler
                 var routine = ZRoutine.Create(address, memory);
                 result = ZCompiler.Compile(routine, this);
                 compiledRoutines.Add(address, result);
+
+                if (profiler != null)
+                {
+                    profiler.RoutineCompiled(result.Statistics);
+                }
             }
 
             return result.Code;

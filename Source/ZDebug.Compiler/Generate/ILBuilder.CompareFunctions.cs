@@ -16,29 +16,29 @@ namespace ZDebug.Compiler.Generate
 
             public void Equal()
             {
-                builder.il.Emit(OpCodes.Ceq);
+                builder.Emit(OpCodes.Ceq);
             }
 
             public void GreaterThan()
             {
-                builder.il.Emit(OpCodes.Cgt);
+                builder.Emit(OpCodes.Cgt);
             }
 
             public void LessThan()
             {
-                builder.il.Emit(OpCodes.Clt);
+                builder.Emit(OpCodes.Clt);
             }
 
             public void AtLeast()
             {
-                builder.il.Emit(OpCodes.Clt);
+                builder.Emit(OpCodes.Clt);
                 builder.Load(0);
                 this.Equal();
             }
 
             public void AtMost()
             {
-                builder.il.Emit(OpCodes.Cgt);
+                builder.Emit(OpCodes.Cgt);
                 builder.Load(0);
                 this.Equal();
             }

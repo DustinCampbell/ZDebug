@@ -54,6 +54,8 @@
     <Compile Include="Generate\ILBuilder.MathFunctions.cs" />
     <Compile Include="Generate\ILocal.cs" />
     <Compile Include="InstructionExtensions.cs" />
+    <Compile Include="Profiling\IZMachineProfiler.cs" />
+    <Compile Include="Profiling\RoutineStatistics.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZCompiler.cs" />

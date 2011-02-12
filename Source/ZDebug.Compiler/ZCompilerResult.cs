@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.Compiler
 {
@@ -9,15 +10,13 @@ namespace ZDebug.Compiler
     {
         private readonly ZRoutine routine;
         private readonly ZRoutineCode code;
-        private readonly int instructions;
-        private readonly int opcodes;
+        private readonly RoutineStatistics statistics;
 
-        public ZCompilerResult(ZRoutine routine, ZRoutineCode code, int instructions, int opcodes)
+        public ZCompilerResult(ZRoutine routine, ZRoutineCode code, RoutineStatistics statistics)
         {
             this.routine = routine;
             this.code = code;
-            this.instructions = instructions;
-            this.opcodes = opcodes;
+            this.statistics = statistics;
         }
 
         /// <summary>
@@ -37,19 +36,11 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
-        /// The number of Z-machine instructions that were compiled.
+        /// Statistics about the routine that was compiled.
         /// </summary>
-        public int Instructions
+        public RoutineStatistics Statistics
         {
-            get { return instructions; }
-        }
-
-        /// <summary>
-        /// The number of IL opcodes that were generated.
-        /// </summary>
-        public int Opcodes
-        {
-            get { return opcodes; }
+            get { return statistics; }
         }
     }
 }

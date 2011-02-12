@@ -46,7 +46,7 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to load local that has already been released.");
                 }
 
-                builder.il.Emit(OpCodes.Ldloc, local);
+                builder.Emit(OpCodes.Ldloc, local);
             }
 
             public void LoadAddress()
@@ -56,7 +56,7 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to load local that has already been released.");
                 }
 
-                builder.il.Emit(OpCodes.Ldloca_S, local);
+                builder.Emit(OpCodes.Ldloca_S, local);
             }
 
             public void LoadAndBox()
@@ -65,7 +65,7 @@ namespace ZDebug.Compiler.Generate
 
                 if (local.LocalType.IsValueType)
                 {
-                    builder.il.Emit(OpCodes.Box, local.LocalType);
+                    builder.Emit(OpCodes.Box, local.LocalType);
                 }
             }
 
@@ -76,7 +76,7 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to store local that has already been released.");
                 }
 
-                builder.il.Emit(OpCodes.Stloc, local);
+                builder.Emit(OpCodes.Stloc, local);
             }
 
             public int Index
@@ -155,28 +155,28 @@ namespace ZDebug.Compiler.Generate
             public void Create(int length)
             {
                 builder.Load(length);
-                builder.il.Emit(OpCodes.Newarr, elementType);
+                builder.Emit(OpCodes.Newarr, elementType);
                 this.Store();
             }
 
             public void Create(ILocal length)
             {
                 length.Load();
-                builder.il.Emit(OpCodes.Newarr, elementType);
+                builder.Emit(OpCodes.Newarr, elementType);
                 this.Store();
             }
 
             public void LoadLength()
             {
                 this.Load();
-                builder.il.Emit(OpCodes.Ldlen);
+                builder.Emit(OpCodes.Ldlen);
             }
 
             public void LoadElement(CodeBuilder loadIndex)
             {
                 this.Load();
                 loadIndex();
-                builder.il.Emit(loadOpCode);
+                builder.Emit(loadOpCode);
             }
 
             public void StoreElement(CodeBuilder loadIndex, CodeBuilder loadValue)
@@ -184,7 +184,7 @@ namespace ZDebug.Compiler.Generate
                 this.Load();
                 loadIndex();
                 loadValue();
-                builder.il.Emit(storeOpCode);
+                builder.Emit(storeOpCode);
             }
         }
 
@@ -197,12 +197,12 @@ namespace ZDebug.Compiler.Generate
             Stack<ILocal> stack;
             if (!locals.TryGetValue(type, out stack))
             {
-                return createWrapper(this, il.DeclareLocal(type));
+                return createWrapper(this, DeclareLocal(type));
             }
 
             if (stack.Count == 0)
             {
-                return createWrapper(this, il.DeclareLocal(type));
+                return createWrapper(this, DeclareLocal(type));
             }
 
             var result = (TWrapper)stack.Pop();

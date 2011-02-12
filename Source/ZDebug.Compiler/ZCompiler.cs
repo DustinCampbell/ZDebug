@@ -5,6 +5,7 @@ using ZDebug.Core.Instructions;
 using System.Reflection;
 using ZDebug.Core.Execution;
 using ZDebug.Compiler.Generate;
+using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.Compiler
 {
@@ -229,7 +230,9 @@ namespace ZDebug.Compiler
 
             var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
 
-            return new ZCompilerResult(this.routine, code, 0, 0);
+            var statistics = new RoutineStatistics(il.OpcodeCount, il.LocalCount);
+
+            return new ZCompilerResult(this.routine, code, statistics);
         }
 
         private void NotImplemented()

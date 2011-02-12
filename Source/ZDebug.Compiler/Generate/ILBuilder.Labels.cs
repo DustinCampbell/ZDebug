@@ -31,11 +31,11 @@ namespace ZDebug.Compiler.Generate
             {
                 if (@short)
                 {
-                    builder.il.Emit(OpCodes.Br_S, label);
+                    builder.Emit(OpCodes.Br_S, label);
                 }
                 else
                 {
-                    builder.il.Emit(OpCodes.Br, label);
+                    builder.Emit(OpCodes.Br, label);
                 }
             }
 
@@ -46,11 +46,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.False:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Brfalse_S, label);
+                            builder.Emit(OpCodes.Brfalse_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Brfalse, label);
+                            builder.Emit(OpCodes.Brfalse, label);
                         }
 
                         break;
@@ -58,11 +58,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.True:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Brtrue_S, label);
+                            builder.Emit(OpCodes.Brtrue_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Brtrue, label);
+                            builder.Emit(OpCodes.Brtrue, label);
                         }
 
                         break;
@@ -70,11 +70,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.NotEqual:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Bne_Un_S, label);
+                            builder.Emit(OpCodes.Bne_Un_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Bne_Un, label);
+                            builder.Emit(OpCodes.Bne_Un, label);
                         }
 
                         break;
@@ -82,11 +82,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.Equal:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Beq_S, label);
+                            builder.Emit(OpCodes.Beq_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Beq, label);
+                            builder.Emit(OpCodes.Beq, label);
                         }
 
                         break;
@@ -94,11 +94,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.AtLeast:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Bge_S, label);
+                            builder.Emit(OpCodes.Bge_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Bge, label);
+                            builder.Emit(OpCodes.Bge, label);
                         }
 
                         break;
@@ -106,11 +106,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.AtMost:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Ble_S, label);
+                            builder.Emit(OpCodes.Ble_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Ble, label);
+                            builder.Emit(OpCodes.Ble, label);
                         }
 
                         break;
@@ -118,11 +118,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.LessThan:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Blt_S, label);
+                            builder.Emit(OpCodes.Blt_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Blt, label);
+                            builder.Emit(OpCodes.Blt, label);
                         }
 
                         break;
@@ -130,11 +130,11 @@ namespace ZDebug.Compiler.Generate
                     case Condition.GreaterThan:
                         if (@short)
                         {
-                            builder.il.Emit(OpCodes.Bgt_S, label);
+                            builder.Emit(OpCodes.Bgt_S, label);
                         }
                         else
                         {
-                            builder.il.Emit(OpCodes.Bgt, label);
+                            builder.Emit(OpCodes.Bgt, label);
                         }
 
                         break;
