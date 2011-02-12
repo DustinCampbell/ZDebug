@@ -21,7 +21,7 @@ namespace ZDebug.Compiler
         {
             var text = machine.ConvertZText(currentInstruction.ZText);
             PrintText(text);
-            il.Return(1);
+            Return(1);
         }
 
         private void op_restart()
@@ -37,17 +37,17 @@ namespace ZDebug.Compiler
         private void op_ret_popped()
         {
             PopStack();
-            il.Return();
+            Return();
         }
 
         private void op_rfalse()
         {
-            il.Return(0);
+            Return(0);
         }
 
         private void op_rtrue()
         {
-            il.Return(1);
+            Return(1);
         }
 
         private void op_show_status()

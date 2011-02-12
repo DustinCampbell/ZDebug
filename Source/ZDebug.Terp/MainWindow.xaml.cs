@@ -14,6 +14,8 @@ using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
+using System.Text;
 
 namespace ZDebug.Terp
 {
@@ -56,6 +58,11 @@ namespace ZDebug.Terp
             {
                 OpenStory(dialog.FileName);
             }
+        }
+
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            machine.Stop();
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -513,6 +520,21 @@ namespace ZDebug.Terp
                 routinesCompiled.Text = compilationStatistics.Count.ToString("0,0");
                 zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
             });
+        }
+
+        private StringBuilder logBuilder = new StringBuilder();
+        private int indentLevel;
+
+        public void EnterRoutine(int address)
+        {
+            var indent = new string(' ', indentLevel * 2);
+            logBuilder.AppendLine(indent + address.ToString("x4"));
+            indentLevel++;
+        }
+
+        public void ExitRoutine(int address)
+        {
+            indentLevel--;
         }
     }
 }

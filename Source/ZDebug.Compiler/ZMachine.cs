@@ -43,6 +43,7 @@ namespace ZDebug.Compiler
         private readonly IntegerMap<ZCompilerResult> compiledRoutines;
 
         private Random random;
+        private bool interupt;
 
         public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null)
         {
@@ -113,8 +114,11 @@ namespace ZDebug.Compiler
             ZCompilerResult result;
             if (!compiledRoutines.TryGetValue(address, out result))
             {
-                var routine = ZRoutine.Create(address, memory);
-                result = ZCompiler.Compile(routine, this);
+                result = ZCompiler.Compile(
+                    routine: ZRoutine.Create(address, memory),
+                    machine: this,
+                    profiling: profiler != null);
+
                 compiledRoutines.Add(address, result);
 
                 if (profiler != null)
@@ -130,6 +134,22 @@ namespace ZDebug.Compiler
         {
             var code = GetRoutineCode(address);
             return code(args);
+        }
+
+        internal void EnterRoutine(int address)
+        {
+            if (profiler != null)
+            {
+                profiler.EnterRoutine(address);
+            }
+        }
+
+        internal void ExitRoutine(int address)
+        {
+            if (profiler != null)
+            {
+                profiler.ExitRoutine(address);
+            }
         }
 
         internal string ReadZText(int address)
@@ -371,6 +391,7 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
+            interupt = false;
             var mainAddress = memory.ReadWord(0x06);
             if (version != 6)
             {
@@ -378,6 +399,11 @@ namespace ZDebug.Compiler
             }
 
             Call(mainAddress, new ushort[0]);
+        }
+
+        public void Stop()
+        {
+            interupt = true;
         }
 
         public byte Version

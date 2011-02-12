@@ -24,11 +24,29 @@ namespace ZDebug.Compiler
             name: "outputStreams",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
 
+        private readonly static FieldInfo interuptField = typeof(ZMachine).GetField(
+            name: "interupt",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
+
         private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
             name: "Call",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
             types: new Type[] { typeof(int), typeof(ushort[]) },
+            modifiers: null);
+
+        private readonly static MethodInfo enterRoutineHelper = typeof(ZMachine).GetMethod(
+            name: "EnterRoutine",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
+            modifiers: null);
+
+        private readonly static MethodInfo exitRoutineHelper = typeof(ZMachine).GetMethod(
+            name: "ExitRoutine",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
             modifiers: null);
 
         private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
@@ -91,6 +109,7 @@ namespace ZDebug.Compiler
 
         private readonly ZRoutine routine;
         private readonly ZMachine machine;
+        private readonly bool profiling;
 
         private ILBuilder il;
         private Dictionary<int, ILabel> addressToLabelMap;
@@ -108,10 +127,11 @@ namespace ZDebug.Compiler
 
         private IArrayLocal locals;
 
-        private ZCompiler(ZRoutine routine, ZMachine machine)
+        private ZCompiler(ZRoutine routine, ZMachine machine, bool profiling)
         {
             this.routine = routine;
             this.machine = machine;
+            this.profiling = profiling;
         }
 
         private static string GetName(ZRoutine routine)
@@ -132,6 +152,13 @@ namespace ZDebug.Compiler
 
             var ilGen = dm.GetILGenerator();
             this.il = new ILBuilder(ilGen);
+
+            if (profiling)
+            {
+                il.LoadArg(0); // ZMachine
+                il.Load(routine.Address);
+                il.Call(enterRoutineHelper);
+            }
 
             // First pass: gather branches and labels
             this.addressToLabelMap = new Dictionary<int, ILabel>();
@@ -225,6 +252,7 @@ namespace ZDebug.Compiler
                     label.Mark();
                 }
 
+                CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
                 currentInstruction = i;
@@ -245,6 +273,37 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", currentInstruction.Address, currentInstruction.Opcode.Name));
         }
 
+        private void CheckInterupt()
+        {
+            var ok = il.NewLabel();
+            il.LoadArg(0);
+            il.Load(interuptField);
+            ok.BranchIf(Condition.False, @short: true);
+
+            il.RuntimeError(string.Format("Z-Machine interupted."));
+
+            ok.Mark();
+        }
+
+        private void Return(int? value = null)
+        {
+            if (profiling)
+            {
+                il.LoadArg(0); // ZMachine
+                il.Load(routine.Address);
+                il.Call(exitRoutineHelper);
+            }
+
+            if (value != null)
+            {
+                il.Return(value.Value);
+            }
+            else
+            {
+                il.Return();
+            }
+        }
+
         private void Branch()
         {
             // It is expected that the value on the top of the evaluation stack
@@ -259,12 +318,12 @@ namespace ZDebug.Compiler
             {
                 case BranchKind.RFalse:
                     il.DebugWrite("  > branching rfalse...");
-                    il.Return(0);
+                    Return(0);
                     break;
 
                 case BranchKind.RTrue:
                     il.DebugWrite("  > branching rtrue...");
-                    il.Return(1);
+                    Return(1);
                     break;
 
                 default: // BranchKind.Address
@@ -729,9 +788,9 @@ namespace ZDebug.Compiler
                     currentInstruction.Opcode.Number));
         }
 
-        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine)
+        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine, bool profiling = false)
         {
-            return new ZCompiler(routine, machine).Compile();
+            return new ZCompiler(routine, machine, profiling).Compile();
         }
     }
 }

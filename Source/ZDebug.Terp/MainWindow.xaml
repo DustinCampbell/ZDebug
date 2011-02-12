@@ -7,6 +7,7 @@
 
     <Window.Resources>
         <BitmapImage x:Key="openImage" UriSource="Images/open.png"/>
+        <BitmapImage x:Key="stopImage" UriSource="Images/stop.png"/>
     </Window.Resources>
 
     <Grid>
@@ -34,6 +35,10 @@
             <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
                 <Button ToolTip="Open a Z-Code File" Click="Open_Click">
                     <Image Height="16" Width="16" Source="{StaticResource openImage}"/>
+                </Button>
+                <Separator/>
+                <Button ToolTip="Stop" Click="Stop_Click">
+                    <Image Height="16" Width="16" Source="{StaticResource stopImage}"/>
                 </Button>
             </ToolBar>
         </ToolBarTray>

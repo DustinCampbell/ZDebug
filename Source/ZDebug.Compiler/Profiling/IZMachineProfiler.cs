@@ -8,5 +8,8 @@ namespace ZDebug.Compiler.Profiling
     public interface IZMachineProfiler
     {
         void RoutineCompiled(RoutineCompilationStatistics statistics);
+
+        void EnterRoutine(int address);
+        void ExitRoutine(int address);
     }
 }

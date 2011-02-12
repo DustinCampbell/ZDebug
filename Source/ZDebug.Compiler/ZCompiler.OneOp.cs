@@ -230,7 +230,7 @@ namespace ZDebug.Compiler
         private void op_ret()
         {
             ReadOperand(0);
-            il.Return();
+            Return();
         }
     }
 }
