@@ -117,7 +117,7 @@ namespace ZDebug.Compiler
             return "ZRoutine_" + routine.Address.ToString("x4");
         }
 
-        public ZRoutineCode Compile()
+        public ZCompilerResult Compile()
         {
             var dm = new DynamicMethod(
                 name: GetName(routine),
@@ -227,7 +227,9 @@ namespace ZDebug.Compiler
                 Assemble();
             }
 
-            return (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
+            var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
+
+            return new ZCompilerResult(this.routine, code, 0, 0);
         }
 
         private void NotImplemented()
@@ -719,7 +721,7 @@ namespace ZDebug.Compiler
                     currentInstruction.Opcode.Number));
         }
 
-        public static ZRoutineCode Compile(ZRoutine routine, ZMachine machine)
+        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine)
         {
             return new ZCompiler(routine, machine).Compile();
         }

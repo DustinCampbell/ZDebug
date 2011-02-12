@@ -58,8 +58,8 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 
-            var zcode = ZCompiler.Compile(routine, zmachine);
-            var res = zcode(new ushort[0]);
+            var zcompilerResult = ZCompiler.Compile(routine, zmachine);
+            var res = zcompilerResult.Code(new ushort[0]);
 
             Assert.That(res, Is.EqualTo(0));
         }
@@ -78,8 +78,8 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 
-            var zcode = ZCompiler.Compile(routine, zmachine);
-            var res = zcode(new ushort[] { 0x8010, 0xffff });
+            var zcompilerResult = ZCompiler.Compile(routine, zmachine);
+            var res = zcompilerResult.Code(new ushort[] { 0x8010, 0xffff });
 
             Assert.That(res, Is.EqualTo(0x2497));
         }
@@ -98,9 +98,9 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 
-            var zcode = ZCompiler.Compile(routine, zmachine);
-            zcode(new ushort[] { 0x8010, 0xffff });
-            var res = zcode(new ushort[] { 0x807c, 0xffff });
+            var zcompilerResult = ZCompiler.Compile(routine, zmachine);
+            zcompilerResult.Code(new ushort[] { 0x8010, 0xffff });
+            var res = zcompilerResult.Code(new ushort[] { 0x807c, 0xffff });
 
             Assert.That(res, Is.EqualTo(0x2491));
         }
@@ -119,10 +119,10 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 
-            var zcode = ZCompiler.Compile(routine, zmachine);
-            zcode(new ushort[] { 0x8010, 0xffff });
-            zcode(new ushort[] { 0x807c, 0xffff });
-            var res = zcode(new ushort[] { 0x80f0, 0xffff });
+            var zcompilerResult = ZCompiler.Compile(routine, zmachine);
+            zcompilerResult.Code(new ushort[] { 0x8010, 0xffff });
+            zcompilerResult.Code(new ushort[] { 0x807c, 0xffff });
+            var res = zcompilerResult.Code(new ushort[] { 0x80f0, 0xffff });
 
             Assert.That(res, Is.EqualTo(0x248b));
         }
@@ -141,8 +141,8 @@ namespace ZDebug.Compiler.Tests
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 
-            var zcode = ZCompiler.Compile(routine, zmachine);
-            var res = zcode(new ushort[] { 0x8010 });
+            var zcompilerResult = ZCompiler.Compile(routine, zmachine);
+            var res = zcompilerResult.Code(new ushort[] { 0x8010 });
 
             Assert.That(res, Is.EqualTo(0x2497));
         }

@@ -38,7 +38,7 @@ namespace ZDebug.Compiler
         private readonly int routinesOffset;
         private readonly int stringsOffset;
 
-        private readonly IntegerMap<ZRoutineCode> compiledRoutines;
+        private readonly IntegerMap<ZCompilerResult> compiledRoutines;
 
         private Random random;
 
@@ -69,7 +69,7 @@ namespace ZDebug.Compiler
             this.routinesOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x28) : 0;
             this.stringsOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x2a) : 0;
 
-            this.compiledRoutines = new IntegerMap<ZRoutineCode>(1024);
+            this.compiledRoutines = new IntegerMap<ZCompilerResult>(1024);
 
             this.random = new Random();
 
@@ -107,7 +107,7 @@ namespace ZDebug.Compiler
 
         private ZRoutineCode GetRoutineCode(int address)
         {
-            ZRoutineCode result;
+            ZCompilerResult result;
             if (!compiledRoutines.TryGetValue(address, out result))
             {
                 var routine = ZRoutine.Create(address, memory);
@@ -115,7 +115,7 @@ namespace ZDebug.Compiler
                 compiledRoutines.Add(address, result);
             }
 
-            return result;
+            return result.Code;
         }
 
         internal ushort Call(int address, ushort[] args)
