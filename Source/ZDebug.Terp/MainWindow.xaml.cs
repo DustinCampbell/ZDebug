@@ -506,7 +506,12 @@ namespace ZDebug.Terp
                 var ticks = compilationStatistics.Sum(s => s.CompileTime.Ticks);
                 var compileTime = new TimeSpan(ticks);
 
-                elapsedTimeText.Text = "Compilation time: " + compileTime.ToString();
+                var ratios = compilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
+                var ratio = ratios.Average();
+
+                elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
+                routinesCompiled.Text = compilationStatistics.Count.ToString("0,0");
+                zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
             });
         }
     }
