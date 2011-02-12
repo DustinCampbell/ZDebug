@@ -42,7 +42,21 @@
         </Grid>
 
         <StatusBar Grid.Row="3">
-            <StatusBarItem Content="Z-Debug"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+
+            <TextBlock Name="elapsedTimeText"/>
+
+            <StackPanel Grid.Column="1">
+                <Separator/>
+            </StackPanel>
         </StatusBar>
 
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -7,17 +8,19 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
+using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Execution;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
-using System.ComponentModel;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ZDebug.Terp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IScreen
+    public partial class MainWindow : Window, IScreen, IZMachineProfiler
     {
         private ZWindowManager windowManager;
         private ZWindow mainWindow;
@@ -28,6 +31,8 @@ namespace ZDebug.Terp
 
         private ZMachine machine;
         private Thread machineThread;
+
+        private List<RoutineCompilationStatistics> compilationStatistics;
 
         public MainWindow()
         {
@@ -72,8 +77,10 @@ namespace ZDebug.Terp
                 machine = null;
             }
 
+            compilationStatistics = new List<RoutineCompilationStatistics>();
+
             var memory = File.ReadAllBytes(fileName);
-            machine = new ZMachine(memory, this);
+            machine = new ZMachine(memory, screen: this, profiler: this);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -487,6 +494,19 @@ namespace ZDebug.Terp
 
                     callback(text);
                 });
+            });
+        }
+
+        public void RoutineCompiled(RoutineCompilationStatistics statistics)
+        {
+            Dispatch(() =>
+            {
+                compilationStatistics.Add(statistics);
+
+                var ticks = compilationStatistics.Sum(s => s.CompileTime.Ticks);
+                var compileTime = new TimeSpan(ticks);
+
+                elapsedTimeText.Text = "Compilation time: " + compileTime.ToString();
             });
         }
     }

@@ -52,6 +52,11 @@ namespace ZDebug.Compiler.Generate
             get { return localCount; }
         }
 
+        public int Size
+        {
+            get { return il.ILOffset; }
+        }
+
         public CompareFunctions Compare
         {
             get { return compare; }

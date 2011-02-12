@@ -7,6 +7,6 @@ namespace ZDebug.Compiler.Profiling
 {
     public interface IZMachineProfiler
     {
-        void RoutineCompiled(RoutineStatistics statistics);
+        void RoutineCompiled(RoutineCompilationStatistics statistics);
     }
 }

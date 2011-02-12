@@ -10,9 +10,9 @@ namespace ZDebug.Compiler
     {
         private readonly ZRoutine routine;
         private readonly ZRoutineCode code;
-        private readonly RoutineStatistics statistics;
+        private readonly RoutineCompilationStatistics statistics;
 
-        public ZCompilerResult(ZRoutine routine, ZRoutineCode code, RoutineStatistics statistics)
+        public ZCompilerResult(ZRoutine routine, ZRoutineCode code, RoutineCompilationStatistics statistics)
         {
             this.routine = routine;
             this.code = code;
@@ -38,7 +38,7 @@ namespace ZDebug.Compiler
         /// <summary>
         /// Statistics about the routine that was compiled.
         /// </summary>
-        public RoutineStatistics Statistics
+        public RoutineCompilationStatistics Statistics
         {
             get { return statistics; }
         }

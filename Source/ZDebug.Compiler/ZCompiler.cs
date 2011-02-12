@@ -6,6 +6,7 @@ using System.Reflection;
 using ZDebug.Core.Execution;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
+using System.Diagnostics;
 
 namespace ZDebug.Compiler
 {
@@ -120,6 +121,8 @@ namespace ZDebug.Compiler
 
         public ZCompilerResult Compile()
         {
+            var sw = Stopwatch.StartNew();
+
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
@@ -230,7 +233,9 @@ namespace ZDebug.Compiler
 
             var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
 
-            var statistics = new RoutineStatistics(il.OpcodeCount, il.LocalCount);
+            sw.Stop();
+
+            var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed);
 
             return new ZCompilerResult(this.routine, code, statistics);
         }
