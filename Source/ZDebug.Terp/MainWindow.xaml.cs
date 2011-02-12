@@ -60,6 +60,18 @@ namespace ZDebug.Terp
             }
         }
 
+        private void Debug_Checked(object sender, RoutedEventArgs e)
+        {
+            if (btnDebug.IsChecked == true)
+            {
+                tbrDebug.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                tbrDebug.Visibility = Visibility.Hidden;
+            }
+        }
+
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             machine.Stop();

@@ -17,6 +17,7 @@ namespace ZDebug.Compiler
         private readonly byte[] memory;
         private readonly IScreen screen;
         private readonly IZMachineProfiler profiler;
+        private readonly bool debugging;
         private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
 
@@ -45,11 +46,12 @@ namespace ZDebug.Compiler
         private Random random;
         private bool interupt;
 
-        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null)
+        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null, bool debugging = false)
         {
             this.memory = memory;
             this.screen = screen;
             this.profiler = profiler;
+            this.debugging = debugging;
             this.outputStreams = new OutputStreams(memory);
             this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
@@ -404,6 +406,11 @@ namespace ZDebug.Compiler
         public void Stop()
         {
             interupt = true;
+        }
+
+        public bool Debugging
+        {
+            get { return debugging; }
         }
 
         public byte Version

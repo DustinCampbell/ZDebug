@@ -275,14 +275,17 @@ namespace ZDebug.Compiler
 
         private void CheckInterupt()
         {
-            var ok = il.NewLabel();
-            il.LoadArg(0);
-            il.Load(interuptField);
-            ok.BranchIf(Condition.False, @short: true);
+            if (machine.Debugging)
+            {
+                var ok = il.NewLabel();
+                il.LoadArg(0);
+                il.Load(interuptField);
+                ok.BranchIf(Condition.False, @short: true);
 
-            il.RuntimeError(string.Format("Z-Machine interupted."));
+                il.RuntimeError(string.Format("Z-Machine interupted."));
 
-            ok.Mark();
+                ok.Mark();
+            }
         }
 
         private void Return(int? value = null)
