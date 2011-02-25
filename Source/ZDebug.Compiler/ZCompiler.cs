@@ -105,6 +105,13 @@ namespace ZDebug.Compiler
             types: new Type[] { },
             modifiers: null);
 
+        private readonly static MethodInfo tokenizeHelper = typeof(ZMachine).GetMethod(
+            name: "Tokenize",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(ushort), typeof(ushort), typeof(ushort), typeof(bool) },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -729,6 +736,14 @@ namespace ZDebug.Compiler
                             if (machine.Version >= 5)
                             {
                                 op_call_n();
+                                return;
+                            }
+
+                            break;
+                        case 0x1b:
+                            if (machine.Version >= 5)
+                            {
+                                op_tokenize();
                                 return;
                             }
 

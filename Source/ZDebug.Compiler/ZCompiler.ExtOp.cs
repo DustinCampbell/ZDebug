@@ -97,12 +97,26 @@ namespace ZDebug.Compiler
 
         private void op_save_undo()
         {
-            NotImplemented();
+            using (var result = il.NewLocal<ushort>())
+            {
+                il.Load(-1);
+                il.Convert.ToUInt16();
+
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
         }
 
         private void op_restore_undo()
         {
-            NotImplemented();
+            using (var result = il.NewLocal<ushort>())
+            {
+                il.Load(-1);
+                il.Convert.ToUInt16();
+
+                result.Store();
+                WriteVariable(currentInstruction.StoreVariable, result);
+            }
         }
     }
 }

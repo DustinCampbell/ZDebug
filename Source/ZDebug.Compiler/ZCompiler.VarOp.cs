@@ -543,5 +543,38 @@ namespace ZDebug.Compiler
                 WriteVariable(currentInstruction.StoreVariable, result);
             }
         }
+
+        private void op_tokenize()
+        {
+            il.LoadArg(0);
+
+            ReadOperand(0);
+            ReadOperand(1);
+
+            if (currentInstruction.OperandCount > 2)
+            {
+                ReadOperand(2);
+            }
+            else
+            {
+                il.Load(0);
+            }
+
+            if (currentInstruction.OperandCount > 3)
+            {
+                ReadOperand(3);
+
+                il.Load(0);
+                il.Compare.Equal();
+                il.Load(0);
+                il.Compare.Equal();
+            }
+            else
+            {
+                il.Load(0);
+            }
+
+            il.Call(tokenizeHelper);
+        }
     }
 }

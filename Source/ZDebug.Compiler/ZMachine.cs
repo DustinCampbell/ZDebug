@@ -379,6 +379,11 @@ namespace ZDebug.Compiler
             return result;
         }
 
+        internal void Tokenize(ushort textBuffer, ushort parseBuffer, ushort dictionary, bool flag)
+        {
+            ztext.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
+        }
+
         internal void Tick()
         {
 
