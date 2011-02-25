@@ -283,7 +283,7 @@ namespace ZDebug.Compiler
 
                 range.Load();
                 il.Load(0);
-                seed.BranchIf(Condition.GreaterThan, @short: true);
+                seed.BranchIf(Condition.AtMost, @short: true);
 
                 il.LoadArg(0);
                 range.Load();
