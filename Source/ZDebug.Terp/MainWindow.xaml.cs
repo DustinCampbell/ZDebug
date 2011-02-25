@@ -94,12 +94,17 @@ namespace ZDebug.Terp
                 mainWindow = null;
                 upperWindow = null;
                 machine = null;
+
+                logBuilder.Clear();
+                indentLevel = 0;
+                routinesExecuted = 0;
+                instructionsExecuted = 0;
             }
 
             compilationStatistics = new List<RoutineCompilationStatistics>();
 
             var memory = File.ReadAllBytes(fileName);
-            machine = new ZMachine(memory, screen: this, profiler: this, debugging: true);
+            machine = new ZMachine(memory, screen: this, profiler: this, debugging: false);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -125,6 +130,7 @@ namespace ZDebug.Terp
                 Print(ex.Message);
                 Print("\n");
                 Print(ex.StackTrace);
+                UpdateRoutinesAndInstructionsExecuted();
             }
         }
 
@@ -490,6 +496,8 @@ namespace ZDebug.Terp
 
         public void ReadChar(Action<char> callback)
         {
+            UpdateRoutinesAndInstructionsExecuted();
+
             Dispatch(() =>
             {
                 mainWindow.ReadChar(ch =>
@@ -504,6 +512,8 @@ namespace ZDebug.Terp
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
+            UpdateRoutinesAndInstructionsExecuted();
+
             Dispatch(() =>
             {
                 mainWindow.ReadCommand(maxChars, text =>
@@ -536,12 +546,16 @@ namespace ZDebug.Terp
 
         private StringBuilder logBuilder = new StringBuilder();
         private int indentLevel;
+        private int routinesExecuted;
+        private int instructionsExecuted;
 
         public void EnterRoutine(int address)
         {
             var indent = new string(' ', indentLevel * 2);
             logBuilder.AppendLine(indent + address.ToString("x4"));
             indentLevel++;
+
+            routinesExecuted++;
         }
 
         public void ExitRoutine(int address)
@@ -551,7 +565,20 @@ namespace ZDebug.Terp
 
         public void MarkInstruction(int address)
         {
+            instructionsExecuted++;
 
+            if ((instructionsExecuted % 1000) == 0)
+            {
+                UpdateRoutinesAndInstructionsExecuted();
+            }
+        }
+
+        private void UpdateRoutinesAndInstructionsExecuted()
+        {
+            Dispatch(() =>
+            {
+                routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", routinesExecuted, instructionsExecuted);
+            });
         }
     }
 }

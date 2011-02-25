@@ -64,6 +64,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
             </Grid>
 
@@ -74,17 +75,25 @@
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Separator/>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center">
                     <Run Text="# Routines:" Foreground="Gray"/>
                     <Run Name="routinesCompiled" FontWeight="Bold"/>
                 </TextBlock>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Separator/>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center">
                     <Run Text="Z-Code / IL:" Foreground="Gray"/>
                     <Run Name="zcodeToILRatio" FontWeight="Bold"/>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <Separator/>
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="Executed:" Foreground="Gray"/>
+                    <Run Name="routinesAndInstructionsExecuted" FontWeight="Bold"/>
                 </TextBlock>
             </StackPanel>
         </StatusBar>
