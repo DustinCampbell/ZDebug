@@ -46,11 +46,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompiledRunner.cs" />
+    <Compile Include="InterpretedRunner.cs" />
     <Compile Include="MockScreen.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runner.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ZDebug.Compiler\ZDebug.Compiler.csproj">
+      <Project>{5438592A-B978-4817-9C92-F91125FECEC2}</Project>
+      <Name>ZDebug.Compiler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZDebug.Core\ZDebug.Core.csproj">
       <Project>{9484E092-64EF-4BA7-A495-77D19E04D7D2}</Project>
       <Name>ZDebug.Core</Name>

@@ -49,6 +49,13 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(int) },
             modifiers: null);
 
+        private readonly static MethodInfo markInstructionHelper = typeof(ZMachine).GetMethod(
+            name: "MarkInstruction",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
+            modifiers: null);
+
         private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
             name: "ReadZText",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
@@ -262,6 +269,7 @@ namespace ZDebug.Compiler
                 CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
+                MarkInstruction(i);
                 currentInstruction = i;
                 Assemble();
             }
@@ -273,6 +281,13 @@ namespace ZDebug.Compiler
             var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed);
 
             return new ZCompilerResult(this.routine, code, statistics);
+        }
+
+        private void MarkInstruction(Instruction i)
+        {
+            il.LoadArg(0);
+            il.Load(i.Address);
+            il.Call(markInstructionHelper);
         }
 
         private void NotImplemented()

@@ -157,6 +157,14 @@ namespace ZDebug.Compiler
             }
         }
 
+        internal void MarkInstruction(int address)
+        {
+            if (profiler != null)
+            {
+                profiler.MarkInstruction(address);
+            }
+        }
+
         internal string ReadZText(int address)
         {
             var zwords = ztext.ReadZWords(address);
@@ -168,7 +176,9 @@ namespace ZDebug.Compiler
             // range should be inclusive, so we need to subtract 1 since System.Random.Next makes it exclusive
             const int minValue = 1;
             int maxValue = Math.Max(minValue, range - 1);
-            return random.Next(minValue, maxValue);
+            var result = random.Next(minValue, maxValue);
+
+            return result;
         }
 
         internal void SeedRandom(short range)
@@ -181,6 +191,11 @@ namespace ZDebug.Compiler
             {
                 random = new Random(+range);
             }
+        }
+
+        public void SetRandomSeed(int seed)
+        {
+            random = new Random(seed);
         }
 
         internal string ConvertZText(ushort[] zwords)

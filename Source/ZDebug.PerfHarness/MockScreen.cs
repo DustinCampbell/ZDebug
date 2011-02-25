@@ -7,22 +7,19 @@ namespace ZDebug.PerfHarness
 {
     internal sealed class MockScreen : IScreen
     {
-        private readonly Processor processor;
         private readonly Action doneAction;
         private readonly string[] commands;
         private int commandIndex;
         private StringBuilder output;
 
-        public MockScreen(Action doneAction, Processor processor)
+        public MockScreen(Action doneAction)
         {
-            this.processor = processor;
             this.doneAction = doneAction;
             this.output = new StringBuilder();
         }
 
-        public MockScreen(string scriptPath, Action doneAction, Processor processor)
+        public MockScreen(string scriptPath, Action doneAction)
         {
-            this.processor = processor;
             this.doneAction = doneAction;
             this.commands = File.ReadAllLines(scriptPath);
             this.commandIndex = 0;
@@ -168,7 +165,6 @@ namespace ZDebug.PerfHarness
             else
             {
                 var command = commands[commandIndex++];
-                //Program.Mark(string.Format("Command: {0} ({1:#,#} instructions; {2:#,#} calls)", command, processor.InstructionCount, processor.CallCount));
                 output.AppendLine(command);
                 callback(command);
             }

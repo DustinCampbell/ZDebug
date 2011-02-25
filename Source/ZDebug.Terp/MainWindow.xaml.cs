@@ -548,5 +548,10 @@ namespace ZDebug.Terp
         {
             indentLevel--;
         }
+
+        public void MarkInstruction(int address)
+        {
+
+        }
     }
 }
