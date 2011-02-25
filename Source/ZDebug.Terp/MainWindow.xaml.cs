@@ -99,7 +99,7 @@ namespace ZDebug.Terp
             compilationStatistics = new List<RoutineCompilationStatistics>();
 
             var memory = File.ReadAllBytes(fileName);
-            machine = new ZMachine(memory, screen: this, profiler: this);
+            machine = new ZMachine(memory, screen: this, profiler: this, debugging: true);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);

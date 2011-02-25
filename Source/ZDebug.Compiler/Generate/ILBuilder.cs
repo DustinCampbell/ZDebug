@@ -159,8 +159,13 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
-        public void Load(FieldInfo field)
+        public void Load(FieldInfo field, bool @volatile = false)
         {
+            if (@volatile)
+            {
+                Emit(OpCodes.Volatile);
+            }
+
             Emit(OpCodes.Ldfld, field);
         }
 

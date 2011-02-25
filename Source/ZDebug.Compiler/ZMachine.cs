@@ -9,6 +9,7 @@ using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Text;
 using ZDebug.Compiler.Profiling;
+using System.Threading;
 
 namespace ZDebug.Compiler
 {
@@ -44,7 +45,9 @@ namespace ZDebug.Compiler
         private readonly IntegerMap<ZCompilerResult> compiledRoutines;
 
         private Random random;
-        private bool interupt;
+
+        private volatile bool interupt;
+        private volatile bool inputReceived;
 
         public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null, bool debugging = false)
         {
@@ -187,7 +190,7 @@ namespace ZDebug.Compiler
 
         internal void Read_Z3(ushort textBuffer, ushort parseBuffer)
         {
-            bool done = false;
+            inputReceived = false;
 
             screen.ShowStatus();
 
@@ -231,10 +234,10 @@ namespace ZDebug.Compiler
                     memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
 
-                done = true;
+                inputReceived = true;
             });
 
-            while (!done)
+            while (!inputReceived)
             {
             }
         }
@@ -243,7 +246,7 @@ namespace ZDebug.Compiler
         {
             // TODO: Support timed input
 
-            bool done = false;
+            inputReceived = false;
 
             byte maxChars = memory.ReadByte(textBuffer);
 
@@ -285,10 +288,10 @@ namespace ZDebug.Compiler
                     memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
 
-                done = true;
+                inputReceived = true;
             });
 
-            while (!done)
+            while (!inputReceived)
             {
             }
         }
@@ -297,7 +300,7 @@ namespace ZDebug.Compiler
         {
             // TODO: Support timed input
 
-            bool done = false;
+            inputReceived = false;
             ushort result = 0;
 
             byte maxChars = memory.ReadByte(textBuffer);
@@ -348,10 +351,10 @@ namespace ZDebug.Compiler
                 // TODO: Update this when timed input is supported
                 result = 10;
 
-                done = true;
+                inputReceived = true;
             });
 
-            while (!done)
+            while (!inputReceived)
             {
             }
 
@@ -360,16 +363,16 @@ namespace ZDebug.Compiler
 
         internal ushort ReadChar()
         {
-            bool done = false;
+            inputReceived = false;
             ushort result = 0;
 
             screen.ReadChar(ch =>
             {
                 result = (ushort)ch;
-                done = true;
+                inputReceived = true;
             });
 
-            while (!done)
+            while (!inputReceived)
             {
             }
 
@@ -406,6 +409,7 @@ namespace ZDebug.Compiler
         public void Stop()
         {
             interupt = true;
+            inputReceived = true;
         }
 
         public bool Debugging

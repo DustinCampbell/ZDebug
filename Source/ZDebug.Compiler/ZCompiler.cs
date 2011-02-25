@@ -279,7 +279,7 @@ namespace ZDebug.Compiler
             {
                 var ok = il.NewLabel();
                 il.LoadArg(0);
-                il.Load(interuptField);
+                il.Load(interuptField, @volatile: true);
                 ok.BranchIf(Condition.False, @short: true);
 
                 il.RuntimeError(string.Format("Z-Machine interupted."));
