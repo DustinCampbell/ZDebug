@@ -32,6 +32,9 @@ namespace ZDebug.Terp
         private Thread machineThread;
         private ZMachineProfiler profiler;
 
+        private string[] script;
+        private int scriptIndex;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -53,6 +56,19 @@ namespace ZDebug.Terp
             if (dialog.ShowDialog(this) == true)
             {
                 OpenStory(dialog.FileName);
+            }
+        }
+
+        private void OpenScript_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Open Game Script"
+            };
+
+            if (dialog.ShowDialog(this) == true)
+            {
+                script = File.ReadAllLines(dialog.FileName);
             }
         }
 
@@ -84,11 +100,14 @@ namespace ZDebug.Terp
                 upperWindow = null;
                 machine = null;
                 profiler = null;
+                script = null;
+                scriptIndex = 0;
             }
 
             var memory = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
             machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: true);
+            machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -500,13 +519,24 @@ namespace ZDebug.Terp
 
             Dispatch(() =>
             {
-                mainWindow.ReadCommand(maxChars, text =>
+                if (script != null && scriptIndex < script.Length)
                 {
                     ResetStatusHeight();
                     currStatusHeight = 0;
+                    string command = script[scriptIndex++];
+                    windowManager.ActiveWindow.PutString(command + "\r\n");
+                    callback(command);
+                }
+                else
+                {
+                    mainWindow.ReadCommand(maxChars, text =>
+                    {
+                        ResetStatusHeight();
+                        currStatusHeight = 0;
 
-                    callback(text);
-                });
+                        callback(text);
+                    });
+                }
             });
         }
 

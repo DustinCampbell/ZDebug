@@ -19,7 +19,7 @@ namespace ZDebug.Terp.Profiling
             this.allStatistics = new List<RoutineCompilationStatistics>();
             this.routines = new IntegerMap<Routine>();
             this.calls = new List<Call>();
-            this.callStack = new Stack<Call>(1024);
+            this.callStack = new Stack<Call>();
         }
 
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)

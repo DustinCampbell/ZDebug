@@ -1,12 +1,13 @@
 ﻿<Window x:Class="ZDebug.Terp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="960" Width="1280"
+        Title="Z-Terp" Height="960" Width="1280"
         Closing="Window_Closing"
         FontFamily="Calibri">
 
     <Window.Resources>
         <BitmapImage x:Key="openImage" UriSource="Images/open.png"/>
+        <BitmapImage x:Key="scriptImage" UriSource="Images/script.png"/>
         <BitmapImage x:Key="stopImage" UriSource="Images/stop.png"/>
     </Window.Resources>
 
@@ -27,6 +28,12 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
+                <MenuItem Header="_Open Game Script..." Click="OpenScript_Click">
+                    <MenuItem.Icon>
+                        <Image Height="16" Width="16" Source="{StaticResource scriptImage}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Header="E_xit" Click="Exit_Click"/>
             </MenuItem>
         </Menu>
@@ -36,8 +43,11 @@
                 <Button ToolTip="Open a Z-Code File" Click="Open_Click">
                     <Image Height="16" Width="16" Source="{StaticResource openImage}"/>
                 </Button>
-            </ToolBar>
-            <ToolBar>
+                <Separator/>
+                <Button ToolTip="Open a Game Script" Click="OpenScript_Click">
+                    <Image Height="16" Width="16" Source="{StaticResource scriptImage}"/>
+                </Button>
+                <Separator/>
                 <Button ToolTip="Stop" Click="Stop_Click">
                     <Image Height="16" Width="16" Source="{StaticResource stopImage}"/>
                 </Button>
