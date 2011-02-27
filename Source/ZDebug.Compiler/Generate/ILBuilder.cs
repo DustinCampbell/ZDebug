@@ -312,5 +312,14 @@ namespace ZDebug.Compiler.Generate
             Emit(OpCodes.Newobj, ctor);
             Emit(OpCodes.Throw);
         }
+
+        public void ThrowException<T>(string message) where T : Exception
+        {
+            var ctor = typeof(T).GetConstructor(new Type[] { typeof(string) });
+
+            Load(message);
+            Emit(OpCodes.Newobj, ctor);
+            Emit(OpCodes.Throw);
+        }
     }
 }

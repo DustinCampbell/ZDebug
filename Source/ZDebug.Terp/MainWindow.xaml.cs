@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -106,7 +107,7 @@ namespace ZDebug.Terp
 
             var memory = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: false);
+            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: true);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
@@ -141,6 +142,7 @@ namespace ZDebug.Terp
             }
 
             profiler.Stop();
+            PopulateCallTree();
         }
 
         private FormattedText GetFixedFontMeasureText()
@@ -560,6 +562,14 @@ namespace ZDebug.Terp
                 routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
                 zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
                 routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
+            });
+        }
+
+        private void PopulateCallTree()
+        {
+            Dispatch(() =>
+            {
+                callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
             });
         }
     }

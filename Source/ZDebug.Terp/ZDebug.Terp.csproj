@@ -63,6 +63,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CallPercentageValueConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -70,9 +71,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Profiling\ICall.cs" />
+    <Compile Include="Profiling\IRoutine.cs" />
     <Compile Include="Profiling\ZMachineProfiler.Call.cs" />
-    <Compile Include="Profiling\Routine.cs" />
     <Compile Include="Profiling\ZMachineProfiler.cs" />
+    <Compile Include="Profiling\ZMachineProfiler.Routine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

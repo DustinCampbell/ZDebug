@@ -1,6 +1,6 @@
-﻿using ZDebug.Core.Instructions;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -61,6 +61,16 @@ namespace ZDebug.Compiler
             }
 
             return false;
+        }
+
+        public static bool IsInterruptable(this Instruction i)
+        {
+            var op = i.Opcode;
+            return !(op.Is(OpcodeKind.TwoOp, 0x14) || // add
+                op.Is(OpcodeKind.TwoOp, 0x15) ||      // sub
+                op.Is(OpcodeKind.TwoOp, 0x16) ||      // mul
+                op.Is(OpcodeKind.TwoOp, 0x17) ||      // div
+                op.Is(OpcodeKind.TwoOp, 0x18));       // mod
         }
 
         private static string PrettyPrint(this Variable var, bool @out = false)

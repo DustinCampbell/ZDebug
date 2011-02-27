@@ -34,7 +34,7 @@ namespace ZDebug.Terp.Profiling
             Routine routine;
             if (!routines.TryGetValue(address, out routine))
             {
-                routine = new Routine(address);
+                routine = new Routine(this, address);
                 routines.Add(address, routine);
             }
 

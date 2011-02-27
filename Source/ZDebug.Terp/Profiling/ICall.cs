@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 
 namespace ZDebug.Terp.Profiling
 {
     public interface ICall
     {
-        Routine Routine { get; }
+        IRoutine Routine { get; }
         int Index { get; }
         ICall Parent { get; }
-        int ChildCount { get; }
-        ICall this[int index] { get; }
+        ReadOnlyCollection<ICall> Children { get; }
         TimeSpan Elapsed { get; }
     }
 }

@@ -268,10 +268,11 @@ namespace ZDebug.Compiler
                     label.Mark();
                 }
 
+                currentInstruction = i;
+
                 CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
-                currentInstruction = i;
                 Profiler_ExecutingInstruction();
                 Assemble();
             }
@@ -322,14 +323,14 @@ namespace ZDebug.Compiler
 
         private void CheckInterupt()
         {
-            if (machine.Debugging)
+            if (machine.Debugging && currentInstruction.IsInterruptable())
             {
                 var ok = il.NewLabel();
                 il.LoadArg(0);
                 il.Load(interuptField, @volatile: true);
                 ok.BranchIf(Condition.False, @short: true);
 
-                il.RuntimeError(string.Format("Z-Machine interupted."));
+                il.ThrowException<ZMachineInterruptedException>();
 
                 ok.Mark();
             }

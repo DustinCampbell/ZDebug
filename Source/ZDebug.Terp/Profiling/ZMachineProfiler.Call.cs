@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 namespace ZDebug.Terp.Profiling
@@ -12,7 +13,8 @@ namespace ZDebug.Terp.Profiling
             private readonly Routine routine;
             private readonly int index;
             private readonly int parentIndex;
-            private readonly List<int> childIndexes;
+            private List<int> childIndexes;
+            private ReadOnlyCollection<ICall> children;
 
             private Stopwatch stopwatch;
             private TimeSpan elapsed;
@@ -39,12 +41,17 @@ namespace ZDebug.Terp.Profiling
             public void Exit()
             {
                 stopwatch.Stop();
+
                 childIndexes.TrimExcess();
+                var childList = childIndexes.ConvertAll(i => (ICall)profiler.GetCallByIndex(i));
+                children = new ReadOnlyCollection<ICall>(childList);
+                childIndexes = null;
+
                 elapsed = stopwatch.Elapsed;
                 stopwatch = null;
             }
 
-            public Routine Routine
+            public IRoutine Routine
             {
                 get
                 {
@@ -64,23 +71,17 @@ namespace ZDebug.Terp.Profiling
             {
                 get
                 {
-                    return profiler.GetCallByIndex(parentIndex);
+                    return parentIndex >= 0
+                        ? profiler.GetCallByIndex(parentIndex)
+                        : null;
                 }
             }
 
-            public int ChildCount
+            public ReadOnlyCollection<ICall> Children
             {
                 get
                 {
-                    return childIndexes.Count;
-                }
-            }
-
-            public ICall this[int index]
-            {
-                get
-                {
-                    return profiler.GetCallByIndex(childIndexes[index]);
+                    return children;
                 }
             }
 
