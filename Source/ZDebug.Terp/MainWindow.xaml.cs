@@ -56,16 +56,9 @@ namespace ZDebug.Terp
             }
         }
 
-        private void Debug_Checked(object sender, RoutedEventArgs e)
+        private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            if (btnDebug.IsChecked == true)
-            {
-                tbrDebug.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                tbrDebug.Visibility = Visibility.Hidden;
-            }
+            this.Close();
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
@@ -95,7 +88,7 @@ namespace ZDebug.Terp
 
             var memory = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: false);
+            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: true);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);

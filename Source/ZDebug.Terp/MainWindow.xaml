@@ -27,19 +27,17 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="E_xit"/>
+                <MenuItem Header="E_xit" Click="Exit_Click"/>
             </MenuItem>
         </Menu>
 
-        <ToolBarTray Grid.Row="1">
-            <ToolBar RenderOptions.BitmapScalingMode="NearestNeighbor">
+        <ToolBarTray Grid.Row="1" RenderOptions.BitmapScalingMode="NearestNeighbor">
+            <ToolBar>
                 <Button ToolTip="Open a Z-Code File" Click="Open_Click">
                     <Image Height="16" Width="16" Source="{StaticResource openImage}"/>
                 </Button>
-                <Separator/>
-                <ToggleButton Name="btnDebug" ToolTip="Activates Debug Mode" Checked="Debug_Checked">Debug</ToggleButton>
             </ToolBar>
-            <ToolBar Name="tbrDebug" RenderOptions.BitmapScalingMode="NearestNeighbor" Visibility="Hidden">
+            <ToolBar>
                 <Button ToolTip="Stop" Click="Stop_Click">
                     <Image Height="16" Width="16" Source="{StaticResource stopImage}"/>
                 </Button>
