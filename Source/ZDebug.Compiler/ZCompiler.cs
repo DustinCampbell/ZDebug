@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using ZDebug.Core.Instructions;
+using System.Diagnostics;
 using System.Reflection;
-using ZDebug.Core.Execution;
+using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
-using System.Diagnostics;
+using ZDebug.Core.Execution;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -167,12 +167,7 @@ namespace ZDebug.Compiler
             var ilGen = dm.GetILGenerator();
             this.il = new ILBuilder(ilGen);
 
-            if (profiling)
-            {
-                il.LoadArg(0); // ZMachine
-                il.Load(routine.Address);
-                il.Call(enterRoutineHelper);
-            }
+            Profiler_EnterRoutine();
 
             // First pass: gather branches and labels
             this.addressToLabelMap = new Dictionary<int, ILabel>();
@@ -269,8 +264,8 @@ namespace ZDebug.Compiler
                 CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
-                MarkInstruction(i);
                 currentInstruction = i;
+                Profiler_ExecutingInstruction();
                 Assemble();
             }
 
@@ -283,11 +278,34 @@ namespace ZDebug.Compiler
             return new ZCompilerResult(this.routine, code, statistics);
         }
 
-        private void MarkInstruction(Instruction i)
+        private void Profiler_EnterRoutine()
         {
-            il.LoadArg(0);
-            il.Load(i.Address);
-            il.Call(executingInstructionHelper);
+            if (profiling)
+            {
+                il.LoadArg(0); // ZMachine
+                il.Load(routine.Address);
+                il.Call(enterRoutineHelper);
+            }
+        }
+
+        private void Profiler_ExitRoutine()
+        {
+            if (profiling)
+            {
+                il.LoadArg(0); // ZMachine
+                il.Load(routine.Address);
+                il.Call(exitRoutineHelper);
+            }
+        }
+
+        private void Profiler_ExecutingInstruction()
+        {
+            if (profiling)
+            {
+                il.LoadArg(0);
+                il.Load(currentInstruction.Address);
+                il.Call(executingInstructionHelper);
+            }
         }
 
         private void NotImplemented()
@@ -312,12 +330,7 @@ namespace ZDebug.Compiler
 
         private void Return(int? value = null)
         {
-            if (profiling)
-            {
-                il.LoadArg(0); // ZMachine
-                il.Load(routine.Address);
-                il.Call(exitRoutineHelper);
-            }
+            Profiler_ExitRoutine();
 
             if (value != null)
             {
