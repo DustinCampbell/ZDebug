@@ -4,7 +4,7 @@ using ZDebug.Core.Collections;
 
 namespace ZDebug.Terp.Profiling
 {
-    public class ZMachineProfiler : IZMachineProfiler
+    public partial class ZMachineProfiler : IZMachineProfiler
     {
         private readonly List<RoutineCompilationStatistics> allStatistics;
         private readonly IntegerMap<Routine> routines;
@@ -38,13 +38,15 @@ namespace ZDebug.Terp.Profiling
                 routines.Add(address, routine);
             }
 
-            var parentCall = callStack.Count > 0
-                ? callStack.Peek()
-                : null;
+            var index = calls.Count;
+            var parent = callStack.Count > 0
+                ? callStack.Peek().Index
+                : -1;
 
-            var call = new Call(routine, parentCall);
+            var call = new Call(this, routine, index, parent);
             calls.Add(call);
             callStack.Push(call);
+
             call.Enter();
         }
 
@@ -57,6 +59,11 @@ namespace ZDebug.Terp.Profiling
         void IZMachineProfiler.ExecutingInstruction(int address)
         {
             instructionsExecuted++;
+        }
+
+        private Call GetCallByIndex(int index)
+        {
+            return calls[index];
         }
 
         public IEnumerable<RoutineCompilationStatistics> CompilationStatistics
@@ -94,13 +101,11 @@ namespace ZDebug.Terp.Profiling
             }
         }
 
-        public Call CallRoot
+        public ICall RootCall
         {
             get
             {
-                return calls.Count > 0
-                    ? calls[0]
-                    : null;
+                return calls[0];
             }
         }
     }
