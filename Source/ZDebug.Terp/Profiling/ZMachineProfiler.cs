@@ -66,6 +66,15 @@ namespace ZDebug.Terp.Profiling
             return calls[index];
         }
 
+        public void Stop()
+        {
+            while (callStack.Count > 0)
+            {
+                var call = callStack.Pop();
+                call.Exit();
+            }
+        }
+
         public IEnumerable<RoutineCompilationStatistics> CompilationStatistics
         {
             get

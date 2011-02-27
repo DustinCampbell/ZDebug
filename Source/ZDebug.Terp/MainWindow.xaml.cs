@@ -139,6 +139,8 @@ namespace ZDebug.Terp
                 Print(ex.StackTrace);
                 UpdateProfilerStatistics();
             }
+
+            profiler.Stop();
         }
 
         private FormattedText GetFixedFontMeasureText()
