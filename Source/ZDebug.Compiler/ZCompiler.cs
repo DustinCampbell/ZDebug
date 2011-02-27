@@ -119,6 +119,13 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(ushort), typeof(ushort), typeof(ushort), typeof(bool) },
             modifiers: null);
 
+        private readonly static MethodInfo quitHelper = typeof(ZMachine).GetMethod(
+            name: "Quit",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { },
+            modifiers: null);
+
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;

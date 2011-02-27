@@ -106,7 +106,7 @@ namespace ZDebug.Terp
 
             var memory = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: true);
+            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: false);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
@@ -124,6 +124,10 @@ namespace ZDebug.Terp
             try
             {
                 machine.Run();
+            }
+            catch (ZMachineQuitException)
+            {
+                // done
             }
             catch (Exception ex)
             {

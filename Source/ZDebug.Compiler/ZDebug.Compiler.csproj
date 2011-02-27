@@ -73,6 +73,7 @@
     <Compile Include="ZMachine.MemoryOutputStream.cs" />
     <Compile Include="ZMachine.OutputStreams.cs" />
     <Compile Include="ZMachineException.cs" />
+    <Compile Include="ZMachineQuitException.cs" />
     <Compile Include="ZRoutine.cs" />
     <Compile Include="ZRoutineCode.cs" />
   </ItemGroup>

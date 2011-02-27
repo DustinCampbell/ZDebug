@@ -1,7 +1,4 @@
-﻿using System.Reflection.Emit;
-using ZDebug.Core.Instructions;
-using ZDebug.Core.Text;
-
+﻿
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
@@ -31,7 +28,7 @@ namespace ZDebug.Compiler
 
         private void op_quit()
         {
-            NotImplemented();
+            il.ThrowException<ZMachineQuitException>();
         }
 
         private void op_ret_popped()
