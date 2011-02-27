@@ -2,27 +2,24 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
-using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Execution;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
-using System.Collections.Generic;
-using System.Linq;
-using System.Diagnostics;
-using System.Text;
+using ZDebug.Terp.Profiling;
 
 namespace ZDebug.Terp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IScreen, IZMachineProfiler
+    public partial class MainWindow : Window, IScreen
     {
         private ZWindowManager windowManager;
         private ZWindow mainWindow;
@@ -33,8 +30,7 @@ namespace ZDebug.Terp
 
         private ZMachine machine;
         private Thread machineThread;
-
-        private List<RoutineCompilationStatistics> compilationStatistics;
+        private ZMachineProfiler profiler;
 
         public MainWindow()
         {
@@ -94,17 +90,12 @@ namespace ZDebug.Terp
                 mainWindow = null;
                 upperWindow = null;
                 machine = null;
-
-                logBuilder.Clear();
-                indentLevel = 0;
-                routinesExecuted = 0;
-                instructionsExecuted = 0;
+                profiler = null;
             }
 
-            compilationStatistics = new List<RoutineCompilationStatistics>();
-
             var memory = File.ReadAllBytes(fileName);
-            machine = new ZMachine(memory, screen: this, profiler: this, debugging: false);
+            profiler = new ZMachineProfiler();
+            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: false);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -130,7 +121,7 @@ namespace ZDebug.Terp
                 Print(ex.Message);
                 Print("\n");
                 Print(ex.StackTrace);
-                UpdateRoutinesAndInstructionsExecuted();
+                UpdateProfilerStatistics();
             }
         }
 
@@ -496,7 +487,7 @@ namespace ZDebug.Terp
 
         public void ReadChar(Action<char> callback)
         {
-            UpdateRoutinesAndInstructionsExecuted();
+            UpdateProfilerStatistics();
 
             Dispatch(() =>
             {
@@ -512,7 +503,7 @@ namespace ZDebug.Terp
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            UpdateRoutinesAndInstructionsExecuted();
+            UpdateProfilerStatistics();
 
             Dispatch(() =>
             {
@@ -526,58 +517,20 @@ namespace ZDebug.Terp
             });
         }
 
-        public void RoutineCompiled(RoutineCompilationStatistics statistics)
+        private void UpdateProfilerStatistics()
         {
             Dispatch(() =>
             {
-                compilationStatistics.Add(statistics);
-
-                var ticks = compilationStatistics.Sum(s => s.CompileTime.Ticks);
+                var ticks = profiler.CompilationStatistics.Sum(s => s.CompileTime.Ticks);
                 var compileTime = new TimeSpan(ticks);
 
-                var ratios = compilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
+                var ratios = profiler.CompilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
                 var ratio = ratios.Average();
 
                 elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
-                routinesCompiled.Text = compilationStatistics.Count.ToString("0,0");
+                routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
                 zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
-            });
-        }
-
-        private StringBuilder logBuilder = new StringBuilder();
-        private int indentLevel;
-        private int routinesExecuted;
-        private int instructionsExecuted;
-
-        public void EnterRoutine(int address)
-        {
-            var indent = new string(' ', indentLevel * 2);
-            logBuilder.AppendLine(indent + address.ToString("x4"));
-            indentLevel++;
-
-            routinesExecuted++;
-        }
-
-        public void ExitRoutine(int address)
-        {
-            indentLevel--;
-        }
-
-        public void MarkInstruction(int address)
-        {
-            instructionsExecuted++;
-
-            if ((instructionsExecuted % 1000) == 0)
-            {
-                UpdateRoutinesAndInstructionsExecuted();
-            }
-        }
-
-        private void UpdateRoutinesAndInstructionsExecuted()
-        {
-            Dispatch(() =>
-            {
-                routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", routinesExecuted, instructionsExecuted);
+                routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
             });
         }
     }

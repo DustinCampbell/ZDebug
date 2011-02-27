@@ -157,11 +157,11 @@ namespace ZDebug.Compiler
             }
         }
 
-        internal void MarkInstruction(int address)
+        internal void ExecutingInstruction(int address)
         {
             if (profiler != null)
             {
-                profiler.MarkInstruction(address);
+                profiler.ExecutingInstruction(address);
             }
         }
 

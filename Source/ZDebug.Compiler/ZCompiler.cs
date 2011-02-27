@@ -49,8 +49,8 @@ namespace ZDebug.Compiler
             types: new Type[] { typeof(int) },
             modifiers: null);
 
-        private readonly static MethodInfo markInstructionHelper = typeof(ZMachine).GetMethod(
-            name: "MarkInstruction",
+        private readonly static MethodInfo executingInstructionHelper = typeof(ZMachine).GetMethod(
+            name: "ExecutingInstruction",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
             types: new Type[] { typeof(int) },
@@ -287,7 +287,7 @@ namespace ZDebug.Compiler
         {
             il.LoadArg(0);
             il.Load(i.Address);
-            il.Call(markInstructionHelper);
+            il.Call(executingInstructionHelper);
         }
 
         private void NotImplemented()

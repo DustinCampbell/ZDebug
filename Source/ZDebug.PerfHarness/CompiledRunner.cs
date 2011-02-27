@@ -77,7 +77,7 @@ namespace ZDebug.PerfHarness
             //indentLevel--;
         }
 
-        void IZMachineProfiler.MarkInstruction(int address)
+        void IZMachineProfiler.ExecutingInstruction(int address)
         {
             //Console.WriteLine(GetIndent() + address.ToString("x4"));
         }

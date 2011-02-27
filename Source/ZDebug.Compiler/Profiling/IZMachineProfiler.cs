@@ -12,6 +12,6 @@ namespace ZDebug.Compiler.Profiling
         void EnterRoutine(int address);
         void ExitRoutine(int address);
 
-        void MarkInstruction(int address);
+        void ExecutingInstruction(int address);
     }
 }
