@@ -69,6 +69,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Profiling\Call.cs" />
+    <Compile Include="Profiling\Routine.cs" />
     <Compile Include="Profiling\ZMachineProfiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
