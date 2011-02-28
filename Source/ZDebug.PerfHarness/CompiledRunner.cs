@@ -1,16 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZDebug.Compiler.Profiling;
+using System.Diagnostics;
 using System.IO;
 using ZDebug.Compiler;
-using System.Diagnostics;
+using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.PerfHarness
 {
     public class CompiledRunner : Runner, IZMachineProfiler
     {
+        private Stopwatch watch;
+        private int callCount;
+        private int instructionCount;
+
         public CompiledRunner(string storyFilePath, string scriptFilePath)
             : base(storyFilePath, scriptFilePath)
         {
@@ -29,57 +30,69 @@ namespace ZDebug.PerfHarness
             machine = new ZMachine(bytes, mockScreen, profiler: this, debugging: true);
             machine.SetRandomSeed(42);
 
-            MarkProfile("Stepping...");
+            MarkProfile("Running...");
 
-            var sw = Stopwatch.StartNew();
+            watch = Stopwatch.StartNew();
 
             try
             {
                 machine.Run();
+            }
+            catch (ZMachineQuitException)
+            {
+                // done
+            }
+            catch (ZMachineInterruptedException)
+            {
+                // done
             }
             catch (Exception ex)
             {
                 MarkProfile(string.Format("{0}: {1}", ex.GetType().FullName, ex.Message));
             }
 
-            sw.Stop();
+            watch.Stop();
 
-            MarkProfile("Done stepping");
+            MarkProfile("Done");
 
-            //Console.WriteLine();
-            //Console.WriteLine("{0:#,#} instructions", processor.InstructionCount);
-            //Console.WriteLine("{0:#,#} calls", processor.CallCount);
             Console.WriteLine();
-            Console.WriteLine("{0:#,0.##########} seconds", (double)sw.ElapsedTicks / (double)Stopwatch.Frequency);
-            //Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)sw.ElapsedTicks / (double)Stopwatch.Frequency) / (double)story.Processor.InstructionCount);
+            Console.WriteLine("{0:#,#} instructions", instructionCount);
+            Console.WriteLine("{0:#,#} calls", callCount);
+            Console.WriteLine();
+            Console.WriteLine("{0:#,0.##########} seconds", (double)watch.ElapsedTicks / (double)Stopwatch.Frequency);
+            Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)watch.ElapsedTicks / (double)Stopwatch.Frequency) / (double)instructionCount);
         }
 
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
         {
-
-        }
-
-        private int indentLevel;
-
-        private string GetIndent()
-        {
-            return new string(' ', indentLevel * 2);
         }
 
         void IZMachineProfiler.EnterRoutine(int address)
         {
-            //Console.WriteLine(GetIndent() + address.ToString("x4"));
-            //indentLevel++;
+            callCount++;
         }
 
         void IZMachineProfiler.ExitRoutine(int address)
         {
-            //indentLevel--;
         }
 
         void IZMachineProfiler.ExecutingInstruction(int address)
         {
-            //Console.WriteLine(GetIndent() + address.ToString("x4"));
+        }
+
+        void IZMachineProfiler.ExecutedInstruction(int address)
+        {
+            instructionCount++;
+        }
+
+        void IZMachineProfiler.Quit()
+        {
+            watch.Stop();
+        }
+
+        void IZMachineProfiler.Interrupt()
+        {
+            watch.Stop();
         }
     }
 }

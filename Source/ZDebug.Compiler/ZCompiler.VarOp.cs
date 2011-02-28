@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZDebug.Core.Instructions;
-using System.Reflection.Emit;
 using System.Reflection;
 using ZDebug.Compiler.Generate;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -50,9 +46,12 @@ namespace ZDebug.Compiler
                 legalCall.Mark();
                 il.LoadArg(0);
                 address.Load();
+                il.Call(getRoutineCodeHelper);
+
+                var invoke = typeof(ZRoutineCode).GetMethod("Invoke");
                 args.Load();
 
-                il.Call(callHelper);
+                il.Call(invoke);
 
                 done.Mark();
             }

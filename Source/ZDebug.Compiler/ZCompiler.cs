@@ -28,6 +28,13 @@ namespace ZDebug.Compiler
             name: "interupt",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
 
+        private readonly static MethodInfo getRoutineCodeHelper = typeof(ZMachine).GetMethod(
+            name: "GetRoutineCode",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { typeof(int) },
+            modifiers: null);
+
         private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
             name: "Call",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
@@ -54,6 +61,13 @@ namespace ZDebug.Compiler
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
             types: new Type[] { typeof(int) },
+            modifiers: null);
+
+        private readonly static MethodInfo executedInstructionHelper = typeof(ZMachine).GetMethod(
+            name: "ExecutedInstruction",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { },
             modifiers: null);
 
         private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
@@ -121,6 +135,13 @@ namespace ZDebug.Compiler
 
         private readonly static MethodInfo quitHelper = typeof(ZMachine).GetMethod(
             name: "Quit",
+            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+            binder: null,
+            types: new Type[] { },
+            modifiers: null);
+
+        private readonly static MethodInfo interruptHelper = typeof(ZMachine).GetMethod(
+            name: "Interrupt",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
             types: new Type[] { },
@@ -270,10 +291,10 @@ namespace ZDebug.Compiler
 
                 currentInstruction = i;
 
+                Profiler_ExecutingInstruction();
                 CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
-                Profiler_ExecutingInstruction();
                 Assemble();
             }
 
@@ -310,9 +331,38 @@ namespace ZDebug.Compiler
         {
             if (profiling)
             {
-                il.LoadArg(0);
+                il.LoadArg(0); // ZMachine
                 il.Load(currentInstruction.Address);
                 il.Call(executingInstructionHelper);
+            }
+        }
+
+        private void Profiler_ExecutedInstruction()
+        {
+            if (profiling)
+            {
+                il.LoadArg(0);
+                il.Call(executedInstructionHelper);
+            }
+        }
+
+        private void Profiler_Quit()
+        {
+            if (profiling)
+            {
+                il.LoadArg(0);
+                il.Call(quitHelper);
+
+                Profiler_ExecutedInstruction();
+            }
+        }
+
+        private void Profiler_Interrupt()
+        {
+            if (profiling)
+            {
+                il.LoadArg(0);
+                il.Call(interruptHelper);
             }
         }
 
@@ -330,6 +380,7 @@ namespace ZDebug.Compiler
                 il.Load(interuptField, @volatile: true);
                 ok.BranchIf(Condition.False, @short: true);
 
+                Profiler_Interrupt();
                 il.ThrowException<ZMachineInterruptedException>();
 
                 ok.Mark();

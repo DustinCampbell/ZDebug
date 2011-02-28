@@ -28,6 +28,7 @@ namespace ZDebug.Compiler
 
         private void op_quit()
         {
+            Profiler_Quit();
             il.ThrowException<ZMachineQuitException>();
         }
 

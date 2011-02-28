@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Core.Collections;
 
 namespace ZDebug.Terp.Profiling
 {
     public partial class ZMachineProfiler : IZMachineProfiler
     {
         private readonly List<RoutineCompilationStatistics> allStatistics;
-        private readonly IntegerMap<Routine> routines;
+        private readonly Dictionary<int, Routine> routines;
         private readonly List<Call> calls;
         private readonly Stack<Call> callStack;
+        private TimeSpan runningTime;
+
+        private readonly Dictionary<int, List<TimeSpan>> instructionTimings;
+        private Stopwatch instructionTimer;
 
         private int routinesExecuted;
         private int instructionsExecuted;
@@ -17,9 +22,12 @@ namespace ZDebug.Terp.Profiling
         public ZMachineProfiler()
         {
             this.allStatistics = new List<RoutineCompilationStatistics>();
-            this.routines = new IntegerMap<Routine>();
+            this.routines = new Dictionary<int, Routine>();
             this.calls = new List<Call>();
             this.callStack = new Stack<Call>();
+
+            this.instructionTimings = new Dictionary<int, List<TimeSpan>>();
+            this.instructionTimer = new Stopwatch();
         }
 
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
@@ -58,7 +66,31 @@ namespace ZDebug.Terp.Profiling
 
         void IZMachineProfiler.ExecutingInstruction(int address)
         {
+            instructionTimer.Restart();
+        }
+
+        void IZMachineProfiler.ExecutedInstruction(int address)
+        {
+            instructionTimer.Stop();
+
+            List<TimeSpan> timingList;
+            if (!instructionTimings.TryGetValue(address, out timingList))
+            {
+                timingList = new List<TimeSpan>();
+                instructionTimings.Add(address, timingList);
+            }
+
+            timingList.Add(instructionTimer.Elapsed);
+
             instructionsExecuted++;
+        }
+
+        void IZMachineProfiler.Quit()
+        {
+        }
+
+        void IZMachineProfiler.Interrupt()
+        {
         }
 
         private Call GetCallByIndex(int index)
@@ -66,12 +98,18 @@ namespace ZDebug.Terp.Profiling
             return calls[index];
         }
 
-        public void Stop()
+        public void Stop(TimeSpan runningTime)
         {
+            this.runningTime = runningTime;
             while (callStack.Count > 0)
             {
                 var call = callStack.Pop();
                 call.Exit();
+            }
+
+            foreach (var routine in routines.Values)
+            {
+                routine.Done();
             }
         }
 
@@ -115,6 +153,38 @@ namespace ZDebug.Terp.Profiling
             get
             {
                 return calls[0];
+            }
+        }
+
+        public IEnumerable<IRoutine> Routines
+        {
+            get
+            {
+                foreach (var routine in routines.Values)
+                {
+                    yield return routine;
+                }
+            }
+        }
+
+        public IEnumerable<Tuple<int, IEnumerable<TimeSpan>>> InstructionTimings
+        {
+            get
+            {
+                foreach (var timing in instructionTimings)
+                {
+                    var address = timing.Key;
+                    var timings = (IEnumerable<TimeSpan>)timing.Value;
+                    yield return Tuple.Create(address, timings);
+                }
+            }
+        }
+
+        public TimeSpan RunningTime
+        {
+            get
+            {
+                return runningTime;
             }
         }
     }

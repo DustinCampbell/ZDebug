@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Instructions;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.Terp.Profiling;
@@ -29,9 +31,11 @@ namespace ZDebug.Terp
         private int currStatusHeight;
         private int machStatusHeight;
 
+        private byte[] storyBytes;
         private ZMachine machine;
         private Thread machineThread;
         private ZMachineProfiler profiler;
+        private Stopwatch watch;
 
         private string[] script;
         private int scriptIndex;
@@ -99,15 +103,17 @@ namespace ZDebug.Terp
 
                 mainWindow = null;
                 upperWindow = null;
+                storyBytes = null;
                 machine = null;
                 profiler = null;
                 script = null;
                 scriptIndex = 0;
+                watch = null;
             }
 
-            var memory = File.ReadAllBytes(fileName);
+            storyBytes = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(memory, screen: this, profiler: profiler, debugging: true);
+            machine = new ZMachine(storyBytes, screen: this, profiler: profiler, debugging: true);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
@@ -122,11 +128,16 @@ namespace ZDebug.Terp
 
         private void Run()
         {
+            watch = Stopwatch.StartNew();
             try
             {
                 machine.Run();
             }
             catch (ZMachineQuitException)
+            {
+                // done
+            }
+            catch (ZMachineInterruptedException)
             {
                 // done
             }
@@ -141,8 +152,13 @@ namespace ZDebug.Terp
                 UpdateProfilerStatistics();
             }
 
-            profiler.Stop();
-            PopulateCallTree();
+            watch.Stop();
+
+            if (profiler != null)
+            {
+                profiler.Stop(watch.Elapsed);
+                PopulateProfilerData();
+            }
         }
 
         private FormattedText GetFixedFontMeasureText()
@@ -550,27 +566,50 @@ namespace ZDebug.Terp
 
         private void UpdateProfilerStatistics()
         {
-            Dispatch(() =>
+            if (profiler != null)
             {
-                var ticks = profiler.CompilationStatistics.Sum(s => s.CompileTime.Ticks);
-                var compileTime = new TimeSpan(ticks);
+                Dispatch(() =>
+                {
+                    var ticks = profiler.CompilationStatistics.Sum(s => s.CompileTime.Ticks);
+                    var compileTime = new TimeSpan(ticks);
 
-                var ratios = profiler.CompilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
-                var ratio = ratios.Average();
+                    var ratios = profiler.CompilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
+                    var ratio = ratios.Average();
 
-                elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
-                routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
-                zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
-                routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
-            });
+                    elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
+                    routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
+                    zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
+                    routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
+                });
+            }
         }
 
-        private void PopulateCallTree()
+        private void PopulateProfilerData()
         {
-            Dispatch(() =>
+            if (profiler != null)
             {
-                callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
-            });
+                Dispatch(() =>
+                {
+                    callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
+                    routineGrid.ItemsSource = profiler.Routines;
+
+                    var reader = new InstructionReader(0, storyBytes);
+
+                    var instructions = profiler.InstructionTimings.Select(timing =>
+                    {
+                        reader.Address = timing.Item1;
+                        var i = reader.NextInstruction();
+                        var totalTime = timing.Item2.Aggregate(TimeSpan.Zero, (r, t) => r + t);
+                        return Tuple.Create(i, totalTime, timing.Item2.Count());
+                    });
+
+                    var totalTimesByOpcodeName = from i in instructions
+                                                 group i by i.Item1.Opcode.Name into g
+                                                 select new { Name = g.Key, TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.Item2), Count = g.Sum(x => x.Item3) };
+
+                    worstOpcodes.ItemsSource = totalTimesByOpcodeName.OrderByDescending(x => x.TotalTime);
+                });
+            }
         }
     }
 }

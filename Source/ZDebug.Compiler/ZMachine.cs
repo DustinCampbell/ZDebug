@@ -41,6 +41,7 @@ namespace ZDebug.Compiler
 
         private Random random;
 
+        private int currentAddress = -1;
         private volatile bool interupt;
         private volatile bool inputReceived;
 
@@ -109,7 +110,7 @@ namespace ZDebug.Compiler
 
         }
 
-        private ZRoutineCode GetRoutineCode(int address)
+        internal ZRoutineCode GetRoutineCode(int address)
         {
             ZCompilerResult result;
             if (!compiledRoutines.TryGetValue(address, out result))
@@ -156,7 +157,37 @@ namespace ZDebug.Compiler
         {
             if (profiler != null)
             {
+                if (currentAddress >= 0)
+                {
+                    ExecutedInstruction();
+                }
+
+                currentAddress = address;
                 profiler.ExecutingInstruction(address);
+            }
+        }
+
+        internal void ExecutedInstruction()
+        {
+            if (profiler != null)
+            {
+                profiler.ExecutedInstruction(currentAddress);
+            }
+        }
+
+        internal void Quit()
+        {
+            if (profiler != null)
+            {
+                profiler.Quit();
+            }
+        }
+
+        internal void Interrupt()
+        {
+            if (profiler != null)
+            {
+                profiler.Interrupt();
             }
         }
 

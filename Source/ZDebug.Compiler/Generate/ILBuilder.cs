@@ -128,8 +128,9 @@ namespace ZDebug.Compiler.Generate
 
         private LocalBuilder DeclareLocal(Type localType)
         {
-            return il.DeclareLocal(localType);
+            var loc = il.DeclareLocal(localType);
             localCount++;
+            return loc;
         }
 
         public void Duplicate()
@@ -167,6 +168,16 @@ namespace ZDebug.Compiler.Generate
             }
 
             Emit(OpCodes.Ldfld, field);
+        }
+
+        public void Store(FieldInfo field, bool @volatile = false)
+        {
+            if (@volatile)
+            {
+                Emit(OpCodes.Volatile);
+            }
+
+            Emit(OpCodes.Stfld, field);
         }
 
         public void Load(string value)

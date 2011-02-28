@@ -1,18 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.VisualStudio.Profiler;
-using ZDebug.Core;
-using ZDebug.Core.Blorb;
-
-namespace ZDebug.PerfHarness
+﻿namespace ZDebug.PerfHarness
 {
     internal class Program
     {
         const string BRONZE = @"..\..\ZCode\bronze\bronze.z8";
         const string DREAMHOLD = @"..\..\ZCode\dreamhold\dreamhold.z8";
         const string SANDDANC = @"..\..\ZCode\sanddanc\sanddanc.z5";
-        const string ROTA = @"..\..\ZCode\rota\RoTA.zblorb";
+        const string ROTA = @"..\..\ZCode\rota\RoTA.z8";
         const string ZORK1 = @"..\..\ZCode\zork1\zork1.z3";
 
         const string BRONZE_SCRIPT = @"..\..\ZCode\bronze\bronze_script.txt";

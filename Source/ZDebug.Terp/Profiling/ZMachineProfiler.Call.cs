@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ZDebug.Terp.Profiling
 {
@@ -17,7 +18,8 @@ namespace ZDebug.Terp.Profiling
             private ReadOnlyCollection<ICall> children;
 
             private Stopwatch stopwatch;
-            private TimeSpan elapsed;
+            private TimeSpan inclusiveTime;
+            private TimeSpan exclusiveTime;
 
             public Call(ZMachineProfiler profiler, Routine routine, int index, int parentIndex)
             {
@@ -26,6 +28,8 @@ namespace ZDebug.Terp.Profiling
                 this.index = index;
                 this.parentIndex = parentIndex;
                 this.childIndexes = new List<int>();
+
+                routine.AddCall(index);
 
                 if (parentIndex >= 0)
                 {
@@ -42,12 +46,15 @@ namespace ZDebug.Terp.Profiling
             {
                 stopwatch.Stop();
 
-                childIndexes.TrimExcess();
                 var childList = childIndexes.ConvertAll(i => (ICall)profiler.GetCallByIndex(i));
+                childList.TrimExcess();
+                childList.Sort((c1, c2) => c1.InclusiveTime.CompareTo(c2.InclusiveTime));
+                childList.Reverse();
                 children = new ReadOnlyCollection<ICall>(childList);
                 childIndexes = null;
 
-                elapsed = stopwatch.Elapsed;
+                inclusiveTime = stopwatch.Elapsed;
+                exclusiveTime = inclusiveTime - (children.Aggregate(TimeSpan.Zero, (r, c) => r + c.InclusiveTime));
                 stopwatch = null;
             }
 
@@ -85,13 +92,37 @@ namespace ZDebug.Terp.Profiling
                 }
             }
 
-            public TimeSpan Elapsed
+            public TimeSpan InclusiveTime
             {
                 get
                 {
-                    return stopwatch == null
-                        ? elapsed
-                        : stopwatch.Elapsed;
+                    return inclusiveTime;
+                }
+            }
+
+            public TimeSpan ExclusiveTime
+            {
+                get
+                {
+                    return exclusiveTime;
+                }
+            }
+
+            public double InclusivePercentage
+            {
+                get
+                {
+                    return parentIndex >= 0
+                        ? ((double)inclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100
+                        : 100.0;
+                }
+            }
+
+            public double ExclusivePercentage
+            {
+                get
+                {
+                    return ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
                 }
             }
         }

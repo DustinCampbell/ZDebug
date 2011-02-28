@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZDebug.Compiler.Profiling
+﻿namespace ZDebug.Compiler.Profiling
 {
     public interface IZMachineProfiler
     {
@@ -13,5 +8,9 @@ namespace ZDebug.Compiler.Profiling
         void ExitRoutine(int address);
 
         void ExecutingInstruction(int address);
+        void ExecutedInstruction(int address);
+
+        void Quit();
+        void Interrupt();
     }
 }
