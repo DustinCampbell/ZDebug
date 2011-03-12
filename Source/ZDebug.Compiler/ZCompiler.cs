@@ -26,6 +26,9 @@ namespace ZDebug.Compiler
         private IArrayLocal args;
         private ILocal argCount;
 
+        private IArrayLocal stack;
+        private ILocal sp;
+
         private IArrayLocal locals;
 
         private ZCompiler(ZRoutine routine, ZMachine machine, bool profiling)
@@ -244,6 +247,50 @@ namespace ZDebug.Compiler
                 il.ThrowException<ZMachineInterruptedException>();
 
                 ok.Mark();
+            }
+        }
+
+        private void Call()
+        {
+            using (var address = il.NewLocal<int>())
+            using (var args = il.NewArrayLocal<ushort>(currentInstruction.OperandCount - 1))
+            {
+                LoadUnpackedRoutineAddress(GetOperand(0));
+                address.Store();
+
+                for (int j = 1; j < currentInstruction.OperandCount; j++)
+                {
+                    // don't close over the iterator variable
+                    int index = j;
+
+                    args.StoreElement(
+                        il.GenerateLoad(index - 1),
+                        il.Generate(() =>
+                            LoadOperand(index)));
+                }
+
+                var legalCall = il.NewLabel();
+                address.Load();
+                legalCall.BranchIf(Condition.True, @short: true);
+
+                var done = il.NewLabel();
+                il.Load(0);
+
+                done.Branch(@short: true);
+
+                legalCall.Mark();
+                il.LoadArg(0);
+                address.Load();
+
+                var getRoutineCode = Reflection<ZMachine>.GetMethod("GetRoutineCode", Types.One<int>(), @public: false);
+                il.Call(getRoutineCode);
+
+                var invoke = Reflection<ZRoutineCode>.GetMethod("Invoke", Types.One<ushort[]>());
+                args.Load();
+
+                il.Call(invoke);
+
+                done.Mark();
             }
         }
 
