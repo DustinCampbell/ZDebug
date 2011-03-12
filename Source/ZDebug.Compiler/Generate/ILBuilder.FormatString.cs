@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using System.Reflection;
+using ZDebug.Compiler.Utilities;
 
 namespace ZDebug.Compiler.Generate
 {
@@ -13,28 +9,28 @@ namespace ZDebug.Compiler.Generate
             name: "Format",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[] { typeof(string), typeof(object) },
+            types: Types.Two<string, object>(),
             modifiers: null);
 
         private readonly static MethodInfo stringFormat2 = typeof(string).GetMethod(
             name: "Format",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[] { typeof(string), typeof(object), typeof(object) },
+            types: Types.Three<string, object, object>(),
             modifiers: null);
 
         private readonly static MethodInfo stringFormat3 = typeof(string).GetMethod(
             name: "Format",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[] { typeof(string), typeof(object), typeof(object), typeof(object) },
+            types: Types.Four<string, object, object, object>(),
             modifiers: null);
 
         private readonly static MethodInfo stringFormatAny = typeof(string).GetMethod(
             name: "Format",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[] { typeof(string), typeof(object[]) },
+            types: Types.Two<string, object[]>(),
             modifiers: null);
 
         public void FormatString(string format, ILocal arg0)

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using System.Reflection;
 using ZDebug.Compiler.Generate;
+using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 
 namespace ZDebug.Compiler
@@ -12,119 +11,119 @@ namespace ZDebug.Compiler
             name: "Print",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(char) },
+            types: Types.One<char>(),
             modifiers: null);
 
         private readonly static MethodInfo print2 = typeof(ZMachine.OutputStreams).GetMethod(
             name: "Print",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(string) },
+            types: Types.One<string>(),
             modifiers: null);
 
         private readonly static MethodInfo selectScreenStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "SelectScreenStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo deselectScreenStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "DeselectScreenStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo selectTranscriptStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "SelectTranscriptStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo deselectTranscriptStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "DeselectTranscriptStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo selectMemoryStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "SelectMemoryStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo deselectMemoryStream = typeof(ZMachine.OutputStreams).GetMethod(
             name: "DeselectMemoryStream",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo setTextStyle = typeof(IScreen).GetMethod(
             name: "SetTextStyle",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ZTextStyle) },
+            types: Types.One<ZTextStyle>(),
             modifiers: null);
 
         private readonly static MethodInfo clear = typeof(IScreen).GetMethod(
             name: "Clear",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo clearAll = typeof(IScreen).GetMethod(
             name: "ClearAll",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(bool) },
+            types: Types.One<bool>(),
             modifiers: null);
 
         private readonly static MethodInfo split = typeof(IScreen).GetMethod(
             name: "Split",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo setWindow = typeof(IScreen).GetMethod(
             name: "SetWindow",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo showStatus = typeof(IScreen).GetMethod(
             name: "ShowStatus",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] {  },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo setForegroundColor = typeof(IScreen).GetMethod(
             name: "SetForegroundColor",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ZColor) },
+            types: Types.One<ZColor>(),
             modifiers: null);
 
         private readonly static MethodInfo setBackgroundColor = typeof(IScreen).GetMethod(
             name: "SetBackgroundColor",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ZColor) },
+            types: Types.One<ZColor>(),
             modifiers: null);
 
         private readonly static MethodInfo setCursor = typeof(IScreen).GetMethod(
             name: "SetCursor",
             bindingAttr: BindingFlags.Public | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int), typeof(int) },
+            types: Types.Two<int, int>(),
             modifiers: null);
 
         private void PrintChar(char ch)

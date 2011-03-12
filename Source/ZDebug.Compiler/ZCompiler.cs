@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
+using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 
@@ -32,119 +32,119 @@ namespace ZDebug.Compiler
             name: "GetRoutineCode",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
             name: "Call",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int), typeof(ushort[]) },
+            types: Types.Two<int, ushort[]>(),
             modifiers: null);
 
         private readonly static MethodInfo enterRoutineHelper = typeof(ZMachine).GetMethod(
             name: "EnterRoutine",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo exitRoutineHelper = typeof(ZMachine).GetMethod(
             name: "ExitRoutine",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo executingInstructionHelper = typeof(ZMachine).GetMethod(
             name: "ExecutingInstruction",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo executedInstructionHelper = typeof(ZMachine).GetMethod(
             name: "ExecutedInstruction",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
             name: "ReadZText",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(int) },
+            types: Types.One<int>(),
             modifiers: null);
 
         private readonly static MethodInfo nextRandomHelper = typeof(ZMachine).GetMethod(
             name: "NextRandom",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(short) },
+            types: Types.One<short>(),
             modifiers: null);
 
         private readonly static MethodInfo seedRandomHelper = typeof(ZMachine).GetMethod(
             name: "SeedRandom",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(short) },
+            types: Types.One<short>(),
             modifiers: null);
 
         private readonly static MethodInfo convertZTextHelper = typeof(ZMachine).GetMethod(
             name: "ConvertZText",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ushort[]) },
+            types: Types.One<ushort[]>(),
             modifiers: null);
 
         private readonly static MethodInfo readZ3Helper = typeof(ZMachine).GetMethod(
             name: "Read_Z3",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ushort), typeof(ushort) },
+            types: Types.Two<ushort, ushort>(),
             modifiers: null);
 
         private readonly static MethodInfo readZ4Helper = typeof(ZMachine).GetMethod(
             name: "Read_Z4",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ushort), typeof(ushort) },
+            types: Types.Two<ushort, ushort>(),
             modifiers: null);
 
         private readonly static MethodInfo readZ5Helper = typeof(ZMachine).GetMethod(
             name: "Read_Z5",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ushort), typeof(ushort) },
+            types: Types.Two<ushort, ushort>(),
             modifiers: null);
 
         private readonly static MethodInfo readCharHelper = typeof(ZMachine).GetMethod(
             name: "ReadChar",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo tokenizeHelper = typeof(ZMachine).GetMethod(
             name: "Tokenize",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { typeof(ushort), typeof(ushort), typeof(ushort), typeof(bool) },
+            types: Types.Four<ushort, ushort, ushort, bool>(),
             modifiers: null);
 
         private readonly static MethodInfo quitHelper = typeof(ZMachine).GetMethod(
             name: "Quit",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo interruptHelper = typeof(ZMachine).GetMethod(
             name: "Interrupt",
             bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
             binder: null,
-            types: new Type[] { },
+            types: Types.None,
             modifiers: null);
 
         internal const int STACK_SIZE = 1024;
@@ -188,7 +188,7 @@ namespace ZDebug.Compiler
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
-                parameterTypes: new Type[] { typeof(ZMachine), typeof(ushort[]) },
+                parameterTypes: Types.Two<ZMachine, ushort[]>(),
                 owner: typeof(ZMachine),
                 skipVisibility: true);
 

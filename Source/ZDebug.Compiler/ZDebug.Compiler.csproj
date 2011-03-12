@@ -58,6 +58,7 @@
     <Compile Include="Profiling\RoutineCompilationStatistics.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\Types.cs" />
     <Compile Include="ZCompiler.cs" />
     <Compile Include="ZCompiler.ExtOp.cs" />
     <Compile Include="ZCompiler.Memory.cs" />

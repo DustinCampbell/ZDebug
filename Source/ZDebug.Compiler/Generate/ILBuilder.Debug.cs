@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Diagnostics;
-using System.Reflection.Emit;
+using ZDebug.Compiler.Utilities;
 
 namespace ZDebug.Compiler.Generate
 {
@@ -14,21 +10,21 @@ namespace ZDebug.Compiler.Generate
             name: "Indent",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[0],
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo debugUnindent = typeof(Debug).GetMethod(
             name: "Unindent",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[0],
+            types: Types.None,
             modifiers: null);
 
         private readonly static MethodInfo debugWriteLine = typeof(Debug).GetMethod(
             name: "WriteLine",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: new Type[] { typeof(string) },
+            types: Types.One<string>(),
             modifiers: null);
 
         [Conditional("LOG")]
