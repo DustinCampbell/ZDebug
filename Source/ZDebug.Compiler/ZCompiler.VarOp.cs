@@ -23,7 +23,7 @@ namespace ZDebug.Compiler
                     args.StoreElement(
                         il.GenerateLoad(index - 1),
                         il.Generate(() =>
-                            ReadOperand(index)));
+                            LoadOperand(index)));
                 }
 
                 var legalCall = il.NewLabel();
@@ -73,7 +73,7 @@ namespace ZDebug.Compiler
                 call();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
 
             il.DebugUnindent();
@@ -81,7 +81,7 @@ namespace ZDebug.Compiler
 
         private void op_check_arg_count()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             argCount.Load();
 
             il.Compare.AtMost();
@@ -90,20 +90,20 @@ namespace ZDebug.Compiler
 
         private void op_not()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             il.Math.Not();
             il.Convert.ToUInt16();
 
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
         private void op_print_char()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             PrintChar();
         }
 
@@ -111,7 +111,7 @@ namespace ZDebug.Compiler
         {
             using (var number = il.NewLocal<short>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 il.Convert.ToInt16();
                 number.Store();
 
@@ -129,20 +129,20 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<ushort>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
                 PopStack();
 
                 value.Store();
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
             }
 
         }
 
         private void op_push()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             PushStack();
         }
 
@@ -159,7 +159,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read propNum
-                ReadOperand(1);
+                LoadOperand(1);
                 propNum.Store();
 
                 il.DebugWrite("propNum: {0}", propNum);
@@ -177,7 +177,7 @@ namespace ZDebug.Compiler
                 loopStart.Mark();
 
                 // Read first property byte and store in value
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 value.Store();
 
                 // if ((value & mask) <= propNum) break;
@@ -236,11 +236,11 @@ namespace ZDebug.Compiler
                 // write byte
                 using (var temp = il.NewLocal<byte>())
                 {
-                    ReadOperand(2);
+                    LoadOperand(2);
                     il.Convert.ToUInt8();
                     temp.Store();
 
-                    WriteByte(propAddress, temp);
+                    StoreByte(propAddress, temp);
 
                     il.DebugWrite("Wrote byte {0:x2} to {1:x4}", temp, propAddress);
 
@@ -252,10 +252,10 @@ namespace ZDebug.Compiler
 
                 using (var temp = il.NewLocal<ushort>())
                 {
-                    ReadOperand(2);
+                    LoadOperand(2);
                     temp.Store();
 
-                    WriteWord(propAddress, temp);
+                    StoreWord(propAddress, temp);
 
                     il.DebugWrite("Wrote word {0:x2} to {1:x4}", temp, propAddress);
                 }
@@ -272,7 +272,7 @@ namespace ZDebug.Compiler
                 var seed = il.NewLabel();
                 var done = il.NewLabel();
 
-                ReadOperand(0);
+                LoadOperand(0);
                 il.Convert.ToInt16();
                 range.Store();
 
@@ -301,19 +301,19 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
         private void op_text_style()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             SetTextStyle();
         }
 
         private void op_buffer_mode()
         {
-            ReadOperand(0);
+            LoadOperand(0);
 
             // TODO: What does buffer_mode mean in this terp?
             il.Pop();
@@ -321,19 +321,19 @@ namespace ZDebug.Compiler
 
         private void op_erase_window()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             EraseWindow();
         }
 
         private void op_split_window()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             SplitWindow();
         }
 
         private void op_set_window()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             SetWindow();
         }
 
@@ -342,10 +342,10 @@ namespace ZDebug.Compiler
             using (var foreground = il.NewLocal<ZColor>())
             using (var background = il.NewLocal<ZColor>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 foreground.Store();
 
-                ReadOperand(1);
+                LoadOperand(1);
                 background.Store();
 
                 SetColor(foreground, background);
@@ -362,10 +362,10 @@ namespace ZDebug.Compiler
             using (var line = il.NewLocal<ushort>())
             using (var column = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 line.Store();
 
-                ReadOperand(1);
+                LoadOperand(1);
                 column.Store();
 
                 SetCursor(line, column);
@@ -382,16 +382,16 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var value = il.NewLocal<byte>())
             {
-                ReadOperand(0);
-                ReadOperand(1);
+                LoadOperand(0);
+                LoadOperand(1);
                 il.Math.Add();
                 address.Store();
 
-                ReadOperand(2);
+                LoadOperand(2);
                 il.Convert.ToUInt8();
                 value.Store();
 
-                WriteByte(address, value);
+                StoreByte(address, value);
             }
         }
 
@@ -400,16 +400,16 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var value = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
-                ReadOperand(1);
+                LoadOperand(0);
+                LoadOperand(1);
                 il.Math.Multiply(2);
                 il.Math.Add();
                 address.Store();
 
-                ReadOperand(2);
+                LoadOperand(2);
                 value.Store();
 
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
@@ -435,7 +435,7 @@ namespace ZDebug.Compiler
                 case 3:
                     using (var address = il.NewLocal<ushort>())
                     {
-                        ReadOperand(1);
+                        LoadOperand(1);
                         address.Store();
                         SelectMemoryStream(address);
                     }
@@ -490,15 +490,15 @@ namespace ZDebug.Compiler
                 il.Call(read);
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
         private void op_sread1()
         {
             il.LoadArg(0);
-            ReadOperand(0);
-            ReadOperand(1);
+            LoadOperand(0);
+            LoadOperand(1);
 
             var read = Reflection<ZMachine>.GetMethod("Read_Z3", Types.Two<ushort, ushort>(), @public: false);
             il.Call(read);
@@ -507,8 +507,8 @@ namespace ZDebug.Compiler
         private void op_sread4()
         {
             il.LoadArg(0);
-            ReadOperand(0);
-            ReadOperand(1);
+            LoadOperand(0);
+            LoadOperand(1);
 
             if (currentInstruction.OperandCount > 2)
             {
@@ -522,11 +522,11 @@ namespace ZDebug.Compiler
         private void op_aread()
         {
             il.LoadArg(0);
-            ReadOperand(0);
+            LoadOperand(0);
 
             if (currentInstruction.OperandCount > 1)
             {
-                ReadOperand(1);
+                LoadOperand(1);
             }
             else
             {
@@ -544,7 +544,7 @@ namespace ZDebug.Compiler
                 il.Call(read);
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -552,12 +552,12 @@ namespace ZDebug.Compiler
         {
             il.LoadArg(0);
 
-            ReadOperand(0);
-            ReadOperand(1);
+            LoadOperand(0);
+            LoadOperand(1);
 
             if (currentInstruction.OperandCount > 2)
             {
-                ReadOperand(2);
+                LoadOperand(2);
             }
             else
             {
@@ -566,7 +566,7 @@ namespace ZDebug.Compiler
 
             if (currentInstruction.OperandCount > 3)
             {
-                ReadOperand(3);
+                LoadOperand(3);
 
                 il.Load(0);
                 il.Compare.Equal();

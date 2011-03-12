@@ -12,13 +12,13 @@ namespace ZDebug.Compiler
     {
         private void BinaryOp(CodeBuilder operation, bool signed = false)
         {
-            ReadOperand(0);
+            LoadOperand(0);
             if (signed)
             {
                 il.Convert.ToInt16();
             }
 
-            ReadOperand(1);
+            LoadOperand(1);
             if (signed)
             {
                 il.Convert.ToInt16();
@@ -30,7 +30,7 @@ namespace ZDebug.Compiler
             using (var temp = il.NewLocal<ushort>())
             {
                 temp.Store();
-                WriteVariable(currentInstruction.StoreVariable, temp);
+                StoreVariable(currentInstruction.StoreVariable, temp);
             }
         }
 
@@ -74,18 +74,18 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<short>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadVariable(varIndex, indirect: true);
+                LoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
 
                 value.Load();
-                ReadOperand(1);
+                LoadOperand(1);
                 il.Convert.ToInt16();
 
                 il.Compare.LessThan();
@@ -98,18 +98,18 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<short>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadVariable(varIndex, indirect: true);
+                LoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
 
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
 
                 value.Load();
-                ReadOperand(1);
+                LoadOperand(1);
                 il.Convert.ToInt16();
 
                 il.Compare.GreaterThan();
@@ -141,7 +141,7 @@ namespace ZDebug.Compiler
             using (var x = il.NewLocal<ushort>())
             using (var result = il.NewLocal<bool>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 x.Store();
 
                 il.Load(0);
@@ -151,7 +151,7 @@ namespace ZDebug.Compiler
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
                 {
-                    ReadOperand(j);
+                    LoadOperand(j);
                     x.Load();
 
                     il.Compare.Equal();
@@ -173,10 +173,10 @@ namespace ZDebug.Compiler
 
         private void op_jg()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             il.Convert.ToInt16();
 
-            ReadOperand(1);
+            LoadOperand(1);
             il.Convert.ToInt16();
 
             il.Compare.GreaterThan();
@@ -185,10 +185,10 @@ namespace ZDebug.Compiler
 
         private void op_jl()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             il.Convert.ToInt16();
 
-            ReadOperand(1);
+            LoadOperand(1);
             il.Convert.ToInt16();
 
             il.Compare.LessThan();
@@ -198,7 +198,7 @@ namespace ZDebug.Compiler
         private void op_jin()
         {
             ReadObjectParentFromOperand(0);
-            ReadOperand(1);
+            LoadOperand(1);
 
             il.Compare.Equal();
             Branch();
@@ -208,10 +208,10 @@ namespace ZDebug.Compiler
         {
             using (var flags = il.NewLocal<ushort>())
             {
-                ReadOperand(1);
+                LoadOperand(1);
                 flags.Store();
 
-                ReadOperand(0);
+                LoadOperand(0);
                 flags.Load();
                 il.Math.And();
 
@@ -227,15 +227,15 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var value = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
-                ReadOperand(1);
+                LoadOperand(0);
+                LoadOperand(1);
                 il.Math.Add();
                 address.Store();
 
-                ReadByte(address);
+                LoadByte(address);
                 value.Store();
 
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
             }
         }
 
@@ -244,16 +244,16 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var value = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
-                ReadOperand(1);
+                LoadOperand(0);
+                LoadOperand(1);
                 il.Math.Multiply(2);
                 il.Math.Add();
                 address.Store();
 
-                ReadWord(address);
+                LoadWord(address);
                 value.Store();
 
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
             }
         }
 
@@ -262,13 +262,13 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<ushort>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadOperand(1);
+                LoadOperand(1);
                 value.Store();
 
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -288,7 +288,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read propNum
-                ReadOperand(1);
+                LoadOperand(1);
                 propNum.Store();
 
                 int mask = machine.Version < 4 ? 0x1f : 0x3f;
@@ -302,7 +302,7 @@ namespace ZDebug.Compiler
 
                 loopStart.Mark();
 
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 value.Store();
 
                 value.Load();
@@ -339,14 +339,14 @@ namespace ZDebug.Compiler
                 il.Math.And(sizeMask);
                 secondBranch.BranchIf(Condition.True, @short: true);
 
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 result.Store();
 
                 done.Branch();
 
                 secondBranch.Mark();
 
-                ReadWord(propAddress);
+                LoadWord(propAddress);
                 result.Store();
 
                 done.Branch();
@@ -360,7 +360,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
                 propAddress.Store();
 
-                ReadWord(propAddress);
+                LoadWord(propAddress);
                 result.Store();
 
                 done.Branch();
@@ -372,7 +372,7 @@ namespace ZDebug.Compiler
 
                 done.Mark();
 
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -391,7 +391,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read propNum
-                ReadOperand(1);
+                LoadOperand(1);
                 propNum.Store();
 
                 int mask = machine.Version < 4 ? 0x1f : 0x3f;
@@ -411,7 +411,7 @@ namespace ZDebug.Compiler
                 // start of the loop
                 loopStart.Mark();
 
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 value.Store();
 
                 propAddress.Load();
@@ -438,12 +438,12 @@ namespace ZDebug.Compiler
                 // At this point, we're done - store the value
                 storePropNum.Mark();
 
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 il.Load(mask);
                 il.Math.And();
                 il.Convert.ToUInt16();
                 value.Store();
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
 
                 done.Branch(@short: true);
 
@@ -452,7 +452,7 @@ namespace ZDebug.Compiler
 
                 il.Load(0);
                 value.Store();
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
 
                 done.Mark();
             }
@@ -473,7 +473,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read propNum
-                ReadOperand(1);
+                LoadOperand(1);
                 propNum.Store();
 
                 int mask = machine.Version < 4 ? 0x1f : 0x3f;
@@ -487,7 +487,7 @@ namespace ZDebug.Compiler
 
                 loopStart.Mark();
 
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 value.Store();
 
                 value.Load();
@@ -529,7 +529,7 @@ namespace ZDebug.Compiler
                 il.Math.Add(1);
                 il.Convert.ToUInt16();
                 propAddress.Store();
-                WriteVariable(currentInstruction.StoreVariable, propAddress);
+                StoreVariable(currentInstruction.StoreVariable, propAddress);
 
                 done.Branch(@short: true);
 
@@ -537,7 +537,7 @@ namespace ZDebug.Compiler
 
                 il.Load(0);
                 value.Store();
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
 
                 done.Mark();
             }
@@ -554,7 +554,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read attribute
-                ReadOperand(1);
+                LoadOperand(1);
                 attribute.Store();
 
                 ObjectHasAttribute(objNum, attribute);
@@ -582,7 +582,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read attribute
-                ReadOperand(1);
+                LoadOperand(1);
                 attribute.Store();
 
                 ObjectSetAttribute(objNum, attribute, true);
@@ -602,7 +602,7 @@ namespace ZDebug.Compiler
                 objNum.Store();
 
                 // Read attribute
-                ReadOperand(1);
+                LoadOperand(1);
                 attribute.Store();
 
                 ObjectSetAttribute(objNum, attribute, false);

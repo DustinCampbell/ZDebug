@@ -58,8 +58,8 @@ namespace ZDebug.Compiler.Generate
             for (int i = 0; i < args.Length; i++)
             {
                 locArgs.StoreElement(
-                    loadIndex: this.GenerateLoad(i),
-                    loadValue: this.GenerateLoadAndBox(args[i]));
+                    indexLoader: () => Load(i),
+                    valueLoader: () => args[i].LoadAndBox());
             }
 
             Load(format);

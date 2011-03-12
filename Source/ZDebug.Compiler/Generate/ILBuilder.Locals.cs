@@ -172,18 +172,18 @@ namespace ZDebug.Compiler.Generate
                 builder.Emit(OpCodes.Ldlen);
             }
 
-            public void LoadElement(CodeBuilder loadIndex)
+            public void LoadElement(CodeBuilder indexLoader)
             {
                 this.Load();
-                loadIndex();
+                indexLoader();
                 builder.Emit(loadOpCode);
             }
 
-            public void StoreElement(CodeBuilder loadIndex, CodeBuilder loadValue)
+            public void StoreElement(CodeBuilder indexLoader, CodeBuilder valueLoader)
             {
                 this.Load();
-                loadIndex();
-                loadValue();
+                indexLoader();
+                valueLoader();
                 builder.Emit(storeOpCode);
             }
         }

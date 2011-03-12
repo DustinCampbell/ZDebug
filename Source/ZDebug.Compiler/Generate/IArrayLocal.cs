@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ZDebug.Compiler.Generate
+﻿namespace ZDebug.Compiler.Generate
 {
     public interface IArrayLocal : ILocal
     {
@@ -12,7 +7,7 @@ namespace ZDebug.Compiler.Generate
 
         void LoadLength();
 
-        void LoadElement(CodeBuilder loadIndex);
-        void StoreElement(CodeBuilder loadIndex, CodeBuilder loadValue);
+        void LoadElement(CodeBuilder indexLoader);
+        void StoreElement(CodeBuilder indexLoader, CodeBuilder valueLoader);
     }
 }

@@ -10,15 +10,15 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<short>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadVariable(varIndex, indirect: true);
+                LoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -27,15 +27,15 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<short>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadVariable(varIndex, indirect: true);
+                LoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
 
-                WriteVariable(varIndex, value, indirect: true);
+                StoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -46,7 +46,7 @@ namespace ZDebug.Compiler
                 ReadObjectChildFromOperand(0);
                 result.Store();
 
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
 
                 result.Load();
                 il.Load(0);
@@ -62,7 +62,7 @@ namespace ZDebug.Compiler
                 ReadObjectParentFromOperand(0);
                 result.Store();
 
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -73,7 +73,7 @@ namespace ZDebug.Compiler
                 ReadObjectSiblingFromOperand(0);
                 result.Store();
 
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
 
                 result.Load();
                 il.Load(0);
@@ -86,7 +86,7 @@ namespace ZDebug.Compiler
         {
             using (var objNum = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 objNum.Store();
 
                 RemoveObjectFromParent(objNum);
@@ -98,7 +98,7 @@ namespace ZDebug.Compiler
             using (var dataAddress = il.NewLocal<ushort>())
             using (var value = il.NewLocal<byte>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 dataAddress.Store();
 
                 var done = il.NewLabel();
@@ -118,7 +118,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
                 dataAddress.Store();
 
-                ReadByte(dataAddress);
+                LoadByte(dataAddress);
                 value.Store();
 
                 var checkForZero = il.NewLabel();
@@ -163,7 +163,7 @@ namespace ZDebug.Compiler
 
                 done.Mark();
 
-                WriteVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable, value);
             }
         }
 
@@ -176,7 +176,7 @@ namespace ZDebug.Compiler
 
         private void op_jz()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             il.Load(0);
             il.Compare.Equal();
 
@@ -188,19 +188,19 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var result = il.NewLocal<ushort>())
             {
-                ReadByRefVariableOperand();
+                LoadByRefVariableOperand();
                 varIndex.Store();
 
-                ReadVariable(varIndex, indirect: true);
+                LoadVariable(varIndex, indirect: true);
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
         private void op_print_addr()
         {
             il.LoadArg(0);
-            ReadOperand(0);
+            LoadOperand(0);
 
             var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
             il.Call(readZText);
@@ -230,7 +230,7 @@ namespace ZDebug.Compiler
 
         private void op_ret()
         {
-            ReadOperand(0);
+            LoadOperand(0);
             Return();
         }
     }

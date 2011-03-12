@@ -1,70 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection.Emit;
+﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
-using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
         /// <summary>
-        /// Reads a byte from memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// Loads a byte from memory at the address retrieved by the <paramref name="addressLoader"/>
+        /// and pushes it onto the evaluation stack.
         /// </summary>
-        /// <param name="loadAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void ReadByte(CodeBuilder loadAddress)
+        /// <param name="addressLoader">A delegate that pushes the address to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        private void LoadByte(CodeBuilder addressLoader)
         {
-            memory.LoadElement(loadAddress);
+            memory.LoadElement(addressLoader);
         }
 
         /// <summary>
-        /// Reads a byte from memory at the specified address.
+        /// Loads a byte from memory at the specified address and pushes it onto the evaluation stack.
         /// </summary>
-        private void ReadByte(int address)
+        private void LoadByte(int address)
         {
-            ReadByte(
-                loadAddress: il.GenerateLoad(address));
+            LoadByte(
+                addressLoader: () => il.Load(address));
         }
 
         /// <summary>
-        /// Reads a byte from memory at the address stored in the given local.
+        /// Loads a byte from memory at the address stored in the given local.
         /// </summary>
-        private void ReadByte(ILocal addressLocal)
+        private void LoadByte(ILocal address)
         {
-            ReadByte(
-                loadAddress: il.GenerateLoad(addressLocal));
+            LoadByte(
+                addressLoader: () => address.Load());
         }
 
         /// <summary>
-        /// Reads a byte from memory at the address on top of the evaluation stack.
+        /// Loads a byte from memory at the address on top of the evaluation stack.
         /// </summary>
-        private void ReadByte()
+        private void LoadByte()
         {
             using (var address = il.NewLocal<int>())
             {
                 address.Store();
-                ReadByte(address);
+                LoadByte(address);
             }
         }
 
         /// <summary>
-        /// Reads a word from memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// Loads a word from memory at the address retrieved by the <paramref name="addressLoader"/>
+        /// and pushes it onto the evaluation stack.
         /// </summary>
-        /// <param name="loadAddress">An Action delegate that pushes the address to be read from to the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="loadAddressPlusOne">An Action delegate that pushes the address + 1 to be read from to the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void ReadWord(CodeBuilder loadAddress, CodeBuilder loadAddressPlusOne)
+        /// <param name="addressLoader">A delegate that pushes the address to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        /// <param name="addressPlusOneLoader">A delegate that pushes the address + 1 to be read from to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        private void LoadWord(CodeBuilder addressLoader, CodeBuilder addressPlusOneLoader)
         {
             // shift memory[address] left 8 bits
-            memory.LoadElement(loadAddress);
+            memory.LoadElement(addressLoader);
             il.Math.Shl(8);
 
             // read memory[address + 1]
-            memory.LoadElement(loadAddressPlusOne);
+            memory.LoadElement(addressPlusOneLoader);
 
             // or bytes together
             il.Math.Or();
@@ -72,150 +69,163 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
-        /// Reads a word from memory at the specified address.
+        /// Loads a word from memory at the specified address.
         /// </summary>
-        private void ReadWord(int address)
+        private void LoadWord(int address)
         {
-            ReadWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne: il.GenerateLoad(address + 1));
+            LoadWord(
+                addressLoader: () => il.Load(address),
+                addressPlusOneLoader: () => il.Load(address + 1));
         }
 
         /// <summary>
-        /// Reads a word from memory at the address stored in the given local.
+        /// Loads a word from memory at the address stored in the given local.
         /// </summary>
-        private void ReadWord(ILocal address)
+        private void LoadWord(ILocal address)
         {
-            ReadWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne:
-                    il.Combine(
-                        il.GenerateLoad(address),
-                        il.GenerateAdd(1)));
+            LoadWord(
+                addressLoader: () => address.Load(),
+                addressPlusOneLoader: () =>
+                {
+                    address.Load();
+                    il.Math.Add(1);
+                });
         }
 
         /// <summary>
-        /// Reads a word from memory at the address on top of the evaluation stack.
+        /// Loads a word from memory at the address on top of the evaluation stack.
         /// </summary>
-        private void ReadWord()
+        private void LoadWord()
         {
             using (var address = il.NewLocal<int>())
             {
                 address.Store();
-                ReadWord(address);
+                LoadWord(address);
             }
         }
 
         /// <summary>
-        /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// Stores a word in memory at the address retrieved by the <paramref name="addressLoader"/>.
         /// </summary>
-        /// <param name="loadAddress">An Action delegate that pushes the address to be written to on the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="loadValue">An Action delegate that pushes the value to be written to the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void WriteByte(CodeBuilder loadAddress, CodeBuilder loadValue)
+        /// <param name="addressLoader">A delegate that pushes the address to be store to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        /// <param name="valueLoader">A delegate that pushes the value to be written to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        private void StoreByte(CodeBuilder addressLoader, CodeBuilder valueLoader)
         {
-            memory.StoreElement(loadAddress, loadValue);
+            memory.StoreElement(addressLoader, valueLoader);
         }
 
         /// <summary>
-        /// Writes a byte to memory at the specified address.
+        /// Stores a byte in memory at the specified address.
         /// </summary>
-        private void WriteByte(int address, ushort value)
+        private void StoreByte(int address, ushort value)
         {
-            WriteByte(
-                loadAddress: il.GenerateLoad(address),
-                loadValue: il.GenerateLoad(value));
+            StoreByte(
+                addressLoader: () => il.Load(address),
+                valueLoader: () => il.Load(value));
         }
 
         /// <summary>
-        /// Writes a byte to memory at the specified address.
+        /// Stores a byte in memory at the specified address.
         /// </summary>
-        private void WriteByte(int address, ILocal value)
+        private void StoreByte(int address, ILocal value)
         {
-            WriteByte(
-                loadAddress: il.GenerateLoad(address),
-                loadValue: il.GenerateLoad(value));
+            StoreByte(
+                addressLoader: () => il.Load(address),
+                valueLoader: () => value.Load());
         }
 
         /// <summary>
-        /// Writes a byte to memory at the address stored in the given local.
+        /// Stores a byte in memory at the address stored in the given local.
         /// </summary>
-        private void WriteByte(ILocal address, ILocal value)
+        private void StoreByte(ILocal address, ILocal value)
         {
-            WriteByte(
-                loadAddress: il.GenerateLoad(address),
-                loadValue: il.GenerateLoad(value));
+            StoreByte(
+                addressLoader: () => address.Load(),
+                valueLoader: () => value.Load());
         }
 
         /// <summary>
-        /// Writes a byte to memory at the address stored in the given local.
+        /// Stores a byte in memory at the address stored in the given local.
         /// </summary>
-        private void WriteByte(ILocal address, ushort value)
+        private void StoreByte(ILocal address, ushort value)
         {
-            WriteByte(
-                loadAddress: il.GenerateLoad(address),
-                loadValue: il.GenerateLoad(value));
+            StoreByte(
+                addressLoader: () => address.Load(),
+                valueLoader: () => il.Load(value));
         }
 
         /// <summary>
-        /// Writes a word a memory at the address pushed onto the evaluation stack by the specified code generator.
+        /// Stores a word in memory at the address retrieved by the <paramref name="addressLoader"/>.
         /// </summary>
-        /// <param name="loadAddress">An Action delegate that loads the address to be written to onto the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="loadAddressPlusOne">An Action delegate that loads the address + 1 to be written to onto the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        /// <param name="loadValue">An Action delegate that loads the value to be written to onto the evaluation stack.
-        /// This delegate should not rely upon the state of the stack when it is called.</param>
-        private void WriteWord(CodeBuilder loadAddress, CodeBuilder loadAddressPlusOne, CodeBuilder loadValue)
+        /// <param name="addressLoader">A delegate that pushes the address to be store to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        /// <param name="addressPlusOneLoader">A delegate that pushes the address to be store to on the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        /// <param name="valueLoader">A delegate that pushes the value to be written to the evaluation stack.
+        /// This delegate should not rely upon the state of the stack when invoked.</param>
+        private void StoreWord(CodeBuilder addressLoader, CodeBuilder addressPlusOneLoader, CodeBuilder valueLoader)
         {
             // memory[address] = (byte)(value >> 8);
             memory.StoreElement(
-                loadAddress,
-                il.Combine(
-                    loadValue,
-                    il.GenerateShr(8),
-                    il.GenerateConvertToUInt8()));
+                addressLoader,
+                () =>
+                {
+                    valueLoader();
+                    il.Math.Shr(8);
+                    il.Convert.ToUInt8();
+                });
 
             // memory[address + 1] = (byte)(value & 0xff);
             memory.StoreElement(
-                loadAddressPlusOne,
-                il.Combine(
-                    loadValue,
-                    il.GenerateAnd(0xff),
-                    il.GenerateConvertToUInt8()));
+                addressPlusOneLoader,
+                () =>
+                {
+                    valueLoader();
+                    il.Math.And(0xff);
+                    il.Convert.ToUInt8();
+                });
         }
 
-        private void WriteWord(int address, ushort value)
+        private void StoreWord(int address, ushort value)
         {
-            WriteWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne: il.GenerateLoad(address + 1),
-                loadValue: il.GenerateLoad(value));
+            StoreWord(
+                addressLoader: () => il.Load(address),
+                addressPlusOneLoader: () => il.Load(address + 1),
+                valueLoader: () => il.Load(value));
         }
 
-        private void WriteWord(int address, ILocal value)
+        private void StoreWord(int address, ILocal value)
         {
-            WriteWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne: il.GenerateLoad(address + 1),
-                loadValue: il.GenerateLoad(value));
+            StoreWord(
+                addressLoader: () => il.Load(address),
+                addressPlusOneLoader: () => il.Load(address + 1),
+                valueLoader: () => value.Load());
         }
 
-        private void WriteWord(ILocal address, ILocal value)
+        private void StoreWord(ILocal address, ILocal value)
         {
-            WriteWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
-                loadValue: il.GenerateLoad(value));
+            StoreWord(
+                addressLoader: () => address.Load(),
+                addressPlusOneLoader: () =>
+                {
+                    address.Load();
+                    il.Math.Add(1);
+                },
+                valueLoader: () => value.Load());
         }
 
-        private void WriteWord(ILocal address, ushort value)
+        private void StoreWord(ILocal address, ushort value)
         {
-            WriteWord(
-                loadAddress: il.GenerateLoad(address),
-                loadAddressPlusOne: il.Combine(il.GenerateLoad(address), il.GenerateAdd(1)),
-                loadValue: il.GenerateLoad(value));
+            StoreWord(
+                addressLoader: () => address.Load(),
+                addressPlusOneLoader: () =>
+                {
+                    address.Load();
+                    il.Math.Add(1);
+                },
+                valueLoader: () => il.Load(value));
         }
 
         private void CheckStackEmpty()
@@ -246,12 +256,7 @@ namespace ZDebug.Compiler
 
         private void PopStack()
         {
-            CheckStackEmpty();
-
-            stack.LoadElement(
-                il.Combine(
-                    il.GenerateLoad(sp),
-                    il.GenerateSubtract(1)));
+            PeekStack();
 
             // decrement sp
             sp.Load();
@@ -263,10 +268,11 @@ namespace ZDebug.Compiler
         {
             CheckStackEmpty();
 
-            stack.LoadElement(
-                il.Combine(
-                    il.GenerateLoad(sp),
-                    il.GenerateSubtract(1)));
+            stack.LoadElement(() =>
+            {
+                sp.Load();
+                il.Math.Subtract(1);
+            });
         }
 
         private void PushStack(ILocal value)
@@ -274,8 +280,8 @@ namespace ZDebug.Compiler
             CheckStackFull();
 
             stack.StoreElement(
-                il.GenerateLoad(sp),
-                il.GenerateLoad(value));
+                indexLoader: () => sp.Load(),
+                valueLoader: () => value.Load());
 
             // increment sp
             sp.Load();
@@ -297,10 +303,12 @@ namespace ZDebug.Compiler
             CheckStackEmpty();
 
             stack.StoreElement(
-                il.Combine(
-                    il.GenerateLoad(sp),
-                    il.GenerateSubtract(1)),
-                il.GenerateLoad(value));
+                indexLoader: () =>
+                {
+                    sp.Load();
+                    il.Math.Subtract(1);
+                },
+                valueLoader: () => value.Load());
         }
 
         private void SetStackTop()
@@ -313,52 +321,55 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
-        /// Reads a value from the locals array
+        /// Loads a value from the locals array onto the evaluation stack.
         /// </summary>
-        private void ReadLocalVariable(int index)
+        private void LoadLocalVariable(int index)
         {
             locals.LoadElement(
-                il.GenerateLoad(index));
+                indexLoader: () => il.Load(index));
         }
 
         /// <summary>
-        /// Reads a value from the locals array
+        /// Loads a value from the locals array onto the evaluation stack.
         /// </summary>
-        private void ReadLocalVariable(ILocal index)
+        private void LoadLocalVariable(ILocal index)
         {
             locals.LoadElement(
-                il.GenerateLoad(index));
+                indexLoader: () => index.Load());
         }
 
-        private void ReadLocalVariable()
+        /// <summary>
+        /// Loads a value from the locals array onto the evaluation stack using the index on the evaluation stack.
+        /// </summary>
+        private void LoadLocalVariable()
         {
             using (var index = il.NewLocal<int>())
             {
                 index.Store();
-                ReadLocalVariable(index);
+                LoadLocalVariable(index);
             }
         }
 
-        private void WriteLocalVariable(int index, ILocal value)
+        private void StoreLocalVariable(int index, ILocal value)
         {
             locals.StoreElement(
-                loadIndex: il.GenerateLoad(index),
-                loadValue: il.GenerateLoad(value));
+                indexLoader: () => il.Load(index),
+                valueLoader: () => value.Load());
         }
 
-        private void WriteLocalVariable(ILocal index, ILocal value)
+        private void StoreLocalVariable(ILocal index, ILocal value)
         {
             locals.StoreElement(
-                loadIndex: il.GenerateLoad(index),
-                loadValue: il.GenerateLoad(value));
+                indexLoader: () => index.Load(),
+                valueLoader: () => value.Load());
         }
 
-        private void WriteLocalVariable(ILocal value)
+        private void StoLocalVariable(ILocal value)
         {
             using (var index = il.NewLocal<int>())
             {
                 index.Store();
-                WriteLocalVariable(index, value);
+                StoreLocalVariable(index, value);
             }
         }
 
@@ -367,7 +378,10 @@ namespace ZDebug.Compiler
             return machine.GlobalVariableTableAddress + (index * 2);
         }
 
-        private void CalculateGlobalVariableAddress(ILocal index = null)
+        /// <summary>
+        /// Calulates the address of a global variable and loads it on the evaluation stack.
+        /// </summary>
+        private void LoadGlobalVariableAddress(ILocal index = null)
         {
             if (index != null)
             {
@@ -378,53 +392,53 @@ namespace ZDebug.Compiler
             il.Math.Add(machine.GlobalVariableTableAddress);
         }
 
-        private void ReadGlobalVariable(int index)
+        private void LoadGlobalVariable(int index)
         {
             var address = CalculateGlobalVariableAddress(index);
-            ReadWord(address);
+            LoadWord(address);
         }
 
-        private void ReadGlobalVariable(ILocal index)
+        private void LoadGlobalVariable(ILocal index)
         {
-            CalculateGlobalVariableAddress(index);
-            ReadWord();
+            LoadGlobalVariableAddress(index);
+            LoadWord();
         }
 
-        private void ReadGlobalVariable()
+        private void LoadGlobalVariable()
         {
-            CalculateGlobalVariableAddress();
-            ReadWord();
+            LoadGlobalVariableAddress();
+            LoadWord();
         }
 
-        private void WriteGlobalVariable(int index, ILocal value)
+        private void StoreGlobalVariable(int index, ILocal value)
         {
             var address = CalculateGlobalVariableAddress(index);
-            WriteWord(address, value);
+            StoreWord(address, value);
         }
 
-        private void WriteGlobalVariable(ILocal index, ILocal value)
+        private void StoreGlobalVariable(ILocal index, ILocal value)
         {
-            CalculateGlobalVariableAddress(index);
+            LoadGlobalVariableAddress(index);
 
             using (var address = il.NewLocal<int>())
             {
                 address.Store();
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
-        private void WriteGlobalVariable(ILocal value)
+        private void StoreGlobalVariable(ILocal value)
         {
-            CalculateGlobalVariableAddress();
+            LoadGlobalVariableAddress();
 
             using (var address = il.NewLocal<int>())
             {
                 address.Store();
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
-        private void ReadVariable(ILocal variableIndex, bool indirect = false)
+        private void LoadVariable(ILocal variableIndex, bool indirect = false)
         {
             il.DebugIndent();
 
@@ -468,7 +482,7 @@ namespace ZDebug.Compiler
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
-                ReadLocalVariable();
+                LoadLocalVariable();
 
                 done.Branch(@short: true);
             }
@@ -482,14 +496,14 @@ namespace ZDebug.Compiler
 
             variableIndex.Load();
             il.Math.Subtract(16);
-            ReadGlobalVariable();
+            LoadGlobalVariable();
 
             done.Mark();
 
             il.DebugUnindent();
         }
 
-        private void ReadVariable(byte variableIndex, bool indirect = false)
+        private void LoadVariable(byte variableIndex, bool indirect = false)
         {
             if (variableIndex == 0)
             {
@@ -504,15 +518,15 @@ namespace ZDebug.Compiler
             }
             else if (variableIndex < 16)
             {
-                ReadLocalVariable(variableIndex - 1);
+                LoadLocalVariable(variableIndex - 1);
             }
             else
             {
-                ReadGlobalVariable(variableIndex - 16);
+                LoadGlobalVariable(variableIndex - 16);
             }
         }
 
-        private void ReadVariable(Variable variable, bool indirect = false)
+        private void LoadVariable(Variable variable, bool indirect = false)
         {
             switch (variable.Kind)
             {
@@ -528,16 +542,16 @@ namespace ZDebug.Compiler
                     break;
 
                 case VariableKind.Local:
-                    ReadLocalVariable(variable.Index);
+                    LoadLocalVariable(variable.Index);
                     break;
 
                 default: // VariableKind.Global
-                    ReadGlobalVariable(variable.Index);
+                    LoadGlobalVariable(variable.Index);
                     break;
             }
         }
 
-        private void WriteVariable(ILocal variableIndex, ILocal value, bool indirect = false)
+        private void StoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
         {
             il.DebugIndent();
 
@@ -581,7 +595,7 @@ namespace ZDebug.Compiler
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
-                WriteLocalVariable(value);
+                StoLocalVariable(value);
 
                 done.Branch(@short: true);
             }
@@ -595,14 +609,14 @@ namespace ZDebug.Compiler
 
             variableIndex.Load();
             il.Math.Subtract(16);
-            WriteGlobalVariable(value);
+            StoreGlobalVariable(value);
 
             done.Mark();
 
             il.DebugUnindent();
         }
 
-        private void WriteVariable(byte variableIndex, ILocal value, bool indirect = false)
+        private void StoreVariable(byte variableIndex, ILocal value, bool indirect = false)
         {
             if (variableIndex == 0)
             {
@@ -617,15 +631,15 @@ namespace ZDebug.Compiler
             }
             else if (variableIndex < 16)
             {
-                WriteLocalVariable(variableIndex - 1, value);
+                StoreLocalVariable(variableIndex - 1, value);
             }
             else
             {
-                WriteGlobalVariable(variableIndex - 16, value);
+                StoreGlobalVariable(variableIndex - 16, value);
             }
         }
 
-        private void WriteVariable(Variable variable, ILocal value, bool indirect = false)
+        private void StoreVariable(Variable variable, ILocal value, bool indirect = false)
         {
             switch (variable.Kind)
             {
@@ -641,11 +655,11 @@ namespace ZDebug.Compiler
                     break;
 
                 case VariableKind.Local:
-                    WriteLocalVariable(variable.Index, value);
+                    StoreLocalVariable(variable.Index, value);
                     break;
 
                 default: // VariableKind.Global
-                    WriteGlobalVariable(variable.Index, value);
+                    StoreGlobalVariable(variable.Index, value);
                     break;
             }
         }
@@ -665,9 +679,9 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
-        /// Reads the specified operand and places the value on the stack.
+        /// Loads the specified operand onto the evaluation stack.
         /// </summary>
-        private void ReadOperand(int operandIndex)
+        private void LoadOperand(int operandIndex)
         {
             var op = GetOperand(operandIndex);
 
@@ -679,15 +693,15 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    ReadVariable((byte)op.Value);
+                    LoadVariable((byte)op.Value);
                     break;
             }
         }
 
         /// <summary>
-        /// Reads the first operand as a by ref variable.
+        /// Loads the first operand as a by ref variable onto the evaluation stack.
         /// </summary>
-        private void ReadByRefVariableOperand()
+        private void LoadByRefVariableOperand()
         {
             var op = GetOperand(0);
 
@@ -698,7 +712,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadVariable((byte)op.Value);
+                    LoadVariable((byte)op.Value);
 
                     break;
 
@@ -717,7 +731,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    ReadVariable((byte)op.Value);
+                    LoadVariable((byte)op.Value);
 
                     byte version = machine.Version;
                     if (version < 4)
@@ -752,7 +766,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    ReadVariable((byte)op.Value);
+                    LoadVariable((byte)op.Value);
 
                     byte version = machine.Version;
                     if (version < 4)

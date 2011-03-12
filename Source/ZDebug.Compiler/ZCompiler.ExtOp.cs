@@ -14,11 +14,11 @@ namespace ZDebug.Compiler
             using (var places = il.NewLocal<int>())
             using (var result = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 il.Convert.ToInt16();
                 number.Store();
 
-                ReadOperand(1);
+                LoadOperand(1);
                 il.Convert.ToInt16();
                 places.Store();
 
@@ -48,7 +48,7 @@ namespace ZDebug.Compiler
                 done.Mark();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -58,10 +58,10 @@ namespace ZDebug.Compiler
             using (var places = il.NewLocal<int>())
             using (var result = il.NewLocal<ushort>())
             {
-                ReadOperand(0);
+                LoadOperand(0);
                 number.Store();
 
-                ReadOperand(1);
+                LoadOperand(1);
                 il.Convert.ToInt16();
                 places.Store();
 
@@ -91,7 +91,7 @@ namespace ZDebug.Compiler
                 done.Mark();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -103,7 +103,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
 
@@ -115,7 +115,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                WriteVariable(currentInstruction.StoreVariable, result);
+                StoreVariable(currentInstruction.StoreVariable, result);
             }
         }
     }

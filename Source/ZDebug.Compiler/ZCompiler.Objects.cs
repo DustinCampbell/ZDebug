@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection.Emit;
+﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
-using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -40,11 +35,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                ReadByte(address);
+                LoadByte(address);
             }
             else
             {
-                ReadWord(address);
+                LoadWord(address);
             }
         }
 
@@ -52,11 +47,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                ReadByte();
+                LoadByte();
             }
             else
             {
-                ReadWord();
+                LoadWord();
             }
         }
 
@@ -64,11 +59,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                WriteByte(address, value);
+                StoreByte(address, value);
             }
             else
             {
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
@@ -76,11 +71,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                WriteByte(address, value);
+                StoreByte(address, value);
             }
             else
             {
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
@@ -88,11 +83,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                WriteByte(address, value);
+                StoreByte(address, value);
             }
             else
             {
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
@@ -100,17 +95,17 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                WriteByte(address, value);
+                StoreByte(address, value);
             }
             else
             {
-                WriteWord(address, value);
+                StoreWord(address, value);
             }
         }
 
         private void ReadValidObjectNumber(int operandIndex, ILabel failed)
         {
-            ReadOperand(operandIndex);
+            LoadOperand(operandIndex);
 
             // Check to see if object number is 0.
             var objNumOk = il.NewLabel();
@@ -163,7 +158,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     ReadObjectParent();
                     break;
             }
@@ -225,7 +220,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     using (var objNum = il.NewLocal<ushort>())
                     {
                         WriteObjectParent(objNum, value);
@@ -271,7 +266,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     ReadObjectSibling();
                     break;
             }
@@ -333,7 +328,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     using (var objNum = il.NewLocal<ushort>())
                     {
                         WriteObjectSibling(objNum, value);
@@ -379,7 +374,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     ReadObjectChild();
                     break;
             }
@@ -441,7 +436,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    ReadOperand(operandIndex);
+                    LoadOperand(operandIndex);
                     using (var objNum = il.NewLocal<ushort>())
                     {
                         WriteObjectChild(objNum, value);
@@ -457,7 +452,7 @@ namespace ZDebug.Compiler
         {
             var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectPropertyTableAddressOffset);
 
-            ReadWord(address);
+            LoadWord(address);
         }
 
         /// <summary>
@@ -472,7 +467,7 @@ namespace ZDebug.Compiler
             // Add property table address offset to the address on the evaluation stack.
             il.Math.Add(machine.ObjectPropertyTableAddressOffset);
 
-            ReadWord();
+            LoadWord();
         }
 
         private void ReadObjectPropertyTableAddressFromOperand(int operandIndex)
@@ -487,7 +482,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    ReadVariable((byte)op.Value);
+                    LoadVariable((byte)op.Value);
                     ReadObjectPropertyTableAddress();
                     break;
             }
@@ -507,7 +502,7 @@ namespace ZDebug.Compiler
             {
                 address.Store();
 
-                ReadByte(address);
+                LoadByte(address);
                 length.Store();
                 zwords.Create(length);
 
@@ -525,12 +520,12 @@ namespace ZDebug.Compiler
                 length.Load();
                 loopDone.BranchIf(Condition.AtLeast);
 
-                ReadWord(address);
+                LoadWord(address);
                 value.Store();
 
                 zwords.StoreElement(
-                    loadIndex: il.GenerateLoad(index),
-                    loadValue: il.GenerateLoad(value));
+                    indexLoader: () => index.Load(),
+                    valueLoader: () => value.Load());
 
                 il.Math.Increment(index);
                 il.Math.Increment(address, 2);
@@ -563,13 +558,13 @@ namespace ZDebug.Compiler
         private void ObjectHasAttribute(ILocal objNum, ILocal attribute)
         {
             memory.LoadElement(
-                loadIndex: il.Generate(() =>
+                indexLoader: () =>
                 {
                     CalculateObjectAddress(objNum);
                     attribute.Load();
                     il.Math.Divide(8);
                     il.Math.Add();
-                }));
+                });
 
             // bit index
             il.Load(1);
@@ -644,8 +639,8 @@ namespace ZDebug.Compiler
 
                 byteValue.Store();
                 memory.StoreElement(
-                    loadIndex: il.GenerateLoad(address), 
-                    loadValue: il.GenerateLoad(byteValue));
+                    indexLoader: () => address.Load(),
+                    valueLoader: () => byteValue.Load());
             }
         }
 
@@ -659,7 +654,7 @@ namespace ZDebug.Compiler
             {
                 propAddress.Store();
 
-                ReadByte(propAddress); // name-length
+                LoadByte(propAddress); // name-length
                 il.Convert.ToUInt16();
                 il.Math.Multiply(2);
                 propAddress.Load();
@@ -692,7 +687,7 @@ namespace ZDebug.Compiler
                 propAddress.Store();
 
                 // read size byte
-                ReadByte(propAddress);
+                LoadByte(propAddress);
                 size.Store();
 
                 // increment propAddress
@@ -730,7 +725,7 @@ namespace ZDebug.Compiler
                     secondSizeByte.Mark();
 
                     // read second size byte
-                    ReadByte(propAddress);
+                    LoadByte(propAddress);
                     size.Store();
 
                     // size &= 0x3f

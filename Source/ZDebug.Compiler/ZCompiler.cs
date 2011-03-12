@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
@@ -137,8 +136,8 @@ namespace ZDebug.Compiler
                     if (localValues[i] != 0)
                     {
                         this.locals.StoreElement(
-                            loadIndex: il.GenerateLoad(i),
-                            loadValue: il.GenerateLoad(localValues[i]));
+                            indexLoader: () => il.Load(i),
+                            valueLoader: () => il.Load(localValues[i]));
                     }
                 }
 
