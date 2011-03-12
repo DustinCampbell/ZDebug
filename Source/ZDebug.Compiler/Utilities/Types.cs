@@ -2,7 +2,7 @@
 
 namespace ZDebug.Compiler.Utilities
 {
-    internal static class Types
+    public static class Types
     {
         public readonly static Type[] None = new Type[0];
 

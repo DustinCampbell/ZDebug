@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZDebug.Core.Instructions;
-using System.Reflection.Emit;
-using ZDebug.Compiler.Generate;
+﻿using ZDebug.Compiler.Generate;
+using ZDebug.Compiler.Utilities;
 
 namespace ZDebug.Compiler
 {
@@ -206,7 +201,9 @@ namespace ZDebug.Compiler
         {
             il.LoadArg(0);
             ReadOperand(0);
-            il.Call(readZTextHelper);
+
+            var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            il.Call(readZText);
             PrintText();
         }
 
@@ -215,7 +212,9 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             var op = GetOperand(0);
             UnpackStringAddress(op);
-            il.Call(readZTextHelper);
+
+            var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            il.Call(readZText);
             PrintText();
         }
 
@@ -223,7 +222,9 @@ namespace ZDebug.Compiler
         {
             il.LoadArg(0);
             ReadObjectShortNameFromOperand(0);
-            il.Call(convertZTextHelper);
+
+            var convertZText = Reflection<ZMachine>.GetMethod("ConvertZText", Types.One<ushort[]>(), @public: false);
+            il.Call(convertZText);
             PrintText();
         }
 

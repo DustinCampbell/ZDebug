@@ -42,7 +42,7 @@ namespace ZDebug.Compiler
         private Random random;
 
         private int currentAddress = -1;
-        private volatile bool interupt;
+        private volatile bool interrupt;
         private volatile bool inputReceived;
 
         public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null, bool debugging = false)
@@ -129,12 +129,6 @@ namespace ZDebug.Compiler
             }
 
             return result.Code;
-        }
-
-        internal ushort Call(int address, ushort[] args)
-        {
-            var code = GetRoutineCode(address);
-            return code(args);
         }
 
         internal void EnterRoutine(int address)
@@ -442,19 +436,20 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
-            interupt = false;
+            interrupt = false;
             var mainAddress = memory.ReadWord(0x06);
             if (version != 6)
             {
                 mainAddress--;
             }
 
-            Call(mainAddress, new ushort[0]);
+            var code = GetRoutineCode(mainAddress);
+            code(new ushort[0]);
         }
 
         public void Stop()
         {
-            interupt = true;
+            interrupt = true;
             inputReceived = true;
         }
 

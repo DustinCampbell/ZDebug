@@ -12,141 +12,6 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private readonly static FieldInfo memoryField = typeof(ZMachine).GetField(
-            name: "memory",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private readonly static FieldInfo screenField = typeof(ZMachine).GetField(
-            name: "screen",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private readonly static FieldInfo outputStreamsField = typeof(ZMachine).GetField(
-            name: "outputStreams",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private readonly static FieldInfo interuptField = typeof(ZMachine).GetField(
-            name: "interupt",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private readonly static MethodInfo getRoutineCodeHelper = typeof(ZMachine).GetMethod(
-            name: "GetRoutineCode",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo callHelper = typeof(ZMachine).GetMethod(
-            name: "Call",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.Two<int, ushort[]>(),
-            modifiers: null);
-
-        private readonly static MethodInfo enterRoutineHelper = typeof(ZMachine).GetMethod(
-            name: "EnterRoutine",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo exitRoutineHelper = typeof(ZMachine).GetMethod(
-            name: "ExitRoutine",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo executingInstructionHelper = typeof(ZMachine).GetMethod(
-            name: "ExecutingInstruction",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo executedInstructionHelper = typeof(ZMachine).GetMethod(
-            name: "ExecutedInstruction",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo readZTextHelper = typeof(ZMachine).GetMethod(
-            name: "ReadZText",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo nextRandomHelper = typeof(ZMachine).GetMethod(
-            name: "NextRandom",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<short>(),
-            modifiers: null);
-
-        private readonly static MethodInfo seedRandomHelper = typeof(ZMachine).GetMethod(
-            name: "SeedRandom",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<short>(),
-            modifiers: null);
-
-        private readonly static MethodInfo convertZTextHelper = typeof(ZMachine).GetMethod(
-            name: "ConvertZText",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<ushort[]>(),
-            modifiers: null);
-
-        private readonly static MethodInfo readZ3Helper = typeof(ZMachine).GetMethod(
-            name: "Read_Z3",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.Two<ushort, ushort>(),
-            modifiers: null);
-
-        private readonly static MethodInfo readZ4Helper = typeof(ZMachine).GetMethod(
-            name: "Read_Z4",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.Two<ushort, ushort>(),
-            modifiers: null);
-
-        private readonly static MethodInfo readZ5Helper = typeof(ZMachine).GetMethod(
-            name: "Read_Z5",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.Two<ushort, ushort>(),
-            modifiers: null);
-
-        private readonly static MethodInfo readCharHelper = typeof(ZMachine).GetMethod(
-            name: "ReadChar",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo tokenizeHelper = typeof(ZMachine).GetMethod(
-            name: "Tokenize",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.Four<ushort, ushort, ushort, bool>(),
-            modifiers: null);
-
-        private readonly static MethodInfo quitHelper = typeof(ZMachine).GetMethod(
-            name: "Quit",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo interruptHelper = typeof(ZMachine).GetMethod(
-            name: "Interrupt",
-            bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
         internal const int STACK_SIZE = 1024;
 
         private readonly ZRoutine routine;
@@ -233,6 +98,7 @@ namespace ZDebug.Compiler
             // Fourth pass: determine whether memory is used
             // TODO: Implement!
 
+            var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
             this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
             // Second pass: determine whether screen is used
@@ -240,11 +106,13 @@ namespace ZDebug.Compiler
             {
                 if (i.UsesScreen())
                 {
+                    var screenField = Reflection<ZMachine>.GetField("screen", @public: false);
                     this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
                     break;
                 }
             }
 
+            var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
             this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
 
             // Create stack and sp
@@ -313,7 +181,9 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
-                il.Call(enterRoutineHelper);
+
+                var enterRoutine = Reflection<ZMachine>.GetMethod("EnterRoutine", Types.One<int>(), @public: false);
+                il.Call(enterRoutine);
             }
         }
 
@@ -323,7 +193,9 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
-                il.Call(exitRoutineHelper);
+
+                var exitRoutine = Reflection<ZMachine>.GetMethod("ExitRoutine", Types.One<int>(), @public: false);
+                il.Call(exitRoutine);
             }
         }
 
@@ -333,7 +205,9 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(currentInstruction.Address);
-                il.Call(executingInstructionHelper);
+
+                var executingInstruction = Reflection<ZMachine>.GetMethod("ExecutingInstruction", Types.One<int>(), @public: false);
+                il.Call(executingInstruction);
             }
         }
 
@@ -342,7 +216,9 @@ namespace ZDebug.Compiler
             if (profiling)
             {
                 il.LoadArg(0);
-                il.Call(executedInstructionHelper);
+
+                var executedInstruction = Reflection<ZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false);
+                il.Call(executedInstruction);
             }
         }
 
@@ -351,7 +227,9 @@ namespace ZDebug.Compiler
             if (profiling)
             {
                 il.LoadArg(0);
-                il.Call(quitHelper);
+
+                var quit = Reflection<ZMachine>.GetMethod("Quit", Types.None, @public: false);
+                il.Call(quit);
 
                 Profiler_ExecutedInstruction();
             }
@@ -362,7 +240,9 @@ namespace ZDebug.Compiler
             if (profiling)
             {
                 il.LoadArg(0);
-                il.Call(interruptHelper);
+
+                var interrupt = Reflection<ZMachine>.GetMethod("Interrupt", Types.None, @public: false);
+                il.Call(interrupt);
             }
         }
 
@@ -377,7 +257,8 @@ namespace ZDebug.Compiler
             {
                 var ok = il.NewLabel();
                 il.LoadArg(0);
-                il.Load(interuptField, @volatile: true);
+                var interruptField = Reflection<ZMachine>.GetField("interrupt", @public: false);
+                il.Load(interruptField, @volatile: true);
                 ok.BranchIf(Condition.False, @short: true);
 
                 Profiler_Interrupt();

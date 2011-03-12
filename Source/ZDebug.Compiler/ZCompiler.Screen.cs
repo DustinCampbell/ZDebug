@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using ZDebug.Compiler.Generate;
+﻿using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 
@@ -7,130 +6,13 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private readonly static MethodInfo print1 = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "Print",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<char>(),
-            modifiers: null);
-
-        private readonly static MethodInfo print2 = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "Print",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<string>(),
-            modifiers: null);
-
-        private readonly static MethodInfo selectScreenStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "SelectScreenStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo deselectScreenStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "DeselectScreenStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo selectTranscriptStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "SelectTranscriptStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo deselectTranscriptStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "DeselectTranscriptStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo selectMemoryStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "SelectMemoryStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo deselectMemoryStream = typeof(ZMachine.OutputStreams).GetMethod(
-            name: "DeselectMemoryStream",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo setTextStyle = typeof(IScreen).GetMethod(
-            name: "SetTextStyle",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<ZTextStyle>(),
-            modifiers: null);
-
-        private readonly static MethodInfo clear = typeof(IScreen).GetMethod(
-            name: "Clear",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo clearAll = typeof(IScreen).GetMethod(
-            name: "ClearAll",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<bool>(),
-            modifiers: null);
-
-        private readonly static MethodInfo split = typeof(IScreen).GetMethod(
-            name: "Split",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo setWindow = typeof(IScreen).GetMethod(
-            name: "SetWindow",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<int>(),
-            modifiers: null);
-
-        private readonly static MethodInfo showStatus = typeof(IScreen).GetMethod(
-            name: "ShowStatus",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.None,
-            modifiers: null);
-
-        private readonly static MethodInfo setForegroundColor = typeof(IScreen).GetMethod(
-            name: "SetForegroundColor",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<ZColor>(),
-            modifiers: null);
-
-        private readonly static MethodInfo setBackgroundColor = typeof(IScreen).GetMethod(
-            name: "SetBackgroundColor",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.One<ZColor>(),
-            modifiers: null);
-
-        private readonly static MethodInfo setCursor = typeof(IScreen).GetMethod(
-            name: "SetCursor",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: Types.Two<int, int>(),
-            modifiers: null);
-
         private void PrintChar(char ch)
         {
             outputStreams.Load();
             il.Load(ch);
-            il.CallVirt(print1);
+
+            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<char>());
+            il.CallVirt(print);
         }
 
         private void PrintChar(ILocal ch)
@@ -139,7 +21,9 @@ namespace ZDebug.Compiler
 
             outputStreams.Load();
             ch.Load();
-            il.CallVirt(print1);
+
+            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<char>());
+            il.CallVirt(print);
         }
 
         private void PrintChar()
@@ -155,14 +39,18 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
             il.Load(text);
-            il.CallVirt(print2);
+
+            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<string>());
+            il.CallVirt(print);
         }
 
         private void PrintText(ILocal text)
         {
             outputStreams.Load();
             text.Load();
-            il.CallVirt(print2);
+
+            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<string>());
+            il.CallVirt(print);
         }
 
         private void PrintText()
@@ -182,6 +70,8 @@ namespace ZDebug.Compiler
 
                 screen.Load();
                 style.Load();
+
+                var setTextStyle = Reflection<IScreen>.GetMethod("SetTextStyle", Types.One<ZTextStyle>());
                 il.CallVirt(setTextStyle);
             }
         }
@@ -202,6 +92,8 @@ namespace ZDebug.Compiler
 
                 screen.Load();
                 window.Load();
+
+                var clear = Reflection<IScreen>.GetMethod("Clear", Types.One<int>());
                 il.CallVirt(clear);
 
                 done.Branch(@short: true);
@@ -214,6 +106,7 @@ namespace ZDebug.Compiler
                 il.Load(-1);
                 il.Compare.Equal();
 
+                var clearAll = Reflection<IScreen>.GetMethod("ClearAll", Types.One<bool>());
                 il.CallVirt(clearAll);
 
                 done.Mark();
@@ -228,6 +121,9 @@ namespace ZDebug.Compiler
 
                 screen.Load();
                 lines.Load();
+
+
+                var split = Reflection<IScreen>.GetMethod("Split", Types.One<int>());
                 il.CallVirt(split);
             }
         }
@@ -240,6 +136,8 @@ namespace ZDebug.Compiler
 
                 screen.Load();
                 window.Load();
+
+                var setWindow = Reflection<IScreen>.GetMethod("SetWindow", Types.One<int>());
                 il.CallVirt(setWindow);
             }
         }
@@ -247,6 +145,8 @@ namespace ZDebug.Compiler
         private void ShowStatus()
         {
             screen.Load();
+
+            var showStatus = Reflection<IScreen>.GetMethod("ShowStatus", Types.None);
             il.CallVirt(showStatus);
         }
 
@@ -258,6 +158,8 @@ namespace ZDebug.Compiler
 
             screen.Load();
             foreground.Load();
+
+            var setForegroundColor = Reflection<IScreen>.GetMethod("SetForegroundColor", Types.One<ZColor>());
             il.Call(setForegroundColor);
 
             next.Mark();
@@ -268,6 +170,8 @@ namespace ZDebug.Compiler
 
             screen.Load();
             background.Load();
+
+            var setBackgroundColor = Reflection<IScreen>.GetMethod("SetBackgroundColor", Types.One<ZColor>());
             il.Call(setBackgroundColor);
 
             next.Mark();
@@ -280,30 +184,40 @@ namespace ZDebug.Compiler
             il.Math.Subtract(1);
             column.Load();
             il.Math.Subtract(1);
+
+            var setCursor = Reflection<IScreen>.GetMethod("SetCursor", Types.Two<int, int>());
             il.Call(setCursor);
         }
 
         private void SelectScreenStream()
         {
             outputStreams.Load();
+
+            var selectScreenStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectScreenStream", Types.None);
             il.Call(selectScreenStream);
         }
 
         private void DeselectScreenStream()
         {
             outputStreams.Load();
+
+            var deselectScreenStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectScreenStream", Types.None);
             il.Call(deselectScreenStream);
         }
 
         private void SelectTranscriptStream()
         {
             outputStreams.Load();
+
+            var selectTranscriptStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectTranscriptStream", Types.None);
             il.Call(selectTranscriptStream);
         }
 
         private void DeselectTranscriptStream()
         {
             outputStreams.Load();
+
+            var deselectTranscriptStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectTranscriptStream", Types.None);
             il.Call(deselectTranscriptStream);
         }
 
@@ -311,12 +225,16 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
             address.Load();
+
+            var selectMemoryStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectMemoryStream", Types.One<int>());
             il.Call(selectMemoryStream);
         }
 
         private void DeselectMemoryStream()
         {
             outputStreams.Load();
+
+            var deselectMemoryStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectMemoryStream", Types.None);
             il.Call(deselectMemoryStream);
         }
     }

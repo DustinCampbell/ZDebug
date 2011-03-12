@@ -1,6 +1,5 @@
-﻿using System;
-using System.Reflection;
-using ZDebug.Compiler.Generate;
+﻿using ZDebug.Compiler.Generate;
+using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 
@@ -8,13 +7,6 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        private readonly static MethodInfo shortToString = typeof(short).GetMethod(
-            name: "ToString",
-            bindingAttr: BindingFlags.Public | BindingFlags.Instance,
-            binder: null,
-            types: new Type[0],
-            modifiers: null);
-
         private void call()
         {
             using (var address = il.NewLocal<int>())
@@ -46,9 +38,11 @@ namespace ZDebug.Compiler
                 legalCall.Mark();
                 il.LoadArg(0);
                 address.Load();
-                il.Call(getRoutineCodeHelper);
 
-                var invoke = typeof(ZRoutineCode).GetMethod("Invoke");
+                var getRoutineCode = Reflection<ZMachine>.GetMethod("GetRoutineCode", Types.One<int>(), @public: false);
+                il.Call(getRoutineCode);
+
+                var invoke = Reflection<ZRoutineCode>.GetMethod("Invoke", Types.One<ushort[]>());
                 args.Load();
 
                 il.Call(invoke);
@@ -122,7 +116,9 @@ namespace ZDebug.Compiler
                 number.Store();
 
                 number.LoadAddress();
-                il.Call(shortToString);
+
+                var toString = Reflection<short>.GetMethod("ToString", Types.None);
+                il.Call(toString);
 
                 PrintText();
             }
@@ -286,14 +282,18 @@ namespace ZDebug.Compiler
 
                 il.LoadArg(0);
                 range.Load();
-                il.Call(nextRandomHelper);
+
+                var nextRandom = Reflection<ZMachine>.GetMethod("NextRandom", Types.One<short>(), @public: false);
+                il.Call(nextRandom);
                 done.Branch(@short: true);
 
                 seed.Mark();
 
                 il.LoadArg(0);
                 range.Load();
-                il.Call(seedRandomHelper);
+
+                var seedRandom = Reflection<ZMachine>.GetMethod("SeedRandom", Types.One<short>(), @public: false);
+                il.Call(seedRandom);
                 il.Load(0);
 
                 done.Mark();
@@ -485,7 +485,9 @@ namespace ZDebug.Compiler
             using (var result = il.NewLocal<ushort>())
             {
                 il.LoadArg(0);
-                il.Call(readCharHelper);
+
+                var read = Reflection<ZMachine>.GetMethod("ReadChar", Types.None, @public: false);
+                il.Call(read);
 
                 result.Store();
                 WriteVariable(currentInstruction.StoreVariable, result);
@@ -498,7 +500,8 @@ namespace ZDebug.Compiler
             ReadOperand(0);
             ReadOperand(1);
 
-            il.Call(readZ3Helper);
+            var read = Reflection<ZMachine>.GetMethod("Read_Z3", Types.Two<ushort, ushort>(), @public: false);
+            il.Call(read);
         }
 
         private void op_sread4()
@@ -512,7 +515,8 @@ namespace ZDebug.Compiler
                 il.RuntimeError("Timed input not supported");
             }
 
-            il.Call(readZ4Helper);
+            var read = Reflection<ZMachine>.GetMethod("Read_Z4", Types.Two<ushort, ushort>(), @public: false);
+            il.Call(read);
         }
 
         private void op_aread()
@@ -536,7 +540,8 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                il.Call(readZ5Helper);
+                var read = Reflection<ZMachine>.GetMethod("Read_Z5", Types.Two<ushort, ushort>(), @public: false);
+                il.Call(read);
 
                 result.Store();
                 WriteVariable(currentInstruction.StoreVariable, result);
@@ -573,7 +578,8 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            il.Call(tokenizeHelper);
+            var tokenize = Reflection<ZMachine>.GetMethod("Tokenize", Types.Four<ushort, ushort, ushort, bool>(), @public: false);
+            il.Call(tokenize);
         }
     }
 }
