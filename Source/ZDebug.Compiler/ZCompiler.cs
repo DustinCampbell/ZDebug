@@ -11,8 +11,6 @@ namespace ZDebug.Compiler
 {
     public partial class ZCompiler
     {
-        internal const int STACK_SIZE = 1024;
-
         private readonly ZRoutine routine;
         private readonly ZMachine machine;
         private readonly bool profiling;
@@ -27,9 +25,6 @@ namespace ZDebug.Compiler
 
         private IArrayLocal args;
         private ILocal argCount;
-
-        private IArrayLocal stack;
-        private ILocal sp;
 
         private IArrayLocal locals;
 
@@ -83,24 +78,13 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Third pass: determine whether local stack is used
-            var usesStack = false;
-            foreach (var i in routine.Instructions)
-            {
-                usesStack = i.UsesStack();
-                if (usesStack)
-                {
-                    break;
-                }
-            }
-
-            // Fourth pass: determine whether memory is used
+            // Second pass: determine whether memory is used
             // TODO: Implement!
 
             var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
             this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
-            // Second pass: determine whether screen is used
+            // Third pass: determine whether screen is used
             foreach (var i in routine.Instructions)
             {
                 if (i.UsesScreen())
@@ -113,10 +97,6 @@ namespace ZDebug.Compiler
 
             var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
             this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
-
-            // Create stack and sp
-            this.stack = usesStack ? il.NewArrayLocal<ushort>(STACK_SIZE) : null;
-            this.sp = usesStack ? il.NewLocal(0) : null;
 
             // Copy arguments locally
             this.argCount = il.NewLocal<int>();

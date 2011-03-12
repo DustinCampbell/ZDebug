@@ -1,4 +1,5 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
@@ -230,8 +231,12 @@ namespace ZDebug.Compiler
 
         private void CheckStackEmpty()
         {
-            sp.Load();
-            il.Load(0);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+
+            il.LoadArg(0);
+            il.Load(spField);
+
+            il.Load(-1);
             il.Compare.Equal();
 
             var ok = il.NewLabel();
@@ -243,8 +248,12 @@ namespace ZDebug.Compiler
 
         private void CheckStackFull()
         {
-            sp.Load();
-            il.Load(STACK_SIZE);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+
+            il.LoadArg(0);
+            il.Load(spField);
+
+            il.Load(ZMachine.STACK_SIZE - 1);
             il.Compare.Equal();
 
             var ok = il.NewLabel();
@@ -256,37 +265,64 @@ namespace ZDebug.Compiler
 
         private void PopStack()
         {
-            PeekStack();
+            CheckStackEmpty();
 
-            // decrement sp
-            sp.Load();
-            il.Math.Subtract(1);
-            sp.Store();
+            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+
+            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
+            using (var sp = il.NewLocal<int>(() => { il.LoadArg(0); il.Load(spField); }))
+            {
+                stack.LoadElement(() => sp.Load());
+
+                // decrement sp
+                il.LoadArg(0);
+                sp.Load();
+                il.Math.Subtract(1);
+                il.Store(spField);
+            }
         }
 
         private void PeekStack()
         {
             CheckStackEmpty();
 
-            stack.LoadElement(() =>
+            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+
+            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
             {
-                sp.Load();
-                il.Math.Subtract(1);
-            });
+                stack.LoadElement(() =>
+                {
+                    il.LoadArg(0);
+                    il.Load(spField);
+                });
+            }
         }
 
         private void PushStack(ILocal value)
         {
             CheckStackFull();
 
-            stack.StoreElement(
-                indexLoader: () => sp.Load(),
-                valueLoader: () => value.Load());
+            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
 
-            // increment sp
-            sp.Load();
-            il.Math.Add(1);
-            sp.Store();
+            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
+            using (var sp = il.NewLocal<int>(() => { il.LoadArg(0); il.Load(spField); }))
+            {
+                // increment sp
+                sp.Load();
+                il.Math.Add(1);
+                sp.Store();
+
+                stack.StoreElement(
+                    indexLoader: () => sp.Load(),
+                    valueLoader: () => value.Load());
+
+                il.LoadArg(0);
+                sp.Load();
+                il.Store(spField);
+            }
         }
 
         private void PushStack()
@@ -302,13 +338,19 @@ namespace ZDebug.Compiler
         {
             CheckStackEmpty();
 
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    sp.Load();
-                    il.Math.Subtract(1);
-                },
-                valueLoader: () => value.Load());
+            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+
+            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
+            {
+                stack.StoreElement(
+                    indexLoader: () =>
+                    {
+                        il.LoadArg(0);
+                        il.Load(spField);
+                    },
+                    valueLoader: () => value.Load());
+            }
         }
 
         private void SetStackTop()
@@ -451,24 +493,16 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-
-            if (stack != null)
+            if (indirect)
             {
-                if (indirect)
-                {
-                    PeekStack();
-                }
-                else
-                {
-                    PopStack();
-                }
-
-                done.Branch(@short: true);
+                PeekStack();
             }
             else
             {
-                il.RuntimeError("Unexpected read from stack.");
+                PopStack();
             }
+
+            done.Branch(@short: true);
 
             // local
             tryLocal.Mark();
@@ -564,24 +598,16 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-
-            if (stack != null)
+            if (indirect)
             {
-                if (indirect)
-                {
-                    SetStackTop(value);
-                }
-                else
-                {
-                    PushStack(value);
-                }
-
-                done.Branch(@short: true);
+                SetStackTop(value);
             }
             else
             {
-                il.RuntimeError("Unexpected write to stack.");
+                PushStack(value);
             }
+
+            done.Branch(@short: true);
 
             // local
             tryLocal.Mark();

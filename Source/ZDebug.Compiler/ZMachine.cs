@@ -10,7 +10,7 @@ namespace ZDebug.Compiler
 {
     public sealed partial class ZMachine
     {
-        private const int STACK_SIZE = 32768;
+        internal const int STACK_SIZE = 32768;
 
         private readonly byte[] memory;
         private readonly IScreen screen;
