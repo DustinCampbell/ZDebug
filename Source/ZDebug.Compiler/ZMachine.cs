@@ -10,12 +10,26 @@ namespace ZDebug.Compiler
 {
     public sealed partial class ZMachine
     {
+        private const int STACK_SIZE = 32768;
+
         private readonly byte[] memory;
         private readonly IScreen screen;
         private readonly IZMachineProfiler profiler;
         private readonly bool debugging;
         private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
+
+        // routine state
+        private readonly ushort[] stack;
+        private int sp;
+
+        private int stackFrame;
+        private readonly int[] stackFrames;
+        private int sfp;
+
+        private readonly ushort[] locals;
+        private ushort localCount;
+        private ushort argumentCount;
 
         private readonly byte version;
 
@@ -55,6 +69,17 @@ namespace ZDebug.Compiler
             this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
             this.version = memory.ReadByte(0x00);
+
+            this.stack = new ushort[STACK_SIZE];
+            this.sp = -1;
+
+            this.stackFrame = -1;
+            this.stackFrames = new int[STACK_SIZE];
+            this.sfp = -1;
+
+            this.locals = new ushort[15];
+            this.localCount = 0;
+            this.argumentCount = 0;
 
             this.objectTableAddress = memory.ReadWord(0x0a);
             this.propertyDefaultsTableSize = (byte)(this.version < 4 ? 31 : 63);
@@ -107,7 +132,57 @@ namespace ZDebug.Compiler
                     memory.WriteByte(0x26, screen.FontWidthInUnits);
                 }
             }
+        }
 
+        internal void PushFrame()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var stack = this.stack;
+            var sp = this.sp;
+
+            stack[++sp] = this.argumentCount;
+
+            var localCount = this.localCount;
+            var locals = this.locals;
+            for (int i = localCount - 1; i >= 0; i--)
+            {
+                stack[++sp] = locals[i];
+            }
+
+            stack[++sp] = localCount;
+
+            this.stackFrame = sp;
+            this.sp = sp;
+        }
+
+        internal void PopFrame()
+        {
+            // local variable count
+            // local variable values
+            // argument count
+
+            var stack = this.stack;
+            var sp = this.sp;
+
+            sp = this.stackFrame;
+
+            var localCount = stack[sp--];
+            var locals = this.locals;
+            for (int i = 0; i < localCount; i++)
+            {
+                locals[i] = stack[sp--];
+            }
+
+            this.localCount = localCount;
+            this.argumentCount = stack[sp--];
+
+            this.stackFrame = stackFrames[sfp--];
+            this.sp = sp;
         }
 
         internal ZRoutineCode GetRoutineCode(int address)
