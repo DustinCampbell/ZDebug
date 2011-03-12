@@ -211,7 +211,7 @@ namespace ZDebug.Compiler
         {
             il.LoadArg(0);
             var op = GetOperand(0);
-            UnpackStringAddress(op);
+            LoadUnpackedStringAddress(op);
 
             var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
             il.Call(readZText);

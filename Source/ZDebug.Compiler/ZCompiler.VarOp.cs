@@ -12,7 +12,7 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<int>())
             using (var args = il.NewArrayLocal<ushort>(currentInstruction.OperandCount - 1))
             {
-                UnpackRoutineAddress(GetOperand(0));
+                LoadUnpackedRoutineAddress(GetOperand(0));
                 address.Store();
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)

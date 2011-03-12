@@ -721,7 +721,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void UnpackRoutineAddress(Operand op)
+        private void LoadUnpackedRoutineAddress(Operand op)
         {
             switch (op.Kind)
             {
@@ -756,7 +756,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void UnpackStringAddress(Operand op)
+        private void LoadUnpackedStringAddress(Operand op)
         {
             switch (op.Kind)
             {
