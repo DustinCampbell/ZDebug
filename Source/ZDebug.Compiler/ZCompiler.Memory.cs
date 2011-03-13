@@ -667,6 +667,8 @@ namespace ZDebug.Compiler
 
         private void StoreVariable(Variable variable, ILocal value, bool indirect = false)
         {
+            il.DebugWrite("Storing {0} in " + currentInstruction.StoreVariable.ToString(), value);
+
             switch (variable.Kind)
             {
                 case VariableKind.Stack:

@@ -1,4 +1,4 @@
 ﻿namespace ZDebug.Compiler
 {
-    public delegate ushort ZRoutineCode(ushort[] args);
+    public delegate ushort ZRoutineCode();
 }

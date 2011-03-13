@@ -14,7 +14,7 @@
 
         static void Main()
         {
-            var runner = new CompiledRunner(ZORK1, ZORK1_SCRIPT);
+            var runner = new CompiledRunner(ROTA, ROTA_SCRIPT);
             runner.Run();
         }
     }

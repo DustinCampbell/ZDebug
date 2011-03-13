@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
@@ -23,13 +24,8 @@ namespace ZDebug.Compiler
         private ILocal screen;
         private ILocal outputStreams;
 
-        private IArrayLocal args;
-        private ILocal argCount;
-
-        private IArrayLocal stack;
-        private ILocal sp;
-
         private IArrayLocal locals;
+        private IArrayLocal arguments;
 
         private ZCompiler(ZRoutine routine, ZMachine machine, bool profiling)
         {
@@ -50,12 +46,17 @@ namespace ZDebug.Compiler
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
-                parameterTypes: Types.Two<ZMachine, ushort[]>(),
+                parameterTypes: Types.One<ZMachine>(),
                 owner: typeof(ZMachine),
                 skipVisibility: true);
 
             var ilGen = dm.GetILGenerator();
             this.il = new ILBuilder(ilGen);
+
+            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
+            il.LoadArg(0);
+            il.Load(routine.Address);
+            il.Store(currentRoutineAddressField);
 
             Profiler_EnterRoutine();
 
@@ -87,6 +88,9 @@ namespace ZDebug.Compiler
             var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
             this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
+            var argumentsField = Reflection<ZMachine>.GetField("arguments", @public: false);
+            this.arguments = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(argumentsField));
+
             // Third pass: determine whether screen is used
             foreach (var i in routine.Instructions)
             {
@@ -101,34 +105,8 @@ namespace ZDebug.Compiler
             var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
             this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
 
-            // Copy arguments locally
-            this.argCount = il.NewLocal<int>();
-            this.args = il.NewArrayLocal<ushort>(il.GenerateLoadArg(1));
-            this.args.LoadLength();
-            il.Convert.ToInt32();
-            this.argCount.Store();
-
-            // Copy locals
-            var localValues = routine.Locals;
-            int localCount = localValues.Length;
-            if (localCount > 0)
-            {
-                this.locals = il.NewArrayLocal<ushort>(localCount);
-                for (int i = 0; i < localCount; i++)
-                {
-                    if (localValues[i] != 0)
-                    {
-                        this.locals.StoreElement(
-                            indexLoader: () => il.Load(i),
-                            valueLoader: () => il.Load(localValues[i]));
-                    }
-                }
-
-                // TODO: Don't copy args if there aren't any
-
-                // Initialize locals with args
-                il.CopyArray(this.args, this.locals);
-            }
+            var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
+            this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
 
             // Fourth pass: emit IL for instructions
             foreach (var i in routine.Instructions)
@@ -252,51 +230,42 @@ namespace ZDebug.Compiler
 
         private void Call()
         {
-            using (var address = il.NewLocal<int>())
-            using (var args = il.NewArrayLocal<ushort>(currentInstruction.OperandCount - 1))
+            il.LoadArg(0);
+
+            LoadUnpackedRoutineAddress(GetOperand(0));
+
+            var argCount = currentInstruction.OperandCount - 1;
+            for (int i = 0; i < argCount; i++)
             {
-                LoadUnpackedRoutineAddress(GetOperand(0));
-                address.Store();
-
-                for (int j = 1; j < currentInstruction.OperandCount; j++)
-                {
-                    // don't close over the iterator variable
-                    int index = j;
-
-                    args.StoreElement(
-                        il.GenerateLoad(index - 1),
-                        il.Generate(() =>
-                            LoadOperand(index)));
-                }
-
-                var legalCall = il.NewLabel();
-                address.Load();
-                legalCall.BranchIf(Condition.True, @short: true);
-
-                var done = il.NewLabel();
-                il.Load(0);
-
-                done.Branch(@short: true);
-
-                legalCall.Mark();
-                il.LoadArg(0);
-                address.Load();
-
-                var getRoutineCode = Reflection<ZMachine>.GetMethod("GetRoutineCode", Types.One<int>(), @public: false);
-                il.Call(getRoutineCode);
-
-                var invoke = Reflection<ZRoutineCode>.GetMethod("Invoke", Types.One<ushort[]>());
-                args.Load();
-
-                il.Call(invoke);
-
-                done.Mark();
+                LoadOperand(i + 1);
             }
+
+            var callName = "Call" + argCount.ToString();
+            var callTypeList = new List<Type>() { typeof(int) };
+            for (int i = 0; i < argCount; i++)
+            {
+                callTypeList.Add(typeof(ushort));
+            }
+            var callTypes = callTypeList.ToArray();
+
+            var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
+
+            il.Call(call);
         }
 
         private void Return(int? value = null)
         {
             Profiler_ExitRoutine();
+
+            il.LoadArg(0);
+
+            if (value != null)
+            {
+                il.DebugWrite("Return " + value.Value);
+            }
+
+            var popFrame = Reflection<ZMachine>.GetMethod("PopFrame", @public: false);
+            il.Call(popFrame);
 
             if (value != null)
             {

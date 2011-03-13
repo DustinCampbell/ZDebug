@@ -16,6 +16,11 @@ namespace ZDebug.Compiler
             // discard result...
             il.Pop();
 
+            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
+            il.LoadArg(0);
+            il.Load(routine.Address);
+            il.Store(currentRoutineAddressField);
+
             il.DebugUnindent();
         }
 
@@ -31,13 +36,21 @@ namespace ZDebug.Compiler
                 StoreVariable(currentInstruction.StoreVariable, result);
             }
 
+            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
+            il.LoadArg(0);
+            il.Load(routine.Address);
+            il.Store(currentRoutineAddressField);
+
             il.DebugUnindent();
         }
 
         private void op_check_arg_count()
         {
             LoadOperand(0);
-            argCount.Load();
+
+            il.LoadArg(0);
+            var argumentCountField = Reflection<ZMachine>.GetField("argumentCount", @public: false);
+            il.Load(argumentCountField);
 
             il.Compare.AtMost();
             Branch();

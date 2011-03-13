@@ -20,6 +20,8 @@ namespace ZDebug.Compiler
         private readonly ZText ztext;
 
         // routine state
+        private int currentRoutineAddress;
+
         private readonly ushort[] stack;
         private int sp;
 
@@ -29,6 +31,8 @@ namespace ZDebug.Compiler
 
         private readonly ushort[] locals;
         private ushort localCount;
+
+        private readonly ushort[] arguments;
         private ushort argumentCount;
 
         private readonly byte version;
@@ -79,6 +83,8 @@ namespace ZDebug.Compiler
 
             this.locals = new ushort[15];
             this.localCount = 0;
+
+            this.arguments = new ushort[7];
             this.argumentCount = 0;
 
             this.objectTableAddress = memory.ReadWord(0x0a);
@@ -134,7 +140,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        internal void PushFrame()
+        internal void PushFrame(int address)
         {
             // argument count
             // local variable values (reversed)
@@ -154,7 +160,7 @@ namespace ZDebug.Compiler
                 stack[++sp] = locals[i];
             }
 
-            stack[++sp] = localCount;
+            stack[++sp] = (ushort)localCount;
 
             this.stackFrame = sp;
             this.sp = sp;
@@ -185,7 +191,7 @@ namespace ZDebug.Compiler
             this.sp = sp;
         }
 
-        internal ZRoutineCode GetRoutineCode(int address)
+        private ZCompilerResult GetCompilerResult(int address)
         {
             ZCompilerResult result;
             if (!compiledRoutines.TryGetValue(address, out result))
@@ -203,7 +209,164 @@ namespace ZDebug.Compiler
                 }
             }
 
-            return result.Code;
+            return result;
+        }
+
+        private ZRoutineCode SetupCall(int address, ushort argCount)
+        {
+            var compilerResult = GetCompilerResult(address);
+
+            PushFrame(address);
+
+            this.argumentCount = argCount;
+
+            var locals = compilerResult.Routine.Locals;
+            var localCount = (ushort)locals.Length;
+
+            for (int i = argCount; i < localCount; i++)
+            {
+                this.locals[i] = locals[i];
+            }
+
+            this.localCount = localCount;
+
+            return compilerResult.Code;
+        }
+
+        internal ushort Call0(int address)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 0);
+
+            return code();
+        }
+
+        internal ushort Call1(int address, ushort arg0)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 1);
+
+            this.locals[0] = arg0;
+
+            return code();
+        }
+
+        internal ushort Call2(int address, ushort arg0, ushort arg1)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 2);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+
+            return code();
+        }
+
+        internal ushort Call3(int address, ushort arg0, ushort arg1, ushort arg2)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 3);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+            this.locals[2] = arg2;
+
+            return code();
+        }
+
+        internal ushort Call4(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 4);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+            this.locals[2] = arg2;
+            this.locals[3] = arg3;
+
+            return code();
+        }
+
+        internal ushort Call5(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 5);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+            this.locals[2] = arg2;
+            this.locals[3] = arg3;
+            this.locals[4] = arg4;
+
+            return code();
+        }
+
+        internal ushort Call6(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 6);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+            this.locals[2] = arg2;
+            this.locals[3] = arg3;
+            this.locals[4] = arg4;
+            this.locals[5] = arg5;
+
+            return code();
+        }
+
+        internal ushort Call7(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            var code = SetupCall(address, 7);
+
+            this.locals[0] = arg0;
+            this.locals[1] = arg1;
+            this.locals[2] = arg2;
+            this.locals[3] = arg3;
+            this.locals[4] = arg4;
+            this.locals[5] = arg5;
+            this.locals[6] = arg6;
+
+            return code();
+        }
+
+        internal ZRoutineCode GetRoutineCode(int address)
+        {
+            return GetCompilerResult(address).Code;
         }
 
         internal void EnterRoutine(int address)
@@ -519,7 +682,7 @@ namespace ZDebug.Compiler
             }
 
             var code = GetRoutineCode(mainAddress);
-            code(new ushort[0]);
+            code();
         }
 
         public void Stop()
