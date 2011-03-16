@@ -1,4 +1,5 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -236,19 +237,40 @@ namespace ZDebug.Compiler
 
         private void op_loadw()
         {
-            using (var address = il.NewLocal<int>())
-            using (var value = il.NewLocal<ushort>())
+            var addressOp = GetOperand(0);
+            var offsetOp = GetOperand(1);
+
+            // Are the address and offset operands constants? If so, we can fold them at compile time.
+            if (addressOp.Kind != OperandKind.Variable &&
+                offsetOp.Kind != OperandKind.Variable)
             {
-                LoadOperand(0);
-                LoadOperand(1);
-                il.Math.Multiply(2);
-                il.Math.Add();
-                address.Store();
+                // OPTIMIZE: Remove the need for 'value' below.
+                using (var value = il.NewLocal<ushort>())
+                {
+                    var address = addressOp.Value + (offsetOp.Value * 2);
 
-                LoadWord(address);
-                value.Store();
+                    LoadWord(address);
+                    value.Store();
 
-                StoreVariable(currentInstruction.StoreVariable, value);
+                    StoreVariable(currentInstruction.StoreVariable, value);
+                }
+            }
+            else
+            {
+                using (var address = il.NewLocal<int>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    LoadOperand(0);
+                    LoadOperand(1);
+                    il.Math.Multiply(2);
+                    il.Math.Add();
+                    address.Store();
+
+                    LoadWord(address);
+                    value.Store();
+
+                    StoreVariable(currentInstruction.StoreVariable, value);
+                }
             }
         }
 

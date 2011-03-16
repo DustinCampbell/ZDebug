@@ -121,9 +121,11 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // locals...
-            var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
-            this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+            if (routine.Locals.Length > 0)
+            {
+                var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
+                this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+            }
 
             // Fourth pass: determine whether screen is used
             foreach (var i in routine.Instructions)
