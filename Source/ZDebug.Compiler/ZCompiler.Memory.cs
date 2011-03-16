@@ -1,5 +1,5 @@
-﻿using ZDebug.Compiler.Generate;
-using ZDebug.Compiler.Utilities;
+﻿using System.Reflection.Emit;
+using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
@@ -231,98 +231,87 @@ namespace ZDebug.Compiler
 
         private void CheckStackEmpty()
         {
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+            if (debugging)
+            {
+                il.Emit(OpCodes.Ldloc, sp);
+                il.Emit(OpCodes.Ldind_I4);
+                il.Load(-1);
+                il.Compare.Equal();
 
-            il.LoadArg(0);
-            il.Load(spField);
+                var ok = il.NewLabel();
+                ok.BranchIf(Condition.False, @short: true);
+                il.RuntimeError("Stack is empty.");
 
-            il.Load(-1);
-            il.Compare.Equal();
-
-            var ok = il.NewLabel();
-            ok.BranchIf(Condition.False, @short: true);
-            il.RuntimeError("Stack is empty.");
-
-            ok.Mark();
+                ok.Mark();
+            }
         }
 
         private void CheckStackFull()
         {
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+            if (debugging)
+            {
+                il.Emit(OpCodes.Ldloc, sp);
+                il.Emit(OpCodes.Ldind_I4);
+                il.Load(ZMachine.STACK_SIZE - 1);
+                il.Compare.Equal();
 
-            il.LoadArg(0);
-            il.Load(spField);
+                var ok = il.NewLabel();
+                ok.BranchIf(Condition.False, @short: true);
+                il.RuntimeError("Stack is full.");
 
-            il.Load(ZMachine.STACK_SIZE - 1);
-            il.Compare.Equal();
-
-            var ok = il.NewLabel();
-            ok.BranchIf(Condition.False, @short: true);
-            il.RuntimeError("Stack is full.");
-
-            ok.Mark();
+                ok.Mark();
+            }
         }
 
         private void PopStack()
         {
             CheckStackEmpty();
 
-            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+            stack.LoadElement(
+                indexLoader: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
+                });
 
-            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
-            using (var sp = il.NewLocal<int>(() => { il.LoadArg(0); il.Load(spField); }))
-            {
-                stack.LoadElement(() => sp.Load());
-
-                // decrement sp
-                il.LoadArg(0);
-                sp.Load();
-                il.Math.Subtract(1);
-                il.Store(spField);
-            }
+            // decrement sp
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldind_I4);
+            il.Math.Subtract(1);
+            il.Emit(OpCodes.Stind_I4);
         }
 
         private void PeekStack()
         {
             CheckStackEmpty();
 
-            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
-
-            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
-            {
-                stack.LoadElement(() =>
+            stack.LoadElement(
+                indexLoader: () =>
                 {
-                    il.LoadArg(0);
-                    il.Load(spField);
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
                 });
-            }
         }
 
         private void PushStack(ILocal value)
         {
             CheckStackFull();
 
-            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+            // increment sp
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldind_I4);
+            il.Math.Add(1);
+            il.Emit(OpCodes.Stind_I4);
 
-            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
-            using (var sp = il.NewLocal<int>(() => { il.LoadArg(0); il.Load(spField); }))
-            {
-                // increment sp
-                sp.Load();
-                il.Math.Add(1);
-                sp.Store();
-
-                stack.StoreElement(
-                    indexLoader: () => sp.Load(),
-                    valueLoader: () => value.Load());
-
-                il.LoadArg(0);
-                sp.Load();
-                il.Store(spField);
-            }
+            stack.StoreElement(
+                indexLoader: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
+                },
+                valueLoader: () => value.Load());
         }
 
         private void PushStack()
@@ -338,19 +327,13 @@ namespace ZDebug.Compiler
         {
             CheckStackEmpty();
 
-            var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
-            var spField = Reflection<ZMachine>.GetField("sp", @public: false);
-
-            using (var stack = il.NewArrayLocal<ushort>(() => { il.LoadArg(0); il.Load(stackField); }))
-            {
-                stack.StoreElement(
-                    indexLoader: () =>
-                    {
-                        il.LoadArg(0);
-                        il.Load(spField);
-                    },
-                    valueLoader: () => value.Load());
-            }
+            stack.StoreElement(
+                indexLoader: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
+                },
+                valueLoader: () => value.Load());
         }
 
         private void SetStackTop()
@@ -406,7 +389,7 @@ namespace ZDebug.Compiler
                 valueLoader: () => value.Load());
         }
 
-        private void StoLocalVariable(ILocal value)
+        private void StoreLocalVariable(ILocal value)
         {
             using (var index = il.NewLocal<int>())
             {
@@ -493,16 +476,23 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-            if (indirect)
+            if (stack != null)
             {
-                PeekStack();
+                if (indirect)
+                {
+                    PeekStack();
+                }
+                else
+                {
+                    PopStack();
+                }
+
+                done.Branch(@short: true);
             }
             else
             {
-                PopStack();
+                il.RuntimeError("Unexpected stack access.");
             }
-
-            done.Branch(@short: true);
 
             // local
             tryLocal.Mark();
@@ -598,16 +588,23 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-            if (indirect)
+            if (stack != null)
             {
-                SetStackTop(value);
+                if (indirect)
+                {
+                    SetStackTop(value);
+                }
+                else
+                {
+                    PushStack(value);
+                }
+
+                done.Branch(@short: true);
             }
             else
             {
-                PushStack(value);
+                il.RuntimeError("Unexpected stack access.");
             }
-
-            done.Branch(@short: true);
 
             // local
             tryLocal.Mark();
@@ -621,7 +618,7 @@ namespace ZDebug.Compiler
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
-                StoLocalVariable(value);
+                StoreLocalVariable(value);
 
                 done.Branch(@short: true);
             }

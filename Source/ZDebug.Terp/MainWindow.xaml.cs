@@ -113,7 +113,7 @@ namespace ZDebug.Terp
 
             storyBytes = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(storyBytes, screen: this, profiler: profiler, debugging: true);
+            machine = new ZMachine(storyBytes, screen: this, profiler: profiler);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
@@ -540,6 +540,12 @@ namespace ZDebug.Terp
         public void ReadCommand(int maxChars, Action<string> callback)
         {
             UpdateProfilerStatistics();
+
+            if (script != null && scriptIndex >= script.Length)
+            {
+                machine.Stop();
+                return;
+            }
 
             Dispatch(() =>
             {

@@ -14,11 +14,12 @@ namespace ZDebug.Compiler
     {
         private readonly ZRoutine routine;
         private readonly ZMachine machine;
-        private readonly bool profiling;
+        private bool debugging;
 
         private ILBuilder il;
         private Dictionary<int, ILabel> addressToLabelMap;
         private Instruction currentInstruction;
+        private List<ZRoutineCall> calls;
 
         private IArrayLocal memory;
         private ILocal screen;
@@ -26,12 +27,14 @@ namespace ZDebug.Compiler
 
         private IArrayLocal locals;
         private IArrayLocal arguments;
+        private IArrayLocal stack;
+        private LocalBuilder sp;
 
-        private ZCompiler(ZRoutine routine, ZMachine machine, bool profiling)
+        private ZCompiler(ZRoutine routine, ZMachine machine, bool debugging = false)
         {
             this.routine = routine;
             this.machine = machine;
-            this.profiling = profiling;
+            this.debugging = debugging;
         }
 
         private static string GetName(ZRoutine routine)
@@ -46,17 +49,14 @@ namespace ZDebug.Compiler
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
-                parameterTypes: Types.One<ZMachine>(),
+                parameterTypes: Types.Two<ZMachine, ZRoutineCall[]>(),
                 owner: typeof(ZMachine),
                 skipVisibility: true);
 
             var ilGen = dm.GetILGenerator();
             this.il = new ILBuilder(ilGen);
 
-            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
-            il.LoadArg(0);
-            il.Load(routine.Address);
-            il.Store(currentRoutineAddressField);
+            this.calls = new List<ZRoutineCall>();
 
             Profiler_EnterRoutine();
 
@@ -108,7 +108,26 @@ namespace ZDebug.Compiler
             var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
             this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
 
-            // Fourth pass: emit IL for instructions
+            // Fourth pass: determine whether stack is used
+            foreach (var i in routine.Instructions)
+            {
+                if (i.UsesStack())
+                {
+                    var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+                    this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
+
+                    var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+                    var int32ByRefType = typeof(int).MakeByRefType();
+                    this.sp = ilGen.DeclareLocal(int32ByRefType);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldflda, spField);
+                    il.Emit(OpCodes.Stloc, this.sp);
+
+                    break;
+                }
+            }
+
+            // Fifth pass: emit IL for instructions
             foreach (var i in routine.Instructions)
             {
                 ILabel label;
@@ -120,7 +139,6 @@ namespace ZDebug.Compiler
                 currentInstruction = i;
 
                 Profiler_ExecutingInstruction();
-                CheckInterupt();
                 il.DebugWrite(i.PrettyPrint(machine));
 
                 Assemble();
@@ -132,12 +150,12 @@ namespace ZDebug.Compiler
 
             var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed);
 
-            return new ZCompilerResult(this.routine, code, statistics);
+            return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
 
         private void Profiler_EnterRoutine()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
@@ -149,7 +167,7 @@ namespace ZDebug.Compiler
 
         private void Profiler_ExitRoutine()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
@@ -161,7 +179,7 @@ namespace ZDebug.Compiler
 
         private void Profiler_ExecutingInstruction()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0); // ZMachine
                 il.Load(currentInstruction.Address);
@@ -173,7 +191,7 @@ namespace ZDebug.Compiler
 
         private void Profiler_ExecutedInstruction()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0);
 
@@ -184,7 +202,7 @@ namespace ZDebug.Compiler
 
         private void Profiler_Quit()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0);
 
@@ -197,7 +215,7 @@ namespace ZDebug.Compiler
 
         private void Profiler_Interrupt()
         {
-            if (profiling)
+            if (machine.Profiling)
             {
                 il.LoadArg(0);
 
@@ -211,46 +229,106 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", currentInstruction.Address, currentInstruction.Opcode.Name));
         }
 
-        private void CheckInterupt()
+        private void DirectCall(Operand addressOp)
         {
-            if (machine.Debugging && currentInstruction.IsInterruptable())
+            if (addressOp.Value == 0)
             {
-                var ok = il.NewLabel();
+                Return(0);
+            }
+            else
+            {
+                var address = machine.UnpackRoutineAddress(addressOp.Value);
+                var routineCall = machine.GetRoutineCall(address);
+                var index = calls.Count;
+                calls.Add(routineCall);
+
                 il.LoadArg(0);
-                var interruptField = Reflection<ZMachine>.GetField("interrupt", @public: false);
-                il.Load(interruptField, @volatile: true);
-                ok.BranchIf(Condition.False, @short: true);
 
-                Profiler_Interrupt();
-                il.ThrowException<ZMachineInterruptedException>();
+                il.LoadArg(1);
+                il.Load(index);
+                il.Emit(OpCodes.Ldelem_Ref);
 
-                ok.Mark();
+                var argCount = currentInstruction.OperandCount - 1;
+                for (int i = 0; i < argCount; i++)
+                {
+                    LoadOperand(i + 1);
+                }
+
+                var callName = "Call" + argCount.ToString();
+                var callTypeList = new List<Type>() { typeof(ZRoutineCall) };
+                for (int i = 0; i < argCount; i++)
+                {
+                    callTypeList.Add(typeof(ushort));
+                }
+                var callTypes = callTypeList.ToArray();
+
+                var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
+
+                il.Call(call);
+            }
+        }
+
+        private void IndirectCall(Operand addressOp)
+        {
+            using (var address = il.NewLocal<int>())
+            {
+                LoadUnpackedRoutineAddress(addressOp);
+                address.Store();
+
+                // is this address 0?
+                var nonZeroCall = il.NewLabel();
+                var done = il.NewLabel();
+                address.Load();
+                nonZeroCall.BranchIf(Condition.True);
+
+                var argCount = currentInstruction.OperandCount - 1;
+                for (int i = 0; i < argCount; i++)
+                {
+                    LoadOperand(i + 1);
+                    il.Pop();
+                }
+
+                il.Load(0);
+
+                done.Branch();
+
+                nonZeroCall.Mark();
+
+                il.LoadArg(0);
+                address.Load();
+
+                for (int i = 0; i < argCount; i++)
+                {
+                    LoadOperand(i + 1);
+                }
+
+                var callName = "Call" + argCount.ToString();
+                var callTypeList = new List<Type>() { typeof(int) };
+                for (int i = 0; i < argCount; i++)
+                {
+                    callTypeList.Add(typeof(ushort));
+                }
+                var callTypes = callTypeList.ToArray();
+
+                var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
+
+                il.Call(call);
+
+                done.Mark();
             }
         }
 
         private void Call()
         {
-            il.LoadArg(0);
-
-            LoadUnpackedRoutineAddress(GetOperand(0));
-
-            var argCount = currentInstruction.OperandCount - 1;
-            for (int i = 0; i < argCount; i++)
+            var addressOp = GetOperand(0);
+            if (addressOp.Kind != OperandKind.Variable)
             {
-                LoadOperand(i + 1);
+                DirectCall(addressOp);
             }
-
-            var callName = "Call" + argCount.ToString();
-            var callTypeList = new List<Type>() { typeof(int) };
-            for (int i = 0; i < argCount; i++)
+            else
             {
-                callTypeList.Add(typeof(ushort));
+                IndirectCall(addressOp);
             }
-            var callTypes = callTypeList.ToArray();
-
-            var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
-
-            il.Call(call);
         }
 
         private void Return(int? value = null)
@@ -769,9 +847,9 @@ namespace ZDebug.Compiler
                     currentInstruction.Opcode.Number));
         }
 
-        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine, bool profiling = false)
+        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine)
         {
-            return new ZCompiler(routine, machine, profiling).Compile();
+            return new ZCompiler(routine, machine).Compile();
         }
     }
 }

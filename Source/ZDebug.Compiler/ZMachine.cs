@@ -15,13 +15,10 @@ namespace ZDebug.Compiler
         private readonly byte[] memory;
         private readonly IScreen screen;
         private readonly IZMachineProfiler profiler;
-        private readonly bool debugging;
         private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
 
         // routine state
-        private int currentRoutineAddress;
-
         private readonly ushort[] stack;
         private int sp;
 
@@ -55,20 +52,20 @@ namespace ZDebug.Compiler
         private readonly int routinesOffset;
         private readonly int stringsOffset;
 
-        private readonly IntegerMap<ZCompilerResult> compiledRoutines;
+        private readonly IntegerMap<ZRoutine> addressToRoutineMap;
+        private readonly IntegerMap<ZRoutineCall> addressToRoutineCallMap;
+        private readonly IntegerMap<ZCompilerResult> compilationResults;
 
         private Random random;
 
         private int currentAddress = -1;
-        private volatile bool interrupt;
         private volatile bool inputReceived;
 
-        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null, bool debugging = false)
+        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null)
         {
             this.memory = memory;
             this.screen = screen;
             this.profiler = profiler;
-            this.debugging = debugging;
             this.outputStreams = new OutputStreams(memory);
             this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
@@ -105,7 +102,9 @@ namespace ZDebug.Compiler
             this.routinesOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x28) : 0;
             this.stringsOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x2a) : 0;
 
-            this.compiledRoutines = new IntegerMap<ZCompilerResult>(1024);
+            this.addressToRoutineMap = new IntegerMap<ZRoutine>();
+            this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>();
+            this.compilationResults = new IntegerMap<ZCompilerResult>();
 
             this.random = new Random();
 
@@ -191,17 +190,26 @@ namespace ZDebug.Compiler
             this.sp = sp;
         }
 
-        private ZCompilerResult GetCompilerResult(int address)
+        private ZRoutine GetRoutineByAddress(int address)
+        {
+            ZRoutine routine;
+            if (!addressToRoutineMap.TryGetValue(address, out routine))
+            {
+                routine = ZRoutine.Create(address, memory);
+                addressToRoutineMap.Add(address, routine);
+            }
+
+            return routine;
+        }
+
+        internal ZCompilerResult Compile(ZRoutine routine)
         {
             ZCompilerResult result;
-            if (!compiledRoutines.TryGetValue(address, out result))
+            if (!compilationResults.TryGetValue(routine.Address, out result))
             {
-                result = ZCompiler.Compile(
-                    routine: ZRoutine.Create(address, memory),
-                    machine: this,
-                    profiling: profiler != null);
+                result = ZCompiler.Compile(routine, machine: this);
 
-                compiledRoutines.Add(address, result);
+                compilationResults.Add(routine.Address, result);
 
                 if (profiler != null)
                 {
@@ -212,15 +220,26 @@ namespace ZDebug.Compiler
             return result;
         }
 
-        private ZRoutineCode SetupCall(int address, ushort argCount)
+        internal ZRoutineCall GetRoutineCall(int address)
         {
-            var compilerResult = GetCompilerResult(address);
+            ZRoutineCall routineCall;
+            if (!addressToRoutineCallMap.TryGetValue(address, out routineCall))
+            {
+                var routine = GetRoutineByAddress(address);
+                routineCall = new ZRoutineCall(routine, machine: this);
+                addressToRoutineCallMap.Add(address, routineCall);
+            }
 
-            PushFrame(address);
+            return routineCall;
+        }
+
+        private void SetupCall(ZRoutineCall routineCall, ushort argCount)
+        {
+            PushFrame(routineCall.Routine.Address);
 
             this.argumentCount = argCount;
 
-            var locals = compilerResult.Routine.Locals;
+            var locals = routineCall.Routine.Locals;
             var localCount = (ushort)locals.Length;
 
             for (int i = argCount; i < localCount; i++)
@@ -229,8 +248,18 @@ namespace ZDebug.Compiler
             }
 
             this.localCount = localCount;
+        }
 
-            return compilerResult.Code;
+        internal ushort Call0(ZRoutineCall routineCall)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 0);
+
+            return routineCall.Invoke();
         }
 
         internal ushort Call0(int address)
@@ -240,9 +269,21 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 0);
+            return Call0(GetRoutineCall(address));
+        }
 
-            return code();
+        internal ushort Call1(ZRoutineCall routineCall, ushort arg0)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 1);
+
+            this.locals[0] = arg0;
+
+            return routineCall.Invoke();
         }
 
         internal ushort Call1(int address, ushort arg0)
@@ -252,11 +293,22 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 1);
+            return Call1(GetRoutineCall(address), arg0);
+        }
+
+        internal ushort Call2(ZRoutineCall routineCall, ushort arg0, ushort arg1)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 2);
 
             this.locals[0] = arg0;
+            this.locals[1] = arg1;
 
-            return code();
+            return routineCall.Invoke();
         }
 
         internal ushort Call2(int address, ushort arg0, ushort arg1)
@@ -266,12 +318,23 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 2);
+            return Call2(GetRoutineCall(address), arg0, arg1);
+        }
+
+        internal ushort Call3(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 3);
 
             this.locals[0] = arg0;
             this.locals[1] = arg1;
+            this.locals[2] = arg2;
 
-            return code();
+            return routineCall.Invoke();
         }
 
         internal ushort Call3(int address, ushort arg0, ushort arg1, ushort arg2)
@@ -281,13 +344,24 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 3);
+            return Call3(GetRoutineCall(address), arg0, arg1, arg2);
+        }
+
+        internal ushort Call4(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 4);
 
             this.locals[0] = arg0;
             this.locals[1] = arg1;
             this.locals[2] = arg2;
+            this.locals[3] = arg3;
 
-            return code();
+            return routineCall.Invoke();
         }
 
         internal ushort Call4(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
@@ -297,14 +371,25 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 4);
+            return Call4(GetRoutineCall(address), arg0, arg1, arg2, arg3);
+        }
+
+        internal ushort Call5(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 5);
 
             this.locals[0] = arg0;
             this.locals[1] = arg1;
             this.locals[2] = arg2;
             this.locals[3] = arg3;
+            this.locals[4] = arg4;
 
-            return code();
+            return routineCall.Invoke();
         }
 
         internal ushort Call5(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
@@ -314,15 +399,26 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 5);
+            return Call5(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4);
+        }
+
+        internal ushort Call6(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        {
+            if (routineCall.Routine.Address == 0)
+            {
+                return 0;
+            }
+
+            SetupCall(routineCall, 6);
 
             this.locals[0] = arg0;
             this.locals[1] = arg1;
             this.locals[2] = arg2;
             this.locals[3] = arg3;
             this.locals[4] = arg4;
+            this.locals[5] = arg5;
 
-            return code();
+            return routineCall.Invoke();
         }
 
         internal ushort Call6(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
@@ -332,26 +428,17 @@ namespace ZDebug.Compiler
                 return 0;
             }
 
-            var code = SetupCall(address, 6);
-
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
-            this.locals[3] = arg3;
-            this.locals[4] = arg4;
-            this.locals[5] = arg5;
-
-            return code();
+            return Call6(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5);
         }
 
-        internal ushort Call7(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        internal ushort Call7(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
         {
-            if (address == 0)
+            if (routineCall.Routine.Address == 0)
             {
                 return 0;
             }
 
-            var code = SetupCall(address, 7);
+            SetupCall(routineCall, 7);
 
             this.locals[0] = arg0;
             this.locals[1] = arg1;
@@ -361,12 +448,23 @@ namespace ZDebug.Compiler
             this.locals[5] = arg5;
             this.locals[6] = arg6;
 
-            return code();
+            return routineCall.Invoke();
+        }
+
+        internal ushort Call7(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        {
+            if (address == 0)
+            {
+                return 0;
+            }
+
+            return Call7(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5, arg6);
         }
 
         internal ZRoutineCode GetRoutineCode(int address)
         {
-            return GetCompilerResult(address).Code;
+            var routine = GetRoutineByAddress(address);
+            return Compile(routine).Code;
         }
 
         internal void EnterRoutine(int address)
@@ -674,26 +772,24 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
-            interrupt = false;
             var mainAddress = memory.ReadWord(0x06);
             if (version != 6)
             {
                 mainAddress--;
             }
 
-            var code = GetRoutineCode(mainAddress);
-            code();
+            var routineCall = GetRoutineCall(mainAddress);
+            routineCall.Invoke();
         }
 
         public void Stop()
         {
-            interrupt = true;
-            inputReceived = true;
+            throw new ZMachineInterruptedException();
         }
 
-        public bool Debugging
+        public bool Profiling
         {
-            get { return debugging; }
+            get { return profiler != null; }
         }
 
         public byte Version

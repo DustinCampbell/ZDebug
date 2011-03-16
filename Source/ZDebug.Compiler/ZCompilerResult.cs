@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.Compiler
@@ -9,12 +6,34 @@ namespace ZDebug.Compiler
     public sealed class ZCompilerResult
     {
         private readonly ZRoutine routine;
+        private readonly ZRoutineCall[] calls;
         private readonly ZRoutineCode code;
         private readonly RoutineCompilationStatistics statistics;
 
-        public ZCompilerResult(ZRoutine routine, ZRoutineCode code, RoutineCompilationStatistics statistics)
+        public ZCompilerResult(ZRoutine routine, ZRoutineCall[] calls, ZRoutineCode code, RoutineCompilationStatistics statistics)
         {
+            if (routine == null)
+            {
+                throw new ArgumentNullException("routine");
+            }
+
+            if (calls == null)
+            {
+                throw new ArgumentNullException("calls");
+            }
+
+            if (code == null)
+            {
+                throw new ArgumentNullException("code");
+            }
+
+            if (statistics == null)
+            {
+                throw new ArgumentNullException("statistics");
+            }
+
             this.routine = routine;
+            this.calls = calls;
             this.code = code;
             this.statistics = statistics;
         }
@@ -25,6 +44,11 @@ namespace ZDebug.Compiler
         public ZRoutine Routine
         {
             get { return routine; }
+        }
+
+        public ZRoutineCall[] Calls
+        {
+            get { return calls; }
         }
 
         /// <summary>

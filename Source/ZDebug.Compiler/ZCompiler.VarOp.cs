@@ -16,11 +16,6 @@ namespace ZDebug.Compiler
             // discard result...
             il.Pop();
 
-            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
-            il.LoadArg(0);
-            il.Load(routine.Address);
-            il.Store(currentRoutineAddressField);
-
             il.DebugUnindent();
         }
 
@@ -35,11 +30,6 @@ namespace ZDebug.Compiler
                 result.Store();
                 StoreVariable(currentInstruction.StoreVariable, result);
             }
-
-            var currentRoutineAddressField = Reflection<ZMachine>.GetField("currentRoutineAddress", @public: false);
-            il.LoadArg(0);
-            il.Load(routine.Address);
-            il.Store(currentRoutineAddressField);
 
             il.DebugUnindent();
         }

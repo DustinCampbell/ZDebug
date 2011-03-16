@@ -11,10 +11,12 @@ namespace ZDebug.PerfHarness
         private Stopwatch watch;
         private int callCount;
         private int instructionCount;
+        private bool profile;
 
-        public CompiledRunner(string storyFilePath, string scriptFilePath)
+        public CompiledRunner(string storyFilePath, string scriptFilePath, bool profile = false)
             : base(storyFilePath, scriptFilePath)
         {
+            this.profile = profile;
         }
 
         public override void Run()
@@ -27,7 +29,7 @@ namespace ZDebug.PerfHarness
             Action doneAction = () => { machine.Stop(); };
 
             var mockScreen = new MockScreen(ScriptFilePath, doneAction);
-            machine = new ZMachine(bytes, mockScreen, profiler: this, debugging: true);
+            machine = new ZMachine(bytes, mockScreen, profile ? this : null);
             machine.SetRandomSeed(42);
 
             MarkProfile("Running...");
@@ -55,12 +57,18 @@ namespace ZDebug.PerfHarness
 
             MarkProfile("Done");
 
-            Console.WriteLine();
-            Console.WriteLine("{0:#,#} instructions", instructionCount);
-            Console.WriteLine("{0:#,#} calls", callCount);
+            if (profile)
+            {
+                Console.WriteLine();
+                Console.WriteLine("{0:#,#} instructions", instructionCount);
+                Console.WriteLine("{0:#,#} calls", callCount);
+            }
             Console.WriteLine();
             Console.WriteLine("{0:#,0.##########} seconds", (double)watch.ElapsedTicks / (double)Stopwatch.Frequency);
-            Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)watch.ElapsedTicks / (double)Stopwatch.Frequency) / (double)instructionCount);
+            if (profile)
+            {
+                Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)watch.ElapsedTicks / (double)Stopwatch.Frequency) / (double)instructionCount);
+            }
         }
 
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)

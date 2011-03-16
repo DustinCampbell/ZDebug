@@ -70,55 +70,55 @@ namespace ZDebug.Compiler.Generate
             get { return math; }
         }
 
-        private void Emit(OpCode opcode)
+        internal void Emit(OpCode opcode)
         {
             il.Emit(opcode);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, int value)
+        internal void Emit(OpCode opcode, int value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, string value)
+        internal void Emit(OpCode opcode, string value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, Type value)
+        internal void Emit(OpCode opcode, Type value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, FieldInfo value)
+        internal void Emit(OpCode opcode, FieldInfo value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, MethodInfo value)
+        internal void Emit(OpCode opcode, MethodInfo value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, ConstructorInfo value)
+        internal void Emit(OpCode opcode, ConstructorInfo value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, Label value)
+        internal void Emit(OpCode opcode, Label value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
         }
 
-        private void Emit(OpCode opcode, LocalBuilder value)
+        internal void Emit(OpCode opcode, LocalBuilder value)
         {
             il.Emit(opcode, value);
             opcodeCount++;
