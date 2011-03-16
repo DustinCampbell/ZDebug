@@ -14,7 +14,7 @@
 
         static void Main()
         {
-            var runner = new CompiledRunner(ROTA, ROTA_SCRIPT);
+            var runner = new CompiledRunner(BRONZE, BRONZE_SCRIPT);
             runner.Run();
         }
     }

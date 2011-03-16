@@ -11,6 +11,21 @@ namespace ZDebug.Compiler
             return op.Kind == kind && op.Number == number;
         }
 
+        public static bool UsesOutputStreams(this Instruction i)
+        {
+            var op = i.Opcode;
+
+            return op.Is(OpcodeKind.ZeroOp, 0x02)  // print
+                || op.Is(OpcodeKind.ZeroOp, 0x0b)  // new_line
+                || op.Is(OpcodeKind.VarOp, 0x05)   // print_char
+                || op.Is(OpcodeKind.VarOp, 0x06)   // print_num
+                || op.Is(OpcodeKind.OneOp, 0x07)   // print_addr
+                || op.Is(OpcodeKind.OneOp, 0x0a)   // print_obj
+                || op.Is(OpcodeKind.OneOp, 0x0d)   // print_paddr
+                || op.Is(OpcodeKind.ZeroOp, 0x03)  // print_ret
+                || op.Is(OpcodeKind.VarOp, 0x13);  // output_stream
+        }
+
         public static bool UsesScreen(this Instruction i)
         {
             var op = i.Opcode;
@@ -55,6 +70,64 @@ namespace ZDebug.Compiler
             foreach (var o in i.Operands)
             {
                 if (o.Kind == OperandKind.Variable && o.Value == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool UsesMemory(this Instruction i)
+        {
+            // TODO: Need to check Z-Machine version
+            var op = i.Opcode;
+            if (op.Is(OpcodeKind.TwoOp, 0x06) ||  // jin
+                op.Is(OpcodeKind.TwoOp, 0x0a) ||  // test_attr
+                op.Is(OpcodeKind.TwoOp, 0x0b) ||  // set_attr
+                op.Is(OpcodeKind.TwoOp, 0x0c) ||  // clear_attr
+                op.Is(OpcodeKind.TwoOp, 0x0e) ||  // insert_obj
+                op.Is(OpcodeKind.TwoOp, 0x0f) ||  // loadw
+                op.Is(OpcodeKind.TwoOp, 0x10) ||  // loadb
+                op.Is(OpcodeKind.TwoOp, 0x11) ||  // get_prop
+                op.Is(OpcodeKind.TwoOp, 0x12) ||  // get_prop_addr
+                op.Is(OpcodeKind.TwoOp, 0x13) ||  // get_next_prop
+                op.Is(OpcodeKind.OneOp, 0x01) ||  // get_sibling
+                op.Is(OpcodeKind.OneOp, 0x02) ||  // get_child
+                op.Is(OpcodeKind.OneOp, 0x03) ||  // get_parent
+                op.Is(OpcodeKind.OneOp, 0x04) ||  // get_prop_len
+                op.Is(OpcodeKind.OneOp, 0x07) ||  // print_addr
+                op.Is(OpcodeKind.OneOp, 0x09) ||  // remove_obj
+                op.Is(OpcodeKind.OneOp, 0x0a) ||  // print_obj
+                op.Is(OpcodeKind.OneOp, 0x0d) ||  // print_paddr
+                op.Is(OpcodeKind.ZeroOp, 0x0d) || // verify
+                op.Is(OpcodeKind.VarOp, 0x01) ||  // storew
+                op.Is(OpcodeKind.VarOp, 0x02) ||  // storeb
+                op.Is(OpcodeKind.VarOp, 0x03) ||  // put_prop
+                op.Is(OpcodeKind.VarOp, 0x04) ||  // read
+                op.Is(OpcodeKind.VarOp, 0x17) ||  // scan_table
+                op.Is(OpcodeKind.VarOp, 0x1b) ||  // tokenize
+                op.Is(OpcodeKind.VarOp, 0x1c) ||  // encode_text
+                op.Is(OpcodeKind.VarOp, 0x1d) ||  // copy_table
+                op.Is(OpcodeKind.VarOp, 0x1e) ||  // print_table
+                op.Is(OpcodeKind.ZeroOp, 0x09))   // pop
+            {
+                return true;
+            }
+
+            if (i.HasStoreVariable && i.StoreVariable.Kind == VariableKind.Global)
+            {
+                return true;
+            }
+
+            if (i.Opcode.IsFirstOpByRef && i.Operands[0].Value > 0x0f)
+            {
+                return true;
+            }
+
+            foreach (var o in i.Operands)
+            {
+                if (o.Kind == OperandKind.Variable && o.Value > 0x0f)
                 {
                     return true;
                 }

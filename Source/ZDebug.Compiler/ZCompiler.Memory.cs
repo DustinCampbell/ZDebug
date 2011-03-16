@@ -476,7 +476,7 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-            if (stack != null)
+            if (usesStack)
             {
                 if (indirect)
                 {
@@ -518,9 +518,16 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            variableIndex.Load();
-            il.Math.Subtract(16);
-            LoadGlobalVariable();
+            if (memory != null)
+            {
+                variableIndex.Load();
+                il.Math.Subtract(16);
+                LoadGlobalVariable();
+            }
+            else
+            {
+                il.RuntimeError("Unexpected global variable access.");
+            }
 
             done.Mark();
 
@@ -588,7 +595,7 @@ namespace ZDebug.Compiler
             tryLocal.BranchIf(Condition.True, @short: true);
 
             // stack
-            if (stack != null)
+            if (usesStack)
             {
                 if (indirect)
                 {
@@ -630,9 +637,16 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            variableIndex.Load();
-            il.Math.Subtract(16);
-            StoreGlobalVariable(value);
+            if (memory != null)
+            {
+                variableIndex.Load();
+                il.Math.Subtract(16);
+                StoreGlobalVariable(value);
+            }
+            else
+            {
+                il.RuntimeError("Unexpected global variable access.");
+            }
 
             done.Mark();
 

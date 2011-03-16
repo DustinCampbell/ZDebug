@@ -172,9 +172,7 @@ namespace ZDebug.Compiler
             // argument count
 
             var stack = this.stack;
-            var sp = this.sp;
-
-            sp = this.stackFrame;
+            var sp = this.stackFrame;
 
             var localCount = stack[sp--];
             var locals = this.locals;

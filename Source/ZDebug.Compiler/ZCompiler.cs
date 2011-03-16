@@ -25,10 +25,12 @@ namespace ZDebug.Compiler
         private ILocal screen;
         private ILocal outputStreams;
 
-        private IArrayLocal locals;
-        private IArrayLocal arguments;
+        private bool usesStack;
+        private bool usesMemory;
+
         private IArrayLocal stack;
         private LocalBuilder sp;
+        private IArrayLocal locals;
 
         private ZCompiler(ZRoutine routine, ZMachine machine, bool debugging = false)
         {
@@ -82,40 +84,18 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Second pass: determine whether memory is used
-            // TODO: Implement!
-
-            var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
-            this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
-
-            var argumentsField = Reflection<ZMachine>.GetField("arguments", @public: false);
-            this.arguments = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(argumentsField));
-
-            // Third pass: determine whether screen is used
-            foreach (var i in routine.Instructions)
-            {
-                if (i.UsesScreen())
-                {
-                    var screenField = Reflection<ZMachine>.GetField("screen", @public: false);
-                    this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
-                    break;
-                }
-            }
-
-            var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
-            this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
-
-            var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
-            this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
-
-            // Fourth pass: determine whether stack is used
+            // Second pass: determine whether stack is used
             foreach (var i in routine.Instructions)
             {
                 if (i.UsesStack())
                 {
+                    this.usesStack = true;
+
+                    // stack...
                     var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
                     this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
 
+                    // sp...
                     var spField = Reflection<ZMachine>.GetField("sp", @public: false);
                     var int32ByRefType = typeof(int).MakeByRefType();
                     this.sp = ilGen.DeclareLocal(int32ByRefType);
@@ -127,7 +107,47 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Fifth pass: emit IL for instructions
+            // Third pass: determine whether memory is used
+            foreach (var i in routine.Instructions)
+            {
+                if (i.UsesMemory())
+                {
+                    this.usesMemory = true;
+
+                    var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
+                    this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
+
+                    break;
+                }
+            }
+
+            // locals...
+            var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
+            this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+
+            // Fourth pass: determine whether screen is used
+            foreach (var i in routine.Instructions)
+            {
+                if (i.UsesScreen())
+                {
+                    var screenField = Reflection<ZMachine>.GetField("screen", @public: false);
+                    this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
+                    break;
+                }
+            }
+
+            // Fifth pass: determine whether outputStreams is used
+            foreach (var i in routine.Instructions)
+            {
+                if (i.UsesOutputStreams())
+                {
+                    var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
+                    this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
+                    break;
+                }
+            }
+
+            // Sixth pass: emit IL for instructions
             foreach (var i in routine.Instructions)
             {
                 ILabel label;
@@ -336,11 +356,6 @@ namespace ZDebug.Compiler
             Profiler_ExitRoutine();
 
             il.LoadArg(0);
-
-            if (value != null)
-            {
-                il.DebugWrite("Return " + value.Value);
-            }
 
             var popFrame = Reflection<ZMachine>.GetMethod("PopFrame", @public: false);
             il.Call(popFrame);
