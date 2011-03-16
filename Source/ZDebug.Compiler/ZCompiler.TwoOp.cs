@@ -237,17 +237,17 @@ namespace ZDebug.Compiler
             else
             {
                 using (var address = il.NewLocal<int>())
-                using (var value = il.NewLocal<ushort>())
                 {
                     LoadOperand(0);
                     LoadOperand(1);
                     il.Math.Add();
                     address.Store();
 
-                    LoadByte(address);
-                    value.Store();
-
-                    StoreVariable(currentInstruction.StoreVariable, value);
+                    StoreVariable(currentInstruction.StoreVariable,
+                        valueLoader: () =>
+                        {
+                            LoadByte(address);
+                        });
                 }
             }
         }
@@ -271,7 +271,6 @@ namespace ZDebug.Compiler
             else
             {
                 using (var address = il.NewLocal<int>())
-                using (var value = il.NewLocal<ushort>())
                 {
                     LoadOperand(0);
                     LoadOperand(1);
@@ -279,10 +278,11 @@ namespace ZDebug.Compiler
                     il.Math.Add();
                     address.Store();
 
-                    LoadWord(address);
-                    value.Store();
-
-                    StoreVariable(currentInstruction.StoreVariable, value);
+                    StoreVariable(currentInstruction.StoreVariable,
+                        valueLoader: () =>
+                        {
+                            LoadWord(address);
+                        });
                 }
             }
         }

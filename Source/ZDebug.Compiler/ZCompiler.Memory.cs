@@ -138,6 +138,16 @@ namespace ZDebug.Compiler
         }
 
         /// <summary>
+        /// Stores a byte in memory at the specified address.
+        /// </summary>
+        private void StoreByte(int address, CodeBuilder valueLoader)
+        {
+            StoreByte(
+                addressLoader: () => il.Load(address),
+                valueLoader: valueLoader);
+        }
+
+        /// <summary>
         /// Stores a byte in memory at the address stored in the given local.
         /// </summary>
         private void StoreByte(ILocal address, ILocal value)
@@ -145,6 +155,16 @@ namespace ZDebug.Compiler
             StoreByte(
                 addressLoader: () => address.Load(),
                 valueLoader: () => value.Load());
+        }
+
+        /// <summary>
+        /// Stores a byte in memory at the address stored in the given local.
+        /// </summary>
+        private void StoreByte(ILocal address, CodeBuilder valueLoader)
+        {
+            StoreByte(
+                addressLoader: () => address.Load(),
+                valueLoader: valueLoader);
         }
 
         /// <summary>
@@ -223,6 +243,18 @@ namespace ZDebug.Compiler
                     il.Math.Add(1);
                 },
                 valueLoader: () => value.Load());
+        }
+
+        private void StoreWord(ILocal address, CodeBuilder valueLoader)
+        {
+            StoreWord(
+                addressLoader: () => address.Load(),
+                addressPlusOneLoader: () =>
+                {
+                    address.Load();
+                    il.Math.Add(1);
+                },
+                valueLoader: valueLoader);
         }
 
         private void StoreWord(ILocal address, ushort value)

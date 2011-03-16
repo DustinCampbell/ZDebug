@@ -337,37 +337,69 @@ namespace ZDebug.Compiler
 
         private void op_storeb()
         {
-            using (var address = il.NewLocal<int>())
-            using (var value = il.NewLocal<byte>())
+            var addressOp = GetOperand(0);
+            var offsetOp = GetOperand(1);
+
+            // Are the address and offset operands constants? If so, we can fold them at compile time.
+            if (addressOp.Kind != OperandKind.Variable &&
+                offsetOp.Kind != OperandKind.Variable)
             {
-                LoadOperand(0);
-                LoadOperand(1);
-                il.Math.Add();
-                address.Store();
+                StoreByte(
+                    address: addressOp.Value + offsetOp.Value,
+                    valueLoader: () =>
+                    {
+                        LoadOperand(2);
+                        il.Convert.ToUInt8();
+                    });
+            }
+            else
+            {
+                using (var address = il.NewLocal<int>())
+                using (var value = il.NewLocal<byte>())
+                {
+                    LoadOperand(0);
+                    LoadOperand(1);
+                    il.Math.Add();
+                    address.Store();
 
-                LoadOperand(2);
-                il.Convert.ToUInt8();
-                value.Store();
+                    LoadOperand(2);
+                    il.Convert.ToUInt8();
+                    value.Store();
 
-                StoreByte(address, value);
+                    StoreByte(address, value);
+                }
             }
         }
 
         private void op_storew()
         {
-            using (var address = il.NewLocal<int>())
-            using (var value = il.NewLocal<ushort>())
+            var addressOp = GetOperand(0);
+            var offsetOp = GetOperand(1);
+
+            // Are the address and offset operands constants? If so, we can fold them at compile time.
+            if (addressOp.Kind != OperandKind.Variable &&
+                offsetOp.Kind != OperandKind.Variable)
             {
-                LoadOperand(0);
-                LoadOperand(1);
-                il.Math.Multiply(2);
-                il.Math.Add();
-                address.Store();
+                StoreWord(
+                    address: addressOp.Value + (offsetOp.Value * 2),
+                    valueLoader: () => LoadOperand(2));
+            }
+            else
+            {
+                using (var address = il.NewLocal<int>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    LoadOperand(0);
+                    LoadOperand(1);
+                    il.Math.Multiply(2);
+                    il.Math.Add();
+                    address.Store();
 
-                LoadOperand(2);
-                value.Store();
+                    LoadOperand(2);
+                    value.Store();
 
-                StoreWord(address, value);
+                    StoreWord(address, value);
+                }
             }
         }
 
