@@ -205,6 +205,14 @@ namespace ZDebug.Compiler
                 valueLoader: () => value.Load());
         }
 
+        private void StoreWord(int address, CodeBuilder valueLoader)
+        {
+            StoreWord(
+                addressLoader: () => il.Load(address),
+                addressPlusOneLoader: () => il.Load(address + 1),
+                valueLoader: valueLoader);
+        }
+
         private void StoreWord(ILocal address, ILocal value)
         {
             StoreWord(
@@ -314,6 +322,26 @@ namespace ZDebug.Compiler
                 valueLoader: () => value.Load());
         }
 
+        private void PushStack(CodeBuilder valueLoader)
+        {
+            CheckStackFull();
+
+            // increment sp
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldind_I4);
+            il.Math.Add(1);
+            il.Emit(OpCodes.Stind_I4);
+
+            stack.StoreElement(
+                indexLoader: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
+                },
+                valueLoader: valueLoader);
+        }
+
         private void PushStack()
         {
             using (var value = il.NewLocal<ushort>())
@@ -334,6 +362,19 @@ namespace ZDebug.Compiler
                     il.Emit(OpCodes.Ldind_I4);
                 },
                 valueLoader: () => value.Load());
+        }
+
+        private void SetStackTop(CodeBuilder valueLoader)
+        {
+            CheckStackEmpty();
+
+            stack.StoreElement(
+                indexLoader: () =>
+                {
+                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldind_I4);
+                },
+                valueLoader: valueLoader);
         }
 
         private void SetStackTop()
@@ -380,6 +421,13 @@ namespace ZDebug.Compiler
             locals.StoreElement(
                 indexLoader: () => il.Load(index),
                 valueLoader: () => value.Load());
+        }
+
+        private void StoreLocalVariable(int index, CodeBuilder valueLoader)
+        {
+            locals.StoreElement(
+                indexLoader: () => il.Load(index),
+                valueLoader: valueLoader);
         }
 
         private void StoreLocalVariable(ILocal index, ILocal value)
@@ -439,6 +487,12 @@ namespace ZDebug.Compiler
         {
             var address = CalculateGlobalVariableAddress(index);
             StoreWord(address, value);
+        }
+
+        private void StoreGlobalVariable(int index, CodeBuilder valueLoader)
+        {
+            var address = CalculateGlobalVariableAddress(index);
+            StoreWord(address, valueLoader);
         }
 
         private void StoreGlobalVariable(ILocal index, ILocal value)
@@ -678,8 +732,6 @@ namespace ZDebug.Compiler
 
         private void StoreVariable(Variable variable, ILocal value, bool indirect = false)
         {
-            il.DebugWrite("Storing {0} in " + currentInstruction.StoreVariable.ToString(), value);
-
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
@@ -699,6 +751,31 @@ namespace ZDebug.Compiler
 
                 default: // VariableKind.Global
                     StoreGlobalVariable(variable.Index, value);
+                    break;
+            }
+        }
+
+        private void StoreVariable(Variable variable, CodeBuilder valueLoader, bool indirect = false)
+        {
+            switch (variable.Kind)
+            {
+                case VariableKind.Stack:
+                    if (indirect)
+                    {
+                        SetStackTop(valueLoader);
+                    }
+                    else
+                    {
+                        PushStack(valueLoader);
+                    }
+                    break;
+
+                case VariableKind.Local:
+                    StoreLocalVariable(variable.Index, valueLoader);
+                    break;
+
+                default: // VariableKind.Global
+                    StoreGlobalVariable(variable.Index, valueLoader);
                     break;
             }
         }

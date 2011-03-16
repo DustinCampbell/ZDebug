@@ -220,18 +220,35 @@ namespace ZDebug.Compiler
 
         private void op_loadb()
         {
-            using (var address = il.NewLocal<int>())
-            using (var value = il.NewLocal<ushort>())
+            var addressOp = GetOperand(0);
+            var offsetOp = GetOperand(1);
+
+            // Are the address and offset operands constants? If so, we can fold them at compile time.
+            if (addressOp.Kind != OperandKind.Variable &&
+                offsetOp.Kind != OperandKind.Variable)
             {
-                LoadOperand(0);
-                LoadOperand(1);
-                il.Math.Add();
-                address.Store();
+                StoreVariable(currentInstruction.StoreVariable,
+                    valueLoader: () =>
+                    {
+                        var address = addressOp.Value + offsetOp.Value;
+                        LoadByte(address);
+                    });
+            }
+            else
+            {
+                using (var address = il.NewLocal<int>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    LoadOperand(0);
+                    LoadOperand(1);
+                    il.Math.Add();
+                    address.Store();
 
-                LoadByte(address);
-                value.Store();
+                    LoadByte(address);
+                    value.Store();
 
-                StoreVariable(currentInstruction.StoreVariable, value);
+                    StoreVariable(currentInstruction.StoreVariable, value);
+                }
             }
         }
 
@@ -244,16 +261,12 @@ namespace ZDebug.Compiler
             if (addressOp.Kind != OperandKind.Variable &&
                 offsetOp.Kind != OperandKind.Variable)
             {
-                // OPTIMIZE: Remove the need for 'value' below.
-                using (var value = il.NewLocal<ushort>())
-                {
-                    var address = addressOp.Value + (offsetOp.Value * 2);
-
-                    LoadWord(address);
-                    value.Store();
-
-                    StoreVariable(currentInstruction.StoreVariable, value);
-                }
+                StoreVariable(currentInstruction.StoreVariable,
+                    valueLoader: () =>
+                    {
+                        var address = addressOp.Value + (offsetOp.Value * 2);
+                        LoadWord(address);
+                    });
             }
             else
             {
