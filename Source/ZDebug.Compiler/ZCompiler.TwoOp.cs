@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ZDebug.Core.Instructions;
-using System.Reflection.Emit;
-using ZDebug.Compiler.Generate;
+﻿using ZDebug.Compiler.Generate;
 
 namespace ZDebug.Compiler
 {
@@ -139,14 +133,11 @@ namespace ZDebug.Compiler
         private void op_je()
         {
             using (var x = il.NewLocal<ushort>())
-            using (var result = il.NewLocal<bool>())
             {
                 LoadOperand(0);
                 x.Store();
 
-                il.Load(0);
-                result.Store();
-
+                var success = il.NewLabel();
                 var done = il.NewLabel();
 
                 for (int j = 1; j < currentInstruction.OperandCount; j++)
@@ -155,18 +146,22 @@ namespace ZDebug.Compiler
                     x.Load();
 
                     il.Compare.Equal();
-                    result.Store();
 
                     // no need to write a branch for the last test
                     if (j < currentInstruction.OperandCount - 1)
                     {
-                        result.Load();
-                        done.BranchIf(Condition.True, @short: true);
+                        success.BranchIf(Condition.True, @short: true);
+                    }
+                    else
+                    {
+                        done.Branch(@short: true);
                     }
                 }
 
+                success.Mark();
+                il.Load(1);
+
                 done.Mark();
-                result.Load();
                 Branch();
             }
         }
