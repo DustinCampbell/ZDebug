@@ -292,7 +292,7 @@ namespace ZDebug.Compiler
             {
                 il.Emit(OpCodes.Ldloc, sp);
                 il.Emit(OpCodes.Ldind_I4);
-                il.Load(ZMachine.STACK_SIZE - 1);
+                il.Load(CompiledZMachine.STACK_SIZE - 1);
                 il.Compare.Equal();
 
                 var ok = il.NewLabel();

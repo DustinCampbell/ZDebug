@@ -202,7 +202,7 @@ namespace ZDebug.Core
             get { return checksum; }
         }
 
-        internal ushort ActualChecksum
+        public ushort ActualChecksum
         {
             get { return actualChecksum; }
         }

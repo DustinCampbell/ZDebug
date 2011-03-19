@@ -6,7 +6,7 @@ namespace ZDebug.Core.Execution
 {
     public abstract partial class ZMachine
     {
-        protected class OutputStreamCollection
+        public class OutputStreamCollection
         {
             private readonly Story story;
             private readonly byte[] memory;
@@ -80,7 +80,7 @@ namespace ZDebug.Core.Execution
                 memory.WriteWord(0x10, flags2);
             }
 
-            public void SelectMemoryStream(byte[] memory, int address)
+            public void SelectMemoryStream(int address)
             {
                 if (memoryStreams.Count == 16)
                 {

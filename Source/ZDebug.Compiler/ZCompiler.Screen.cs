@@ -11,7 +11,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             il.Load(ch);
 
-            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<char>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<char>());
             il.CallVirt(print);
         }
 
@@ -22,7 +22,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             ch.Load();
 
-            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<char>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<char>());
             il.CallVirt(print);
         }
 
@@ -40,7 +40,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             il.Load(text);
 
-            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<string>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<string>());
             il.CallVirt(print);
         }
 
@@ -49,7 +49,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             text.Load();
 
-            var print = Reflection<ZMachine.OutputStreams>.GetMethod("Print", Types.One<string>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<string>());
             il.CallVirt(print);
         }
 
@@ -193,7 +193,7 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
 
-            var selectScreenStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectScreenStream", Types.None);
+            var selectScreenStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectScreenStream", Types.None);
             il.Call(selectScreenStream);
         }
 
@@ -201,7 +201,7 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
 
-            var deselectScreenStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectScreenStream", Types.None);
+            var deselectScreenStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectScreenStream", Types.None);
             il.Call(deselectScreenStream);
         }
 
@@ -209,7 +209,7 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
 
-            var selectTranscriptStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectTranscriptStream", Types.None);
+            var selectTranscriptStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectTranscriptStream", Types.None);
             il.Call(selectTranscriptStream);
         }
 
@@ -217,7 +217,7 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
 
-            var deselectTranscriptStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectTranscriptStream", Types.None);
+            var deselectTranscriptStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectTranscriptStream", Types.None);
             il.Call(deselectTranscriptStream);
         }
 
@@ -226,7 +226,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             address.Load();
 
-            var selectMemoryStream = Reflection<ZMachine.OutputStreams>.GetMethod("SelectMemoryStream", Types.One<int>());
+            var selectMemoryStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectMemoryStream", Types.One<int>());
             il.Call(selectMemoryStream);
         }
 
@@ -234,7 +234,7 @@ namespace ZDebug.Compiler
         {
             outputStreams.Load();
 
-            var deselectMemoryStream = Reflection<ZMachine.OutputStreams>.GetMethod("DeselectMemoryStream", Types.None);
+            var deselectMemoryStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectMemoryStream", Types.None);
             il.Call(deselectMemoryStream);
         }
     }

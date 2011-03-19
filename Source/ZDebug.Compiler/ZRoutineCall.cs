@@ -3,11 +3,11 @@ namespace ZDebug.Compiler
 {
     public sealed class ZRoutineCall
     {
-        private readonly ZMachine machine;
+        private readonly CompiledZMachine machine;
         private readonly ZRoutine routine;
         private ZCompilerResult compilationResult;
 
-        public ZRoutineCall(ZRoutine routine, ZMachine machine)
+        public ZRoutineCall(ZRoutine routine, CompiledZMachine machine)
         {
             this.machine = machine;
             this.routine = routine;

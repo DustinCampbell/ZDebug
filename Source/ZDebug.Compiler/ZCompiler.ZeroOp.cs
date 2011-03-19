@@ -56,7 +56,7 @@ namespace ZDebug.Compiler
 
         private void op_verify()
         {
-            var verify = Reflection<ZMachine>.GetMethod("Verify", @public: false);
+            var verify = Reflection<CompiledZMachine>.GetMethod("Verify", @public: false);
 
             il.LoadArg(0);
             il.Call(verify);

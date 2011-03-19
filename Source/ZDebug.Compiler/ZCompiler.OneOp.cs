@@ -202,7 +202,7 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             LoadOperand(0);
 
-            var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
             il.Call(readZText);
             PrintText();
         }
@@ -213,7 +213,7 @@ namespace ZDebug.Compiler
             var op = GetOperand(0);
             LoadUnpackedStringAddress(op);
 
-            var readZText = Reflection<ZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
             il.Call(readZText);
             PrintText();
         }
@@ -223,7 +223,7 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             ReadObjectShortNameFromOperand(0);
 
-            var convertZText = Reflection<ZMachine>.GetMethod("ConvertZText", Types.One<ushort[]>(), @public: false);
+            var convertZText = Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.One<ushort[]>(), @public: false);
             il.Call(convertZText);
             PrintText();
         }

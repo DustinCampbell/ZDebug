@@ -755,7 +755,7 @@ namespace ZDebug.Core.Execution
 
                 case 3:
                     ushort address = operandValues[1];
-                    this.OutputStreams.SelectMemoryStream(this.Memory, address);
+                    this.OutputStreams.SelectMemoryStream(address);
                     break;
 
                 case -1:

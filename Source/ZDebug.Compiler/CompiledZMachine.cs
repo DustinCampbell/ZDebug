@@ -1,6 +1,7 @@
 ﻿using System;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core;
+using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Routines;
@@ -9,19 +10,11 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
-    public sealed partial class ZMachine
+    public sealed partial class CompiledZMachine : ZMachine
     {
         internal const int STACK_SIZE = 32768;
 
-        private readonly Story story;
-        private readonly byte[] memory;
-        private readonly IScreen screen;
         private readonly IZMachineProfiler profiler;
-        private readonly OutputStreams outputStreams;
-        private readonly ZText ztext;
-        private readonly byte version;
-
-        private readonly ushort actualChecksum;
 
         // routine state
         private readonly ushort[] stack;
@@ -49,7 +42,6 @@ namespace ZDebug.Compiler
         private readonly byte objectAttributeCount;
 
         private readonly ushort dictionaryAddress;
-        private readonly ushort globalVariableTableAddress;
 
         private readonly int packResolution;
         private readonly int routinesOffset;
@@ -59,26 +51,13 @@ namespace ZDebug.Compiler
         private readonly IntegerMap<ZRoutineCall> addressToRoutineCallMap;
         private readonly IntegerMap<ZCompilerResult> compilationResults;
 
-        private Random random;
-
         private int currentAddress = -1;
         private volatile bool inputReceived;
 
-        public ZMachine(Story story, IScreen screen = null, IZMachineProfiler profiler = null)
+        public CompiledZMachine(Story story, IZMachineProfiler profiler = null)
+            : base(story)
         {
-            this.story = story;
-            this.memory = story.Memory;
-            this.screen = screen;
             this.profiler = profiler;
-            this.outputStreams = new OutputStreams(memory);
-            if (screen != null)
-            {
-                this.outputStreams.RegisterScreen(screen);
-            }
-            this.ztext = new ZText(memory);
-            this.version = memory.ReadByte(0x00);
-
-            this.actualChecksum = CalculateChecksum();
 
             this.stack = new ushort[STACK_SIZE];
             this.sp = -1;
@@ -93,103 +72,31 @@ namespace ZDebug.Compiler
             this.arguments = new ushort[7];
             this.argumentCount = 0;
 
-            this.objectTableAddress = memory.ReadWord(0x0a);
-            this.propertyDefaultsTableSize = (byte)(this.version < 4 ? 31 : 63);
+            this.objectTableAddress = this.Memory.ReadWord(0x0a);
+            this.propertyDefaultsTableSize = (byte)(this.Version < 4 ? 31 : 63);
             this.objectEntriesAddress = (ushort)(this.objectTableAddress + (this.propertyDefaultsTableSize * 2));
-            this.objectEntrySize = (byte)(this.version < 4 ? 9 : 14);
-            this.objectParentOffset = (byte)(this.version < 4 ? 4 : 6);
-            this.objectSiblingOffset = (byte)(this.version < 4 ? 5 : 8);
-            this.objectChildOffset = (byte)(this.version < 4 ? 6 : 10);
-            this.objectPropertyTableAddressOffset = (byte)(this.version < 4 ? 7 : 12);
-            this.objectAttributeByteCount = (byte)(version < 4 ? 4 : 6);
-            this.objectAttributeCount = (byte)(version < 4 ? 32 : 48);
+            this.objectEntrySize = (byte)(this.Version < 4 ? 9 : 14);
+            this.objectParentOffset = (byte)(this.Version < 4 ? 4 : 6);
+            this.objectSiblingOffset = (byte)(this.Version < 4 ? 5 : 8);
+            this.objectChildOffset = (byte)(this.Version < 4 ? 6 : 10);
+            this.objectPropertyTableAddressOffset = (byte)(this.Version < 4 ? 7 : 12);
+            this.objectAttributeByteCount = (byte)(this.Version < 4 ? 4 : 6);
+            this.objectAttributeCount = (byte)(this.Version < 4 ? 32 : 48);
 
-            this.dictionaryAddress = memory.ReadWord(0x08);
-            this.globalVariableTableAddress = memory.ReadWord(0x0c);
+            this.dictionaryAddress = this.Memory.ReadWord(0x08);
 
-            this.packResolution = this.version < 4 ? 2 : this.version < 8 ? 4 : 8;
-            this.routinesOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x28) : 0;
-            this.stringsOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x2a) : 0;
+            this.packResolution = this.Version < 4 ? 2 : this.Version < 8 ? 4 : 8;
+            this.routinesOffset = (this.Version >= 6 && this.Version <= 7) ? Memory.ReadWord(0x28) : 0;
+            this.stringsOffset = (this.Version >= 6 && this.Version <= 7) ? Memory.ReadWord(0x2a) : 0;
 
             this.routineTable = new ZRoutineTable(story);
             this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>();
             this.compilationResults = new IntegerMap<ZCompilerResult>();
-
-            this.random = new Random();
-
-            if (version >= 4)
-            {
-                memory.WriteByte(0x20, screen.ScreenHeightInLines);
-                memory.WriteByte(0x21, screen.ScreenWidthInColumns);
-            }
-
-            if (version >= 5)
-            {
-                memory.WriteWord(0x24, screen.ScreenHeightInUnits);
-                memory.WriteWord(0x22, screen.ScreenWidthInUnits);
-
-                if (version == 6)
-                {
-                    memory.WriteByte(0x26, screen.FontHeightInUnits);
-                }
-                else
-                {
-                    memory.WriteByte(0x27, screen.FontHeightInUnits);
-                }
-
-                if (version == 6)
-                {
-                    memory.WriteByte(0x27, screen.FontWidthInUnits);
-                }
-                else
-                {
-                    memory.WriteByte(0x26, screen.FontWidthInUnits);
-                }
-            }
-        }
-
-        private int ReadFileSize()
-        {
-            var fileSize = memory.ReadWord(0x1a);
-
-            if (version >= 1 && version <= 3)
-            {
-                return fileSize * 2;
-            }
-            else if (version >= 4 && version <= 5)
-            {
-                return fileSize * 4;
-            }
-            else if (version >= 6 && version <= 8)
-            {
-                return fileSize * 8;
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid version number: " + version);
-            }
-        }
-
-        private ushort CalculateChecksum()
-        {
-            var size = Math.Min(ReadFileSize(), memory.Length);
-            ushort result = 0;
-            for (int i = 0x40; i < size; i++)
-            {
-                result += memory.ReadByte(i);
-            }
-
-            return result;
-        }
-
-        private ushort ReadChecksum()
-        {
-            return memory.ReadWord(0x1c);
         }
 
         internal bool Verify()
         {
-            return actualChecksum == ReadChecksum();
+            return this.Story.ActualChecksum == Header.ReadChecksum(this.Memory);
         }
 
         internal void PushFrame(int address)
@@ -572,16 +479,16 @@ namespace ZDebug.Compiler
 
         internal string ReadZText(int address)
         {
-            var zwords = ztext.ReadZWords(address);
+            var zwords = this.ZText.ReadZWords(address);
             return ConvertZText(zwords);
         }
 
         internal int NextRandom(short range)
         {
             // range should be inclusive, so we need to subtract 1 since System.Random.Next makes it exclusive
-            const int minValue = 1;
-            int maxValue = Math.Max(minValue, range - 1);
-            var result = random.Next(minValue, maxValue);
+            const ushort minValue = 1;
+            ushort maxValue = Math.Max(minValue, (ushort)(range - 1));
+            var result = GenerateRandomNumber(minValue, maxValue);
 
             return result;
         }
@@ -590,68 +497,63 @@ namespace ZDebug.Compiler
         {
             if (range == 0)
             {
-                random = new Random((int)DateTime.Now.Ticks);
+                SetRandomSeed((int)DateTime.Now.Ticks);
             }
             else
             {
-                random = new Random(+range);
+                SetRandomSeed(+range);
             }
-        }
-
-        public void SetRandomSeed(int seed)
-        {
-            random = new Random(seed);
         }
 
         internal string ConvertZText(ushort[] zwords)
         {
-            return ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            return this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
         internal void Read_Z3(ushort textBuffer, ushort parseBuffer)
         {
             inputReceived = false;
 
-            screen.ShowStatus();
+            this.Screen.ShowStatus();
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
                 }
 
-                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+                this.Memory.WriteByte(textBuffer + 1 + text.Length, 0);
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+                ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionaryAddress);
 
-                byte maxWords = memory.ReadByte(parseBuffer);
+                byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                memory.WriteByte(parseBuffer + 1, parsedWords);
+                this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                 for (int i = 0; i < parsedWords; i++)
                 {
                     ZCommandToken token = tokens[i];
 
-                    ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                    ushort address = this.ZText.LookupWord(token.Text, dictionaryAddress);
                     if (address > 0)
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                     }
                     else
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                     }
 
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
 
                 inputReceived = true;
@@ -668,44 +570,44 @@ namespace ZDebug.Compiler
 
             inputReceived = false;
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
                 }
 
-                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+                this.Memory.WriteByte(textBuffer + 1 + text.Length, 0);
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+                ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionaryAddress);
 
-                byte maxWords = memory.ReadByte(parseBuffer);
+                byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                memory.WriteByte(parseBuffer + 1, parsedWords);
+                this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                 for (int i = 0; i < parsedWords; i++)
                 {
                     ZCommandToken token = tokens[i];
 
-                    ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                    ushort address = this.ZText.LookupWord(token.Text, dictionaryAddress);
                     if (address > 0)
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                     }
                     else
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                     }
 
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
 
                 inputReceived = true;
@@ -723,48 +625,48 @@ namespace ZDebug.Compiler
             inputReceived = false;
             ushort result = 0;
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
-                byte existingTextCount = memory.ReadByte(textBuffer + 1);
+                byte existingTextCount = this.Memory.ReadByte(textBuffer + 1);
 
-                memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
+                this.Memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
                 }
 
                 if (parseBuffer > 0)
                 {
                     // TODO: Use ztext.TokenizeLine.
 
-                    ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionaryAddress);
+                    ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionaryAddress);
 
-                    byte maxWords = memory.ReadByte(parseBuffer);
+                    byte maxWords = this.Memory.ReadByte(parseBuffer);
                     byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                    memory.WriteByte(parseBuffer + 1, parsedWords);
+                    this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                     for (int i = 0; i < parsedWords; i++)
                     {
                         ZCommandToken token = tokens[i];
 
-                        ushort address = ztext.LookupWord(token.Text, dictionaryAddress);
+                        ushort address = this.ZText.LookupWord(token.Text, dictionaryAddress);
                         if (address > 0)
                         {
-                            memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                         }
                         else
                         {
-                            memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                         }
 
-                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
                     }
                 }
 
@@ -786,7 +688,7 @@ namespace ZDebug.Compiler
             inputReceived = false;
             ushort result = 0;
 
-            screen.ReadChar(ch =>
+            this.Screen.ReadChar(ch =>
             {
                 result = (ushort)ch;
                 inputReceived = true;
@@ -801,12 +703,7 @@ namespace ZDebug.Compiler
 
         internal void Tokenize(ushort textBuffer, ushort parseBuffer, ushort dictionary, bool flag)
         {
-            ztext.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
-        }
-
-        internal void Tick()
-        {
-
+            this.ZText.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
         }
 
         public int UnpackRoutineAddress(ushort byteAddress)
@@ -821,8 +718,8 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
-            var mainAddress = memory.ReadWord(0x06);
-            if (version != 6)
+            var mainAddress = this.Memory.ReadWord(0x06);
+            if (this.Version != 6)
             {
                 mainAddress--;
             }
@@ -839,11 +736,6 @@ namespace ZDebug.Compiler
         public bool Profiling
         {
             get { return profiler != null; }
-        }
-
-        public byte Version
-        {
-            get { return version; }
         }
 
         public ushort ObjectTableAddress
@@ -894,11 +786,6 @@ namespace ZDebug.Compiler
         public byte ObjectAttributeCount
         {
             get { return objectAttributeCount; }
-        }
-
-        public ushort GlobalVariableTableAddress
-        {
-            get { return globalVariableTableAddress; }
         }
 
         public int RoutinesOffset

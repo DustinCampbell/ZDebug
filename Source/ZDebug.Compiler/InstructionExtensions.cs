@@ -186,7 +186,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public static string PrettyPrint(this Instruction i, ZMachine machine)
+        public static string PrettyPrint(this Instruction i, CompiledZMachine machine)
         {
             var builder = new StringBuilder();
 

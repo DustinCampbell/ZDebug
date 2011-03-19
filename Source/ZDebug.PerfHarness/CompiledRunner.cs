@@ -26,11 +26,12 @@ namespace ZDebug.PerfHarness
 
             var bytes = File.ReadAllBytes(StoryFilePath);
 
-            ZMachine machine = null;
+            CompiledZMachine machine = null;
             Action doneAction = () => { machine.Stop(); };
 
             var mockScreen = new MockScreen(ScriptFilePath, doneAction);
-            machine = new ZMachine(Story.FromBytes(bytes), mockScreen, profile ? this : null);
+            machine = new CompiledZMachine(Story.FromBytes(bytes), profile ? this : null);
+            machine.RegisterScreen(mockScreen);
             machine.SetRandomSeed(42);
 
             MarkProfile("Running...");

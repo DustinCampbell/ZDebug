@@ -3,7 +3,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Basics
 {
-    internal static class Header
+    public static class Header
     {
         // offsets...
         private const int VersionIndex = 0x00;

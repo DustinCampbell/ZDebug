@@ -18,7 +18,7 @@ namespace ZDebug.Compiler
     public partial class ZCompiler
     {
         private readonly ZRoutine routine;
-        private readonly ZMachine machine;
+        private readonly CompiledZMachine machine;
         private bool debugging;
 
         private ILBuilder il;
@@ -37,7 +37,7 @@ namespace ZDebug.Compiler
         private LocalBuilder sp;
         private IArrayLocal locals;
 
-        private ZCompiler(ZRoutine routine, ZMachine machine, bool debugging = false)
+        private ZCompiler(ZRoutine routine, CompiledZMachine machine, bool debugging = false)
         {
             this.routine = routine;
             this.machine = machine;
@@ -56,8 +56,8 @@ namespace ZDebug.Compiler
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
-                parameterTypes: Types.Two<ZMachine, ZRoutineCall[]>(),
-                owner: typeof(ZMachine),
+                parameterTypes: Types.Two<CompiledZMachine, ZRoutineCall[]>(),
+                owner: typeof(CompiledZMachine),
                 skipVisibility: true);
 
             var ilGen = dm.GetILGenerator();
@@ -97,11 +97,11 @@ namespace ZDebug.Compiler
                     this.usesStack = true;
 
                     // stack...
-                    var stackField = Reflection<ZMachine>.GetField("stack", @public: false);
+                    var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
                     this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
 
                     // sp...
-                    var spField = Reflection<ZMachine>.GetField("sp", @public: false);
+                    var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
                     var int32ByRefType = typeof(int).MakeByRefType();
                     this.sp = ilGen.DeclareLocal(int32ByRefType);
                     il.Emit(OpCodes.Ldarg_0);
@@ -119,7 +119,7 @@ namespace ZDebug.Compiler
                 {
                     this.usesMemory = true;
 
-                    var memoryField = Reflection<ZMachine>.GetField("memory", @public: false);
+                    var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
                     this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
                     break;
@@ -128,7 +128,7 @@ namespace ZDebug.Compiler
 
             if (routine.Locals.Length > 0)
             {
-                var localsField = Reflection<ZMachine>.GetField("locals", @public: false);
+                var localsField = Reflection<CompiledZMachine>.GetField("locals", @public: false);
                 this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
             }
 
@@ -137,7 +137,7 @@ namespace ZDebug.Compiler
             {
                 if (i.UsesScreen())
                 {
-                    var screenField = Reflection<ZMachine>.GetField("screen", @public: false);
+                    var screenField = Reflection<ZMachine>.GetField("Screen", @public: false);
                     this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
                     break;
                 }
@@ -148,7 +148,7 @@ namespace ZDebug.Compiler
             {
                 if (i.UsesOutputStreams())
                 {
-                    var outputStreamsField = Reflection<ZMachine>.GetField("outputStreams", @public: false);
+                    var outputStreamsField = Reflection<ZMachine>.GetField("OutputStreams", @public: false);
                     this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
                     break;
                 }
@@ -187,7 +187,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
 
-                var enterRoutine = Reflection<ZMachine>.GetMethod("EnterRoutine", Types.One<int>(), @public: false);
+                var enterRoutine = Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.One<int>(), @public: false);
                 il.Call(enterRoutine);
             }
         }
@@ -199,7 +199,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
 
-                var exitRoutine = Reflection<ZMachine>.GetMethod("ExitRoutine", Types.One<int>(), @public: false);
+                var exitRoutine = Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.One<int>(), @public: false);
                 il.Call(exitRoutine);
             }
         }
@@ -211,7 +211,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(currentInstruction.Address);
 
-                var executingInstruction = Reflection<ZMachine>.GetMethod("ExecutingInstruction", Types.One<int>(), @public: false);
+                var executingInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.One<int>(), @public: false);
                 il.Call(executingInstruction);
             }
         }
@@ -222,7 +222,7 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0);
 
-                var executedInstruction = Reflection<ZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false);
+                var executedInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false);
                 il.Call(executedInstruction);
             }
         }
@@ -233,7 +233,7 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0);
 
-                var quit = Reflection<ZMachine>.GetMethod("Quit", Types.None, @public: false);
+                var quit = Reflection<CompiledZMachine>.GetMethod("Quit", Types.None, @public: false);
                 il.Call(quit);
 
                 Profiler_ExecutedInstruction();
@@ -246,7 +246,7 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0);
 
-                var interrupt = Reflection<ZMachine>.GetMethod("Interrupt", Types.None, @public: false);
+                var interrupt = Reflection<CompiledZMachine>.GetMethod("Interrupt", Types.None, @public: false);
                 il.Call(interrupt);
             }
         }
@@ -289,7 +289,7 @@ namespace ZDebug.Compiler
                 }
                 var callTypes = callTypeList.ToArray();
 
-                var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
+                var call = Reflection<CompiledZMachine>.GetMethod(callName, callTypes, @public: false);
 
                 il.Call(call);
             }
@@ -337,7 +337,7 @@ namespace ZDebug.Compiler
                 }
                 var callTypes = callTypeList.ToArray();
 
-                var call = Reflection<ZMachine>.GetMethod(callName, callTypes, @public: false);
+                var call = Reflection<CompiledZMachine>.GetMethod(callName, callTypes, @public: false);
 
                 il.Call(call);
 
@@ -364,7 +364,7 @@ namespace ZDebug.Compiler
 
             il.LoadArg(0);
 
-            var popFrame = Reflection<ZMachine>.GetMethod("PopFrame", @public: false);
+            var popFrame = Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false);
             il.Call(popFrame);
 
             if (value != null)
@@ -869,7 +869,7 @@ namespace ZDebug.Compiler
                     currentInstruction.Opcode.Number));
         }
 
-        public static ZCompilerResult Compile(ZRoutine routine, ZMachine machine)
+        public static ZCompilerResult Compile(ZRoutine routine, CompiledZMachine machine)
         {
             return new ZCompiler(routine, machine).Compile();
         }

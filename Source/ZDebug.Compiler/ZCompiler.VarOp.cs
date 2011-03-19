@@ -39,7 +39,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
 
             il.LoadArg(0);
-            var argumentCountField = Reflection<ZMachine>.GetField("argumentCount", @public: false);
+            var argumentCountField = Reflection<CompiledZMachine>.GetField("argumentCount", @public: false);
             il.Load(argumentCountField);
 
             il.Compare.AtMost();
@@ -241,7 +241,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0);
                 range.Load();
 
-                var nextRandom = Reflection<ZMachine>.GetMethod("NextRandom", Types.One<short>(), @public: false);
+                var nextRandom = Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.One<short>(), @public: false);
                 il.Call(nextRandom);
                 done.Branch(@short: true);
 
@@ -250,7 +250,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0);
                 range.Load();
 
-                var seedRandom = Reflection<ZMachine>.GetMethod("SeedRandom", Types.One<short>(), @public: false);
+                var seedRandom = Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.One<short>(), @public: false);
                 il.Call(seedRandom);
                 il.Load(0);
 
@@ -476,7 +476,7 @@ namespace ZDebug.Compiler
             {
                 il.LoadArg(0);
 
-                var read = Reflection<ZMachine>.GetMethod("ReadChar", Types.None, @public: false);
+                var read = Reflection<CompiledZMachine>.GetMethod("ReadChar", Types.None, @public: false);
                 il.Call(read);
 
                 result.Store();
@@ -490,7 +490,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
 
-            var read = Reflection<ZMachine>.GetMethod("Read_Z3", Types.Two<ushort, ushort>(), @public: false);
+            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z3", Types.Two<ushort, ushort>(), @public: false);
             il.Call(read);
         }
 
@@ -505,7 +505,7 @@ namespace ZDebug.Compiler
                 il.RuntimeError("Timed input not supported");
             }
 
-            var read = Reflection<ZMachine>.GetMethod("Read_Z4", Types.Two<ushort, ushort>(), @public: false);
+            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z4", Types.Two<ushort, ushort>(), @public: false);
             il.Call(read);
         }
 
@@ -530,7 +530,7 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                var read = Reflection<ZMachine>.GetMethod("Read_Z5", Types.Two<ushort, ushort>(), @public: false);
+                var read = Reflection<CompiledZMachine>.GetMethod("Read_Z5", Types.Two<ushort, ushort>(), @public: false);
                 il.Call(read);
 
                 result.Store();
@@ -568,7 +568,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            var tokenize = Reflection<ZMachine>.GetMethod("Tokenize", Types.Four<ushort, ushort, ushort, bool>(), @public: false);
+            var tokenize = Reflection<CompiledZMachine>.GetMethod("Tokenize", Types.Four<ushort, ushort, ushort, bool>(), @public: false);
             il.Call(tokenize);
         }
     }

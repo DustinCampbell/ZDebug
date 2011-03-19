@@ -7,11 +7,12 @@ namespace ZDebug.Core.Execution
 {
     public abstract partial class ZMachine
     {
+        private readonly byte version;
+        private readonly ushort globalVariableTableAddress;
+
         protected readonly Story Story;
         protected readonly byte[] Memory;
-        protected readonly byte Version;
         protected readonly ZText ZText;
-        protected readonly ushort GlobalVariableTableAddress;
 
         protected readonly OutputStreamCollection OutputStreams;
         protected IScreen Screen;
@@ -24,9 +25,10 @@ namespace ZDebug.Core.Execution
         {
             this.Story = story;
             this.Memory = story.Memory;
-            this.Version = story.Version;
+            this.version = story.Version;
             this.ZText = new ZText(this.Memory);
-            this.GlobalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
+
+            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
 
             this.OutputStreams = new OutputStreamCollection(story);
             RegisterScreen(NullScreen.Instance);
@@ -36,13 +38,13 @@ namespace ZDebug.Core.Execution
 
         private void SetScreenDimensions()
         {
-            if (this.Version >= 4)
+            if (this.version >= 4)
             {
                 Header.WriteScreenHeightInLines(this.Memory, this.Screen.ScreenHeightInLines);
                 Header.WriteScreenWidthInColumns(this.Memory, this.Screen.ScreenWidthInColumns);
             }
 
-            if (this.Version >= 5)
+            if (this.version >= 5)
             {
                 Header.WriteScreenHeightInUnits(this.Memory, this.Screen.ScreenHeightInUnits);
                 Header.WriteScreenWidthInUnits(this.Memory, this.Screen.ScreenWidthInUnits);
@@ -57,7 +59,7 @@ namespace ZDebug.Core.Execution
 
             SetScreenDimensions();
 
-            if (this.Version >= 5)
+            if (this.version >= 5)
             {
                 this.Memory.WriteByte(0x2c, (byte)this.Screen.DefaultBackgroundColor);
                 this.Memory.WriteByte(0x2d, (byte)this.Screen.DefaultForegroundColor);
@@ -84,6 +86,22 @@ namespace ZDebug.Core.Execution
         protected ushort GenerateRandomNumber(ushort minValue, ushort maxValue)
         {
             return (ushort)random.Next(minValue, maxValue);
+        }
+
+        public byte Version
+        {
+            get
+            {
+                return this.version;
+            }
+        }
+
+        public ushort GlobalVariableTableAddress
+        {
+            get
+            {
+                return globalVariableTableAddress;
+            }
         }
     }
 }
