@@ -793,7 +793,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
 
             ushort[] zwords = ZText.ReadZWords(this.Memory, byteAddress);
-            string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            string text = this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
         }
@@ -824,7 +824,7 @@ namespace ZDebug.Core.Execution
             int address = this.Story.UnpackStringAddress(byteAddress);
 
             ushort[] zwords = ZText.ReadZWords(this.Memory, address);
-            string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            string text = this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
         }
@@ -965,7 +965,7 @@ namespace ZDebug.Core.Execution
 
                     ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
-                    ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
+                    ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionary);
 
                     byte maxWords = this.Memory.ReadByte(parseBuffer);
                     byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
@@ -976,7 +976,7 @@ namespace ZDebug.Core.Execution
                     {
                         ZCommandToken token = tokens[i];
 
-                        ushort address = ztext.LookupWord(token.Text, dictionary);
+                        ushort address = this.ZText.LookupWord(token.Text, dictionary);
                         if (address > 0)
                         {
                             this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
@@ -1020,7 +1020,7 @@ namespace ZDebug.Core.Execution
 
                 ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
-                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
+                ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionary);
 
                 byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
@@ -1031,7 +1031,7 @@ namespace ZDebug.Core.Execution
                 {
                     ZCommandToken token = tokens[i];
 
-                    ushort address = ztext.LookupWord(token.Text, dictionary);
+                    ushort address = this.ZText.LookupWord(token.Text, dictionary);
                     if (address > 0)
                     {
                         this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
@@ -1078,7 +1078,7 @@ namespace ZDebug.Core.Execution
 
                 ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
-                ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
+                ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionary);
 
                 byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
@@ -1089,7 +1089,7 @@ namespace ZDebug.Core.Execution
                 {
                     ZCommandToken token = tokens[i];
 
-                    ushort address = ztext.LookupWord(token.Text, dictionary);
+                    ushort address = this.ZText.LookupWord(token.Text, dictionary);
                     if (address > 0)
                     {
                         this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
@@ -1263,7 +1263,7 @@ namespace ZDebug.Core.Execution
                 ? operandValues[3] != 0
                 : false;
 
-            ztext.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
+            this.ZText.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
         }
 
         internal void op_verify()

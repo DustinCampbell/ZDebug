@@ -11,7 +11,6 @@ namespace ZDebug.Core.Execution
     {
         private const int stackSize = 32768;
 
-        private readonly ZText ztext;
         private readonly Opcode[] opcodes;
 
         private int pc;
@@ -61,7 +60,6 @@ namespace ZDebug.Core.Execution
         public Processor(Story story)
             : base(story)
         {
-            this.ztext = new ZText(this.Memory);
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
 
@@ -452,7 +450,7 @@ namespace ZDebug.Core.Execution
 
             var zwords = this.Memory.ReadWords(ref pc, count);
 
-            return ztext.ZWordsAsString(zwords, ZTextFlags.All);
+            return this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
         }
 
         private ushort GetObjectAddress(ushort objNum)
