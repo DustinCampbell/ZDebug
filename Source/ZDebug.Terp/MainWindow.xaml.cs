@@ -605,8 +605,8 @@ namespace ZDebug.Terp
                     {
                         reader.Address = timing.Item1;
                         var i = reader.NextInstruction();
-                        var totalTime = timing.Item2.Aggregate(TimeSpan.Zero, (r, t) => r + t);
-                        return Tuple.Create(i, totalTime, timing.Item2.Count());
+                        var totalTime = timing.Item2.Item2;
+                        return Tuple.Create(i, totalTime, timing.Item2.Item1);
                     });
 
                     var totalTimesByOpcodeName = from i in instructions

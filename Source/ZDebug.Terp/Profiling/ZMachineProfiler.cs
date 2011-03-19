@@ -13,7 +13,7 @@ namespace ZDebug.Terp.Profiling
         private readonly Stack<Call> callStack;
         private TimeSpan runningTime;
 
-        private readonly Dictionary<int, List<TimeSpan>> instructionTimings;
+        private readonly Dictionary<int, Tuple<int, TimeSpan>> instructionTimings;
         private Stopwatch instructionTimer;
 
         private int routinesExecuted;
@@ -26,7 +26,7 @@ namespace ZDebug.Terp.Profiling
             this.calls = new List<Call>();
             this.callStack = new Stack<Call>();
 
-            this.instructionTimings = new Dictionary<int, List<TimeSpan>>();
+            this.instructionTimings = new Dictionary<int, Tuple<int, TimeSpan>>();
             this.instructionTimer = new Stopwatch();
         }
 
@@ -73,14 +73,17 @@ namespace ZDebug.Terp.Profiling
         {
             instructionTimer.Stop();
 
-            List<TimeSpan> timingList;
-            if (!instructionTimings.TryGetValue(address, out timingList))
+            Tuple<int, TimeSpan> timings;
+            if (instructionTimings.TryGetValue(address, out timings))
             {
-                timingList = new List<TimeSpan>();
-                instructionTimings.Add(address, timingList);
+                timings = Tuple.Create(timings.Item1 + 1, timings.Item2.Add(instructionTimer.Elapsed));
+            }
+            else
+            {
+                timings = Tuple.Create(1, instructionTimer.Elapsed);
             }
 
-            timingList.Add(instructionTimer.Elapsed);
+            instructionTimings[address] = timings;
 
             instructionsExecuted++;
         }
@@ -167,14 +170,14 @@ namespace ZDebug.Terp.Profiling
             }
         }
 
-        public IEnumerable<Tuple<int, IEnumerable<TimeSpan>>> InstructionTimings
+        public IEnumerable<Tuple<int, Tuple<int, TimeSpan>>> InstructionTimings
         {
             get
             {
                 foreach (var timing in instructionTimings)
                 {
                     var address = timing.Key;
-                    var timings = (IEnumerable<TimeSpan>)timing.Value;
+                    var timings = timing.Value;
                     yield return Tuple.Create(address, timings);
                 }
             }
