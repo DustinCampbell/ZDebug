@@ -584,10 +584,14 @@ namespace ZDebug.Terp
                     var ratios = profiler.CompilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length);
                     var ratio = ratios.Average();
 
+                    var calculatedVariableLoads = profiler.CompilationStatistics.Sum(s => s.CalculatedLoadVariableCount);
+                    var calculatedVariableStores = profiler.CompilationStatistics.Sum(s => s.CalculatedStoreVariableCount);
+
                     elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
                     routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
                     zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
                     routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
+                    calculatedVariables.Text = string.Format("{0:#,#} / {1:#,#}", calculatedVariableLoads, calculatedVariableStores);
                 });
             }
         }

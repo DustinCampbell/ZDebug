@@ -204,12 +204,12 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                LoadVariable(varIndex, indirect: true);
+                CalulatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -221,12 +221,12 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                LoadVariable(varIndex, indirect: true);
+                CalulatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
 
                 value.Load();
                 LoadOperand(1);
@@ -245,12 +245,12 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                LoadVariable(varIndex, indirect: true);
+                CalulatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -262,12 +262,12 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                LoadVariable(varIndex, indirect: true);
+                CalulatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
 
                 value.Load();
                 LoadOperand(1);
@@ -436,7 +436,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                LoadVariable(varIndex, indirect: true);
+                CalulatedLoadVariable(varIndex, indirect: true);
                 result.Store();
                 StoreVariable(currentInstruction.StoreVariable, result);
             }
@@ -522,7 +522,7 @@ namespace ZDebug.Compiler
                 LoadOperand(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -613,7 +613,7 @@ namespace ZDebug.Compiler
                 PopStack();
 
                 value.Store();
-                StoreVariable(varIndex, value, indirect: true);
+                CalculatedStoreVariable(varIndex, value, indirect: true);
             }
 
         }

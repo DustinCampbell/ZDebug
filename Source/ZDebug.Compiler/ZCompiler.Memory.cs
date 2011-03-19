@@ -273,7 +273,7 @@ namespace ZDebug.Compiler
         {
             if (debugging)
             {
-                il.Emit(OpCodes.Ldloc, sp);
+                il.Emit(OpCodes.Ldloc, spRef);
                 il.Emit(OpCodes.Ldind_I4);
                 il.Load(-1);
                 il.Compare.Equal();
@@ -290,7 +290,7 @@ namespace ZDebug.Compiler
         {
             if (debugging)
             {
-                il.Emit(OpCodes.Ldloc, sp);
+                il.Emit(OpCodes.Ldloc, spRef);
                 il.Emit(OpCodes.Ldind_I4);
                 il.Load(CompiledZMachine.STACK_SIZE - 1);
                 il.Compare.Equal();
@@ -310,13 +310,13 @@ namespace ZDebug.Compiler
             stack.LoadElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 });
 
             // decrement sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, spRef);
+            il.Emit(OpCodes.Ldloc, spRef);
             il.Emit(OpCodes.Ldind_I4);
             il.Math.Subtract(1);
             il.Emit(OpCodes.Stind_I4);
@@ -329,7 +329,7 @@ namespace ZDebug.Compiler
             stack.LoadElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 });
         }
@@ -339,8 +339,8 @@ namespace ZDebug.Compiler
             CheckStackFull();
 
             // increment sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, spRef);
+            il.Emit(OpCodes.Ldloc, spRef);
             il.Emit(OpCodes.Ldind_I4);
             il.Math.Add(1);
             il.Emit(OpCodes.Stind_I4);
@@ -348,7 +348,7 @@ namespace ZDebug.Compiler
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 },
                 valueLoader: () => value.Load());
@@ -359,8 +359,8 @@ namespace ZDebug.Compiler
             CheckStackFull();
 
             // increment sp
-            il.Emit(OpCodes.Ldloc, sp);
-            il.Emit(OpCodes.Ldloc, sp);
+            il.Emit(OpCodes.Ldloc, spRef);
+            il.Emit(OpCodes.Ldloc, spRef);
             il.Emit(OpCodes.Ldind_I4);
             il.Math.Add(1);
             il.Emit(OpCodes.Stind_I4);
@@ -368,7 +368,7 @@ namespace ZDebug.Compiler
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 },
                 valueLoader: valueLoader);
@@ -390,7 +390,7 @@ namespace ZDebug.Compiler
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 },
                 valueLoader: () => value.Load());
@@ -403,7 +403,7 @@ namespace ZDebug.Compiler
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, sp);
+                    il.Emit(OpCodes.Ldloc, spRef);
                     il.Emit(OpCodes.Ldind_I4);
                 },
                 valueLoader: valueLoader);
@@ -423,8 +423,8 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(int index)
         {
-            locals.LoadElement(
-                indexLoader: () => il.Load(index));
+            il.Emit(OpCodes.Ldloc, localRefs[index]);
+            il.Emit(OpCodes.Ldind_U2);
         }
 
         /// <summary>
@@ -450,16 +450,15 @@ namespace ZDebug.Compiler
 
         private void StoreLocalVariable(int index, ILocal value)
         {
-            locals.StoreElement(
-                indexLoader: () => il.Load(index),
+            StoreLocalVariable(index,
                 valueLoader: () => value.Load());
         }
 
         private void StoreLocalVariable(int index, CodeBuilder valueLoader)
         {
-            locals.StoreElement(
-                indexLoader: () => il.Load(index),
-                valueLoader: valueLoader);
+            il.Emit(OpCodes.Ldloc, localRefs[index]);
+            valueLoader();
+            il.Emit(OpCodes.Stind_I2);
         }
 
         private void StoreLocalVariable(ILocal index, ILocal value)
@@ -549,7 +548,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void LoadVariable(ILocal variableIndex, bool indirect = false)
+        private void CalulatedLoadVariable(ILocal variableIndex, bool indirect = false)
         {
             il.DebugIndent();
 
@@ -588,7 +587,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (locals != null)
+            if (localRefs != null)
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
@@ -618,6 +617,8 @@ namespace ZDebug.Compiler
             done.Mark();
 
             il.DebugUnindent();
+
+            calculatedLoadVariableCount++;
         }
 
         private void LoadVariable(byte variableIndex, bool indirect = false)
@@ -668,7 +669,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void StoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
+        private void CalculatedStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
         {
             il.DebugIndent();
 
@@ -707,7 +708,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (locals != null)
+            if (localRefs != null)
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
@@ -737,6 +738,8 @@ namespace ZDebug.Compiler
             done.Mark();
 
             il.DebugUnindent();
+
+            calculatedStoreVariableCount++;
         }
 
         private void StoreVariable(byte variableIndex, ILocal value, bool indirect = false)

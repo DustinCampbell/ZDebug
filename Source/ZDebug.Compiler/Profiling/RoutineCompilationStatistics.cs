@@ -10,14 +10,25 @@ namespace ZDebug.Compiler.Profiling
         private readonly int localCount;
         private readonly int size;
         private readonly TimeSpan compileTime;
+        private readonly int calculatedLoadVariableCount;
+        private readonly int calculatedStoreVariableCount;
 
-        public RoutineCompilationStatistics(ZRoutine routine, int opcodeCount, int localCount, int size, TimeSpan compileTime)
+        public RoutineCompilationStatistics(
+            ZRoutine routine,
+            int opcodeCount,
+            int localCount,
+            int size,
+            TimeSpan compileTime,
+            int calculatedLoadVariableCount,
+            int calculatedStoreVariableCount)
         {
             this.routine = routine;
             this.opcodeCount = opcodeCount;
             this.localCount = localCount;
             this.size = size;
             this.compileTime = compileTime;
+            this.calculatedLoadVariableCount = calculatedLoadVariableCount;
+            this.calculatedStoreVariableCount = calculatedStoreVariableCount;
         }
 
         /// <summary>
@@ -58,6 +69,22 @@ namespace ZDebug.Compiler.Profiling
         public TimeSpan CompileTime
         {
             get { return compileTime; }
+        }
+
+        /// <summary>
+        /// The number of calculated variable loads.
+        /// </summary>
+        public int CalculatedLoadVariableCount
+        {
+            get { return calculatedLoadVariableCount; }
+        }
+
+        /// <summary>
+        /// The number of calculated variable stores.
+        /// </summary>
+        public int CalculatedStoreVariableCount
+        {
+            get { return calculatedStoreVariableCount; }
         }
 
         public override string ToString()

@@ -9,10 +9,6 @@ using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 using ZDebug.Core.Utilities;
 
-// Potential optimizations:
-// 
-// * Use ref locals for indexes into the locals array.
-
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
@@ -34,8 +30,13 @@ namespace ZDebug.Compiler
         private bool usesMemory;
 
         private IArrayLocal stack;
-        private LocalBuilder sp;
+        private LocalBuilder spRef;
+
         private IArrayLocal locals;
+        private LocalBuilder[] localRefs;
+
+        private int calculatedLoadVariableCount;
+        private int calculatedStoreVariableCount;
 
         private ZCompiler(ZRoutine routine, CompiledZMachine machine, bool debugging = false)
         {
@@ -103,10 +104,10 @@ namespace ZDebug.Compiler
                     // sp...
                     var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
                     var int32ByRefType = typeof(int).MakeByRefType();
-                    this.sp = ilGen.DeclareLocal(int32ByRefType);
+                    this.spRef = ilGen.DeclareLocal(int32ByRefType);
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldflda, spField);
-                    il.Emit(OpCodes.Stloc, this.sp);
+                    il.Emit(OpCodes.Stloc, this.spRef);
 
                     break;
                 }
@@ -126,10 +127,32 @@ namespace ZDebug.Compiler
                 }
             }
 
-            if (routine.Locals.Length > 0)
+            var localCount = routine.Locals.Length;
+            if (localCount > 0)
             {
+                // correct local byref variables to vector elements of the ZMachine's locals array.
                 var localsField = Reflection<CompiledZMachine>.GetField("locals", @public: false);
                 this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+
+                var ushortByRefType = typeof(ushort).MakeByRefType();
+                this.localRefs = new LocalBuilder[localCount];
+
+                // Try the code below to see if it's more efficent than loading the field once for each local.
+                il.LoadArg(0);
+                il.Load(localsField);
+
+                for (int i = 0; i < localCount - 1; i++)
+                {
+                    il.Duplicate();
+                }
+
+                for (int i = 0; i < localCount; i++)
+                {
+                    this.localRefs[i] = ilGen.DeclareLocal(ushortByRefType);
+                    il.Load(i);
+                    il.Emit(OpCodes.Ldelema, typeof(ushort));
+                    il.Emit(OpCodes.Stloc, this.localRefs[i]);
+                }
             }
 
             // Fourth pass: determine whether screen is used
@@ -175,7 +198,7 @@ namespace ZDebug.Compiler
 
             sw.Stop();
 
-            var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed);
+            var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed, calculatedLoadVariableCount, calculatedStoreVariableCount);
 
             return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
