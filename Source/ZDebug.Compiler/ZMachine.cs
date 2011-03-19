@@ -4,6 +4,7 @@ using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Text;
 using ZDebug.Core.Utilities;
+using ZDebug.Core.Routines;
 
 namespace ZDebug.Compiler
 {

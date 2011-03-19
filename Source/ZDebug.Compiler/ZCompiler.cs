@@ -7,6 +7,7 @@ using ZDebug.Compiler.Profiling;
 using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Routines;
 
 // Potential optimizations:
 // 

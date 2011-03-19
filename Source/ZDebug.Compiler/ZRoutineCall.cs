@@ -1,4 +1,5 @@
-﻿namespace ZDebug.Compiler
+﻿using ZDebug.Core.Routines;
+namespace ZDebug.Compiler
 {
     public sealed class ZRoutineCall
     {
