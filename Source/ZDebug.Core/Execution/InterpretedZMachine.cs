@@ -1,13 +1,12 @@
 ﻿using System;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Instructions;
-using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class Processor : ZMachine
+    public sealed partial class InterpretedZMachine : ZMachine
     {
         private const int stackSize = 32768;
 
@@ -29,9 +28,6 @@ namespace ZDebug.Core.Execution
         private readonly byte childOffset;
         private readonly byte propertyTableAddressOffset;
 
-        private readonly ZObjectTable objectTable;
-        private readonly ushort globalVariableTableAddress;
-
         // stack and routine call state
         private readonly uint[] stack = new uint[stackSize];
         private int sp = -1;
@@ -48,21 +44,12 @@ namespace ZDebug.Core.Execution
 
         private readonly ushort[] empty = new ushort[0];
 
-        private readonly OutputStreams outputStreams;
-        private Random random = new Random();
-        private IScreen screen;
-        private ISoundEngine soundEngine;
-        private IMessageLog messageLog;
-
         private int instructionCount;
         private int callCount;
 
-        public Processor(Story story)
+        public InterpretedZMachine(Story story)
             : base(story)
         {
-            this.objectTable = story.ObjectTable;
-            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
-
             this.objectTableAddress = Header.ReadObjectTableAddress(this.Memory);
             this.maxObjects = (ushort)(this.Version <= 3 ? 255 : 65535);
             this.maxProperties = (byte)(this.Version <= 3 ? 31 : 63);
@@ -76,11 +63,6 @@ namespace ZDebug.Core.Execution
             this.siblingOffset = (byte)(this.Version <= 3 ? 5 : 8);
             this.childOffset = (byte)(this.Version <= 3 ? 6 : 10);
             this.propertyTableAddressOffset = (byte)(this.Version <= 3 ? 7 : 12);
-
-            this.outputStreams = new OutputStreams(story);
-            RegisterScreen(NullScreen.Instance);
-            RegisterSoundEngine(NullSoundEngine.Instance);
-            RegisterMessageLog(NullMessageLog.Instance);
 
             this.pc = Header.ReadMainRoutineAddress(this.Memory);
             this.opcodes = OpcodeTables.GetOpcodeTable(this.Version).opcodes;
@@ -109,7 +91,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return this.Memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return this.Memory.ReadWord(this.GlobalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -133,7 +115,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return this.Memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return this.Memory.ReadWord(this.GlobalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -149,7 +131,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
+                var address = this.GlobalVariableTableAddress + ((variableIndex - 0x10) * 2);
                 this.Memory.WriteWord(address, value);
             }
         }
@@ -171,7 +153,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
+                var address = this.GlobalVariableTableAddress + ((variableIndex - 0x10) * 2);
                 this.Memory.WriteWord(address, value);
             }
         }
@@ -523,68 +505,6 @@ namespace ZDebug.Core.Execution
             instructionCount++;
 
             return pc;
-        }
-
-        private void SetScreenDimensions()
-        {
-            if (this.Version >= 4)
-            {
-                Header.WriteScreenHeightInLines(this.Memory, screen.ScreenHeightInLines);
-                Header.WriteScreenWidthInColumns(this.Memory, screen.ScreenWidthInColumns);
-            }
-
-            if (this.Version >= 5)
-            {
-                Header.WriteScreenHeightInUnits(this.Memory, screen.ScreenHeightInUnits);
-                Header.WriteScreenWidthInUnits(this.Memory, screen.ScreenWidthInUnits);
-                Header.WriteFontHeightInUnits(this.Memory, screen.FontHeightInUnits);
-                Header.WriteFontWidthInUnits(this.Memory, screen.FontWidthInUnits);
-            }
-        }
-
-        public void RegisterScreen(IScreen screen)
-        {
-            if (screen == null)
-            {
-                throw new ArgumentNullException("screen");
-            }
-
-            this.screen = screen;
-
-            SetScreenDimensions();
-
-            if (this.Version >= 5)
-            {
-                this.Memory.WriteByte(0x2c, (byte)screen.DefaultBackgroundColor);
-                this.Memory.WriteByte(0x2d, (byte)screen.DefaultForegroundColor);
-            }
-
-            outputStreams.RegisterScreen(screen);
-        }
-
-        public void RegisterSoundEngine(ISoundEngine soundEngine)
-        {
-            if (soundEngine == null)
-            {
-                throw new ArgumentNullException("soundEngine");
-            }
-
-            this.soundEngine = soundEngine;
-        }
-
-        public void RegisterMessageLog(IMessageLog messageLog)
-        {
-            if (messageLog == null)
-            {
-                throw new ArgumentNullException("messageLog");
-            }
-
-            this.messageLog = messageLog;
-        }
-
-        public void SetRandomSeed(int seed)
-        {
-            random = new Random(seed);
         }
 
         public int PC

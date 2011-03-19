@@ -7,7 +7,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class Processor
+    public sealed partial class InterpretedZMachine
     {
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Arithmetic routines
@@ -169,12 +169,12 @@ namespace ZDebug.Core.Execution
 
             if (obj1 == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Branch(obj2 == 0);
                 return;
             }
 
-            ushort obj1Parent = objectTable.ReadParentNumberByObjectNumber(obj1);
+            ushort obj1Parent = this.Story.ObjectTable.ReadParentNumberByObjectNumber(obj1);
 
             Branch(obj1Parent == obj2);
         }
@@ -389,13 +389,13 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
             byte attrNum = (byte)operandValues[1];
 
-            objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, false);
+            this.Story.ObjectTable.SetAttributeValueByObjectNumber(objNum, attrNum, false);
         }
 
         internal void op_get_child()
@@ -404,13 +404,13 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 Branch(false);
                 return;
             }
 
-            ushort childNum = objectTable.ReadChildNumberByObjectNumber(objNum);
+            ushort childNum = this.Story.ObjectTable.ReadChildNumberByObjectNumber(objNum);
 
             Store(childNum);
             Branch(childNum > 0);
@@ -422,7 +422,7 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 return;
             }
@@ -459,12 +459,12 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 return;
             }
 
-            ushort parentNum = objectTable.ReadParentNumberByObjectNumber(objNum);
+            ushort parentNum = this.Story.ObjectTable.ReadParentNumberByObjectNumber(objNum);
 
             Store(parentNum);
         }
@@ -475,7 +475,7 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 return;
             }
@@ -526,7 +526,7 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 return;
             }
@@ -603,13 +603,13 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Store(0);
                 Branch(false);
                 return;
             }
 
-            ushort siblingNum = objectTable.ReadSiblingNumberByObjectNumber(objNum);
+            ushort siblingNum = this.Story.ObjectTable.ReadSiblingNumberByObjectNumber(objNum);
 
             Store(siblingNum);
             Branch(siblingNum > 0);
@@ -621,7 +621,7 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
@@ -629,11 +629,11 @@ namespace ZDebug.Core.Execution
 
             if (destNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
-            objectTable.MoveObjectToDestinationByNumber(objNum, destNum);
+            this.Story.ObjectTable.MoveObjectToDestinationByNumber(objNum, destNum);
         }
 
         internal void op_put_prop()
@@ -642,7 +642,7 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
@@ -686,11 +686,11 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
-            objectTable.RemoveObjectFromParentByNumber(objNum);
+            this.Story.ObjectTable.RemoveObjectFromParentByNumber(objNum);
         }
 
         internal void op_set_attr()
@@ -699,13 +699,13 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 return;
             }
 
             byte attrNum = (byte)operandValues[1];
 
-            objectTable.SetAttributeValueByObjectNumber(objNum, attrNum, true);
+            this.Story.ObjectTable.SetAttributeValueByObjectNumber(objNum, attrNum, true);
         }
 
         internal void op_test_attr()
@@ -714,14 +714,14 @@ namespace ZDebug.Core.Execution
 
             if (objNum == 0)
             {
-                messageLog.SendWarning(opcode, startAddress, "called with object 0");
+                this.MessageLog.SendWarning(opcode, startAddress, "called with object 0");
                 Branch(false);
                 return;
             }
 
             byte attrNum = (byte)operandValues[1];
 
-            bool result = objectTable.HasAttributeByObjectNumber(objNum, attrNum);
+            bool result = this.Story.ObjectTable.HasAttributeByObjectNumber(objNum, attrNum);
 
             Branch(result);
         }
@@ -733,12 +733,12 @@ namespace ZDebug.Core.Execution
         internal void op_buffer_mode()
         {
             // TODO: What should we do with buffer_mode? Does it have any meaning?
-            messageLog.SendWarning(opcode, startAddress, "Unsupported");
+            this.MessageLog.SendWarning(opcode, startAddress, "Unsupported");
         }
 
         internal void op_new_line()
         {
-            outputStreams.Print('\n');
+            this.OutputStreams.Print('\n');
         }
 
         internal void op_output_stream()
@@ -746,37 +746,37 @@ namespace ZDebug.Core.Execution
             switch ((short)operandValues[0])
             {
                 case 1:
-                    outputStreams.SelectScreenStream();
+                    this.OutputStreams.SelectScreenStream();
                     break;
 
                 case 2:
-                    outputStreams.SelectTranscriptStream();
+                    this.OutputStreams.SelectTranscriptStream();
                     break;
 
                 case 3:
                     ushort address = operandValues[1];
-                    outputStreams.SelectMemoryStream(this.Memory, address);
+                    this.OutputStreams.SelectMemoryStream(this.Memory, address);
                     break;
 
                 case -1:
-                    outputStreams.DeselectScreenStream();
+                    this.OutputStreams.DeselectScreenStream();
                     break;
 
                 case -2:
-                    outputStreams.DeselectTranscriptStream();
+                    this.OutputStreams.DeselectTranscriptStream();
                     break;
 
                 case -3:
-                    outputStreams.DeselectMemoryStream();
+                    this.OutputStreams.DeselectMemoryStream();
                     break;
 
                 case 4:
                 case -4:
-                    messageLog.SendError(opcode, startAddress, "stream 4 is non supported");
+                    this.MessageLog.SendError(opcode, startAddress, "stream 4 is non supported");
                     break;
 
                 default:
-                    messageLog.SendError(opcode, startAddress, "Illegal stream value: {0}", operandValues[0]);
+                    this.MessageLog.SendError(opcode, startAddress, "Illegal stream value: {0}", operandValues[0]);
                     break;
             }
         }
@@ -785,7 +785,7 @@ namespace ZDebug.Core.Execution
         {
             string text = DecodeEmbeddedText();
 
-            outputStreams.Print(text);
+            this.OutputStreams.Print(text);
         }
 
         internal void op_print_addr()
@@ -795,27 +795,27 @@ namespace ZDebug.Core.Execution
             ushort[] zwords = ZText.ReadZWords(this.Memory, byteAddress);
             string text = this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
 
-            outputStreams.Print(text);
+            this.OutputStreams.Print(text);
         }
 
         internal void op_print_char()
         {
             char ch = (char)operandValues[0];
-            outputStreams.Print(ch);
+            this.OutputStreams.Print(ch);
         }
 
         internal void op_print_num()
         {
             short number = (short)operandValues[0];
-            outputStreams.Print(number.ToString());
+            this.OutputStreams.Print(number.ToString());
         }
 
         internal void op_print_obj()
         {
             ushort objNum = operandValues[0];
 
-            ZObject obj = objectTable.GetByNumber(objNum);
-            outputStreams.Print(obj.ShortName);
+            ZObject obj = this.Story.ObjectTable.GetByNumber(objNum);
+            this.OutputStreams.Print(obj.ShortName);
         }
 
         internal void op_print_paddr()
@@ -826,13 +826,13 @@ namespace ZDebug.Core.Execution
             ushort[] zwords = ZText.ReadZWords(this.Memory, address);
             string text = this.ZText.ZWordsAsString(zwords, ZTextFlags.All);
 
-            outputStreams.Print(text);
+            this.OutputStreams.Print(text);
         }
 
         internal void op_print_ret()
         {
             string text = DecodeEmbeddedText();
-            outputStreams.Print(text + "\n");
+            this.OutputStreams.Print(text + "\n");
             Return(1);
         }
 
@@ -847,21 +847,21 @@ namespace ZDebug.Core.Execution
                 ? operandValues[3]
                 : (ushort)0;
 
-            int left = screen.GetCursorColumn();
+            int left = this.Screen.GetCursorColumn();
 
             for (int i = 0; i < height; i++)
             {
                 if (i != 0)
                 {
-                    int y = screen.GetCursorLine() + 1;
-                    screen.SetCursor(y, left);
+                    int y = this.Screen.GetCursorLine() + 1;
+                    this.Screen.SetCursor(y, left);
                 }
 
                 for (int j = 0; j < width; j++)
                 {
                     char ch = (char)this.Memory.ReadByte(address);
                     address++;
-                    screen.Print(ch);
+                    this.Screen.Print(ch);
                 }
 
                 address += skip;
@@ -876,12 +876,12 @@ namespace ZDebug.Core.Execution
 
             if (foreground != 0)
             {
-                screen.SetForegroundColor(foreground);
+                this.Screen.SetForegroundColor(foreground);
             }
 
             if (background != 0)
             {
-                screen.SetBackgroundColor(background);
+                this.Screen.SetBackgroundColor(background);
             }
         }
 
@@ -889,7 +889,7 @@ namespace ZDebug.Core.Execution
         {
             ZFont font = (ZFont)operandValues[0];
 
-            ushort oldFont = (ushort)screen.SetFont(font);
+            ushort oldFont = (ushort)this.Screen.SetFont(font);
 
             Store(oldFont);
         }
@@ -898,7 +898,7 @@ namespace ZDebug.Core.Execution
         {
             ZTextStyle textStyle = (ZTextStyle)operandValues[0];
 
-            screen.SetTextStyle(textStyle);
+            this.Screen.SetTextStyle(textStyle);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -913,15 +913,15 @@ namespace ZDebug.Core.Execution
 
                 if (inputStream != 1)
                 {
-                    messageLog.SendWarning(opcode, startAddress, "expected first operand to be 1 but was " + inputStream);
+                    this.MessageLog.SendWarning(opcode, startAddress, "expected first operand to be 1 but was " + inputStream);
                 }
             }
             else
             {
-                messageLog.SendWarning(opcode, startAddress, "expected at least 1 operand.");
+                this.MessageLog.SendWarning(opcode, startAddress, "expected at least 1 operand.");
             }
 
-            screen.ReadChar(ch =>
+            this.Screen.ReadChar(ch =>
             {
                 Store((ushort)ch);
             });
@@ -941,12 +941,12 @@ namespace ZDebug.Core.Execution
 
             if (operandCount > 2)
             {
-                messageLog.SendWarning(opcode, startAddress, "timed input was attempted but it is unsupported");
+                this.MessageLog.SendWarning(opcode, startAddress, "timed input was attempted but it is unsupported");
             }
 
             byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
@@ -1001,11 +1001,11 @@ namespace ZDebug.Core.Execution
             ushort textBuffer = operandValues[0];
             ushort parseBuffer = operandValues[1];
 
-            screen.ShowStatus();
+            this.Screen.ShowStatus();
 
             byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
@@ -1056,14 +1056,14 @@ namespace ZDebug.Core.Execution
 
             if (operandCount > 2)
             {
-                messageLog.SendWarning(opcode, startAddress, "timed input was attempted but it is unsupported");
+                this.MessageLog.SendWarning(opcode, startAddress, "timed input was attempted but it is unsupported");
             }
 
             // TODO: Do something with time and routine operands if provided.
 
             byte maxChars = this.Memory.ReadByte(textBuffer);
 
-            screen.ReadCommand(maxChars, s =>
+            this.Screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
@@ -1115,11 +1115,11 @@ namespace ZDebug.Core.Execution
 
             if (window == -1 || window == -2)
             {
-                screen.ClearAll(unsplit: window == -1);
+                this.Screen.ClearAll(unsplit: window == -1);
             }
             else
             {
-                screen.Clear(window);
+                this.Screen.Clear(window);
             }
         }
 
@@ -1128,14 +1128,14 @@ namespace ZDebug.Core.Execution
             ushort line = operandValues[0];
             ushort column = operandValues[1];
 
-            screen.SetCursor(line - 1, column - 1);
+            this.Screen.SetCursor(line - 1, column - 1);
         }
 
         internal void op_set_window()
         {
             ushort window = operandValues[0];
 
-            screen.SetWindow(window);
+            this.Screen.SetWindow(window);
         }
 
         internal void op_split_window()
@@ -1144,11 +1144,11 @@ namespace ZDebug.Core.Execution
 
             if (height > 0)
             {
-                screen.Split(height);
+                this.Screen.Split(height);
             }
             else
             {
-                screen.Unsplit();
+                this.Screen.Unsplit();
             }
         }
 
@@ -1184,69 +1184,69 @@ namespace ZDebug.Core.Execution
             if (range > 0)
             {
                 // range should be inclusive, so we need to subtract 1 since System.Random.Next makes it exclusive
-                const int minValue = 1;
-                int maxValue = Math.Max(minValue, range - 1);
-                int result = random.Next(minValue, maxValue);
+                const ushort minValue = 1;
+                ushort maxValue = Math.Max(minValue, (ushort)(range - 1));
+                ushort result = GenerateRandomNumber(minValue, maxValue);
 
-                Store((ushort)result);
+                Store(result);
             }
             else if (range < 0)
             {
-                random = new Random(+range);
+                SetRandomSeed(+range);
                 Store(0);
             }
             else // range = 0s
             {
-                random = new Random((int)DateTime.Now.Ticks);
+                SetRandomSeed((int)DateTime.Now.Ticks);
                 Store(0);
             }
         }
 
         internal void op_restore_undo()
         {
-            messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
+            this.MessageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
             Store(unchecked((ushort)-1));
         }
 
         internal void op_save_undo()
         {
-            messageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
+            this.MessageLog.SendWarning(opcode, startAddress, "Undo is not supported.");
 
             Store(unchecked((ushort)-1));
         }
 
         internal void op_show_status()
         {
-            screen.ShowStatus();
+            this.Screen.ShowStatus();
         }
 
         internal void op_sound_effect()
         {
             if (operandCount == 0)
             {
-                messageLog.SendError(opcode, startAddress, "Called without any operands.");
-                soundEngine.HighBeep();
+                this.MessageLog.SendError(opcode, startAddress, "Called without any operands.");
+                this.SoundEngine.HighBeep();
             }
             else if (operandCount == 1)
             {
                 ushort number = operandValues[0];
                 if (number == 1)
                 {
-                    soundEngine.HighBeep();
+                    this.SoundEngine.HighBeep();
                 }
                 else if (number == 2)
                 {
-                    soundEngine.LowBeep();
+                    this.SoundEngine.LowBeep();
                 }
                 else
                 {
-                    messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported without additional operands", operandValues[0]);
+                    this.MessageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported without additional operands", operandValues[0]);
                 }
             }
             else
             {
-                messageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported", operandValues[0]);
+                this.MessageLog.SendError(opcode, startAddress, "Sound effect {0} is not supported", operandValues[0]);
             }
         }
 

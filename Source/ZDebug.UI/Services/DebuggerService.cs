@@ -24,7 +24,7 @@ namespace ZDebug.UI.Services
 
         private static IInterpreter interpreter;
         private static Story story;
-        private static Processor processor;
+        private static InterpretedZMachine processor;
         private static GameInfo gameInfo;
         private static ZRoutineTable routineTable;
         private static InstructionReader reader;
@@ -206,7 +206,7 @@ namespace ZDebug.UI.Services
             interpreter = new Interpreter();
             story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
-            processor = new Processor(story);
+            processor = new InterpretedZMachine(story);
             routineTable = new ZRoutineTable(story, cache);
             reader = new InstructionReader(processor.PC, story.Memory, cache);
 
@@ -452,7 +452,7 @@ namespace ZDebug.UI.Services
             get { return story != null; }
         }
 
-        public static Processor Processor
+        public static InterpretedZMachine Processor
         {
             get { return processor; }
         }

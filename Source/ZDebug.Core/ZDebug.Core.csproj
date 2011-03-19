@@ -52,11 +52,11 @@
     <Compile Include="Collections\ReadOnlyArray`1.cs" />
     <Compile Include="Dictionary\ZDictionary.cs" />
     <Compile Include="Dictionary\ZDictionaryEntry.cs" />
-    <Compile Include="Execution\Processor.NullSoundEngine.cs" />
+    <Compile Include="Execution\ZMachine.NullSoundEngine.cs" />
     <Compile Include="Execution\IInputStream.cs" />
     <Compile Include="Execution\ISoundEngine.cs" />
-    <Compile Include="Execution\Processor.OpcodeRoutines.cs" />
-    <Compile Include="Execution\Processor.ParseInstruction.cs" />
+    <Compile Include="Execution\InterpretedZMachine.OpcodeRoutines.cs" />
+    <Compile Include="Execution\InterpretedZMachine.ParseInstruction.cs" />
     <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Execution\ZMachine.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
@@ -64,10 +64,10 @@
     <Compile Include="Execution\IScreen.cs" />
     <Compile Include="Execution\IMessageLog.cs" />
     <Compile Include="Execution\MessageLogExtensions.cs" />
-    <Compile Include="Execution\Processor.NullMessageLog.cs" />
-    <Compile Include="Execution\Processor.OutputStreams.cs" />
-    <Compile Include="Execution\Processor.NullOutputStream.cs" />
-    <Compile Include="Execution\Processor.NullScreen.cs" />
+    <Compile Include="Execution\ZMachine.NullMessageLog.cs" />
+    <Compile Include="Execution\ZMachine.OutputStreamCollection.cs" />
+    <Compile Include="Execution\ZMachine.NullOutputStream.cs" />
+    <Compile Include="Execution\ZMachine.NullScreen.cs" />
     <Compile Include="Execution\StackFrameEventArgs.cs" />
     <Compile Include="Execution\ZColor.cs" />
     <Compile Include="Execution\ZFont.cs" />
@@ -109,7 +109,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Objects\ZPropertyTable.cs" />
-    <Compile Include="Execution\Processor.cs" />
+    <Compile Include="Execution\InterpretedZMachine.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routines\ZRoutineAddedEventArgs.cs" />
@@ -133,7 +133,7 @@
     <Compile Include="Utilities\Types.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Execution\Processor.MemoryOutputStream.cs" />
+    <Compile Include="Execution\ZMachine.MemoryOutputStream.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

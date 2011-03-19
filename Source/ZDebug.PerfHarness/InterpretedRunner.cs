@@ -35,7 +35,7 @@ namespace ZDebug.PerfHarness
             MarkProfile("Reading story");
 
             var story = ReadStory(StoryFilePath);
-            var processor = new Processor(story);
+            var processor = new InterpretedZMachine(story);
 
             var done = false;
             Action doneAction = () => { done = true; };

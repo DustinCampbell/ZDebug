@@ -2,7 +2,7 @@
 
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class Processor
+    public abstract partial class ZMachine
     {
         private class MemoryOutputStream : IOutputStream
         {

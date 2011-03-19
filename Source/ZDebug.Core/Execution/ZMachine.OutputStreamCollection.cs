@@ -4,9 +4,9 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class Processor
+    public abstract partial class ZMachine
     {
-        private class OutputStreams
+        protected class OutputStreamCollection
         {
             private readonly Story story;
             private readonly byte[] memory;
@@ -19,7 +19,7 @@ namespace ZDebug.Core.Execution
 
             private readonly Stack<MemoryOutputStream> memoryStreams;
 
-            internal OutputStreams(Story story)
+            internal OutputStreamCollection(Story story)
             {
                 this.story = story;
                 this.memory = story.Memory;

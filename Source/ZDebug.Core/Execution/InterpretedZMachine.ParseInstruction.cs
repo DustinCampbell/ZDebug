@@ -4,7 +4,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
-    public sealed partial class Processor
+    public sealed partial class InterpretedZMachine
     {
         // constants used for instruction parsing
         private const byte opKind_Two = 0 * 32;
@@ -47,7 +47,7 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    operandValues[operandCount++] = this.Memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                    operandValues[operandCount++] = this.Memory.ReadWord(this.GlobalVariableTableAddress + ((variableIndex - 0x10) * 2));
                 }
             }
             else if ((kind & opKind_SmallConstant) != 0)
