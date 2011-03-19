@@ -11,7 +11,7 @@ namespace ZDebug.Core
         public GlobalVariablesTable(Memory memory)
         {
             this.memory = memory;
-            this.address = memory.ReadGlobalVariableTableAddress();
+            this.address = Header.ReadGlobalVariableTableAddress(memory.Bytes);
         }
 
         private ushort ReadGlobalVariable(int index)

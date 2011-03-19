@@ -24,7 +24,7 @@ namespace ZDebug.Core.Dictionary
             this.ztext = ztext;
 
             var memory = story.Memory;
-            this.address = memory.ReadDictionaryAddress();
+            this.address = Header.ReadDictionaryAddress(memory.Bytes);
 
             var reader = memory.CreateReader(address);
 

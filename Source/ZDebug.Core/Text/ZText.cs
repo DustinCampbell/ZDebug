@@ -20,7 +20,7 @@ namespace ZDebug.Core.Text
         {
             this.memory = memory;
             this.alphabetTable = new AlphabetTable(memory);
-            this.version = memory.ReadVersion();
+            this.version = Header.ReadVersion(memory.Bytes);
             this.builder = new StringBuilder();
             this.abbreviationAlphabetTable = new AlphabetTable(memory);
             this.abbreviationBuilder = new StringBuilder();
@@ -319,7 +319,7 @@ namespace ZDebug.Core.Text
             // Use standard dictionary if none is provided.
             if (dictionary == 0)
             {
-                dictionary = memory.ReadDictionaryAddress();
+                dictionary = Header.ReadDictionaryAddress(memory.Bytes);
             }
 
             var bytes = memory.Bytes;

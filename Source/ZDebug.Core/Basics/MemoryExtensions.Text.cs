@@ -39,7 +39,7 @@ namespace ZDebug.Core.Basics
                 throw new ArgumentOutOfRangeException("index");
             }
 
-            var abbreviationsTableAddress = memory.ReadAbbreviationsTableAddress();
+            var abbreviationsTableAddress = Header.ReadAbbreviationsTableAddress(memory.Bytes);
             var abbreviationAddress = (2 * memory.ReadWord(abbreviationsTableAddress + (index * 2)));
 
             return memory.ReadZWords(abbreviationAddress);

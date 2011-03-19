@@ -37,8 +37,8 @@ namespace ZDebug.Core.Objects
             this.memory = memory;
             this.bytes = memory.Bytes;
             this.ztext = ztext;
-            this.version = memory.ReadVersion();
-            this.address = memory.ReadObjectTableAddress();
+            this.version = Header.ReadVersion(memory.Bytes);
+            this.address = Header.ReadObjectTableAddress(memory.Bytes);
 
             this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
             this.maxProperties = (byte)(version <= 3 ? 31 : 63);
@@ -427,7 +427,7 @@ namespace ZDebug.Core.Objects
 
             reader.SkipShortName();
 
-            var version = memory.ReadVersion();
+            var version = Header.ReadVersion(memory.Bytes);
             var index = 0;
             var prop = reader.NextProperty(version, propertyTable, index);
             while (prop != null)

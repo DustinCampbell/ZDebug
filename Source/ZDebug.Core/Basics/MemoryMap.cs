@@ -37,7 +37,7 @@ namespace ZDebug.Core.Basics
         {
             AddRegion(MemoryMapRegionKind.Header, "Header", 0, 0x3f);
 
-            var headerExtensionBase = memory.ReadHeaderExtensionTableAddress();
+            var headerExtensionBase = Header.ReadHeaderExtensionTableAddress(memory.Bytes);
             if (headerExtensionBase > 0)
             {
                 var headerExtensionSize = memory.ReadWord(headerExtensionBase);
@@ -58,13 +58,13 @@ namespace ZDebug.Core.Basics
 
         private void AddAbbreviationRegions(Memory memory)
         {
-            var version = memory.ReadVersion();
+            var version = Header.ReadVersion(memory.Bytes);
             if (version == 1) // V1 did not support abbreviations
             {
                 return;
             }
 
-            var tableBase = memory.ReadAbbreviationsTableAddress();
+            var tableBase = Header.ReadAbbreviationsTableAddress(memory.Bytes);
             var count = version == 2 ? 32 : 96;
             var tableEnd = tableBase + (count * 2) - 1;
 
@@ -107,7 +107,7 @@ namespace ZDebug.Core.Basics
 
         private void AddDictionaryRegion(Memory memory)
         {
-            var dictionaryBase = memory.ReadDictionaryAddress();
+            var dictionaryBase = Header.ReadDictionaryAddress(memory.Bytes);
 
             var reader = memory.CreateReader(dictionaryBase);
             var separatorCount = reader.NextByte();
@@ -123,12 +123,12 @@ namespace ZDebug.Core.Basics
 
         private void AddObjectTableRegions(Memory memory)
         {
-            var objectTableBase = memory.ReadObjectTableAddress();
+            var objectTableBase = Header.ReadObjectTableAddress(memory.Bytes);
             var objectTableEnd = 0;
             var objectDataBase = 0;
             var objectDataEnd = 0;
 
-            var version = memory.ReadVersion();
+            var version = Header.ReadVersion(memory.Bytes);
             var entrySize = ObjectHelpers.GetEntrySize(version);
             var propertyTableOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
 
@@ -169,12 +169,12 @@ namespace ZDebug.Core.Basics
 
         private void AddInformTables(Memory memory)
         {
-            if (!memory.IsInformStory())
+            if (!Header.IsInformStory(memory.Bytes))
             {
                 return;
             }
 
-            var informVersion = memory.ReadInformVersionNumber();
+            var informVersion = Header.ReadInformVersionNumber(memory.Bytes);
             if (informVersion < 600)
             {
                 return;

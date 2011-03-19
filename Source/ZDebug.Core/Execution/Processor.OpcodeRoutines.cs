@@ -718,7 +718,7 @@ namespace ZDebug.Core.Execution
                 Branch(false);
                 return;
             }
-            
+
             byte attrNum = (byte)operandValues[1];
 
             bool result = objectTable.HasAttributeByObjectNumber(objNum, attrNum);
@@ -963,7 +963,7 @@ namespace ZDebug.Core.Execution
                 {
                     // TODO: Use ztext.TokenizeLine.
 
-                    ushort dictionary = memory.ReadDictionaryAddress();
+                    ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
 
                     ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1018,7 +1018,7 @@ namespace ZDebug.Core.Execution
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = memory.ReadDictionaryAddress();
+                ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1076,7 +1076,7 @@ namespace ZDebug.Core.Execution
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = memory.ReadDictionaryAddress();
+                ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1268,7 +1268,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_verify()
         {
-            Branch(story.ActualChecksum == memory.ReadChecksum());
+            Branch(story.ActualChecksum == Header.ReadChecksum(memory.Bytes));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////

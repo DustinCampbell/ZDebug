@@ -14,7 +14,7 @@ namespace ZDebug.Core.Inform
         {
             this.memory = memory;
             this.memoryMap = memoryMap;
-            this.version = memory.ReadInformVersionNumber();
+            this.version = Header.ReadInformVersionNumber(memory.Bytes);
             this.ztext = ztext;
         }
 
@@ -27,7 +27,7 @@ namespace ZDebug.Core.Inform
         {
             var address = memoryMap[MemoryMapRegionKind.PropertyNamesTable].Base + (propNum * 2);
             var propNamePackedAddress = memory.ReadWord(address);
-            var propNameAddress = memory.UnpackStringAddress(propNamePackedAddress);
+            var propNameAddress = Header.UnpackStringAddress(memory.Bytes, propNamePackedAddress);
 
             var propNameZWords = memory.ReadZWords(propNameAddress);
 

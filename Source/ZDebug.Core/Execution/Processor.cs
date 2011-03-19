@@ -70,9 +70,9 @@ namespace ZDebug.Core.Execution
             this.bytes = this.memory.Bytes;
             this.ztext = new ZText(story.Memory);
             this.objectTable = story.ObjectTable;
-            this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
+            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.memory.Bytes);
 
-            this.objectTableAddress = this.memory.ReadObjectTableAddress();
+            this.objectTableAddress = Header.ReadObjectTableAddress(this.memory.Bytes);
             this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
             this.maxProperties = (byte)(version <= 3 ? 31 : 63);
             this.propertyDefaultsTableSize = (byte)(maxProperties * 2);
@@ -91,7 +91,7 @@ namespace ZDebug.Core.Execution
             RegisterSoundEngine(NullSoundEngine.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
 
-            this.pc = this.memory.ReadMainRoutineAddress();
+            this.pc = Header.ReadMainRoutineAddress(this.memory.Bytes);
             this.opcodes = OpcodeTables.GetOpcodeTable(this.version).opcodes;
 
             this.callAddress = (uint)this.pc;
@@ -538,16 +538,16 @@ namespace ZDebug.Core.Execution
         {
             if (story.Version >= 4)
             {
-                story.Memory.WriteScreenHeightInLines(screen.ScreenHeightInLines);
-                story.Memory.WriteScreenWidthInColumns(screen.ScreenWidthInColumns);
+                Header.WriteScreenHeightInLines(story.Memory.Bytes, screen.ScreenHeightInLines);
+                Header.WriteScreenWidthInColumns(story.Memory.Bytes, screen.ScreenWidthInColumns);
             }
 
             if (story.Version >= 5)
             {
-                story.Memory.WriteScreenHeightInUnits(screen.ScreenHeightInUnits);
-                story.Memory.WriteScreenWidthInUnits(screen.ScreenWidthInUnits);
-                story.Memory.WriteFontHeightInUnits(screen.FontHeightInUnits);
-                story.Memory.WriteFontWidthInUnits(screen.FontWidthInUnits);
+                Header.WriteScreenHeightInUnits(story.Memory.Bytes, screen.ScreenHeightInUnits);
+                Header.WriteScreenWidthInUnits(story.Memory.Bytes, screen.ScreenWidthInUnits);
+                Header.WriteFontHeightInUnits(story.Memory.Bytes, screen.FontHeightInUnits);
+                Header.WriteFontWidthInUnits(story.Memory.Bytes, screen.FontWidthInUnits);
             }
         }
 

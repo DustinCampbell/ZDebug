@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Basics\Header.cs" />
     <Compile Include="Blorb\BlorbFile.cs" />
     <Compile Include="Blorb\BlorbFileException.cs" />
     <Compile Include="Blorb\PictureKind.cs" />
@@ -74,7 +75,6 @@
     <Compile Include="Basics\MemoryReaderExtensions.Objects.cs" />
     <Compile Include="Basics\Memory.cs" />
     <Compile Include="Basics\MemoryReader.cs" />
-    <Compile Include="Basics\MemoryExtensions.Header.cs" />
     <Compile Include="Basics\MemoryExtensions.Text.cs" />
     <Compile Include="Basics\MemoryMap.cs" />
     <Compile Include="Basics\MemoryMapRegion.cs" />

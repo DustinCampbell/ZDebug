@@ -37,21 +37,21 @@ namespace ZDebug.Core
         private Story(Memory memory)
         {
             this.memory = memory;
-            this.version = memory.ReadVersion();
-            this.serialNumber = memory.ReadSerialNumber();
-            this.releaseNumber = memory.ReadReleaseNumber();
-            this.checksum = memory.ReadChecksum();
-            this.actualChecksum = memory.CalculateChecksum();
-            this.routinesOffset = memory.ReadRoutinesOffset();
-            this.stringsOffset = memory.ReadStringsOffset();
-            this.instructionCache = new InstructionCache((memory.Size - memory.ReadStaticMemoryBase()) / 8);
+            this.version = Header.ReadVersion(memory.Bytes);
+            this.serialNumber = Header.ReadSerialNumber(memory.Bytes);
+            this.releaseNumber = Header.ReadReleaseNumber(memory.Bytes);
+            this.checksum = Header.ReadChecksum(memory.Bytes);
+            this.actualChecksum = Header.CalculateChecksum(memory.Bytes);
+            this.routinesOffset = Header.ReadRoutinesOffset(memory.Bytes);
+            this.stringsOffset = Header.ReadStringsOffset(memory.Bytes);
+            this.instructionCache = new InstructionCache((memory.Size - Header.ReadStaticMemoryBase(memory.Bytes)) / 8);
             this.ztext = new ZText(memory);
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap, ztext);
             this.objectTable = new ZObjectTable(memory, ztext);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.dictionary = new ZDictionary(this, ztext);
-            this.mainRoutineAddress = memory.ReadMainRoutineAddress();
+            this.mainRoutineAddress = Header.ReadMainRoutineAddress(memory.Bytes);
 
             RegisterInterpreter(new DefaultInterpreter());
         }
@@ -224,7 +224,7 @@ namespace ZDebug.Core
 
         public bool IsInformStory
         {
-            get { return memory.IsInformStory(); }
+            get { return Header.IsInformStory(memory.Bytes); }
         }
 
         public InformData InformData
