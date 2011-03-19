@@ -33,7 +33,7 @@ namespace ZDebug.Terp
         private int machStatusHeight;
 
         private byte[] storyBytes;
-        private ZMachine machine;
+        private ZDebug.Compiler.ZMachine machine;
         private Thread machineThread;
         private ZMachineProfiler profiler;
         private Stopwatch watch;
@@ -114,7 +114,7 @@ namespace ZDebug.Terp
 
             storyBytes = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(Story.FromBytes(storyBytes), screen: this, profiler: profiler);
+            machine = new ZDebug.Compiler.ZMachine(Story.FromBytes(storyBytes), screen: this, profiler: profiler);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);

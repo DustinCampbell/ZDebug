@@ -200,15 +200,15 @@ namespace ZDebug.Core.Execution
 
         internal void op_call_n()
         {
-            Call(story.UnpackRoutineAddress(operandValues[0]));
+            Call(this.Story.UnpackRoutineAddress(operandValues[0]));
         }
 
         internal void op_call_s()
         {
             var pc = this.pc;
-            var storeVariable = memory[pc];
+            var storeVariable = this.Memory[pc];
             this.pc = pc + 1;
-            Call(story.UnpackRoutineAddress(operandValues[0]), storeVariable);
+            Call(this.Story.UnpackRoutineAddress(operandValues[0]), storeVariable);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -248,14 +248,14 @@ namespace ZDebug.Core.Execution
         {
             int address = operandValues[0] + operandValues[1];
 
-            Store(memory[address]);
+            Store(this.Memory[address]);
         }
 
         internal void op_loadw()
         {
             int address = operandValues[0] + (operandValues[1] * 2);
 
-            Store(memory.ReadWord(address));
+            Store(this.Memory.ReadWord(address));
         }
 
         internal void op_store()
@@ -267,14 +267,14 @@ namespace ZDebug.Core.Execution
         {
             int address = operandValues[0] + operandValues[1];
 
-            memory[address] = (byte)operandValues[2];
+            this.Memory[address] = (byte)operandValues[2];
         }
 
         internal void op_storew()
         {
             int address = operandValues[0] + (operandValues[1] * 2);
 
-            memory.WriteWord(address, operandValues[2]);
+            this.Memory.WriteWord(address, operandValues[2]);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +291,7 @@ namespace ZDebug.Core.Execution
             {
                 for (int j = 0; j < size; j++)
                 {
-                    memory.WriteByte(first + j, 0);
+                    this.Memory.WriteByte(first + j, 0);
                 }
             }
             else if ((short)size < 0 || first > second) // copy forwards
@@ -304,16 +304,16 @@ namespace ZDebug.Core.Execution
 
                 for (int j = 0; j < copySize; j++)
                 {
-                    var value = memory.ReadByte(first + j);
-                    memory.WriteByte(second + j, value);
+                    var value = this.Memory.ReadByte(first + j);
+                    this.Memory.WriteByte(second + j, value);
                 }
             }
             else // copy backwards
             {
                 for (int j = size - 1; j >= 0; j--)
                 {
-                    var value = memory.ReadByte(first + j);
-                    memory.WriteByte(second + j, value);
+                    var value = this.Memory.ReadByte(first + j);
+                    this.Memory.WriteByte(second + j, value);
                 }
             }
         }
@@ -333,7 +333,7 @@ namespace ZDebug.Core.Execution
             {
                 if ((form & 0x80) != 0)
                 {
-                    var value = memory.ReadWord(address);
+                    var value = this.Memory.ReadWord(address);
                     if (value == x)
                     {
                         Store(address);
@@ -343,7 +343,7 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    var value = memory[address];
+                    var value = this.Memory[address];
                     if (value == x)
                     {
                         Store(address);
@@ -429,7 +429,7 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte mask = (byte)(this.Version <= 3 ? 0x1f : 0x3f);
             byte value;
 
             ushort propAddress = GetFirstProperty(objNum);
@@ -438,7 +438,7 @@ namespace ZDebug.Core.Execution
             {
                 do
                 {
-                    value = memory[propAddress];
+                    value = this.Memory[propAddress];
                     propAddress = GetNextProperty(propAddress);
                 }
                 while ((value & mask) > propNum);
@@ -449,7 +449,7 @@ namespace ZDebug.Core.Execution
                 }
             }
 
-            value = memory[propAddress];
+            value = this.Memory[propAddress];
             Store((ushort)(value & mask));
         }
 
@@ -482,13 +482,13 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte mask = (byte)(this.Version <= 3 ? 0x1f : 0x3f);
             byte value;
 
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = memory[propAddress];
+                value = this.Memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -502,19 +502,19 @@ namespace ZDebug.Core.Execution
             {
                 propAddress++;
 
-                if ((version <= 3 && (value & 0xe0) == 0) || (version >= 4 && (value & 0xc0) == 0))
+                if ((this.Version <= 3 && (value & 0xe0) == 0) || (this.Version >= 4 && (value & 0xc0) == 0))
                 {
-                    result = memory[propAddress];
+                    result = this.Memory[propAddress];
                 }
                 else
                 {
-                    result = memory.ReadWord(propAddress);
+                    result = this.Memory.ReadWord(propAddress);
                 }
             }
             else
             {
                 propAddress = (ushort)(this.objectTableAddress + ((propNum - 1) * 2));
-                result = memory.ReadWord(propAddress);
+                result = this.Memory.ReadWord(propAddress);
             }
 
             Store(result);
@@ -533,13 +533,13 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte mask = (byte)(this.Version <= 3 ? 0x1f : 0x3f);
             byte value;
 
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = memory[propAddress];
+                value = this.Memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -550,7 +550,7 @@ namespace ZDebug.Core.Execution
 
             if ((value & mask) == propNum)
             {
-                if (version >= 4 && (value & 0x80) != 0)
+                if (this.Version >= 4 && (value & 0x80) != 0)
                 {
                     propAddress++;
                 }
@@ -574,9 +574,9 @@ namespace ZDebug.Core.Execution
             }
 
             dataAddress--;
-            byte value = memory[dataAddress];
+            byte value = this.Memory[dataAddress];
 
-            if (this.version <= 3)
+            if (this.Version <= 3)
             {
                 value = (byte)((value >> 5) + 1);
             }
@@ -648,13 +648,13 @@ namespace ZDebug.Core.Execution
 
             ushort propNum = operandValues[1];
 
-            byte mask = (byte)(version <= 3 ? 0x1f : 0x3f);
+            byte mask = (byte)(this.Version <= 3 ? 0x1f : 0x3f);
             byte value;
 
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = memory[propAddress];
+                value = this.Memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -670,13 +670,13 @@ namespace ZDebug.Core.Execution
 
             propAddress++;
 
-            if ((this.version <= 3 && (value & 0xe0) == 0) || (this.version >= 4) && (value & 0xc0) == 0)
+            if ((this.Version <= 3 && (value & 0xe0) == 0) || (this.Version >= 4) && (value & 0xc0) == 0)
             {
-                memory[propAddress] = (byte)operandValues[2];
+                this.Memory[propAddress] = (byte)operandValues[2];
             }
             else
             {
-                memory.WriteWord(propAddress, operandValues[2]);
+                this.Memory.WriteWord(propAddress, operandValues[2]);
             }
         }
 
@@ -755,7 +755,7 @@ namespace ZDebug.Core.Execution
 
                 case 3:
                     ushort address = operandValues[1];
-                    outputStreams.SelectMemoryStream(memory, address);
+                    outputStreams.SelectMemoryStream(this.Memory, address);
                     break;
 
                 case -1:
@@ -792,7 +792,7 @@ namespace ZDebug.Core.Execution
         {
             ushort byteAddress = operandValues[0];
 
-            ushort[] zwords = ZText.ReadZWords(memory, byteAddress);
+            ushort[] zwords = ZText.ReadZWords(this.Memory, byteAddress);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
@@ -821,9 +821,9 @@ namespace ZDebug.Core.Execution
         internal void op_print_paddr()
         {
             ushort byteAddress = operandValues[0];
-            int address = story.UnpackStringAddress(byteAddress);
+            int address = this.Story.UnpackStringAddress(byteAddress);
 
-            ushort[] zwords = ZText.ReadZWords(memory, address);
+            ushort[] zwords = ZText.ReadZWords(this.Memory, address);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
@@ -859,7 +859,7 @@ namespace ZDebug.Core.Execution
 
                 for (int j = 0; j < width; j++)
                 {
-                    char ch = (char)memory.ReadByte(address);
+                    char ch = (char)this.Memory.ReadByte(address);
                     address++;
                     screen.Print(ch);
                 }
@@ -944,33 +944,33 @@ namespace ZDebug.Core.Execution
                 messageLog.SendWarning(opcode, startAddress, "timed input was attempted but it is unsupported");
             }
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
             screen.ReadCommand(maxChars, s =>
             {
                 string text = s.ToLower();
 
-                byte existingTextCount = memory.ReadByte(textBuffer + 1);
+                byte existingTextCount = this.Memory.ReadByte(textBuffer + 1);
 
-                memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
+                this.Memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
                 }
 
                 if (parseBuffer > 0)
                 {
                     // TODO: Use ztext.TokenizeLine.
 
-                    ushort dictionary = Header.ReadDictionaryAddress(memory);
+                    ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
                     ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
-                    byte maxWords = memory.ReadByte(parseBuffer);
+                    byte maxWords = this.Memory.ReadByte(parseBuffer);
                     byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                    memory.WriteByte(parseBuffer + 1, parsedWords);
+                    this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                     for (int i = 0; i < parsedWords; i++)
                     {
@@ -979,15 +979,15 @@ namespace ZDebug.Core.Execution
                         ushort address = ztext.LookupWord(token.Text, dictionary);
                         if (address > 0)
                         {
-                            memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                         }
                         else
                         {
-                            memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                         }
 
-                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                        memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
                     }
                 }
 
@@ -1003,7 +1003,7 @@ namespace ZDebug.Core.Execution
 
             screen.ShowStatus();
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
             screen.ReadCommand(maxChars, s =>
             {
@@ -1011,21 +1011,21 @@ namespace ZDebug.Core.Execution
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
                 }
 
-                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+                this.Memory.WriteByte(textBuffer + 1 + text.Length, 0);
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = Header.ReadDictionaryAddress(memory);
+                ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
-                byte maxWords = memory.ReadByte(parseBuffer);
+                byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                memory.WriteByte(parseBuffer + 1, parsedWords);
+                this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                 for (int i = 0; i < parsedWords; i++)
                 {
@@ -1034,15 +1034,15 @@ namespace ZDebug.Core.Execution
                     ushort address = ztext.LookupWord(token.Text, dictionary);
                     if (address > 0)
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                     }
                     else
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                     }
 
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
             });
         }
@@ -1061,7 +1061,7 @@ namespace ZDebug.Core.Execution
 
             // TODO: Do something with time and routine operands if provided.
 
-            byte maxChars = memory.ReadByte(textBuffer);
+            byte maxChars = this.Memory.ReadByte(textBuffer);
 
             screen.ReadCommand(maxChars, s =>
             {
@@ -1069,21 +1069,21 @@ namespace ZDebug.Core.Execution
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
+                    this.Memory.WriteByte(textBuffer + 1 + i, (byte)text[i]);
                 }
 
-                memory.WriteByte(textBuffer + 1 + text.Length, 0);
+                this.Memory.WriteByte(textBuffer + 1 + text.Length, 0);
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = Header.ReadDictionaryAddress(memory);
+                ushort dictionary = Header.ReadDictionaryAddress(this.Memory);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
-                byte maxWords = memory.ReadByte(parseBuffer);
+                byte maxWords = this.Memory.ReadByte(parseBuffer);
                 byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-                memory.WriteByte(parseBuffer + 1, parsedWords);
+                this.Memory.WriteByte(parseBuffer + 1, parsedWords);
 
                 for (int i = 0; i < parsedWords; i++)
                 {
@@ -1092,15 +1092,15 @@ namespace ZDebug.Core.Execution
                     ushort address = ztext.LookupWord(token.Text, dictionary);
                     if (address > 0)
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), address);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
                     }
                     else
                     {
-                        memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
+                        this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
                     }
 
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                    memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
+                    this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
                 }
             });
         }
@@ -1268,7 +1268,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_verify()
         {
-            Branch(story.ActualChecksum == Header.ReadChecksum(memory));
+            Branch(this.Story.ActualChecksum == Header.ReadChecksum(this.Memory));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1382,7 +1382,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x19:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // illegal
                                 }
@@ -1391,7 +1391,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1a:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // illegal
                                 }
@@ -1400,7 +1400,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1b:
-                                if (version < 5 || version == 6)
+                                if (this.Version < 5 || this.Version == 6)
                                 {
                                     break; // illegal
                                 }
@@ -1452,7 +1452,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x08:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // illegal
                                 }
@@ -1485,7 +1485,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0f:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'not' unsupported
                                 }
@@ -1534,7 +1534,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x09:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'pop' unsupported
                                 }
@@ -1552,7 +1552,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0c:
-                                if (version == 3)
+                                if (this.Version == 3)
                                 {
                                     op_show_status();
                                     return;
@@ -1563,7 +1563,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x0d:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // illegal
                                 }
@@ -1575,7 +1575,7 @@ namespace ZDebug.Core.Execution
                                 break; // first byte of extended opcode -- should never hit this
 
                             case 0x0f:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // illegal
                                 }
@@ -1608,11 +1608,11 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x04:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     op_sread1();
                                 }
-                                else if (version == 4)
+                                else if (this.Version == 4)
                                 {
                                     op_sread2();
                                 }
@@ -1640,7 +1640,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x09:
-                                if (version == 6)
+                                if (this.Version == 6)
                                 {
                                     break; // 'pull' stack unsupported
                                 }
@@ -1649,7 +1649,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0a:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // 'split_window' illegal
                                 }
@@ -1658,7 +1658,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0b:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // 'set_window' illegal
                                 }
@@ -1667,7 +1667,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0c:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'call_vs2' illegal
                                 }
@@ -1676,7 +1676,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0d:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'erase_window' illegal
                                 }
@@ -1685,7 +1685,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0e:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'erase_line' illegal
                                 }
@@ -1695,11 +1695,11 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x0f:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'set_cursor' illegal
                                 }
-                                else if (version == 6)
+                                else if (this.Version == 6)
                                 {
                                     break; // 'set_cursor' unsupported
                                 }
@@ -1711,7 +1711,7 @@ namespace ZDebug.Core.Execution
                                 break; // 'get_cursor' unsupported;
 
                             case 0x11:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'set_text_style' illegal
                                 }
@@ -1720,7 +1720,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x12:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'buffer_mode' illegal
                                 }
@@ -1729,11 +1729,11 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x13:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // 'output_stream' illegal
                                 }
-                                else if (version == 6)
+                                else if (this.Version == 6)
                                 {
                                     break; // 'output_stream' unsupported
                                 }
@@ -1742,7 +1742,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x14:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // 'input_stream' illegal
                                 }
@@ -1752,7 +1752,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x15:
-                                if (version < 3)
+                                if (this.Version < 3)
                                 {
                                     break; // 'sound_effect' illegal
                                 }
@@ -1763,7 +1763,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x16:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'read_char' illegal
                                 }
@@ -1772,7 +1772,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x17:
-                                if (version < 4)
+                                if (this.Version < 4)
                                 {
                                     break; // 'scan_table' illegal
                                 }
@@ -1781,7 +1781,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x18:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'not' illegal
                                 }
@@ -1790,7 +1790,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x19:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'call_vn' illegal
                                 }
@@ -1799,7 +1799,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1a:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'call_vn2' illegal
                                 }
@@ -1808,7 +1808,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1b:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'tokenize' illegal
                                 }
@@ -1817,7 +1817,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1c:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'encode_text' illegal
                                 }
@@ -1827,7 +1827,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x1d:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'copy_table' illegal
                                 }
@@ -1836,7 +1836,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1e:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'print_table' illegal
                                 }
@@ -1845,7 +1845,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x1f:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'check_arg_count' illegal
                                 }
@@ -1862,7 +1862,7 @@ namespace ZDebug.Core.Execution
                         switch (opcode.Number)
                         {
                             case 0x00:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'save' illegal
                                 }
@@ -1872,7 +1872,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x01:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'restore' illegal
                                 }
@@ -1882,7 +1882,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x02:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'log_shift' unsupported
                                 }
@@ -1891,7 +1891,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x03:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'art_shift' unsupported
                                 }
@@ -1900,7 +1900,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x04:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'set_font' unsupported
                                 }
@@ -1909,7 +1909,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x05:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'draw_picture' illegal
                                 }
@@ -1919,7 +1919,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x06:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'picture_data' illegal
                                 }
@@ -1929,7 +1929,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x07:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'erase_picture' illegal
                                 }
@@ -1939,7 +1939,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x08:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'set_margins' illegal
                                 }
@@ -1949,7 +1949,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x09:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'save_undo' unsupported
                                 }
@@ -1958,7 +1958,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0a:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'restore_undo' unsupported
                                 }
@@ -1967,7 +1967,7 @@ namespace ZDebug.Core.Execution
                                 return;
 
                             case 0x0b:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'print_unicode' illegal
                                 }
@@ -1977,7 +1977,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x0c:
-                                if (version < 5)
+                                if (this.Version < 5)
                                 {
                                     break; // 'check_unicode' illegal
                                 }
@@ -1987,7 +1987,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x10:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'move_window' illegal
                                 }
@@ -1997,7 +1997,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x11:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'window_size' illegal
                                 }
@@ -2007,7 +2007,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x12:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'window_style' illegal
                                 }
@@ -2017,7 +2017,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x13:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'get_wind_prop' illegal
                                 }
@@ -2027,7 +2027,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x14:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'scroll_window' illegal
                                 }
@@ -2037,7 +2037,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x15:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'pop_stack' illegal
                                 }
@@ -2047,7 +2047,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x16:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'read_mouse' illegal
                                 }
@@ -2057,7 +2057,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x17:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'mouse_window' illegal
                                 }
@@ -2067,7 +2067,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x18:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'push_stack' illegal
                                 }
@@ -2077,7 +2077,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x19:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'put_wind_prop' illegal
                                 }
@@ -2087,7 +2087,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x1a:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'print_form' illegal
                                 }
@@ -2097,7 +2097,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x1b:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'make_menu' illegal
                                 }
@@ -2107,7 +2107,7 @@ namespace ZDebug.Core.Execution
                                 }
 
                             case 0x1c:
-                                if (version != 6)
+                                if (this.Version != 6)
                                 {
                                     break; // 'picture_table' illegal
                                 }

@@ -28,7 +28,7 @@ namespace ZDebug.Core.Execution
         {
             if ((kind & opKind_Variable) != 0)
             {
-                byte variableIndex = memory[pc++];
+                byte variableIndex = this.Memory[pc++];
                 if (variableIndex < 16)
                 {
                     if (variableIndex > 0)
@@ -47,16 +47,16 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    operandValues[operandCount++] = memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                    operandValues[operandCount++] = this.Memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
                 }
             }
             else if ((kind & opKind_SmallConstant) != 0)
             {
-                operandValues[operandCount++] = memory[pc++];
+                operandValues[operandCount++] = this.Memory[pc++];
             }
             else // kind == opKind_LargeConstant
             {
-                operandValues[operandCount++] = memory.ReadWord(pc);
+                operandValues[operandCount++] = this.Memory.ReadWord(pc);
                 pc += 2;
             }
         }
@@ -104,7 +104,7 @@ namespace ZDebug.Core.Execution
 
             operandCount = 0;
 
-            byte opByte = memory[pc++];
+            byte opByte = this.Memory[pc++];
 
             Opcode op;
             if (opByte < 0x80) // 2OP opcodes
@@ -120,8 +120,8 @@ namespace ZDebug.Core.Execution
             }
             else if (opByte == 0xbe) // EXT opcodes
             {
-                op = opcodes[opKind_Ext + memory[pc++]];
-                LoadAllOperands(memory[pc++]);
+                op = opcodes[opKind_Ext + this.Memory[pc++]];
+                LoadAllOperands(this.Memory[pc++]);
             }
             else if (opByte < 0xc0) // 0OP opcodes
             {
@@ -133,12 +133,12 @@ namespace ZDebug.Core.Execution
 
                 if (!op.IsDoubleVariable)
                 {
-                    LoadAllOperands(memory[pc++]);
+                    LoadAllOperands(this.Memory[pc++]);
                 }
                 else
                 {
-                    byte kinds1 = memory[pc++];
-                    byte kinds2 = memory[pc++];
+                    byte kinds1 = this.Memory[pc++];
+                    byte kinds2 = this.Memory[pc++];
                     LoadAllOperands(kinds1);
                     LoadAllOperands(kinds2);
                 }
