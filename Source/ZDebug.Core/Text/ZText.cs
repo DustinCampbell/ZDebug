@@ -26,6 +26,42 @@ namespace ZDebug.Core.Text
             this.abbreviationBuilder = new StringBuilder();
         }
 
+        private static ushort[] ReadAbbreviation(byte[] memory, int index)
+        {
+            if (index < 0 || index > 95)
+            {
+                throw new ArgumentOutOfRangeException("index");
+            }
+
+            var abbreviationsTableAddress = Header.ReadAbbreviationsTableAddress(memory);
+            var abbreviationAddress = (2 * memory.ReadWord(abbreviationsTableAddress + (index * 2)));
+
+            return ZText.ReadZWords(memory, abbreviationAddress);
+        }
+
+        /// <summary>
+        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="Memory"/>.
+        /// </summary>
+        public static ushort[] ReadZWords(byte[] memory, int address)
+        {
+            if (memory == null)
+            {
+                throw new ArgumentNullException("memory");
+            }
+
+            int count = 0;
+            while (true)
+            {
+                var zword = memory.ReadWord(address + (count++ * 2));
+                if ((zword & 0x8000) != 0)
+                {
+                    break;
+                }
+            }
+
+            return memory.ReadWords(address, count);
+        }
+
         private byte[] ZWordsToZChars(ushort[] zwords)
         {
             var count = zwords.Length;
@@ -92,7 +128,7 @@ namespace ZDebug.Core.Text
                         {
                             var abbreviationCode = zchars[++i];
                             var abbreviationIndex = (32 * (zchar - 1)) + abbreviationCode;
-                            var abbreviationZWords = memory.ReadAbbreviation(abbreviationIndex);
+                            var abbreviationZWords = ReadAbbreviation(memory.Bytes, abbreviationIndex);
                             var abbreviationText = ZWordsAsString(abbreviationZWords, ZTextFlags.None, abbreviationAlphabetTable, abbreviationBuilder);
                             builder.Append(abbreviationText);
                         }

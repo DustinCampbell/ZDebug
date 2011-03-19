@@ -1,5 +1,6 @@
 ﻿using System;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Text
 {
@@ -35,13 +36,35 @@ namespace ZDebug.Core.Text
                 }
                 else
                 {
-                    alphabets = memory.ReadCustomAlphabetTable(alphabetTableAddress);
+                    alphabets = ReadCustomAlphabetTable(memory.Bytes, alphabetTableAddress);
                 }
             }
             else
             {
                 throw new InvalidOperationException("Invalid version number: " + version);
             }
+        }
+
+        private static char ByteToChar(byte b)
+        {
+            var ch = (char)b;
+            return ch == '^'
+                ? '\n'
+                : ch;
+        }
+
+        private static char[][] ReadCustomAlphabetTable(byte[] memory, int address)
+        {
+            var result = new char[3][];
+
+            result[0] = "??????".ToCharArray().Concat(memory.ReadBytes(address, 26).ConvertAll(ByteToChar));
+            result[1] = "??????".ToCharArray().Concat(memory.ReadBytes(address + 26, 26).ConvertAll(ByteToChar));
+
+            // We need the first character below because A2/C6 isn't a printable character --
+            // it starts a multi-byte ZSCII character.
+            result[2] = "???????".ToCharArray().Concat(memory.ReadBytes(address + 53, 25).ConvertAll(ByteToChar));
+
+            return result;
         }
 
         public void FullReset()

@@ -792,7 +792,7 @@ namespace ZDebug.Core.Execution
         {
             ushort byteAddress = operandValues[0];
 
-            ushort[] zwords = memory.ReadZWords(byteAddress);
+            ushort[] zwords = ZText.ReadZWords(memory.Bytes, byteAddress);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
@@ -823,7 +823,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackStringAddress(byteAddress);
 
-            ushort[] zwords = memory.ReadZWords(address);
+            ushort[] zwords = ZText.ReadZWords(memory.Bytes, address);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
