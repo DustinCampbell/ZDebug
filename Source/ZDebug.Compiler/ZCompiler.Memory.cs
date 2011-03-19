@@ -790,6 +790,29 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void StoreVariable(byte variableIndex, CodeBuilder valueLoader, bool indirect = false)
+        {
+            if (variableIndex == 0)
+            {
+                if (indirect)
+                {
+                    SetStackTop(valueLoader);
+                }
+                else
+                {
+                    PushStack(valueLoader);
+                }
+            }
+            else if (variableIndex < 16)
+            {
+                StoreLocalVariable(variableIndex - 1, valueLoader);
+            }
+            else
+            {
+                StoreGlobalVariable(variableIndex - 16, valueLoader);
+            }
+        }
+
         private void StoreVariable(Variable variable, CodeBuilder valueLoader, bool indirect = false)
         {
             switch (variable.Kind)

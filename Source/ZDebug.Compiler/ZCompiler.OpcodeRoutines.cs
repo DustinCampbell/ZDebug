@@ -198,18 +198,41 @@ namespace ZDebug.Compiler
 
         private void op_dec()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<short>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                CalculatedLoadVariable(varIndex, indirect: true);
-                il.Convert.ToInt16();
-                il.Math.Subtract(1);
-                value.Store();
+                    LoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Subtract(1);
+                    value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<short>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    CalculatedLoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Subtract(1);
+                    value.Store();
+
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -239,18 +262,41 @@ namespace ZDebug.Compiler
 
         private void op_inc()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<short>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                CalculatedLoadVariable(varIndex, indirect: true);
-                il.Convert.ToInt16();
-                il.Math.Add(1);
-                value.Store();
+                    LoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Add(1);
+                    value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<short>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    CalculatedLoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Add(1);
+                    value.Store();
+
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -430,15 +476,36 @@ namespace ZDebug.Compiler
 
         private void op_load()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var result = il.NewLocal<ushort>())
-            {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+            var varIndexOp = GetOperand(0);
 
-                CalculatedLoadVariable(varIndex, indirect: true);
-                result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
+            {
+                using (var result = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
+
+                    LoadVariable(varIndex, indirect: true);
+                    result.Store();
+
+                    StoreVariable(currentInstruction.StoreVariable, result);
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var result = il.NewLocal<ushort>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    CalculatedLoadVariable(varIndex, indirect: true);
+                    result.Store();
+                    StoreVariable(currentInstruction.StoreVariable, result);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -513,16 +580,37 @@ namespace ZDebug.Compiler
 
         private void op_store()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<ushort>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                LoadOperand(1);
-                value.Store();
+                    LoadOperand(1);
+                    value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    LoadOperand(1);
+                    value.Store();
+
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -604,18 +692,38 @@ namespace ZDebug.Compiler
 
         private void op_pull()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<ushort>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                PopStack();
+                    PopStack();
+                    value.Store();
 
-                value.Store();
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
+                }
             }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    LoadByRefVariableOperand();
+                    varIndex.Store();
 
+                    PopStack();
+
+                    value.Store();
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
+            }
         }
 
         private void op_push()

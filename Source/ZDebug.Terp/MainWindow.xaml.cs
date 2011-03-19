@@ -138,10 +138,12 @@ namespace ZDebug.Terp
             catch (ZMachineQuitException)
             {
                 // done
+                UpdateProfilerStatistics();
             }
             catch (ZMachineInterruptedException)
             {
                 // done
+                UpdateProfilerStatistics();
             }
             catch (Exception ex)
             {
