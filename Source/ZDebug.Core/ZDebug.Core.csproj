@@ -120,7 +120,6 @@
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\Bits.cs" />
     <Compile Include="Utilities\ByteArrayExtensions.cs" />
-    <Compile Include="Utilities\ReadOnlyCollectionExtensions.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

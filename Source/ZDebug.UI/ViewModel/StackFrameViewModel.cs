@@ -1,6 +1,6 @@
-﻿using ZDebug.Core.Execution;
+﻿using System.Linq;
+using ZDebug.Core.Execution;
 using ZDebug.Core.Utilities;
-using System;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -31,7 +31,7 @@ namespace ZDebug.UI.ViewModel
 
         public string ArgText
         {
-            get 
+            get
             {
                 return "(" + string.Join(", ", stackFrame.Arguments.ToArray().ConvertAll(arg => arg.ToString("x4"))) + ")";
             }
