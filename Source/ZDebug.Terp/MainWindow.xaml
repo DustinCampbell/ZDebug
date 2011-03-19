@@ -99,7 +99,17 @@
                         </Grid>
                     </TabItem>
                     <TabItem Header="Instructions">
-
+                        <DataGrid Name="instructionsGrid"
+                                  AutoGenerateColumns="False"
+                                  HorizontalGridLinesBrush="LightGray"
+                                  VerticalGridLinesBrush="LightGray">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Address" IsReadOnly="True" Binding="{Binding Address, Mode=OneWay, StringFormat=\{0:x4\}}"/>
+                                <DataGridTextColumn Header="Opcode" IsReadOnly="True" Binding="{Binding OpcodeName, Mode=OneWay}"/>
+                                <DataGridTextColumn Header="X Executed" IsReadOnly="True" Binding="{Binding TimesExecuted, Mode=OneWay, StringFormat=\{0:#\,#\}}"/>
+                                <DataGridTextColumn Header="Total Time" IsReadOnly="True" Binding="{Binding TotalTime, Mode=OneWay, Converter={StaticResource timeSpanToString}}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </TabItem>
                     <TabItem Header="Routines">
                         <DataGrid Name="routineGrid"
@@ -108,7 +118,7 @@
                                   VerticalGridLinesBrush="LightGray">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Address" IsReadOnly="True" Binding="{Binding Address, Mode=OneWay, StringFormat=\{0:x4\}}"/>
-                                <DataGridTextColumn Header="# Calls" IsReadOnly="True" Binding="{Binding Calls.Count, Mode=OneWay}"/>
+                                <DataGridTextColumn Header="# Calls" IsReadOnly="True" Binding="{Binding Calls.Count, Mode=OneWay, StringFormat=\{0:#\,#\}}"/>
                                 <DataGridTextColumn Header="Inclusive %" IsReadOnly="True" Binding="{Binding InclusivePercentage, Mode=OneWay, StringFormat=\{0:0.00\}%}"/>
                                 <DataGridTextColumn Header="Exclusive %" IsReadOnly="True" Binding="{Binding ExclusivePercentage, Mode=OneWay, StringFormat=\{0:0.00\}%}"/>
                                 <DataGridTextColumn Header="Inclusive Time" IsReadOnly="True" Binding="{Binding InclusiveTime, Mode=OneWay, Converter={StaticResource timeSpanToString}}"/>

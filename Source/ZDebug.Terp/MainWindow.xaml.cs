@@ -605,15 +605,28 @@ namespace ZDebug.Terp
                     {
                         reader.Address = timing.Item1;
                         var i = reader.NextInstruction();
-                        var totalTime = timing.Item2.Item2;
-                        return Tuple.Create(i, totalTime, timing.Item2.Item1);
+                        return new
+                        {
+                            Instruction = i,
+                            Address = i.Address,
+                            OpcodeName = i.Opcode.Name,
+                            TimesExecuted = timing.Item2.Item1,
+                            TotalTime = timing.Item2.Item2
+                        };
                     });
 
-                    var totalTimesByOpcodeName = from i in instructions
-                                                 group i by i.Item1.Opcode.Name into g
-                                                 select new { Name = g.Key, TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.Item2), Count = g.Sum(x => x.Item3) };
+                    instructionsGrid.ItemsSource = instructions.OrderByDescending(x => x.TotalTime);
 
-                    worstOpcodes.ItemsSource = totalTimesByOpcodeName.OrderByDescending(x => x.TotalTime);
+                    var opcodes = from i in instructions
+                                  group i by i.Instruction.Opcode.Name into g
+                                  select new
+                                  {
+                                      Name = g.Key,
+                                      TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
+                                      Count = g.Sum(x => x.TimesExecuted)
+                                  };
+
+                    worstOpcodes.ItemsSource = opcodes.OrderByDescending(x => x.TotalTime);
                 });
             }
         }
