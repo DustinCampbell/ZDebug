@@ -16,5 +16,7 @@ namespace ZDebug.Terp.Profiling
 
         double InclusivePercentage { get; }
         double ExclusivePercentage { get; }
+
+        bool Recursive { get; }
     }
 }

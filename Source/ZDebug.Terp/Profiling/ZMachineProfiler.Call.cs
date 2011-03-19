@@ -14,6 +14,7 @@ namespace ZDebug.Terp.Profiling
             private readonly Routine routine;
             private readonly int index;
             private readonly int parentIndex;
+            private readonly bool recursive;
             private List<int> childIndexes;
             private ReadOnlyCollection<ICall> children;
 
@@ -21,12 +22,13 @@ namespace ZDebug.Terp.Profiling
             private TimeSpan inclusiveTime;
             private TimeSpan exclusiveTime;
 
-            public Call(ZMachineProfiler profiler, Routine routine, int index, int parentIndex)
+            public Call(ZMachineProfiler profiler, Routine routine, int index, int parentIndex, bool recursive)
             {
                 this.profiler = profiler;
                 this.routine = routine;
                 this.index = index;
                 this.parentIndex = parentIndex;
+                this.recursive = recursive;
                 this.childIndexes = new List<int>();
 
                 routine.AddCall(index);
@@ -123,6 +125,14 @@ namespace ZDebug.Terp.Profiling
                 get
                 {
                     return ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
+                }
+            }
+
+            public bool Recursive
+            {
+                get
+                {
+                    return recursive;
                 }
             }
         }

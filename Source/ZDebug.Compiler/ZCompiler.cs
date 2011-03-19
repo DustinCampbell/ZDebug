@@ -8,6 +8,10 @@ using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 
+// Potential optimizations:
+// 
+// * Use ref locals for indexes into the locals array.
+
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler

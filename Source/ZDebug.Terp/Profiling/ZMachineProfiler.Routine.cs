@@ -36,7 +36,7 @@ namespace ZDebug.Terp.Profiling
                 calls = new ReadOnlyCollection<ICall>(callList);
                 callIndexes = null;
 
-                inclusiveTime = calls.Aggregate(TimeSpan.Zero, (r, c) => r + c.InclusiveTime);
+                inclusiveTime = calls.Aggregate(TimeSpan.Zero, (r, c) => r + (c.Recursive ? TimeSpan.Zero : c.InclusiveTime));
                 exclusiveTime = calls.Aggregate(TimeSpan.Zero, (r, c) => r + c.ExclusiveTime);
             }
 

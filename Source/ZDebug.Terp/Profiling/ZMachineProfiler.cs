@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using ZDebug.Compiler.Profiling;
+using ZDebug.Terp.Utilities;
 
 namespace ZDebug.Terp.Profiling
 {
@@ -51,7 +53,9 @@ namespace ZDebug.Terp.Profiling
                 ? callStack.Peek().Index
                 : -1;
 
-            var call = new Call(this, routine, index, parent);
+            var recursive = callStack.TopToBottom().Any(c => c.Routine.Address == address);
+
+            var call = new Call(this, routine, index, parent, recursive);
             calls.Add(call);
             callStack.Push(call);
 
