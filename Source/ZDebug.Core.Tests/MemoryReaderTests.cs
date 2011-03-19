@@ -178,7 +178,7 @@ namespace ZDebug.Core.Tests
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0,
                              0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var reader = new MemoryReader(bytes, 0);
+            var reader = new MemoryReader(bytes, 8);
             ushort[][] expected =
             { 
                 new ushort[] { 0xff00, 0x0ff0 }, 

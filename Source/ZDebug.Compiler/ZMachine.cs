@@ -67,7 +67,10 @@ namespace ZDebug.Compiler
             this.screen = screen;
             this.profiler = profiler;
             this.outputStreams = new OutputStreams(memory);
-            this.outputStreams.RegisterScreen(screen);
+            if (screen != null)
+            {
+                this.outputStreams.RegisterScreen(screen);
+            }
             this.ztext = new ZText(memory);
             this.version = memory.ReadByte(0x00);
 
