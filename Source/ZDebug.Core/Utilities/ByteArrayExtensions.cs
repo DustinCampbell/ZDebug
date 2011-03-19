@@ -31,18 +31,12 @@ namespace ZDebug.Core.Utilities
 
         public static ushort ReadWord(this byte[] bytes, int index)
         {
-            byte b1 = bytes[index];
-            byte b2 = bytes[index + 1];
-
-            return (ushort)(b1 << 8 | b2);
+            return (ushort)(bytes[index] << 8 | bytes[index + 1]);
         }
 
         public static ushort ReadWord(this byte[] array, ref int index)
         {
-            byte b1 = array[index++];
-            byte b2 = array[index++];
-
-            return (ushort)(b1 << 8 | b2);
+            return (ushort)(array[index++] << 8 | array[index++]);
         }
 
         public static ushort[] ReadWords(this byte[] array, int index, int length)
@@ -123,7 +117,7 @@ namespace ZDebug.Core.Utilities
                 byte b2 = (byte)(value & 0x00ff);
 
                 array[index + i] = b1;
-                array[index + i+ 1] = b2;
+                array[index + i + 1] = b2;
 
                 i += 2;
             }
