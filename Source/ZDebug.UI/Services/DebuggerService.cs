@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 using System.Xml.Linq;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
-using ZDebug.UI.Utilities;
-using ZDebug.Core.Instructions;
 using ZDebug.Core.Execution;
-using System.Windows.Input;
-using System.Windows;
-using System.Threading;
-using System.Windows.Threading;
+using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Services
 {
@@ -24,6 +23,7 @@ namespace ZDebug.UI.Services
 
         private static IInterpreter interpreter;
         private static Story story;
+        private static Processor processor;
         private static GameInfo gameInfo;
         private static RoutineTable routineTable;
         private static InstructionReader reader;
@@ -55,8 +55,6 @@ namespace ZDebug.UI.Services
         /// </summary>
         private static int Step()
         {
-            var processor = story.Processor;
-
             reader.Address = processor.PC;
             currentInstruction = reader.NextInstruction();
 
@@ -146,7 +144,7 @@ namespace ZDebug.UI.Services
                     new XElement("gamescript",
                         gameScript.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
-                        routineTable.Select(r => new XElement("routine", 
+                        routineTable.Select(r => new XElement("routine",
                             new XAttribute("address", r.Address),
                             new XAttribute("name", r.Name)))));
 
@@ -166,6 +164,7 @@ namespace ZDebug.UI.Services
 
             interpreter = null;
             story = null;
+            processor = null;
             gameInfo = null;
             routineTable = null;
             reader = null;
@@ -206,17 +205,18 @@ namespace ZDebug.UI.Services
             interpreter = new Interpreter();
             story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
+            processor = new Processor(story);
             routineTable = new RoutineTable(story, cache);
-            reader = new InstructionReader(story.Processor.PC, story.Memory.Bytes, cache);
+            reader = new InstructionReader(processor.PC, story.Memory.Bytes, cache);
 
             DebuggerService.fileName = fileName;
 
             LoadSettings(story);
 
             gameScriptCommandIndex = gameScript.Count != 0 ? 0 : -1;
-            story.Processor.SetRandomSeed(42);
+            processor.SetRandomSeed(42);
 
-            story.Processor.Quit += Processor_Quit;
+            processor.Quit += Processor_Quit;
 
             var handler = StoryOpened;
             if (handler != null)
@@ -421,7 +421,7 @@ namespace ZDebug.UI.Services
 
             if (priorState == DebuggerState.Running)
             {
-                if (breakpoints.Contains(story.Processor.PC))
+                if (breakpoints.Contains(processor.PC))
                 {
                     ChangeState(DebuggerState.Stopped);
                 }
@@ -449,6 +449,11 @@ namespace ZDebug.UI.Services
         public static bool HasStory
         {
             get { return story != null; }
+        }
+
+        public static Processor Processor
+        {
+            get { return processor; }
         }
 
         public static GameInfo GameInfo

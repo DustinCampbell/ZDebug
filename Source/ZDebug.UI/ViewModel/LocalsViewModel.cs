@@ -31,7 +31,7 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.State != DebuggerState.Running)
             {
-                var processor = DebuggerService.Story.Processor;
+                var processor = DebuggerService.Processor;
 
                 // Update locals...
                 var localCount = processor.LocalCount;

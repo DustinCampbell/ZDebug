@@ -62,13 +62,13 @@ namespace ZDebug.Core.Execution
         private int instructionCount;
         private int callCount;
 
-        internal Processor(Story story, ZText ztext)
+        public Processor(Story story)
         {
             this.story = story;
             this.memory = story.Memory;
             this.version = story.Version;
             this.bytes = this.memory.Bytes;
-            this.ztext = ztext;
+            this.ztext = new ZText(story.Memory);
             this.objectTable = story.ObjectTable;
             this.globalVariableTableAddress = this.memory.ReadGlobalVariableTableAddress();
 
@@ -354,7 +354,7 @@ namespace ZDebug.Core.Execution
                 var loc = stack[sp--];
                 var index = i * 2;
                 locals[index] = (ushort)((loc >> 16) & 0xffff);
-                locals[index+1] = (ushort)(loc & 0xffff);
+                locals[index + 1] = (ushort)(loc & 0xffff);
             }
 
             var argCount = (int)stack[sp--];

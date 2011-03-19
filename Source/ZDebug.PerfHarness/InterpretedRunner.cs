@@ -3,6 +3,7 @@ using ZDebug.Core;
 using ZDebug.Core.Blorb;
 using System;
 using System.Diagnostics;
+using ZDebug.Core.Execution;
 
 namespace ZDebug.PerfHarness
 {
@@ -34,8 +35,7 @@ namespace ZDebug.PerfHarness
             MarkProfile("Reading story");
 
             var story = ReadStory(StoryFilePath);
-
-            var processor = story.Processor;
+            var processor = new Processor(story);
 
             var done = false;
             Action doneAction = () => { done = true; };
@@ -71,7 +71,7 @@ namespace ZDebug.PerfHarness
             Console.WriteLine("{0:#,#} calls", processor.CallCount);
             Console.WriteLine();
             Console.WriteLine("{0:#,0.##########} seconds", (double)sw.ElapsedTicks / (double)Stopwatch.Frequency);
-            Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)sw.ElapsedTicks / (double)Stopwatch.Frequency) / (double)story.Processor.InstructionCount);
+            Console.WriteLine("{0:#,0.##########} seconds per instruction", ((double)sw.ElapsedTicks / (double)Stopwatch.Frequency) / (double)processor.InstructionCount);
         }
     }
 }

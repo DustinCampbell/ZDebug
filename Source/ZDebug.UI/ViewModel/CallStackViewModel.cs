@@ -19,7 +19,7 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.State != DebuggerState.Running)
             {
-                var frames = DebuggerService.Story.Processor.GetStackFrames();
+                var frames = DebuggerService.Processor.GetStackFrames();
 
                 stackFrames.BeginBulkOperation();
                 try

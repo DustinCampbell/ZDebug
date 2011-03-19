@@ -28,7 +28,7 @@ namespace ZDebug.UI.ViewModel
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
             DebuggerService.StateChanged += DebuggerService_StateChanged;
-            e.Story.Processor.RegisterMessageLog(this);
+            DebuggerService.Processor.RegisterMessageLog(this);
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)

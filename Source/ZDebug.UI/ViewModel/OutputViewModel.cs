@@ -48,8 +48,8 @@ namespace ZDebug.UI.ViewModel
 
             windowManager.Activate(mainWindow);
 
-            e.Story.Processor.RegisterScreen(this);
-            e.Story.Processor.RegisterSoundEngine(this);
+            DebuggerService.Processor.RegisterScreen(this);
+            DebuggerService.Processor.RegisterSoundEngine(this);
         }
 
         private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)

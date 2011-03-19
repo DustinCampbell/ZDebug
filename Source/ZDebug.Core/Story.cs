@@ -2,12 +2,11 @@
 using System.IO;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Dictionary;
-using ZDebug.Core.Execution;
 using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Interpreter;
 using ZDebug.Core.Objects;
 using ZDebug.Core.Text;
-using ZDebug.Core.Interpreter;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
@@ -31,7 +30,6 @@ namespace ZDebug.Core
         private readonly ZObjectTable objectTable;
         private readonly GlobalVariablesTable globalVariablesTable;
         private readonly ZDictionary dictionary;
-        private readonly Processor processor;
         private readonly int mainRoutineAddress;
 
         private IInterpreter interpreter;
@@ -53,7 +51,6 @@ namespace ZDebug.Core
             this.objectTable = new ZObjectTable(memory, ztext);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.dictionary = new ZDictionary(this, ztext);
-            this.processor = new Processor(this, ztext);
             this.mainRoutineAddress = memory.ReadMainRoutineAddress();
 
             RegisterInterpreter(new DefaultInterpreter());
@@ -248,11 +245,6 @@ namespace ZDebug.Core
         public ZDictionary Dictionary
         {
             get { return dictionary; }
-        }
-
-        public Processor Processor
-        {
-            get { return processor; }
         }
 
         public int MainRoutineAddress

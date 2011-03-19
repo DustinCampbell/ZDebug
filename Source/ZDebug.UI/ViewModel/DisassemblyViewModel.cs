@@ -136,7 +136,7 @@ namespace ZDebug.UI.ViewModel
                     }
                 }
 
-                ipLine = GetLineByAddress(e.Story.Processor.PC);
+                ipLine = GetLineByAddress(DebuggerService.Processor.PC);
                 ipLine.HasIP = true;
             }
             finally
@@ -313,32 +313,32 @@ namespace ZDebug.UI.ViewModel
 
             if (e.NewState == DebuggerState.Running)
             {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                var line = GetLineByAddress(DebuggerService.Processor.PC);
                 line.HasIP = false;
             }
             else if (e.NewState == DebuggerState.StoppedAtError)
             {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingAddress);
+                var line = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
                 line.State = DisassemblyLineState.Blocked;
                 line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
                 BringLineIntoView(line);
             }
             else if (e.NewState == DebuggerState.Done)
             {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.ExecutingAddress);
+                var line = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
                 line.State = DisassemblyLineState.Stopped;
                 BringLineIntoView(line);
             }
             else if (e.NewState == DebuggerState.AwaitingInput)
             {
-                inputLine = GetLineByAddress(DebuggerService.Story.Processor.ExecutingAddress);
+                inputLine = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
                 inputLine.State = DisassemblyLineState.Paused;
                 BringLineIntoView(inputLine);
             }
             else if (e.NewState == DebuggerState.Stopped &&
                 (e.OldState == DebuggerState.Running || e.OldState == DebuggerState.AwaitingInput))
             {
-                var line = GetLineByAddress(DebuggerService.Story.Processor.PC);
+                var line = GetLineByAddress(DebuggerService.Processor.PC);
                 line.HasIP = true;
                 BringLineIntoView(line);
             }
