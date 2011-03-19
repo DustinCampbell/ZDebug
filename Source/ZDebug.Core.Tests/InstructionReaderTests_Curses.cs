@@ -20,9 +20,9 @@ namespace ZDebug.Core.Tests
         public void FirstInstruction()
         {
             var story = LoadStory();
-            var initialPC = Header.ReadInitialPC(story.Memory.Bytes);
+            var initialPC = Header.ReadInitialPC(story.Memory);
 
-            var ireader = new InstructionReader(initialPC, story.Memory.Bytes, null);
+            var ireader = new InstructionReader(initialPC, story.Memory, null);
 
             var i = ireader.NextInstruction();
 

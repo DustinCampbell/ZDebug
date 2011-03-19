@@ -77,7 +77,7 @@ namespace ZDebug.Core.Instructions
                 address += localCount * 2;
             }
 
-            var reader = new InstructionReader(address, story.Memory.Bytes, cache);
+            var reader = new InstructionReader(address, story.Memory, cache);
 
             var instructions = new List<Instruction>();
             var lastAddressKnown = address;

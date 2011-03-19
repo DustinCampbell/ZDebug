@@ -10,8 +10,7 @@ namespace ZDebug.Core.Objects
 {
     public class ZObjectTable : IIndexedEnumerable<ZObject>
     {
-        private readonly Memory memory;
-        private readonly byte[] bytes;
+        private readonly byte[] memory;
         private readonly ZText ztext;
         private readonly byte version;
         private readonly ushort address;
@@ -32,13 +31,12 @@ namespace ZDebug.Core.Objects
         private readonly IntegerMap<ZPropertyTable> propertyTables;
         private readonly ZObject[] objects;
 
-        internal ZObjectTable(Memory memory, ZText ztext)
+        internal ZObjectTable(byte[] memory, ZText ztext)
         {
             this.memory = memory;
-            this.bytes = memory.Bytes;
             this.ztext = ztext;
-            this.version = Header.ReadVersion(memory.Bytes);
-            this.address = Header.ReadObjectTableAddress(memory.Bytes);
+            this.version = Header.ReadVersion(memory);
+            this.address = Header.ReadObjectTableAddress(memory);
 
             this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
             this.maxProperties = (byte)(version <= 3 ? 31 : 63);
@@ -80,7 +78,7 @@ namespace ZDebug.Core.Objects
                 throw new ArgumentOutOfRangeException("propNum");
             }
 
-            return bytes.ReadWord(address + ((propNum - 1) * 2));
+            return memory.ReadWord(address + ((propNum - 1) * 2));
         }
 
         internal byte[] ReadAttributeBytesByObjectAddress(ushort objAddress)
@@ -127,7 +125,7 @@ namespace ZDebug.Core.Objects
             int byteIdx = attribute / 8;
             int bitMask = 1 << (7 - (attribute % 8));
 
-            byte b = bytes[objAddress + byteIdx];
+            byte b = memory[objAddress + byteIdx];
 
             return (b & bitMask) != 0;
         }
@@ -193,11 +191,11 @@ namespace ZDebug.Core.Objects
         {
             if (numberSize == 1)
             {
-                return bytes[address];
+                return memory[address];
             }
             else if (numberSize == 2)
             {
-                return bytes.ReadWord(address);
+                return memory.ReadWord(address);
             }
             else
             {
@@ -209,11 +207,11 @@ namespace ZDebug.Core.Objects
         {
             if (numberSize == 1)
             {
-                bytes[address] = (byte)value;
+                memory[address] = (byte)value;
             }
             else if (numberSize == 2)
             {
-                bytes.WriteWord(address, value);
+                memory.WriteWord(address, value);
             }
             else
             {
@@ -295,7 +293,7 @@ namespace ZDebug.Core.Objects
 
         internal ushort ReadPropertyTableAddressByObjectAddress(ushort objAddress)
         {
-            return bytes.ReadWord(objAddress + propertyTableAddressOffset);
+            return memory.ReadWord(objAddress + propertyTableAddressOffset);
         }
 
         internal ushort ReadPropertyTableAddressByObjectNumber(ushort objNum)
@@ -307,7 +305,7 @@ namespace ZDebug.Core.Objects
 
         internal void WritePropertyTableAddressByObjectAddress(ushort objAddress, ushort value)
         {
-            bytes.WriteWord(objAddress + propertyTableAddressOffset, value);
+            memory.WriteWord(objAddress + propertyTableAddressOffset, value);
         }
 
         internal void WritePropertyTableAddressByObjectNumber(ushort objNum, ushort value)
@@ -331,9 +329,9 @@ namespace ZDebug.Core.Objects
                     return objects.ToArray();
                 }
 
-                objects.Add(new ZObject(memory, this, ztext, address, i));
+                objects.Add(new ZObject(this, ztext, address, i));
 
-                var propertyTableAddress = bytes.ReadWord(address + propertyTableAddressOffset);
+                var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
                 smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
 
                 address += entrySize;
@@ -378,7 +376,7 @@ namespace ZDebug.Core.Objects
 
         internal ushort[] ReadShortName(ushort address)
         {
-            var length = bytes[address];
+            var length = memory[address];
             return memory.ReadWords(address + 1, length);
         }
 
@@ -395,7 +393,7 @@ namespace ZDebug.Core.Objects
                 return 0;
             }
 
-            byte sizeByte = bytes[dataAddress - 1];
+            byte sizeByte = memory[dataAddress - 1];
 
             byte dataLength;
             if (version <= 3)
@@ -423,11 +421,11 @@ namespace ZDebug.Core.Objects
         {
             // read properties...
             var props = new List<ZProperty>();
-            var reader = memory.CreateReader(propertyTable.Address);
+            var reader = new MemoryReader(memory, propertyTable.Address);
 
             reader.SkipShortName();
 
-            var version = Header.ReadVersion(memory.Bytes);
+            var version = Header.ReadVersion(memory);
             var index = 0;
             var prop = reader.NextProperty(version, propertyTable, index);
             while (prop != null)

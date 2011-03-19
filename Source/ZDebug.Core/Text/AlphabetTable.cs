@@ -16,9 +16,9 @@ namespace ZDebug.Core.Text
         private int currentAlphabet;
         private int baseAlphabet;
 
-        public AlphabetTable(Memory memory)
+        public AlphabetTable(byte[] memory)
         {
-            var version = Header.ReadVersion(memory.Bytes);
+            var version = Header.ReadVersion(memory);
             if (version == 1)
             {
                 alphabets = new char[][] { A0, A1, A3 };
@@ -29,14 +29,14 @@ namespace ZDebug.Core.Text
             }
             else if (version >= 5 && version <= 8)
             {
-                var alphabetTableAddress = Header.ReadAlphabetTableAddress(memory.Bytes);
+                var alphabetTableAddress = Header.ReadAlphabetTableAddress(memory);
                 if (alphabetTableAddress == 0)
                 {
                     alphabets = new char[][] { A0, A1, A2 };
                 }
                 else
                 {
-                    alphabets = ReadCustomAlphabetTable(memory.Bytes, alphabetTableAddress);
+                    alphabets = ReadCustomAlphabetTable(memory, alphabetTableAddress);
                 }
             }
             else

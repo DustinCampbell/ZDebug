@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Blorb
 {
     public sealed class BlorbFile
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private int releaseNumber;
 
         private static string NameFromId(uint id)
@@ -104,9 +105,9 @@ namespace ZDebug.Core.Blorb
                 throw new ArgumentNullException("stream");
             }
 
-            this.memory = new Memory(stream);
+            this.memory = stream.ReadFully();
 
-            var reader = memory.CreateReader(0);
+            var reader = new MemoryReader(this.memory, 0);
 
             var dwords = reader.NextDWords(3);
 

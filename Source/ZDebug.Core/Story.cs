@@ -13,7 +13,7 @@ namespace ZDebug.Core
 {
     public sealed class Story
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly byte version;
         private readonly int serialNumber;
         private readonly ushort releaseNumber;
@@ -34,36 +34,26 @@ namespace ZDebug.Core
 
         private IInterpreter interpreter;
 
-        private Story(Memory memory)
+        private Story(byte[] memory)
         {
             this.memory = memory;
-            this.version = Header.ReadVersion(memory.Bytes);
-            this.serialNumber = Header.ReadSerialNumber(memory.Bytes);
-            this.releaseNumber = Header.ReadReleaseNumber(memory.Bytes);
-            this.checksum = Header.ReadChecksum(memory.Bytes);
-            this.actualChecksum = Header.CalculateChecksum(memory.Bytes);
-            this.routinesOffset = Header.ReadRoutinesOffset(memory.Bytes);
-            this.stringsOffset = Header.ReadStringsOffset(memory.Bytes);
-            this.instructionCache = new InstructionCache((memory.Size - Header.ReadStaticMemoryBase(memory.Bytes)) / 8);
+            this.version = Header.ReadVersion(memory);
+            this.serialNumber = Header.ReadSerialNumber(memory);
+            this.releaseNumber = Header.ReadReleaseNumber(memory);
+            this.checksum = Header.ReadChecksum(memory);
+            this.actualChecksum = Header.CalculateChecksum(memory);
+            this.routinesOffset = Header.ReadRoutinesOffset(memory);
+            this.stringsOffset = Header.ReadStringsOffset(memory);
+            this.instructionCache = new InstructionCache((memory.Length - Header.ReadStaticMemoryBase(memory)) / 8);
             this.ztext = new ZText(memory);
             this.memoryMap = new MemoryMap(memory);
             this.informData = new InformData(memory, this.memoryMap, ztext);
             this.objectTable = new ZObjectTable(memory, ztext);
             this.globalVariablesTable = new GlobalVariablesTable(memory);
             this.dictionary = new ZDictionary(this, ztext);
-            this.mainRoutineAddress = Header.ReadMainRoutineAddress(memory.Bytes);
+            this.mainRoutineAddress = Header.ReadMainRoutineAddress(memory);
 
             RegisterInterpreter(new DefaultInterpreter());
-        }
-
-        private Story(byte[] bytes)
-            : this(new Memory(bytes))
-        {
-        }
-
-        private Story(Stream stream)
-            : this(new Memory(stream))
-        {
         }
 
         public int UnpackRoutineAddress(ushort byteAddress)
@@ -182,7 +172,7 @@ namespace ZDebug.Core
             memory.WriteWord(0x10, flags2);
         }
 
-        public Memory Memory
+        public byte[] Memory
         {
             get { return memory; }
         }
@@ -224,7 +214,7 @@ namespace ZDebug.Core
 
         public bool IsInformStory
         {
-            get { return Header.IsInformStory(memory.Bytes); }
+            get { return Header.IsInformStory(memory); }
         }
 
         public InformData InformData
@@ -259,7 +249,7 @@ namespace ZDebug.Core
 
         public static Story FromStream(Stream stream)
         {
-            return new Story(stream);
+            return new Story(stream.ReadFully());
         }
     }
 }

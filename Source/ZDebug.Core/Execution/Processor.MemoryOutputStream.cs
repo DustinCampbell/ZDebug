@@ -1,5 +1,4 @@
-﻿using ZDebug.Core.Basics;
-using ZDebug.Core.Utilities;
+﻿using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -7,11 +6,11 @@ namespace ZDebug.Core.Execution
     {
         private class MemoryOutputStream : IOutputStream
         {
-            private readonly Memory memory;
+            private readonly byte[] memory;
             private readonly int address;
             private ushort count;
 
-            public MemoryOutputStream(Memory memory, int address)
+            public MemoryOutputStream(byte[] memory, int address)
             {
                 this.memory = memory;
                 this.address = address;

@@ -2,14 +2,14 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
-using ZDebug.Core.Execution;
+using ZDebug.Core.Basics;
+using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
-using ZDebug.Core.Collections;
-using System.Windows.Input;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -82,7 +82,7 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
-            var reader = e.Story.Memory.CreateReader(0);
+            var reader = new MemoryReader(e.Story.Memory, 0);
 
             DisassemblyLineViewModel ipLine;
 

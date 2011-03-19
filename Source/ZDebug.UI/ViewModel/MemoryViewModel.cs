@@ -40,7 +40,7 @@ namespace ZDebug.UI.ViewModel
 
         private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
         {
-            var reader = e.Story.Memory.CreateReader(0);
+            var reader = new MemoryReader(e.Story.Memory, 0);
 
             lines.BeginBulkOperation();
             try

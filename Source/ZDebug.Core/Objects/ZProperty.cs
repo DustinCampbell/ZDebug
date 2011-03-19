@@ -1,11 +1,11 @@
 ﻿using System;
-using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Objects
 {
     public class ZProperty
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly ZPropertyTable propertyTable;
         private readonly int index;
         private readonly int address;
@@ -13,7 +13,7 @@ namespace ZDebug.Core.Objects
         private readonly int dataAddress;
         private readonly int length;
 
-        internal ZProperty(Memory memory, ZPropertyTable propertyTable, int index, int address, int number, int dataAddress, int length)
+        internal ZProperty(byte[] memory, ZPropertyTable propertyTable, int index, int address, int number, int dataAddress, int length)
         {
             this.memory = memory;
             this.propertyTable = propertyTable;

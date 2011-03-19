@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Globalization;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Utilities;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
-using System.Media;
 
 namespace ZDebug.UI.ViewModel
 {

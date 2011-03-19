@@ -23,10 +23,9 @@ namespace ZDebug.Core.Dictionary
             this.story = story;
             this.ztext = ztext;
 
-            var memory = story.Memory;
-            this.address = Header.ReadDictionaryAddress(memory.Bytes);
+            this.address = Header.ReadDictionaryAddress(story.Memory);
 
-            var reader = memory.CreateReader(address);
+            var reader = new MemoryReader(story.Memory, address);
 
             int wordSepCount = reader.NextByte();
             this.wordSeparators = reader.NextBytes(wordSepCount).ConvertAll(b => (char)b).AsReadOnly();

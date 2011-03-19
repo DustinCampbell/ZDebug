@@ -206,7 +206,7 @@ namespace ZDebug.Core.Execution
         internal void op_call_s()
         {
             var pc = this.pc;
-            var storeVariable = bytes[pc];
+            var storeVariable = memory[pc];
             this.pc = pc + 1;
             Call(story.UnpackRoutineAddress(operandValues[0]), storeVariable);
         }
@@ -248,14 +248,14 @@ namespace ZDebug.Core.Execution
         {
             int address = operandValues[0] + operandValues[1];
 
-            Store(bytes[address]);
+            Store(memory[address]);
         }
 
         internal void op_loadw()
         {
             int address = operandValues[0] + (operandValues[1] * 2);
 
-            Store(bytes.ReadWord(address));
+            Store(memory.ReadWord(address));
         }
 
         internal void op_store()
@@ -267,14 +267,14 @@ namespace ZDebug.Core.Execution
         {
             int address = operandValues[0] + operandValues[1];
 
-            bytes[address] = (byte)operandValues[2];
+            memory[address] = (byte)operandValues[2];
         }
 
         internal void op_storew()
         {
             int address = operandValues[0] + (operandValues[1] * 2);
 
-            bytes.WriteWord(address, operandValues[2]);
+            memory.WriteWord(address, operandValues[2]);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +333,7 @@ namespace ZDebug.Core.Execution
             {
                 if ((form & 0x80) != 0)
                 {
-                    var value = bytes.ReadWord(address);
+                    var value = memory.ReadWord(address);
                     if (value == x)
                     {
                         Store(address);
@@ -343,7 +343,7 @@ namespace ZDebug.Core.Execution
                 }
                 else
                 {
-                    var value = bytes[address];
+                    var value = memory[address];
                     if (value == x)
                     {
                         Store(address);
@@ -438,7 +438,7 @@ namespace ZDebug.Core.Execution
             {
                 do
                 {
-                    value = bytes[propAddress];
+                    value = memory[propAddress];
                     propAddress = GetNextProperty(propAddress);
                 }
                 while ((value & mask) > propNum);
@@ -449,7 +449,7 @@ namespace ZDebug.Core.Execution
                 }
             }
 
-            value = bytes[propAddress];
+            value = memory[propAddress];
             Store((ushort)(value & mask));
         }
 
@@ -488,7 +488,7 @@ namespace ZDebug.Core.Execution
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = bytes[propAddress];
+                value = memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -504,17 +504,17 @@ namespace ZDebug.Core.Execution
 
                 if ((version <= 3 && (value & 0xe0) == 0) || (version >= 4 && (value & 0xc0) == 0))
                 {
-                    result = bytes[propAddress];
+                    result = memory[propAddress];
                 }
                 else
                 {
-                    result = bytes.ReadWord(propAddress);
+                    result = memory.ReadWord(propAddress);
                 }
             }
             else
             {
                 propAddress = (ushort)(this.objectTableAddress + ((propNum - 1) * 2));
-                result = bytes.ReadWord(propAddress);
+                result = memory.ReadWord(propAddress);
             }
 
             Store(result);
@@ -539,7 +539,7 @@ namespace ZDebug.Core.Execution
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = bytes[propAddress];
+                value = memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -574,7 +574,7 @@ namespace ZDebug.Core.Execution
             }
 
             dataAddress--;
-            byte value = bytes[dataAddress];
+            byte value = memory[dataAddress];
 
             if (this.version <= 3)
             {
@@ -654,7 +654,7 @@ namespace ZDebug.Core.Execution
             ushort propAddress = GetFirstProperty(objNum);
             while (true)
             {
-                value = bytes[propAddress];
+                value = memory[propAddress];
                 if ((value & mask) <= propNum)
                 {
                     break;
@@ -672,11 +672,11 @@ namespace ZDebug.Core.Execution
 
             if ((this.version <= 3 && (value & 0xe0) == 0) || (this.version >= 4) && (value & 0xc0) == 0)
             {
-                bytes[propAddress] = (byte)operandValues[2];
+                memory[propAddress] = (byte)operandValues[2];
             }
             else
             {
-                bytes.WriteWord(propAddress, operandValues[2]);
+                memory.WriteWord(propAddress, operandValues[2]);
             }
         }
 
@@ -792,7 +792,7 @@ namespace ZDebug.Core.Execution
         {
             ushort byteAddress = operandValues[0];
 
-            ushort[] zwords = ZText.ReadZWords(memory.Bytes, byteAddress);
+            ushort[] zwords = ZText.ReadZWords(memory, byteAddress);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
@@ -823,7 +823,7 @@ namespace ZDebug.Core.Execution
             ushort byteAddress = operandValues[0];
             int address = story.UnpackStringAddress(byteAddress);
 
-            ushort[] zwords = ZText.ReadZWords(memory.Bytes, address);
+            ushort[] zwords = ZText.ReadZWords(memory, address);
             string text = ztext.ZWordsAsString(zwords, ZTextFlags.All);
 
             outputStreams.Print(text);
@@ -963,7 +963,7 @@ namespace ZDebug.Core.Execution
                 {
                     // TODO: Use ztext.TokenizeLine.
 
-                    ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
+                    ushort dictionary = Header.ReadDictionaryAddress(memory);
 
                     ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1018,7 +1018,7 @@ namespace ZDebug.Core.Execution
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
+                ushort dictionary = Header.ReadDictionaryAddress(memory);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1076,7 +1076,7 @@ namespace ZDebug.Core.Execution
 
                 // TODO: Use ztext.TokenizeLine.
 
-                ushort dictionary = Header.ReadDictionaryAddress(memory.Bytes);
+                ushort dictionary = Header.ReadDictionaryAddress(memory);
 
                 ZCommandToken[] tokens = ztext.TokenizeCommand(text, dictionary);
 
@@ -1268,7 +1268,7 @@ namespace ZDebug.Core.Execution
 
         internal void op_verify()
         {
-            Branch(story.ActualChecksum == Header.ReadChecksum(memory.Bytes));
+            Branch(story.ActualChecksum == Header.ReadChecksum(memory));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////

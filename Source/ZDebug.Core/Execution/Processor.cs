@@ -12,9 +12,8 @@ namespace ZDebug.Core.Execution
         private const int stackSize = 32768;
 
         private readonly Story story;
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly byte version;
-        private readonly byte[] bytes;
         private readonly ZText ztext;
         private readonly Opcode[] opcodes;
 
@@ -67,12 +66,11 @@ namespace ZDebug.Core.Execution
             this.story = story;
             this.memory = story.Memory;
             this.version = story.Version;
-            this.bytes = this.memory.Bytes;
             this.ztext = new ZText(story.Memory);
             this.objectTable = story.ObjectTable;
-            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.memory.Bytes);
+            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.memory);
 
-            this.objectTableAddress = Header.ReadObjectTableAddress(this.memory.Bytes);
+            this.objectTableAddress = Header.ReadObjectTableAddress(this.memory);
             this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
             this.maxProperties = (byte)(version <= 3 ? 31 : 63);
             this.propertyDefaultsTableSize = (byte)(maxProperties * 2);
@@ -91,7 +89,7 @@ namespace ZDebug.Core.Execution
             RegisterSoundEngine(NullSoundEngine.Instance);
             RegisterMessageLog(NullMessageLog.Instance);
 
-            this.pc = Header.ReadMainRoutineAddress(this.memory.Bytes);
+            this.pc = Header.ReadMainRoutineAddress(this.memory);
             this.opcodes = OpcodeTables.GetOpcodeTable(this.version).opcodes;
 
             this.callAddress = (uint)this.pc;
@@ -118,7 +116,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return bytes.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -142,7 +140,7 @@ namespace ZDebug.Core.Execution
             }
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
-                return bytes.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
+                return memory.ReadWord(globalVariableTableAddress + ((variableIndex - 0x10) * 2));
             }
         }
 
@@ -159,7 +157,7 @@ namespace ZDebug.Core.Execution
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
                 var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
-                bytes.WriteWord(address, value);
+                memory.WriteWord(address, value);
             }
         }
 
@@ -181,7 +179,7 @@ namespace ZDebug.Core.Execution
             else // global: variableIndex >= 0x10 && variableIndex <= 0xff
             {
                 var address = globalVariableTableAddress + ((variableIndex - 0x10) * 2);
-                bytes.WriteWord(address, value);
+                memory.WriteWord(address, value);
             }
         }
 
@@ -263,7 +261,7 @@ namespace ZDebug.Core.Execution
                 this.argumentCount = argCount;
 
                 // read locals
-                var locCount = bytes[pc++];
+                var locCount = memory[pc++];
                 this.localCount = locCount;
 
                 for (int i = 0; i < argCount; i++)
@@ -399,7 +397,7 @@ namespace ZDebug.Core.Execution
              * 6 bits. If bit 6 is clear, then the offset is a signed 14-bit number given in bits 0 to 5 of the first
              * byte followed by all 8 of the second. */
 
-            byte specifier = bytes[pc++];
+            byte specifier = memory[pc++];
 
             byte offset1 = (byte)(specifier & 0x3f);
 
@@ -416,7 +414,7 @@ namespace ZDebug.Core.Execution
                     offset1 |= 0xc0;
                 }
 
-                byte offset2 = bytes[pc++];
+                byte offset2 = memory[pc++];
 
                 offset = (ushort)((offset1 << 8) | offset2);
             }
@@ -440,7 +438,7 @@ namespace ZDebug.Core.Execution
 
         private void Store(ushort value)
         {
-            var storeVariable = bytes[pc++];
+            var storeVariable = memory[pc++];
 
             WriteVariableValue(storeVariable, value);
         }
@@ -450,7 +448,7 @@ namespace ZDebug.Core.Execution
             int count = 0;
             while (true)
             {
-                var zword = bytes.ReadWord(pc + (count++ * 2));
+                var zword = memory.ReadWord(pc + (count++ * 2));
                 if ((zword & 0x8000) != 0)
                 {
                     break;
@@ -480,7 +478,7 @@ namespace ZDebug.Core.Execution
             ushort objAddress = GetObjectAddress(objNum);
             objAddress += this.propertyTableAddressOffset;
 
-            return bytes.ReadWord(objAddress);
+            return memory.ReadWord(objAddress);
         }
 
         /// <summary>
@@ -489,7 +487,7 @@ namespace ZDebug.Core.Execution
         private ushort GetFirstProperty(ushort objNum)
         {
             ushort propAddress = GetObjectName(objNum);
-            byte nameLength = bytes[propAddress++];
+            byte nameLength = memory[propAddress++];
 
             return (ushort)(propAddress + (ushort)(nameLength * 2));
         }
@@ -499,7 +497,7 @@ namespace ZDebug.Core.Execution
         /// </summary>
         private ushort GetNextProperty(ushort propAddress)
         {
-            byte size = bytes[propAddress++];
+            byte size = memory[propAddress++];
 
             if (this.version <= 3)
             {
@@ -511,7 +509,7 @@ namespace ZDebug.Core.Execution
             }
             else
             {
-                size = bytes[propAddress];
+                size = memory[propAddress];
                 size &= 0x3f;
 
                 if (size == 0)
@@ -538,16 +536,16 @@ namespace ZDebug.Core.Execution
         {
             if (story.Version >= 4)
             {
-                Header.WriteScreenHeightInLines(story.Memory.Bytes, screen.ScreenHeightInLines);
-                Header.WriteScreenWidthInColumns(story.Memory.Bytes, screen.ScreenWidthInColumns);
+                Header.WriteScreenHeightInLines(story.Memory, screen.ScreenHeightInLines);
+                Header.WriteScreenWidthInColumns(story.Memory, screen.ScreenWidthInColumns);
             }
 
             if (story.Version >= 5)
             {
-                Header.WriteScreenHeightInUnits(story.Memory.Bytes, screen.ScreenHeightInUnits);
-                Header.WriteScreenWidthInUnits(story.Memory.Bytes, screen.ScreenWidthInUnits);
-                Header.WriteFontHeightInUnits(story.Memory.Bytes, screen.FontHeightInUnits);
-                Header.WriteFontWidthInUnits(story.Memory.Bytes, screen.FontWidthInUnits);
+                Header.WriteScreenHeightInUnits(story.Memory, screen.ScreenHeightInUnits);
+                Header.WriteScreenWidthInUnits(story.Memory, screen.ScreenWidthInUnits);
+                Header.WriteFontHeightInUnits(story.Memory, screen.FontHeightInUnits);
+                Header.WriteFontWidthInUnits(story.Memory, screen.FontWidthInUnits);
             }
         }
 

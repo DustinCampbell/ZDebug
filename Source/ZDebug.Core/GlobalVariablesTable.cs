@@ -1,17 +1,18 @@
 ﻿using System;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core
 {
     public class GlobalVariablesTable
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly int address;
 
-        public GlobalVariablesTable(Memory memory)
+        public GlobalVariablesTable(byte[] memory)
         {
             this.memory = memory;
-            this.address = Header.ReadGlobalVariableTableAddress(memory.Bytes);
+            this.address = Header.ReadGlobalVariableTableAddress(memory);
         }
 
         private ushort ReadGlobalVariable(int index)

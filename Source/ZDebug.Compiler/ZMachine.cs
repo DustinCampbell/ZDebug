@@ -1,6 +1,5 @@
 ﻿using System;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Text;
@@ -69,7 +68,7 @@ namespace ZDebug.Compiler
             this.profiler = profiler;
             this.outputStreams = new OutputStreams(memory);
             this.outputStreams.RegisterScreen(screen);
-            this.ztext = new ZText(new Memory(memory));
+            this.ztext = new ZText(memory);
             this.version = memory.ReadByte(0x00);
 
             this.actualChecksum = CalculateChecksum();

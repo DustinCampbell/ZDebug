@@ -13,8 +13,7 @@ namespace ZDebug.Core.Tests
         public void NextByteWorksAsExpectedFromIndexZero()
         {
             var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(0);
+            var reader = new MemoryReader(bytes, 0);
 
             for (int i = 0; i < bytes.Length; i++)
             {
@@ -33,8 +32,7 @@ namespace ZDebug.Core.Tests
         public void NextByteWorksAsExpectedFromDifferentIndex()
         {
             var bytes = ArrayEx.Create(1024, i => (byte)(i % 255));
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(512);
+            var reader = new MemoryReader(bytes, 512);
 
             for (int i = 512; i < bytes.Length; i++)
             {
@@ -53,8 +51,7 @@ namespace ZDebug.Core.Tests
         public void NextBytesWorksAsExpectedFromIndexZero()
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(0);
+            var reader = new MemoryReader(bytes, 0);
 
             byte[][] expected =
             { 
@@ -81,8 +78,7 @@ namespace ZDebug.Core.Tests
         public void NextBytesWorksAsExpectedFromDifferentIndex()
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(4);
+            var reader = new MemoryReader(bytes, 4);
 
             byte[][] expected =
             { 
@@ -110,8 +106,7 @@ namespace ZDebug.Core.Tests
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0,
                              0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(0);
+            var reader = new MemoryReader(bytes, 0);
 
             ushort[] expected = { 0xff00, 0x0ff0, 0xff00, 0x0ff0, 0xff00, 0x0ff0, 0xff00, 0x0ff0 };
 
@@ -133,8 +128,7 @@ namespace ZDebug.Core.Tests
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0,
                              0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(8);
+            var reader = new MemoryReader(bytes, 8);
 
             ushort[] expected = { 0xff00, 0x0ff0, 0xff00, 0x0ff0, 0xff00, 0x0ff0, 0xff00, 0x0ff0 };
 
@@ -156,8 +150,7 @@ namespace ZDebug.Core.Tests
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0,
                              0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(0);
+            var reader = new MemoryReader(bytes, 0);
 
             ushort[][] expected =
             { 
@@ -185,9 +178,7 @@ namespace ZDebug.Core.Tests
         {
             byte[] bytes = { 0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0,
                              0xff, 0x00, 0x0f, 0xf0, 0xff, 0x00, 0x0f, 0xf0 };
-            var memory = new Memory(bytes);
-            var reader = memory.CreateReader(8);
-
+            var reader = new MemoryReader(bytes, 0);
             ushort[][] expected =
             { 
                 new ushort[] { 0xff00, 0x0ff0 }, 

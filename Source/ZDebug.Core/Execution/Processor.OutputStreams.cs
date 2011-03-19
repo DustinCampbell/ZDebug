@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZDebug.Core.Basics;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Execution
 {
@@ -9,7 +9,7 @@ namespace ZDebug.Core.Execution
         private class OutputStreams
         {
             private readonly Story story;
-            private readonly Memory memory;
+            private readonly byte[] memory;
 
             private bool screenActive;
             private IOutputStream screenStream;
@@ -63,7 +63,7 @@ namespace ZDebug.Core.Execution
             public void SelectTranscriptStream()
             {
                 transcriptActive = true;
-                
+
                 // set transcript flag as demanded by standard 1.0
                 var flags2 = memory.ReadWord(0x10);
                 flags2 |= 0x01;
@@ -80,7 +80,7 @@ namespace ZDebug.Core.Execution
                 memory.WriteWord(0x10, flags2);
             }
 
-            public void SelectMemoryStream(Memory memory, int address)
+            public void SelectMemoryStream(byte[] memory, int address)
             {
                 if (memoryStreams.Count == 16)
                 {

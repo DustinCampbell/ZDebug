@@ -1,19 +1,16 @@
-﻿using ZDebug.Core.Basics;
-using ZDebug.Core.Text;
+﻿using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Objects
 {
     public class ZObject
     {
-        private readonly Memory memory;
         private readonly ZObjectTable objectTable;
         private readonly ZText ztext;
         private readonly ushort address;
         private readonly ushort number;
 
-        internal ZObject(Memory memory, ZObjectTable objectTable, ZText ztext, ushort address, ushort number)
+        internal ZObject(ZObjectTable objectTable, ZText ztext, ushort address, ushort number)
         {
-            this.memory = memory;
             this.objectTable = objectTable;
             this.ztext = ztext;
             this.address = address;

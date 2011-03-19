@@ -1,20 +1,21 @@
 ﻿using ZDebug.Core.Basics;
 using ZDebug.Core.Text;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Inform
 {
     public sealed class InformData
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly MemoryMap memoryMap;
         private readonly int version;
         private readonly ZText ztext;
 
-        public InformData(Memory memory, MemoryMap memoryMap, ZText ztext)
+        public InformData(byte[] memory, MemoryMap memoryMap, ZText ztext)
         {
             this.memory = memory;
             this.memoryMap = memoryMap;
-            this.version = Header.ReadInformVersionNumber(memory.Bytes);
+            this.version = Header.ReadInformVersionNumber(memory);
             this.ztext = ztext;
         }
 
@@ -27,9 +28,9 @@ namespace ZDebug.Core.Inform
         {
             var address = memoryMap[MemoryMapRegionKind.PropertyNamesTable].Base + (propNum * 2);
             var propNamePackedAddress = memory.ReadWord(address);
-            var propNameAddress = Header.UnpackStringAddress(memory.Bytes, propNamePackedAddress);
+            var propNameAddress = Header.UnpackStringAddress(memory, propNamePackedAddress);
 
-            var propNameZWords = ZText.ReadZWords(memory.Bytes, propNameAddress);
+            var propNameZWords = ZText.ReadZWords(memory, propNameAddress);
 
             return ztext.ZWordsAsString(propNameZWords, ZTextFlags.None);
         }

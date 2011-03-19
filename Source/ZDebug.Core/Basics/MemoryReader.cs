@@ -1,12 +1,14 @@
 ﻿using System;
+using ZDebug.Core.Utilities;
+
 namespace ZDebug.Core.Basics
 {
     public sealed class MemoryReader
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private int address;
 
-        public MemoryReader(Memory memory, int address)
+        public MemoryReader(byte[] memory, int address)
         {
             this.memory = memory;
             this.address = address;
@@ -14,7 +16,7 @@ namespace ZDebug.Core.Basics
 
         public byte NextByte()
         {
-            if (address + 1 > memory.Size)
+            if (address + 1 > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -31,7 +33,7 @@ namespace ZDebug.Core.Basics
                 return new byte[0];
             }
 
-            if (address + length > memory.Size)
+            if (address + length > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -43,7 +45,7 @@ namespace ZDebug.Core.Basics
 
         public ushort NextWord()
         {
-            if (address + 2 > memory.Size)
+            if (address + 2 > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -60,7 +62,7 @@ namespace ZDebug.Core.Basics
                 return new ushort[0];
             }
 
-            if (address + (length * 2) > memory.Size)
+            if (address + (length * 2) > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -72,7 +74,7 @@ namespace ZDebug.Core.Basics
 
         public uint NextDWord()
         {
-            if (address + 4 > memory.Size)
+            if (address + 4 > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -89,7 +91,7 @@ namespace ZDebug.Core.Basics
                 return new uint[0];
             }
 
-            if (address + (length * 4) > memory.Size)
+            if (address + (length * 4) > memory.Length)
             {
                 throw new InvalidOperationException("Attempted to read past end of memory");
             }
@@ -101,7 +103,7 @@ namespace ZDebug.Core.Basics
 
         public void Skip(int length)
         {
-            if (length < 0 || address + length > memory.Size)
+            if (length < 0 || address + length > memory.Length)
             {
                 throw new ArgumentOutOfRangeException("length");
             }
@@ -114,7 +116,7 @@ namespace ZDebug.Core.Basics
             get { return address; }
             set
             {
-                if (value < 0 || value > memory.Size)
+                if (value < 0 || value > memory.Length)
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
@@ -125,15 +127,15 @@ namespace ZDebug.Core.Basics
 
         public int Size
         {
-            get { return memory.Size; }
+            get { return memory.Length; }
         }
 
         public int RemainingBytes
         {
-            get { return memory.Size - address; }
+            get { return memory.Length - address; }
         }
 
-        public Memory Memory
+        public byte[] Memory
         {
             get { return memory; }
         }

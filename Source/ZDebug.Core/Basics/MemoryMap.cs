@@ -1,16 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Basics
 {
     public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly List<MemoryMapRegion> regions;
         private readonly Dictionary<MemoryMapRegionKind, MemoryMapRegion> kindToRegionMap;
 
-        internal MemoryMap(Memory memory)
+        internal MemoryMap(byte[] memory)
         {
             this.memory = memory;
 
@@ -33,11 +34,11 @@ namespace ZDebug.Core.Basics
             kindToRegionMap.Add(kind, region);
         }
 
-        private void AddHeaderRegions(Memory memory)
+        private void AddHeaderRegions(byte[] memory)
         {
             AddRegion(MemoryMapRegionKind.Header, "Header", 0, 0x3f);
 
-            var headerExtensionBase = Header.ReadHeaderExtensionTableAddress(memory.Bytes);
+            var headerExtensionBase = Header.ReadHeaderExtensionTableAddress(memory);
             if (headerExtensionBase > 0)
             {
                 var headerExtensionSize = memory.ReadWord(headerExtensionBase);
@@ -56,15 +57,15 @@ namespace ZDebug.Core.Basics
             }
         }
 
-        private void AddAbbreviationRegions(Memory memory)
+        private void AddAbbreviationRegions(byte[] memory)
         {
-            var version = Header.ReadVersion(memory.Bytes);
+            var version = Header.ReadVersion(memory);
             if (version == 1) // V1 did not support abbreviations
             {
                 return;
             }
 
-            var tableBase = Header.ReadAbbreviationsTableAddress(memory.Bytes);
+            var tableBase = Header.ReadAbbreviationsTableAddress(memory);
             var count = version == 2 ? 32 : 96;
             var tableEnd = tableBase + (count * 2) - 1;
 
@@ -105,11 +106,11 @@ namespace ZDebug.Core.Basics
             AddRegion(MemoryMapRegionKind.AbbreviationData, "Abbreviation data", dataBase, dataEnd);
         }
 
-        private void AddDictionaryRegion(Memory memory)
+        private void AddDictionaryRegion(byte[] memory)
         {
-            var dictionaryBase = Header.ReadDictionaryAddress(memory.Bytes);
+            var dictionaryBase = Header.ReadDictionaryAddress(memory);
 
-            var reader = memory.CreateReader(dictionaryBase);
+            var reader = new MemoryReader(memory, dictionaryBase);
             var separatorCount = reader.NextByte();
             reader.Skip(separatorCount);
 
@@ -121,14 +122,14 @@ namespace ZDebug.Core.Basics
             AddRegion(MemoryMapRegionKind.Dictionary, "Dictionary", dictionaryBase, dictionaryEnd);
         }
 
-        private void AddObjectTableRegions(Memory memory)
+        private void AddObjectTableRegions(byte[] memory)
         {
-            var objectTableBase = Header.ReadObjectTableAddress(memory.Bytes);
+            var objectTableBase = Header.ReadObjectTableAddress(memory);
             var objectTableEnd = 0;
             var objectDataBase = 0;
             var objectDataEnd = 0;
 
-            var version = Header.ReadVersion(memory.Bytes);
+            var version = Header.ReadVersion(memory);
             var entrySize = ObjectHelpers.GetEntrySize(version);
             var propertyTableOffset = ObjectHelpers.GetPropertyTableAddressOffset(version);
 
@@ -156,7 +157,7 @@ namespace ZDebug.Core.Basics
             objectTableEnd = objectAddress - 1;
 
             // skip last property table to get end...
-            var reader = memory.CreateReader(objectDataEnd);
+            var reader = new MemoryReader(memory, objectDataEnd);
             reader.SkipShortName();
             reader.SkipProperties(version);
 
@@ -167,14 +168,14 @@ namespace ZDebug.Core.Basics
             AddRegion(MemoryMapRegionKind.PropertyData, "Property data", objectDataBase, objectDataEnd);
         }
 
-        private void AddInformTables(Memory memory)
+        private void AddInformTables(byte[] memory)
         {
-            if (!Header.IsInformStory(memory.Bytes))
+            if (!Header.IsInformStory(memory))
             {
                 return;
             }
 
-            var informVersion = Header.ReadInformVersionNumber(memory.Bytes);
+            var informVersion = Header.ReadInformVersionNumber(memory);
             if (informVersion < 600)
             {
                 return;
@@ -183,7 +184,7 @@ namespace ZDebug.Core.Basics
             var propertyDataRegion = kindToRegionMap[MemoryMapRegionKind.PropertyData];
             var classNumbersBase = propertyDataRegion.End + 1;
 
-            var reader = memory.CreateReader(classNumbersBase);
+            var reader = new MemoryReader(memory, classNumbersBase);
 
             while (reader.NextWord() != 0)
                 ;

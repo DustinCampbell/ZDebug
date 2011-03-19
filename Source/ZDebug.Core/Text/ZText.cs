@@ -8,7 +8,7 @@ namespace ZDebug.Core.Text
 {
     public sealed class ZText
     {
-        private readonly Memory memory;
+        private readonly byte[] memory;
         private readonly AlphabetTable alphabetTable;
         private readonly byte version;
         private readonly StringBuilder builder;
@@ -16,11 +16,11 @@ namespace ZDebug.Core.Text
         private readonly AlphabetTable abbreviationAlphabetTable;
         private readonly StringBuilder abbreviationBuilder;
 
-        public ZText(Memory memory)
+        public ZText(byte[] memory)
         {
             this.memory = memory;
             this.alphabetTable = new AlphabetTable(memory);
-            this.version = Header.ReadVersion(memory.Bytes);
+            this.version = Header.ReadVersion(memory);
             this.builder = new StringBuilder();
             this.abbreviationAlphabetTable = new AlphabetTable(memory);
             this.abbreviationBuilder = new StringBuilder();
@@ -40,7 +40,7 @@ namespace ZDebug.Core.Text
         }
 
         /// <summary>
-        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="Memory"/>.
+        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="byte[]"/>.
         /// </summary>
         public static ushort[] ReadZWords(byte[] memory, int address)
         {
@@ -128,7 +128,7 @@ namespace ZDebug.Core.Text
                         {
                             var abbreviationCode = zchars[++i];
                             var abbreviationIndex = (32 * (zchar - 1)) + abbreviationCode;
-                            var abbreviationZWords = ReadAbbreviation(memory.Bytes, abbreviationIndex);
+                            var abbreviationZWords = ReadAbbreviation(memory, abbreviationIndex);
                             var abbreviationText = ZWordsAsString(abbreviationZWords, ZTextFlags.None, abbreviationAlphabetTable, abbreviationBuilder);
                             builder.Append(abbreviationText);
                         }
@@ -205,7 +205,7 @@ namespace ZDebug.Core.Text
 
 
         /// <summary>
-        /// Reads the Z-words at the specified <paramref name="address"/> from the given <see cref="Memory"/>.
+        /// Reads the Z-words at the specified <paramref name="address"/>.
         /// </summary>
         public ushort[] ReadZWords(int address)
         {
@@ -355,13 +355,11 @@ namespace ZDebug.Core.Text
             // Use standard dictionary if none is provided.
             if (dictionary == 0)
             {
-                dictionary = Header.ReadDictionaryAddress(memory.Bytes);
+                dictionary = Header.ReadDictionaryAddress(memory);
             }
 
-            var bytes = memory.Bytes;
-
             // Set number of parse tokens to zero.
-            bytes[parse + 1] = 0;
+            memory[parse + 1] = 0;
 
             int addr1 = text;
             int addr2 = 0;
@@ -369,7 +367,7 @@ namespace ZDebug.Core.Text
             int length = 0;
             if (version >= 5)
             {
-                length = bytes[++addr1];
+                length = memory[++addr1];
             }
 
             byte zc;
@@ -389,11 +387,11 @@ namespace ZDebug.Core.Text
 
                 // Check for separator
                 int sepAddr = dictionary;
-                byte sepCount = bytes[sepAddr++];
+                byte sepCount = memory[sepAddr++];
                 byte separator;
                 do
                 {
-                    separator = bytes[sepAddr++];
+                    separator = memory[sepAddr++];
                 }
                 while (zc != separator && --sepCount != 0);
 
@@ -407,7 +405,7 @@ namespace ZDebug.Core.Text
                 }
                 else if (addr2 != 0)
                 {
-                    TokenizeWord(bytes, text, (ushort)(addr2 - text), (ushort)(addr1 - addr2), parse, dictionary, flag);
+                    TokenizeWord(memory, text, (ushort)(addr2 - text), (ushort)(addr1 - addr2), parse, dictionary, flag);
 
                     addr2 = 0;
                 }
@@ -415,7 +413,7 @@ namespace ZDebug.Core.Text
                 // Translate separator (which is a word in its own right)
                 if (sepCount != 0)
                 {
-                    TokenizeWord(bytes, text, (ushort)(addr1 - text), (ushort)1, parse, dictionary, flag);
+                    TokenizeWord(memory, text, (ushort)(addr1 - text), (ushort)1, parse, dictionary, flag);
                 }
             }
             while (zc != 0);
