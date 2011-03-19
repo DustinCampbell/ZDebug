@@ -17,6 +17,9 @@ namespace ZDebug.Compiler
         private readonly IZMachineProfiler profiler;
         private readonly OutputStreams outputStreams;
         private readonly ZText ztext;
+        private readonly byte version;
+
+        private readonly ushort actualChecksum;
 
         // routine state
         private readonly ushort[] stack;
@@ -31,8 +34,6 @@ namespace ZDebug.Compiler
 
         private readonly ushort[] arguments;
         private ushort argumentCount;
-
-        private readonly byte version;
 
         private readonly ushort objectTableAddress;
         private readonly byte propertyDefaultsTableSize;
@@ -70,6 +71,8 @@ namespace ZDebug.Compiler
             this.outputStreams.RegisterScreen(screen);
             this.ztext = new ZText(new Memory(memory));
             this.version = memory.ReadByte(0x00);
+
+            this.actualChecksum = CalculateChecksum();
 
             this.stack = new ushort[STACK_SIZE];
             this.sp = -1;
@@ -137,6 +140,50 @@ namespace ZDebug.Compiler
                     memory.WriteByte(0x26, screen.FontWidthInUnits);
                 }
             }
+        }
+
+        private int ReadFileSize()
+        {
+            var fileSize = memory.ReadWord(0x1a);
+
+            if (version >= 1 && version <= 3)
+            {
+                return fileSize * 2;
+            }
+            else if (version >= 4 && version <= 5)
+            {
+                return fileSize * 4;
+            }
+            else if (version >= 6 && version <= 8)
+            {
+                return fileSize * 8;
+            }
+            else
+            {
+                throw new InvalidOperationException("Invalid version number: " + version);
+            }
+        }
+
+        private ushort CalculateChecksum()
+        {
+            var size = Math.Min(ReadFileSize(), memory.Length);
+            ushort result = 0;
+            for (int i = 0x40; i < size; i++)
+            {
+                result += memory.ReadByte(i);
+            }
+
+            return result;
+        }
+
+        private ushort ReadChecksum()
+        {
+            return memory.ReadWord(0x1c);
+        }
+
+        internal bool Verify()
+        {
+            return actualChecksum == ReadChecksum();
         }
 
         internal void PushFrame(int address)

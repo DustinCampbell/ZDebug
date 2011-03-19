@@ -1,4 +1,5 @@
 ﻿
+using ZDebug.Compiler.Utilities;
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
@@ -55,12 +56,18 @@ namespace ZDebug.Compiler
 
         private void op_verify()
         {
-            NotImplemented();
+            var verify = Reflection<ZMachine>.GetMethod("Verify", @public: false);
+
+            il.LoadArg(0);
+            il.Call(verify);
+
+            Branch();
         }
 
         private void op_piracy()
         {
-            NotImplemented();
+            il.Load(1);
+            Branch();
         }
     }
 }
