@@ -548,7 +548,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void CalulatedLoadVariable(ILocal variableIndex, bool indirect = false)
+        private void CalculatedLoadVariable(ILocal variableIndex, bool indirect = false)
         {
             il.DebugIndent();
 

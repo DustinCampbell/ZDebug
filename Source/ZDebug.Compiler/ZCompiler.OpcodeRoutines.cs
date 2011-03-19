@@ -204,7 +204,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                CalulatedLoadVariable(varIndex, indirect: true);
+                CalculatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
@@ -221,7 +221,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                CalulatedLoadVariable(varIndex, indirect: true);
+                CalculatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
@@ -245,7 +245,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                CalulatedLoadVariable(varIndex, indirect: true);
+                CalculatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
@@ -262,7 +262,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                CalulatedLoadVariable(varIndex, indirect: true);
+                CalculatedLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Add(1);
                 value.Store();
@@ -436,7 +436,7 @@ namespace ZDebug.Compiler
                 LoadByRefVariableOperand();
                 varIndex.Store();
 
-                CalulatedLoadVariable(varIndex, indirect: true);
+                CalculatedLoadVariable(varIndex, indirect: true);
                 result.Store();
                 StoreVariable(currentInstruction.StoreVariable, result);
             }
