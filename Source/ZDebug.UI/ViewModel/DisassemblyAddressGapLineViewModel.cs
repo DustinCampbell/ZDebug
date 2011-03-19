@@ -1,24 +1,24 @@
-﻿
-using ZDebug.Core.Instructions;
+﻿using ZDebug.Core.Routines;
+
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class DisassemblyAddressGapLineViewModel : DisassemblyLineViewModel
     {
-        private readonly Routine start;
-        private readonly Routine end;
+        private readonly ZRoutine start;
+        private readonly ZRoutine end;
 
-        public DisassemblyAddressGapLineViewModel(Routine start, Routine end)
+        public DisassemblyAddressGapLineViewModel(ZRoutine start, ZRoutine end)
         {
             this.start = start;
             this.end = end;
         }
 
-        public Routine Start
+        public ZRoutine Start
         {
             get { return start; }
         }
 
-        public Routine End
+        public ZRoutine End
         {
             get { return end; }
         }
@@ -53,6 +53,5 @@ namespace ZDebug.UI.ViewModel
                 }
             }
         }
-
     }
 }

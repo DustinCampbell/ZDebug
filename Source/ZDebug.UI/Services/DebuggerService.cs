@@ -11,6 +11,7 @@ using ZDebug.Core.Blorb;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;
+using ZDebug.Core.Routines;
 using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Services
@@ -25,7 +26,7 @@ namespace ZDebug.UI.Services
         private static Story story;
         private static Processor processor;
         private static GameInfo gameInfo;
-        private static RoutineTable routineTable;
+        private static ZRoutineTable routineTable;
         private static InstructionReader reader;
         private static Instruction currentInstruction;
         private static string fileName;
@@ -206,7 +207,7 @@ namespace ZDebug.UI.Services
             story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
             processor = new Processor(story);
-            routineTable = new RoutineTable(story, cache);
+            routineTable = new ZRoutineTable(story, cache);
             reader = new InstructionReader(processor.PC, story.Memory, cache);
 
             DebuggerService.fileName = fileName;
@@ -466,7 +467,7 @@ namespace ZDebug.UI.Services
             get { return gameInfo != null; }
         }
 
-        public static RoutineTable RoutineTable
+        public static ZRoutineTable RoutineTable
         {
             get { return routineTable; }
         }

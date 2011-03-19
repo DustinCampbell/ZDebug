@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using ZDebug.Compiler;
 using ZDebug.Compiler.Profiling;
+using ZDebug.Core;
 
 namespace ZDebug.PerfHarness
 {
@@ -29,7 +30,7 @@ namespace ZDebug.PerfHarness
             Action doneAction = () => { machine.Stop(); };
 
             var mockScreen = new MockScreen(ScriptFilePath, doneAction);
-            machine = new ZMachine(bytes, mockScreen, profile ? this : null);
+            machine = new ZMachine(Story.FromBytes(bytes), mockScreen, profile ? this : null);
             machine.SetRandomSeed(42);
 
             MarkProfile("Running...");

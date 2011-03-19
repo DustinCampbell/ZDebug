@@ -1,10 +1,11 @@
 ﻿using System;
 using ZDebug.Compiler.Profiling;
+using ZDebug.Core;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Routines;
 using ZDebug.Core.Text;
 using ZDebug.Core.Utilities;
-using ZDebug.Core.Routines;
 
 namespace ZDebug.Compiler
 {
@@ -12,6 +13,7 @@ namespace ZDebug.Compiler
     {
         internal const int STACK_SIZE = 32768;
 
+        private readonly Story story;
         private readonly byte[] memory;
         private readonly IScreen screen;
         private readonly IZMachineProfiler profiler;
@@ -53,7 +55,7 @@ namespace ZDebug.Compiler
         private readonly int routinesOffset;
         private readonly int stringsOffset;
 
-        private readonly IntegerMap<ZRoutine> addressToRoutineMap;
+        private readonly ZRoutineTable routineTable;
         private readonly IntegerMap<ZRoutineCall> addressToRoutineCallMap;
         private readonly IntegerMap<ZCompilerResult> compilationResults;
 
@@ -62,9 +64,10 @@ namespace ZDebug.Compiler
         private int currentAddress = -1;
         private volatile bool inputReceived;
 
-        public ZMachine(byte[] memory, IScreen screen = null, IZMachineProfiler profiler = null)
+        public ZMachine(Story story, IScreen screen = null, IZMachineProfiler profiler = null)
         {
-            this.memory = memory;
+            this.story = story;
+            this.memory = story.Memory;
             this.screen = screen;
             this.profiler = profiler;
             this.outputStreams = new OutputStreams(memory);
@@ -108,7 +111,7 @@ namespace ZDebug.Compiler
             this.routinesOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x28) : 0;
             this.stringsOffset = (this.version >= 6 && this.version <= 7) ? memory.ReadWord(0x2a) : 0;
 
-            this.addressToRoutineMap = new IntegerMap<ZRoutine>();
+            this.routineTable = new ZRoutineTable(story);
             this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>();
             this.compilationResults = new IntegerMap<ZCompilerResult>();
 
@@ -240,14 +243,12 @@ namespace ZDebug.Compiler
 
         private ZRoutine GetRoutineByAddress(int address)
         {
-            ZRoutine routine;
-            if (!addressToRoutineMap.TryGetValue(address, out routine))
+            if (!routineTable.Exists(address))
             {
-                routine = ZRoutine.Create(address, memory);
-                addressToRoutineMap.Add(address, routine);
+                routineTable.Add(address);
             }
 
-            return routine;
+            return routineTable.GetByAddress(address);
         }
 
         internal ZCompilerResult Compile(ZRoutine routine)

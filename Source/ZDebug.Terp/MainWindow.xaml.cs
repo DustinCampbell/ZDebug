@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
+using ZDebug.Core;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.IO.Services;
@@ -113,7 +114,7 @@ namespace ZDebug.Terp
 
             storyBytes = File.ReadAllBytes(fileName);
             profiler = new ZMachineProfiler();
-            machine = new ZMachine(storyBytes, screen: this, profiler: profiler);
+            machine = new ZMachine(Story.FromBytes(storyBytes), screen: this, profiler: profiler);
             machine.SetRandomSeed(42);
 
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);

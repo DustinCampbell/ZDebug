@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using ZDebug.Compiler.Tests.Utilities;
+using ZDebug.Core;
 using ZDebug.Core.Routines;
 
 namespace ZDebug.Compiler.Tests
@@ -34,7 +35,7 @@ namespace ZDebug.Compiler.Tests
             Assert.That(routine.Locals.Length, Is.EqualTo(0));
             Assert.That(routine.Instructions.Length, Is.EqualTo(32));
 
-            var zmachine = new ZMachine(memory);
+            var zmachine = new ZMachine(Story.FromBytes(memory));
 
             Assert.That(zmachine.GlobalVariableTableAddress, Is.EqualTo(0x2271));
 

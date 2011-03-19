@@ -1,15 +1,12 @@
-﻿using ZDebug.Core.Instructions;
-using System.Windows.Input;
-using System.Windows;
-using ZDebug.UI.Services;
+﻿using ZDebug.Core.Routines;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class DisassemblyRoutineHeaderLineViewModel : DisassemblyLineViewModel
     {
-        private readonly Routine routine;
+        private readonly ZRoutine routine;
 
-        public DisassemblyRoutineHeaderLineViewModel(Routine routine)
+        public DisassemblyRoutineHeaderLineViewModel(ZRoutine routine)
         {
             this.routine = routine;
         }
@@ -26,14 +23,14 @@ namespace ZDebug.UI.ViewModel
 
         public bool HasLocals
         {
-            get { return routine.Locals.Count > 0; }
+            get { return routine.Locals.Length > 0; }
         }
 
         public string LocalCountText
         {
             get
             {
-                var localCount = routine.Locals.Count;
+                var localCount = routine.Locals.Length;
                 if (localCount == 1)
                 {
                     return "1 local";

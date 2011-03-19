@@ -1,13 +1,12 @@
 ﻿using System;
-using ZDebug.Core.Routines;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.Core.Routines
 {
-    public sealed class RoutineNameChangedEventArgs : EventArgs
+    public sealed class ZRoutineAddedEventArgs : EventArgs
     {
         private readonly ZRoutine routine;
 
-        public RoutineNameChangedEventArgs(ZRoutine routine)
+        public ZRoutineAddedEventArgs(ZRoutine routine)
         {
             this.routine = routine;
         }

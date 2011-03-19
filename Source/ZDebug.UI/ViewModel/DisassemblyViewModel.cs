@@ -6,7 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
-using ZDebug.Core.Instructions;
+using ZDebug.Core.Routines;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -120,7 +120,7 @@ namespace ZDebug.UI.ViewModel
                     addressToLineMap.Add(routine.Address, routineHeaderLine);
 
                     var instructions = routine.Instructions;
-                    var lastIndex = instructions.Count - 1;
+                    var lastIndex = instructions.Length - 1;
                     for (int i = 0; i <= lastIndex; i++)
                     {
                         var instruction = instructions[i];
@@ -177,7 +177,7 @@ namespace ZDebug.UI.ViewModel
             BringLineIntoView(newLine);
         }
 
-        private void RoutineTable_RoutineAdded(object sender, RoutineAddedEventArgs e)
+        private void RoutineTable_RoutineAdded(object sender, ZRoutineAddedEventArgs e)
         {
             lines.BeginBulkOperation();
             try
@@ -243,7 +243,7 @@ namespace ZDebug.UI.ViewModel
                 }
 
                 var instructions = e.Routine.Instructions;
-                var lastIndex = instructions.Count - 1;
+                var lastIndex = instructions.Length - 1;
                 for (int i = lastIndex; i >= 0; i--)
                 {
                     var instruction = instructions[i];

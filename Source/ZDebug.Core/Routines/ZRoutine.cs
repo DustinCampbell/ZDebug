@@ -11,8 +11,9 @@ namespace ZDebug.Core.Routines
         private readonly int length;
         private readonly ReadOnlyArray<Instruction> instructions;
         private readonly ReadOnlyArray<ushort> locals;
+        private string name;
 
-        private ZRoutine(int address, Instruction[] instructions, ushort[] locals)
+        private ZRoutine(int address, Instruction[] instructions, ushort[] locals, string name)
         {
             this.address = address;
             this.instructions = new ReadOnlyArray<Instruction>(instructions);
@@ -27,6 +28,8 @@ namespace ZDebug.Core.Routines
             {
                 this.length = 0;
             }
+
+            this.name = name ?? string.Empty;
         }
 
         public int Address
@@ -49,6 +52,18 @@ namespace ZDebug.Core.Routines
             get { return locals; }
         }
 
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value ?? string.Empty;
+            }
+        }
+
         private static ushort[] ReadLocals(ref int address, byte[] memory, byte version)
         {
             var localCount = memory.ReadByte(ref address);
@@ -63,9 +78,9 @@ namespace ZDebug.Core.Routines
             }
         }
 
-        private static Instruction[] ReadInstructions(int address, byte[] memory)
+        private static Instruction[] ReadInstructions(int address, byte[] memory, InstructionCache cache)
         {
-            var reader = new InstructionReader(address, memory);
+            var reader = new InstructionReader(address, memory, cache);
             var instructions = new List<Instruction>();
             var lastKnownAddress = address;
 
@@ -106,15 +121,15 @@ namespace ZDebug.Core.Routines
             return instructions.ToArray();
         }
 
-        public static ZRoutine Create(int address, byte[] memory)
+        public static ZRoutine Create(int address, byte[] memory, InstructionCache cache = null, string name = null)
         {
             var version = memory.ReadByte(0);
 
             var startAddress = address;
             var locals = ReadLocals(ref address, memory, version);
-            var instructions = ReadInstructions(address, memory);
+            var instructions = ReadInstructions(address, memory, cache);
 
-            return new ZRoutine(startAddress, instructions, locals);
+            return new ZRoutine(startAddress, instructions, locals, name);
         }
     }
 }
