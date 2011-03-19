@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ZDebug.Compiler.Utilities
+namespace ZDebug.Core.Utilities
 {
     [Serializable]
     public class ReflectionException : Exception

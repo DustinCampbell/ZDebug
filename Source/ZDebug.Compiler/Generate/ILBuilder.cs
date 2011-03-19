@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using ZDebug.Compiler.Utilities;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler.Generate
 {

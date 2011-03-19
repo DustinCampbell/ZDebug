@@ -121,7 +121,13 @@
     <Compile Include="Utilities\ArrayExtensions.cs" />
     <Compile Include="Utilities\Bits.cs" />
     <Compile Include="Utilities\ByteArrayExtensions.cs" />
+    <Compile Include="Utilities\Reflection.ConstructorInfoKey.cs" />
+    <Compile Include="Utilities\Reflection.cs" />
+    <Compile Include="Utilities\Reflection.FieldInfoKey.cs" />
+    <Compile Include="Utilities\Reflection.MethodInfoKey.cs" />
+    <Compile Include="Utilities\ReflectionException.cs" />
     <Compile Include="Utilities\StreamExtensions.cs" />
+    <Compile Include="Utilities\Types.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Execution\Processor.MemoryOutputStream.cs" />

@@ -1,4 +1,4 @@
-﻿using ZDebug.Compiler.Utilities;
+﻿using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler.Generate
 {

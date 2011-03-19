@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ZDebug.Compiler.Utilities
+namespace ZDebug.Core.Utilities
 {
     public static partial class Reflection<T>
     {

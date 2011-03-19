@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ZDebug.Compiler.Utilities
+namespace ZDebug.Core.Utilities
 {
     public static partial class Reflection<T>
     {
-        private struct ConstructorInfoKey : IEquatable<ConstructorInfoKey>
+        private struct MethodInfoKey : IEquatable<MethodInfoKey>
         {
+            private readonly string name;
             private readonly BindingFlags flags;
             private readonly Type[] types;
 
-            public ConstructorInfoKey(BindingFlags flags, Type[] types)
+            public MethodInfoKey(string name, BindingFlags flags, Type[] types)
             {
+                this.name = name;
                 this.flags = flags;
                 this.types = types;
             }
 
-            public bool Equals(ConstructorInfoKey other)
+            public bool Equals(MethodInfoKey other)
             {
+                if (!StringComparer.Ordinal.Equals(name, other.name))
+                {
+                    return false;
+                }
+
                 if (flags != other.flags)
                 {
                     return false;
@@ -41,9 +48,9 @@ namespace ZDebug.Compiler.Utilities
 
             public override bool Equals(object obj)
             {
-                if (obj is ConstructorInfoKey)
+                if (obj is MethodInfoKey)
                 {
-                    return Equals((ConstructorInfoKey)obj);
+                    return Equals((MethodInfoKey)obj);
                 }
 
                 return false;
@@ -52,6 +59,7 @@ namespace ZDebug.Compiler.Utilities
             public override int GetHashCode()
             {
                 int result = 0;
+                result ^= StringComparer.Ordinal.GetHashCode(name);
                 result ^= flags.GetHashCode();
 
                 foreach (var type in types)

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZDebug.Compiler.Utilities
+namespace ZDebug.Core.Utilities
 {
     public static class Types
     {

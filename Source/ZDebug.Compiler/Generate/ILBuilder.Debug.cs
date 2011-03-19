@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using ZDebug.Compiler.Utilities;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler.Generate
 {

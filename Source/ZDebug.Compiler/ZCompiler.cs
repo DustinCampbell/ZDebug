@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
+using ZDebug.Core.Utilities;
 
 // Potential optimizations:
 // 

@@ -1,6 +1,6 @@
 ﻿using ZDebug.Compiler.Generate;
-using ZDebug.Compiler.Utilities;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
