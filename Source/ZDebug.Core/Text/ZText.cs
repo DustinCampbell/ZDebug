@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Text
 {

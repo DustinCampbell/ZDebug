@@ -2,6 +2,7 @@
 using System.IO;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Dictionary;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Inform;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;

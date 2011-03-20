@@ -1,6 +1,7 @@
 ﻿using System;
+using ZDebug.Core.Utilities;
 
-namespace ZDebug.Core.Utilities
+namespace ZDebug.Core.Extensions
 {
     public static class ByteArrayExtensions
     {

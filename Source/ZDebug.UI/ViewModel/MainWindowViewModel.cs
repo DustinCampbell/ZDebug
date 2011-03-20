@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AvalonDock;
 using Microsoft.Win32;
+using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 

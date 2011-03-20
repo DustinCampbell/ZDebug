@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Terp.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Terp.Profiling
 {

@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using ZDebug.Core.Basics;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Tests.Utilities;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Tests
 {

@@ -9,8 +9,8 @@ using ZDebug.Core.Collections;
 using ZDebug.Core.Routines;
 using ZDebug.UI.Collections;
 using ZDebug.UI.Controls;
+using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
-using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {

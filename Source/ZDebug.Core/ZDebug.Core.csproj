@@ -59,6 +59,7 @@
     <Compile Include="Execution\InterpretedZMachine.ParseInstruction.cs" />
     <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Execution\ZMachine.cs" />
+    <Compile Include="Extensions\StackExtensions.cs" />
     <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
@@ -121,15 +122,15 @@
     <Compile Include="Text\ZText.cs" />
     <Compile Include="Text\ZTextFlags.cs" />
     <Compile Include="Utilities\ArrayEx.cs" />
-    <Compile Include="Utilities\ArrayExtensions.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Utilities\Bits.cs" />
-    <Compile Include="Utilities\ByteArrayExtensions.cs" />
+    <Compile Include="Extensions\ByteArrayExtensions.cs" />
     <Compile Include="Utilities\Reflection.ConstructorInfoKey.cs" />
     <Compile Include="Utilities\Reflection.cs" />
     <Compile Include="Utilities\Reflection.FieldInfoKey.cs" />
     <Compile Include="Utilities\Reflection.MethodInfoKey.cs" />
     <Compile Include="Utilities\ReflectionException.cs" />
-    <Compile Include="Utilities\StreamExtensions.cs" />
+    <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Utilities\Types.cs" />
   </ItemGroup>
   <ItemGroup>

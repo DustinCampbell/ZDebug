@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Blorb
 {

@@ -1,5 +1,5 @@
 ﻿using System;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Objects
 {

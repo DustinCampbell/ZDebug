@@ -1,8 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
 using ZDebug.UI.Collections;
+using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
-using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {

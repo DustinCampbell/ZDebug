@@ -5,11 +5,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ZDebug.Core.Execution;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
+using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
-using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Instructions;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Routines
 {

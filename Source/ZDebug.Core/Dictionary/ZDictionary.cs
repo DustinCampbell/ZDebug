@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Text;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Dictionary
 {

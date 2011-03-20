@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ZDebug.Core.Instructions;
 using System.Collections.ObjectModel;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Execution
 {

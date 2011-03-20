@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using NUnit.Framework;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Tests.Utilities;
 using ZDebug.Core.Utilities;
 

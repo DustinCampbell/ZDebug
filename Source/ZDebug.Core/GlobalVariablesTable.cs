@@ -1,6 +1,6 @@
 ﻿using System;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core
 {

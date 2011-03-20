@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ZDebug.Terp.Utilities
+namespace ZDebug.Core.Extensions
 {
     public static class StackExtensions
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
-using ZDebug.Core.Utilities;
+using ZDebug.Core.Extensions;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel

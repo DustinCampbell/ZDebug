@@ -5,9 +5,9 @@ using ZDebug.Core;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Routines;
 using ZDebug.Core.Text;
-using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
