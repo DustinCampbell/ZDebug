@@ -7,7 +7,7 @@ namespace ZDebug.UI
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            this.MainWindow = ViewModelWithView.Create<MainWindowViewModel, Window>();
+            this.MainWindow = ViewModelWithView<MainWindowViewModel, Window>.Create();
             this.MainWindow.Show();
         }
     }

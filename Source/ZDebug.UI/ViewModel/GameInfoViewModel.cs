@@ -7,7 +7,7 @@ namespace ZDebug.UI.ViewModel
     internal sealed class GameInfoViewModel : ViewModelWithViewBase<Window>
     {
         public GameInfoViewModel()
-            : base("GameInfoView")
+            : base("GameInfoDialogView")
         {
         }
 

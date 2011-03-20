@@ -62,7 +62,7 @@ namespace ZDebug.UI.ViewModel
                 return;
             }
 
-            var dialog = ViewModelWithView.Create<EditRoutineNameViewModel, Window>();
+            var dialog = ViewModelWithView<EditRoutineNameViewModel, Window>.Create();
 
             var dialogViewModel = (EditRoutineNameViewModel)dialog.DataContext;
             dialogViewModel.Name = routineViewModel.Name;

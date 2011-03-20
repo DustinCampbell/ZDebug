@@ -113,7 +113,7 @@ namespace ZDebug.UI.ViewModel
 
         private void EditGameScriptExecuted()
         {
-            var gameScriptDialog = ViewModelWithView.Create<GameScriptDialogViewModel, Window>();
+            var gameScriptDialog = ViewModelWithView<GameScriptDialogViewModel, Window>.Create();
             gameScriptDialog.Owner = this.View;
             if (gameScriptDialog.ShowDialog() == true)
             {
@@ -130,7 +130,7 @@ namespace ZDebug.UI.ViewModel
 
         private void GoToAddressExecuted()
         {
-            var dialog = ViewModelWithView.Create<GoToAddressViewModel, Window>();
+            var dialog = ViewModelWithView<GoToAddressViewModel, Window>.Create();
             dialog.Owner = this.View;
             if (dialog.ShowDialog() == true)
             {
@@ -207,7 +207,7 @@ namespace ZDebug.UI.ViewModel
 
         private void AboutGameExecuted()
         {
-            var gameInfoDialog = ViewModelWithView.Create<GameInfoViewModel, Window>();
+            var gameInfoDialog = ViewModelWithView<GameInfoViewModel, Window>.Create();
             gameInfoDialog.Owner = this.View;
             gameInfoDialog.ShowDialog();
         }
@@ -254,34 +254,34 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.StoryClosed += StoryClosed;
 
             var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
-            storyInfoContent.Content = ViewModelWithView.Create<StoryInfoViewModel, UserControl>();
+            storyInfoContent.Content = ViewModelWithView<StoryInfoViewModel, UserControl>.Create();
 
             var memoryMapContent = this.View.FindName<DockableContent>("memoryMapContent");
-            memoryMapContent.Content = ViewModelWithView.Create<MemoryMapViewModel, UserControl>();
+            memoryMapContent.Content = ViewModelWithView<MemoryMapViewModel, UserControl>.Create();
 
             var globalsContent = this.View.FindName<DockableContent>("globalsContent");
-            globalsContent.Content = ViewModelWithView.Create<GlobalsViewModel, UserControl>();
+            globalsContent.Content = ViewModelWithView<GlobalsViewModel, UserControl>.Create();
 
             var disassemblyContent = this.View.FindName<DocumentContent>("disassemblyContent");
-            disassemblyContent.Content = ViewModelWithView.Create<DisassemblyViewModel, UserControl>();
+            disassemblyContent.Content = ViewModelWithView<DisassemblyViewModel, UserControl>.Create();
 
             var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
-            objectsContent.Content = ViewModelWithView.Create<ObjectsViewModel, UserControl>();
+            objectsContent.Content = ViewModelWithView<ObjectsViewModel, UserControl>.Create();
 
             //var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             //memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
             var localsContent = this.View.FindName<DockableContent>("localsContent");
-            localsContent.Content = ViewModelWithView.Create<LocalsViewModel, UserControl>();
+            localsContent.Content = ViewModelWithView<LocalsViewModel, UserControl>.Create();
 
             var callStackContent = this.View.FindName<DockableContent>("callStackContent");
-            callStackContent.Content = ViewModelWithView.Create<CallStackViewModel, UserControl>();
+            callStackContent.Content = ViewModelWithView<CallStackViewModel, UserControl>.Create();
 
             var outputContent = this.View.FindName<DockableContent>("outputContent");
-            outputContent.Content = ViewModelWithView.Create<OutputViewModel, UserControl>();
+            outputContent.Content = ViewModelWithView<OutputViewModel, UserControl>.Create();
 
             var messagesContent = this.View.FindName<DockableContent>("messagesContent");
-            messagesContent.Content = ViewModelWithView.Create<MessageLogViewModel, UserControl>();
+            messagesContent.Content = ViewModelWithView<MessageLogViewModel, UserControl>.Create();
 
             this.View.SourceInitialized += (s, e) =>
             {

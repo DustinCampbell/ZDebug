@@ -30,7 +30,7 @@ namespace ZDebug.UI.Extensions
         {
             if (bringIndexIntoView == null)
             {
-                bringIndexIntoView = Reflection<VirtualizingPanel>.GetMethod("BringIndexIntoView", @public: false);
+                bringIndexIntoView = Reflection<VirtualizingPanel>.GetMethod("BringIndexIntoView", Types.One<int>(), @public: false);
             }
 
             bringIndexIntoView.Invoke(virtualizingPanel, new object[] { index });
