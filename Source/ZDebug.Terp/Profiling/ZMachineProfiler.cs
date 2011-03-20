@@ -21,6 +21,10 @@ namespace ZDebug.Terp.Profiling
         private int routinesExecuted;
         private int instructionsExecuted;
 
+        private HashSet<int> calculatedCalls;
+        private int directCallCount;
+        private int calculatedCallCount;
+
         public ZMachineProfiler()
         {
             this.allStatistics = new List<RoutineCompilationStatistics>();
@@ -30,11 +34,26 @@ namespace ZDebug.Terp.Profiling
 
             this.instructionTimings = new Dictionary<int, Tuple<int, TimeSpan>>();
             this.instructionTimer = new Stopwatch();
+
+            this.calculatedCalls = new HashSet<int>();
         }
 
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
         {
             allStatistics.Add(statistics);
+        }
+
+        void IZMachineProfiler.Call(int address, bool calculated)
+        {
+            if (calculated)
+            {
+                calculatedCalls.Add(address);
+                calculatedCallCount++;
+            }
+            else
+            {
+                directCallCount++;
+            }
         }
 
         void IZMachineProfiler.EnterRoutine(int address)
@@ -192,6 +211,22 @@ namespace ZDebug.Terp.Profiling
             get
             {
                 return runningTime;
+            }
+        }
+
+        public int DirectCallCount
+        {
+            get
+            {
+                return directCallCount;
+            }
+        }
+
+        public int CalculatedCallCount
+        {
+            get
+            {
+                return calculatedCallCount;
             }
         }
     }

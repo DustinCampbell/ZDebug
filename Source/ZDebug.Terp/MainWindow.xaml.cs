@@ -592,8 +592,9 @@ namespace ZDebug.Terp
                     elapsedTimeText.Text = string.Format("{0:#,0}.{1:000}", compileTime.Seconds, compileTime.Milliseconds);
                     routinesCompiled.Text = profiler.RoutinesCompiled.ToString("#,#");
                     zcodeToILRatio.Text = string.Format("1 / {0:0.###} ({1:0.###}%)", ratio, ratio * 100);
-                    routinesAndInstructionsExecuted.Text = string.Format("{0:#,#} / {1:#,#}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
-                    calculatedVariables.Text = string.Format("{0:#,#} / {1:#,#}", calculatedVariableLoads, calculatedVariableStores);
+                    routinesAndInstructionsExecuted.Text = string.Format("{0:#,0} / {1:#,0}", profiler.RoutinesExecuted, profiler.InstructionsExecuted);
+                    calculatedVariables.Text = string.Format("{0:#,0} / {1:#,0}", calculatedVariableLoads, calculatedVariableStores);
+                    calls.Text = string.Format("{0:#,0} / {1:#,0}", profiler.DirectCallCount, profiler.CalculatedCallCount);
                 });
             }
         }

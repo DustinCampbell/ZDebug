@@ -895,6 +895,31 @@ namespace ZDebug.Compiler
             }
         }
 
+        /// <summary>
+        /// Unpacks the byte address on the evaluation stack as a routine address.
+        /// </summary>
+        private void UnpackRoutineAddress()
+        {
+            byte version = machine.Version;
+            if (version < 4)
+            {
+                il.Math.Multiply(2);
+            }
+            else if (version < 8)
+            {
+                il.Math.Multiply(4);
+            }
+            else // 8
+            {
+                il.Math.Multiply(8);
+            }
+
+            if (version >= 6 && version <= 7)
+            {
+                il.Math.Add(machine.RoutinesOffset * 8);
+            }
+        }
+
         private void LoadUnpackedRoutineAddress(Operand op)
         {
             switch (op.Kind)
@@ -906,26 +931,7 @@ namespace ZDebug.Compiler
 
                 default: // OperandKind.Variable
                     LoadVariable((byte)op.Value);
-
-                    byte version = machine.Version;
-                    if (version < 4)
-                    {
-                        il.Math.Multiply(2);
-                    }
-                    else if (version < 8)
-                    {
-                        il.Math.Multiply(4);
-                    }
-                    else // 8
-                    {
-                        il.Math.Multiply(8);
-                    }
-
-                    if (version >= 6 && version <= 7)
-                    {
-                        il.Math.Add(machine.RoutinesOffset * 8);
-                    }
-
+                    UnpackRoutineAddress();
                     break;
             }
         }

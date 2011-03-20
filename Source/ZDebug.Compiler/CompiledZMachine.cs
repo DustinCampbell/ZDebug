@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core;
 using ZDebug.Core.Basics;
@@ -90,8 +91,8 @@ namespace ZDebug.Compiler
             this.stringsOffset = (this.Version >= 6 && this.Version <= 7) ? Memory.ReadWord(0x2a) : 0;
 
             this.routineTable = new ZRoutineTable(story);
-            this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>();
-            this.compilationResults = new IntegerMap<ZCompilerResult>();
+            this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>(8192);
+            this.compilationResults = new IntegerMap<ZCompilerResult>(8192);
         }
 
         internal bool Verify()
@@ -150,12 +151,14 @@ namespace ZDebug.Compiler
 
         private ZRoutine GetRoutineByAddress(int address)
         {
-            if (!routineTable.Exists(address))
+            ZRoutine routine;
+            if (!routineTable.TryGetByAddress(address, out routine))
             {
                 routineTable.Add(address);
+                routine = routineTable.GetByAddress(address);
             }
 
-            return routineTable.GetByAddress(address);
+            return routine;
         }
 
         internal ZCompilerResult Compile(ZRoutine routine)
@@ -206,34 +209,25 @@ namespace ZDebug.Compiler
             this.localCount = localCount;
         }
 
-        internal ushort Call0(ZRoutineCall routineCall)
+        internal ushort DirectCall0(ZRoutineCall routineCall)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 0);
 
             return routineCall.Invoke();
         }
 
-        internal ushort Call0(int address)
+        internal ushort CalculatedCall0(int address)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call0(GetRoutineCall(address));
+            return DirectCall0(GetRoutineCall(address));
         }
 
-        internal ushort Call1(ZRoutineCall routineCall, ushort arg0)
+        internal ushort DirectCall1(ZRoutineCall routineCall, ushort arg0)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 1);
 
@@ -242,22 +236,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call1(int address, ushort arg0)
+        internal ushort CalculatedCall1(int address, ushort arg0)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call1(GetRoutineCall(address), arg0);
+            return DirectCall1(GetRoutineCall(address), arg0);
         }
 
-        internal ushort Call2(ZRoutineCall routineCall, ushort arg0, ushort arg1)
+        internal ushort DirectCall2(ZRoutineCall routineCall, ushort arg0, ushort arg1)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 2);
 
@@ -267,22 +255,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call2(int address, ushort arg0, ushort arg1)
+        internal ushort CalculatedCall2(int address, ushort arg0, ushort arg1)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call2(GetRoutineCall(address), arg0, arg1);
+            return DirectCall2(GetRoutineCall(address), arg0, arg1);
         }
 
-        internal ushort Call3(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2)
+        internal ushort DirectCall3(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 3);
 
@@ -293,22 +275,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call3(int address, ushort arg0, ushort arg1, ushort arg2)
+        internal ushort CalculatedCall3(int address, ushort arg0, ushort arg1, ushort arg2)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call3(GetRoutineCall(address), arg0, arg1, arg2);
+            return DirectCall3(GetRoutineCall(address), arg0, arg1, arg2);
         }
 
-        internal ushort Call4(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        internal ushort DirectCall4(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 4);
 
@@ -320,22 +296,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call4(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        internal ushort CalculatedCall4(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call4(GetRoutineCall(address), arg0, arg1, arg2, arg3);
+            return DirectCall4(GetRoutineCall(address), arg0, arg1, arg2, arg3);
         }
 
-        internal ushort Call5(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        internal ushort DirectCall5(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 5);
 
@@ -348,22 +318,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call5(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        internal ushort CalculatedCall5(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call5(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4);
+            return DirectCall5(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4);
         }
 
-        internal ushort Call6(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        internal ushort DirectCall6(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 6);
 
@@ -377,22 +341,16 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call6(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        internal ushort CalculatedCall6(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call6(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5);
+            return DirectCall6(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5);
         }
 
-        internal ushort Call7(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        internal ushort DirectCall7(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
         {
-            if (routineCall.Routine.Address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 7);
 
@@ -407,20 +365,25 @@ namespace ZDebug.Compiler
             return routineCall.Invoke();
         }
 
-        internal ushort Call7(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        internal ushort CalculatedCall7(int address, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
         {
-            if (address == 0)
-            {
-                return 0;
-            }
+            Debug.Assert(address != 0);
 
-            return Call7(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+            return DirectCall7(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5, arg6);
         }
 
         internal ZRoutineCode GetRoutineCode(int address)
         {
             var routine = GetRoutineByAddress(address);
             return Compile(routine).Code;
+        }
+
+        internal void Profiler_Call(int address, bool calculated)
+        {
+            if (profiler != null)
+            {
+                profiler.Call(address, calculated);
+            }
         }
 
         internal void EnterRoutine(int address)

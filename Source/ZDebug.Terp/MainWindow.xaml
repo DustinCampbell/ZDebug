@@ -167,6 +167,7 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
             </Grid>
 
@@ -204,6 +205,14 @@
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="Calculated Variables (L/S):" Foreground="Gray"/>
                     <Run Name="calculatedVariables" FontWeight="Bold"/>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="4" Orientation="Horizontal">
+                <Separator/>
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="Calls (D/C):" Foreground="Gray"/>
+                    <Run Name="calls" FontWeight="Bold"/>
                 </TextBlock>
             </StackPanel>
         </StatusBar>

@@ -238,25 +238,55 @@ namespace ZDebug.Compiler
 
         private void op_dec_chk()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<short>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                CalculatedLoadVariable(varIndex, indirect: true);
-                il.Convert.ToInt16();
-                il.Math.Subtract(1);
-                value.Store();
+                    LoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Subtract(1);
+                    value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
 
-                value.Load();
-                LoadOperand(1);
-                il.Convert.ToInt16();
+                    value.Load();
+                    LoadOperand(1);
+                    il.Convert.ToInt16();
 
-                il.Compare.LessThan();
-                Branch();
+                    il.Compare.LessThan();
+                    Branch();
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<short>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    CalculatedLoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Subtract(1);
+                    value.Store();
+
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+
+                    value.Load();
+                    LoadOperand(1);
+                    il.Convert.ToInt16();
+
+                    il.Compare.LessThan();
+                    Branch();
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -302,25 +332,55 @@ namespace ZDebug.Compiler
 
         private void op_inc_chk()
         {
-            using (var varIndex = il.NewLocal<byte>())
-            using (var value = il.NewLocal<short>())
+            var varIndexOp = GetOperand(0);
+
+            if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                LoadByRefVariableOperand();
-                varIndex.Store();
+                using (var value = il.NewLocal<short>())
+                {
+                    var varIndex = (byte)varIndexOp.Value;
 
-                CalculatedLoadVariable(varIndex, indirect: true);
-                il.Convert.ToInt16();
-                il.Math.Add(1);
-                value.Store();
+                    LoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Add(1);
+                    value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                    StoreVariable(varIndex, value, indirect: true);
 
-                value.Load();
-                LoadOperand(1);
-                il.Convert.ToInt16();
+                    value.Load();
+                    LoadOperand(1);
+                    il.Convert.ToInt16();
 
-                il.Compare.GreaterThan();
-                Branch();
+                    il.Compare.GreaterThan();
+                    Branch();
+                }
+            }
+            else if (varIndexOp.Kind == OperandKind.Variable)
+            {
+                using (var varIndex = il.NewLocal<byte>())
+                using (var value = il.NewLocal<short>())
+                {
+                    LoadVariable((byte)varIndexOp.Value);
+                    varIndex.Store();
+
+                    CalculatedLoadVariable(varIndex, indirect: true);
+                    il.Convert.ToInt16();
+                    il.Math.Add(1);
+                    value.Store();
+
+                    CalculatedStoreVariable(varIndex, value, indirect: true);
+
+                    value.Load();
+                    LoadOperand(1);
+                    il.Convert.ToInt16();
+
+                    il.Compare.GreaterThan();
+                    Branch();
+                }
+            }
+            else
+            {
+                throw new ZCompilerException("Expected small constant or variable, but was " + varIndexOp.Kind);
             }
         }
 
@@ -980,7 +1040,7 @@ namespace ZDebug.Compiler
 
                 // Read objNum
                 var storeZero = il.NewLabel();
-                ReadValidObjectNumber(0, storeZero);
+                ReadValidObjectNumber(operandIndex: 0, failed: storeZero);
                 objNum.Store();
 
                 // Read propNum
@@ -1036,19 +1096,20 @@ namespace ZDebug.Compiler
 
                 storeAddress.Mark();
 
-                propAddress.Load();
-                il.Math.Add(1);
-                il.Convert.ToUInt16();
-                propAddress.Store();
-                StoreVariable(currentInstruction.StoreVariable, propAddress);
+                StoreVariable(currentInstruction.StoreVariable,
+                    valueLoader: () =>
+                    {
+                        propAddress.Load();
+                        il.Math.Add(1);
+                        il.Convert.ToUInt16();
+                    });
 
                 done.Branch(@short: true);
 
                 storeZero.Mark();
 
-                il.Load(0);
-                value.Store();
-                StoreVariable(currentInstruction.StoreVariable, value);
+                StoreVariable(currentInstruction.StoreVariable,
+                    valueLoader: () => il.Load(0));
 
                 done.Mark();
             }

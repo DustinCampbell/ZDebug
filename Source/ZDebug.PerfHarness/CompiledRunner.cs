@@ -77,6 +77,10 @@ namespace ZDebug.PerfHarness
         {
         }
 
+        void IZMachineProfiler.Call(int address, bool calculated)
+        {
+        }
+
         void IZMachineProfiler.EnterRoutine(int address)
         {
             callCount++;

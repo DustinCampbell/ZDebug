@@ -11,14 +11,14 @@ namespace ZDebug.Core.Routines
     {
         private readonly Story story;
         private readonly InstructionCache cache;
-        private readonly IntegerMap<ZRoutine> addressToRoutineMap;
+        private readonly IntegerMap<ZRoutine> routines;
         private readonly List<int> sortedAddresses;
 
         public ZRoutineTable(Story story, InstructionCache cache = null)
         {
             this.story = story;
             this.cache = cache ?? new InstructionCache();
-            this.addressToRoutineMap = new IntegerMap<ZRoutine>();
+            this.routines = new IntegerMap<ZRoutine>(8192);
             this.sortedAddresses = new List<int>();
 
             Add(story.MainRoutineAddress, "Main");
@@ -45,7 +45,7 @@ namespace ZDebug.Core.Routines
 
             var routine = ZRoutine.Create(address, story.Memory, cache, name);
 
-            addressToRoutineMap.Add(address, routine);
+            routines.Add(address, routine);
 
             var index = sortedAddresses.BinarySearch(address);
             sortedAddresses.Insert(~index, address);
@@ -64,29 +64,34 @@ namespace ZDebug.Core.Routines
 
         public bool Exists(int address)
         {
-            return addressToRoutineMap.Contains(address);
+            return routines.Contains(address);
         }
 
         public ZRoutine GetByAddress(int address)
         {
-            return addressToRoutineMap[address];
+            return routines[address];
+        }
+
+        public bool TryGetByAddress(int address, out ZRoutine routine)
+        {
+            return routines.TryGetValue(address, out routine);
         }
 
         public ZRoutine this[int index]
         {
-            get { return addressToRoutineMap[sortedAddresses[index]]; }
+            get { return routines[sortedAddresses[index]]; }
         }
 
         public int Count
         {
-            get { return addressToRoutineMap.Count; }
+            get { return routines.Count; }
         }
 
         public IEnumerator<ZRoutine> GetEnumerator()
         {
             for (int i = 0; i < sortedAddresses.Count; i++)
             {
-                yield return addressToRoutineMap[sortedAddresses[i]];
+                yield return routines[sortedAddresses[i]];
             }
         }
 

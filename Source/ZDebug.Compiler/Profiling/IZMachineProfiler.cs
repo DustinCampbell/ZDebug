@@ -4,6 +4,8 @@
     {
         void RoutineCompiled(RoutineCompilationStatistics statistics);
 
+        void Call(int address, bool calculated);
+
         void EnterRoutine(int address);
         void ExitRoutine(int address);
 

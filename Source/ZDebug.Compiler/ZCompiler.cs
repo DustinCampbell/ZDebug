@@ -9,6 +9,11 @@ using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 using ZDebug.Core.Utilities;
 
+// Potential optimizations:
+//
+// * Speed up calculated calls
+// * Create ref locals for globals directly accessed
+
 namespace ZDebug.Compiler
 {
     public partial class ZCompiler
@@ -27,7 +32,6 @@ namespace ZDebug.Compiler
         private ILocal outputStreams;
 
         private bool usesStack;
-        private bool usesMemory;
 
         private IArrayLocal stack;
         private LocalBuilder spRef;
@@ -37,6 +41,24 @@ namespace ZDebug.Compiler
 
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
+
+        private static readonly Type[] directCall0Types = Types.One<ZRoutineCall>();
+        private static readonly Type[] directCall1Types = Types.Two<ZRoutineCall, ushort>();
+        private static readonly Type[] directCall2Types = Types.Three<ZRoutineCall, ushort, ushort>();
+        private static readonly Type[] directCall3Types = Types.Four<ZRoutineCall, ushort, ushort, ushort>();
+        private static readonly Type[] directCall4Types = Types.Five<ZRoutineCall, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall5Types = Types.Six<ZRoutineCall, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall6Types = Types.Seven<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall7Types = Types.Eight<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
+
+        private static readonly Type[] calculatedCall0Types = Types.One<int>();
+        private static readonly Type[] calculatedCall1Types = Types.Two<int, ushort>();
+        private static readonly Type[] calculatedCall2Types = Types.Three<int, ushort, ushort>();
+        private static readonly Type[] calculatedCall3Types = Types.Four<int, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall4Types = Types.Five<int, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall5Types = Types.Six<int, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall6Types = Types.Seven<int, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall7Types = Types.Eight<int, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
 
         private ZCompiler(ZRoutine routine, CompiledZMachine machine, bool debugging = false)
         {
@@ -118,8 +140,6 @@ namespace ZDebug.Compiler
             {
                 if (i.UsesMemory())
                 {
-                    this.usesMemory = true;
-
                     var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
                     this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
 
@@ -132,7 +152,18 @@ namespace ZDebug.Compiler
             {
                 // correct local byref variables to vector elements of the ZMachine's locals array.
                 var localsField = Reflection<CompiledZMachine>.GetField("locals", @public: false);
-                this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+
+                // Determine whether we need the 'locals' variable or not.
+                // We should only need this if there is an instruction with
+                // a by-ref first operand that's a variable.
+                foreach (var i in routine.Instructions)
+                {
+                    if (i.Opcode.IsFirstOpByRef && i.Operands[0].Kind == OperandKind.Variable)
+                    {
+                        this.locals = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(localsField));
+                        break;
+                    }
+                }
 
                 var ushortByRefType = typeof(ushort).MakeByRefType();
                 this.localRefs = new LocalBuilder[localCount];
@@ -198,7 +229,14 @@ namespace ZDebug.Compiler
 
             sw.Stop();
 
-            var statistics = new RoutineCompilationStatistics(this.routine, il.OpcodeCount, il.LocalCount, il.Size, sw.Elapsed, calculatedLoadVariableCount, calculatedStoreVariableCount);
+            var statistics = new RoutineCompilationStatistics(
+                this.routine,
+                il.OpcodeCount,
+                il.LocalCount,
+                il.Size,
+                sw.Elapsed,
+                calculatedLoadVariableCount,
+                calculatedStoreVariableCount);
 
             return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
@@ -279,8 +317,59 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", currentInstruction.Address, currentInstruction.Opcode.Name));
         }
 
+        private static Type[] GetDirectCallTypes(int argumentCount)
+        {
+            switch (argumentCount)
+            {
+                case 0: return directCall0Types;
+                case 1: return directCall1Types;
+                case 2: return directCall2Types;
+                case 3: return directCall3Types;
+                case 4: return directCall4Types;
+                case 5: return directCall5Types;
+                case 6: return directCall6Types;
+                case 7: return directCall7Types;
+                default: throw new ZCompilerException("Only calls of 0 to 7 arguments are supported.");
+            }
+        }
+
+        private static Type[] GetCalculatedCallTypes(int argumentCount)
+        {
+            switch (argumentCount)
+            {
+                case 0: return calculatedCall0Types;
+                case 1: return calculatedCall1Types;
+                case 2: return calculatedCall2Types;
+                case 3: return calculatedCall3Types;
+                case 4: return calculatedCall4Types;
+                case 5: return calculatedCall5Types;
+                case 6: return calculatedCall6Types;
+                case 7: return calculatedCall7Types;
+                default: throw new ZCompilerException("Only calls of 0 to 7 arguments are supported.");
+            }
+        }
+
         private void DirectCall(Operand addressOp)
         {
+            if (machine.Profiling)
+            {
+                il.LoadArg(0); // ZMachine
+
+                if (addressOp.Value == 0)
+                {
+                    il.Load(0);
+                }
+                else
+                {
+                    il.Load(machine.UnpackRoutineAddress(addressOp.Value));
+                }
+
+                il.Load(false);
+
+                var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                il.Call(profilerCall);
+            }
+
             if (addressOp.Value == 0)
             {
                 Return(0);
@@ -304,13 +393,8 @@ namespace ZDebug.Compiler
                     LoadOperand(i + 1);
                 }
 
-                var callName = "Call" + argCount.ToString();
-                var callTypeList = new List<Type>() { typeof(ZRoutineCall) };
-                for (int i = 0; i < argCount; i++)
-                {
-                    callTypeList.Add(typeof(ushort));
-                }
-                var callTypes = callTypeList.ToArray();
+                var callName = "DirectCall" + argCount.ToString();
+                var callTypes = GetDirectCallTypes(argCount);
 
                 var call = Reflection<CompiledZMachine>.GetMethod(callName, callTypes, @public: false);
 
@@ -318,11 +402,11 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void IndirectCall(Operand addressOp)
+        private void CalculatedCall(Operand addressOp)
         {
             using (var address = il.NewLocal<int>())
             {
-                LoadUnpackedRoutineAddress(addressOp);
+                LoadVariable((byte)addressOp.Value);
                 address.Store();
 
                 // is this address 0?
@@ -331,11 +415,26 @@ namespace ZDebug.Compiler
                 address.Load();
                 nonZeroCall.BranchIf(Condition.True);
 
-                var argCount = currentInstruction.OperandCount - 1;
-                for (int i = 0; i < argCount; i++)
+                if (machine.Profiling)
                 {
-                    LoadOperand(i + 1);
-                    il.Pop();
+                    il.LoadArg(0); // ZMachine
+                    il.Load(0);
+                    il.Load(true);
+
+                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                    il.Call(profilerCall);
+                }
+
+                // load and throw away all SP operands...
+                var argCount = currentInstruction.OperandCount - 1;
+                for (int i = 1; i <= argCount; i++)
+                {
+                    var op = GetOperand(i);
+                    if (op.Kind == OperandKind.Variable && op.Value == 0)
+                    {
+                        LoadOperand(i);
+                        il.Pop();
+                    }
                 }
 
                 il.Load(0);
@@ -344,21 +443,28 @@ namespace ZDebug.Compiler
 
                 nonZeroCall.Mark();
 
+                if (machine.Profiling)
+                {
+                    il.LoadArg(0); // ZMachine
+                    address.Load();
+                    UnpackRoutineAddress();
+                    il.Load(true);
+
+                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                    il.Call(profilerCall);
+                }
+
                 il.LoadArg(0);
                 address.Load();
+                UnpackRoutineAddress();
 
-                for (int i = 0; i < argCount; i++)
+                for (int i = 1; i <= argCount; i++)
                 {
-                    LoadOperand(i + 1);
+                    LoadOperand(i);
                 }
 
-                var callName = "Call" + argCount.ToString();
-                var callTypeList = new List<Type>() { typeof(int) };
-                for (int i = 0; i < argCount; i++)
-                {
-                    callTypeList.Add(typeof(ushort));
-                }
-                var callTypes = callTypeList.ToArray();
+                var callName = "CalculatedCall" + argCount.ToString();
+                var callTypes = GetCalculatedCallTypes(argCount);
 
                 var call = Reflection<CompiledZMachine>.GetMethod(callName, callTypes, @public: false);
 
@@ -377,7 +483,7 @@ namespace ZDebug.Compiler
             }
             else
             {
-                IndirectCall(addressOp);
+                CalculatedCall(addressOp);
             }
         }
 
