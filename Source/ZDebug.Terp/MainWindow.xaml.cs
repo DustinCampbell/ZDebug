@@ -71,11 +71,16 @@ namespace ZDebug.Terp
 
         private void storyService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
+            if (machineThread != null)
+            {
+                machineThread.Abort();
+                machineThread = null;
+            }
+
             windowManager.Root.Close();
 
             mainWindow = null;
             upperWindow = null;
-            storyService = null;
             machine = null;
             profiler = null;
             script = null;
@@ -167,6 +172,10 @@ namespace ZDebug.Terp
             {
                 // done
                 UpdateProfilerStatistics();
+            }
+            catch (ThreadAbortException)
+            {
+                // done
             }
             catch (Exception ex)
             {

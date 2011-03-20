@@ -141,13 +141,21 @@ namespace ZDebug.IO.Windows
         public override void PutString(string text)
         {
             paragraph.Inlines.Add(GetFormattedRun(text));
-            FindFirstVisualChild<ScrollViewer>(scrollViewer).ScrollToEnd();
+            var scroll = FindFirstVisualChild<ScrollViewer>(scrollViewer);
+            if (scroll != null)
+            {
+                scroll.ScrollToEnd();
+            }
         }
 
         public override void PutChar(char ch)
         {
             paragraph.Inlines.Add(GetFormattedRun(ch.ToString()));
-            FindFirstVisualChild<ScrollViewer>(scrollViewer).ScrollToEnd();
+            var scroll = FindFirstVisualChild<ScrollViewer>(scrollViewer);
+            if (scroll != null)
+            {
+                scroll.ScrollToEnd();
+            }
         }
 
         public override void ReadChar(Action<char> callback)
