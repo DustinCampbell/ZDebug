@@ -13,7 +13,7 @@ namespace ZDebug.Compiler
 
         private void BinaryOp(CodeBuilder operation, bool signed = false)
         {
-            using (var temp = il.NewLocal<ushort>())
+            using (var result = il.NewLocal<ushort>())
             {
                 LoadOperand(0);
                 if (signed)
@@ -30,8 +30,8 @@ namespace ZDebug.Compiler
                 operation();
                 il.Convert.ToUInt16();
 
-                temp.Store();
-                StoreVariable(currentInstruction.StoreVariable, temp);
+                result.Store();
+                Store(() => result.Load());
             }
         }
 
@@ -109,7 +109,7 @@ namespace ZDebug.Compiler
                 done.Mark();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -152,7 +152,7 @@ namespace ZDebug.Compiler
                 done.Mark();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -163,15 +163,12 @@ namespace ZDebug.Compiler
 
         private void op_not()
         {
-            LoadOperand(0);
-            il.Math.Not();
-            il.Convert.ToUInt16();
-
-            using (var result = il.NewLocal<ushort>())
+            Store(() =>
             {
-                result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
-            }
+                LoadOperand(0);
+                il.Math.Not();
+                il.Convert.ToUInt16();
+            });
         }
 
         private void op_test()
@@ -390,37 +387,48 @@ namespace ZDebug.Compiler
 
         private void op_je()
         {
-            using (var x = il.NewLocal<ushort>())
+            // We can take a faster path if there are only two operands to compare.
+            if (currentInstruction.OperandCount == 2)
             {
                 LoadOperand(0);
-                x.Store();
-
-                var success = il.NewLabel();
-                var done = il.NewLabel();
-
-                for (int j = 1; j < currentInstruction.OperandCount; j++)
-                {
-                    LoadOperand(j);
-                    x.Load();
-
-                    il.Compare.Equal();
-
-                    // no need to write a branch for the last test
-                    if (j < currentInstruction.OperandCount - 1)
-                    {
-                        success.BranchIf(Condition.True, @short: true);
-                    }
-                    else
-                    {
-                        done.Branch(@short: true);
-                    }
-                }
-
-                success.Mark();
-                il.Load(1);
-
-                done.Mark();
+                LoadOperand(1);
+                il.Compare.Equal();
                 Branch();
+            }
+            else
+            {
+                using (var x = il.NewLocal<ushort>())
+                {
+                    LoadOperand(0);
+                    x.Store();
+
+                    var success = il.NewLabel();
+                    var done = il.NewLabel();
+
+                    for (int j = 1; j < currentInstruction.OperandCount; j++)
+                    {
+                        LoadOperand(j);
+                        x.Load();
+
+                        il.Compare.Equal();
+
+                        // no need to write a branch for the last test
+                        if (j < currentInstruction.OperandCount - 1)
+                        {
+                            success.BranchIf(Condition.True, @short: true);
+                        }
+                        else
+                        {
+                            done.Branch(@short: true);
+                        }
+                    }
+
+                    success.Mark();
+                    il.Load(1);
+
+                    done.Mark();
+                    Branch();
+                }
             }
         }
 
@@ -498,7 +506,7 @@ namespace ZDebug.Compiler
                 Call();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
 
             il.DebugUnindent();
@@ -547,7 +555,7 @@ namespace ZDebug.Compiler
                     LoadVariable(varIndex, indirect: true);
                     result.Store();
 
-                    StoreVariable(currentInstruction.StoreVariable, result);
+                    Store(() => result.Load());
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -560,7 +568,7 @@ namespace ZDebug.Compiler
 
                     CalculatedLoadVariable(varIndex, indirect: true);
                     result.Store();
-                    StoreVariable(currentInstruction.StoreVariable, result);
+                    Store(() => result.Load());
                 }
             }
             else
@@ -578,12 +586,11 @@ namespace ZDebug.Compiler
             if (addressOp.Kind != OperandKind.Variable &&
                 offsetOp.Kind != OperandKind.Variable)
             {
-                StoreVariable(currentInstruction.StoreVariable,
-                    valueLoader: () =>
-                    {
-                        var address = addressOp.Value + offsetOp.Value;
-                        LoadByte(address);
-                    });
+                Store(valueLoader: () =>
+                {
+                    var address = addressOp.Value + offsetOp.Value;
+                    LoadByte(address);
+                });
             }
             else
             {
@@ -594,11 +601,10 @@ namespace ZDebug.Compiler
                     il.Math.Add();
                     address.Store();
 
-                    StoreVariable(currentInstruction.StoreVariable,
-                        valueLoader: () =>
-                        {
-                            LoadByte(address);
-                        });
+                    Store(valueLoader: () =>
+                    {
+                        LoadByte(address);
+                    });
                 }
             }
         }
@@ -612,12 +618,11 @@ namespace ZDebug.Compiler
             if (addressOp.Kind != OperandKind.Variable &&
                 offsetOp.Kind != OperandKind.Variable)
             {
-                StoreVariable(currentInstruction.StoreVariable,
-                    valueLoader: () =>
-                    {
-                        var address = addressOp.Value + (offsetOp.Value * 2);
-                        LoadWord(address);
-                    });
+                Store(valueLoader: () =>
+                {
+                    var address = addressOp.Value + (offsetOp.Value * 2);
+                    LoadWord(address);
+                });
             }
             else
             {
@@ -629,11 +634,10 @@ namespace ZDebug.Compiler
                     il.Math.Add();
                     address.Store();
 
-                    StoreVariable(currentInstruction.StoreVariable,
-                        valueLoader: () =>
-                        {
-                            LoadWord(address);
-                        });
+                    Store(valueLoader: () =>
+                    {
+                        LoadWord(address);
+                    });
                 }
             }
         }
@@ -823,7 +827,7 @@ namespace ZDebug.Compiler
                 ReadObjectChildFromOperand(0);
                 result.Store();
 
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
 
                 result.Load();
                 il.Load(0);
@@ -899,7 +903,7 @@ namespace ZDebug.Compiler
                 il.Math.And();
                 il.Convert.ToUInt16();
                 value.Store();
-                StoreVariable(currentInstruction.StoreVariable, value);
+                Store(() => value.Load());
 
                 done.Branch(@short: true);
 
@@ -908,7 +912,7 @@ namespace ZDebug.Compiler
 
                 il.Load(0);
                 value.Store();
-                StoreVariable(currentInstruction.StoreVariable, value);
+                Store(() => value.Load());
 
                 done.Mark();
             }
@@ -921,7 +925,7 @@ namespace ZDebug.Compiler
                 ReadObjectParentFromOperand(0);
                 result.Store();
 
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1025,7 +1029,7 @@ namespace ZDebug.Compiler
 
                 done.Mark();
 
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1096,20 +1100,18 @@ namespace ZDebug.Compiler
 
                 storeAddress.Mark();
 
-                StoreVariable(currentInstruction.StoreVariable,
-                    valueLoader: () =>
-                    {
-                        propAddress.Load();
-                        il.Math.Add(1);
-                        il.Convert.ToUInt16();
-                    });
+                Store(valueLoader: () =>
+                {
+                    propAddress.Load();
+                    il.Math.Add(1);
+                    il.Convert.ToUInt16();
+                });
 
                 done.Branch(@short: true);
 
                 storeZero.Mark();
 
-                StoreVariable(currentInstruction.StoreVariable,
-                    valueLoader: () => il.Load(0));
+                Store(() => il.Load(0));
 
                 done.Mark();
             }
@@ -1185,7 +1187,7 @@ namespace ZDebug.Compiler
 
                 done.Mark();
 
-                StoreVariable(currentInstruction.StoreVariable, value);
+                Store(() => value.Load());
             }
         }
 
@@ -1215,7 +1217,7 @@ namespace ZDebug.Compiler
                 ReadObjectSiblingFromOperand(0);
                 result.Store();
 
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
 
                 result.Load();
                 il.Load(0);
@@ -1592,7 +1594,7 @@ namespace ZDebug.Compiler
                 il.Call(read);
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1621,7 +1623,7 @@ namespace ZDebug.Compiler
                 il.Call(read);
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1767,7 +1769,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1784,7 +1786,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 
@@ -1796,7 +1798,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
 
                 result.Store();
-                StoreVariable(currentInstruction.StoreVariable, result);
+                Store(() => result.Load());
             }
         }
 

@@ -508,6 +508,11 @@ namespace ZDebug.Compiler
 
         private void Branch()
         {
+            if (!currentInstruction.HasBranch)
+            {
+                throw new ZCompilerException("Expected instruction to have a branch.");
+            }
+
             // It is expected that the value on the top of the evaluation stack
             // is the boolean value to compare branch.Condition with.
 
@@ -537,6 +542,16 @@ namespace ZDebug.Compiler
             }
 
             noJump.Mark();
+        }
+
+        private void Store(CodeBuilder valueLoader, bool indirect = false)
+        {
+            if (!currentInstruction.HasStoreVariable)
+            {
+                throw new ZCompilerException("Expected instruction to have a store variable.");
+            }
+
+            StoreVariable(currentInstruction.StoreVariable, valueLoader, indirect);
         }
 
         private void Assemble()
