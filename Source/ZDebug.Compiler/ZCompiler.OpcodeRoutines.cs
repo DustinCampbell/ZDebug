@@ -13,23 +13,23 @@ namespace ZDebug.Compiler
 
         private void BinaryOp(CodeBuilder operation, bool signed = false)
         {
-            LoadOperand(0);
-            if (signed)
-            {
-                il.Convert.ToInt16();
-            }
-
-            LoadOperand(1);
-            if (signed)
-            {
-                il.Convert.ToInt16();
-            }
-
-            operation();
-            il.Convert.ToUInt16();
-
             using (var temp = il.NewLocal<ushort>())
             {
+                LoadOperand(0);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                LoadOperand(1);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                operation();
+                il.Convert.ToUInt16();
+
                 temp.Store();
                 StoreVariable(currentInstruction.StoreVariable, temp);
             }

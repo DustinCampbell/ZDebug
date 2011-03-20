@@ -14,6 +14,7 @@ using ZDebug.Compiler;
 using ZDebug.Core;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Utilities;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.Terp.Profiling;
@@ -32,8 +33,8 @@ namespace ZDebug.Terp
         private int currStatusHeight;
         private int machStatusHeight;
 
-        private byte[] storyBytes;
-        private ZDebug.Compiler.CompiledZMachine machine;
+        private Story story;
+        private CompiledZMachine machine;
         private Thread machineThread;
         private ZMachineProfiler profiler;
         private Stopwatch watch;
@@ -104,7 +105,7 @@ namespace ZDebug.Terp
 
                 mainWindow = null;
                 upperWindow = null;
-                storyBytes = null;
+                story = null;
                 machine = null;
                 profiler = null;
                 script = null;
@@ -112,9 +113,9 @@ namespace ZDebug.Terp
                 watch = null;
             }
 
-            storyBytes = File.ReadAllBytes(fileName);
+            story = Story.FromBytes(File.ReadAllBytes(fileName));
             profiler = new ZMachineProfiler();
-            machine = new ZDebug.Compiler.CompiledZMachine(Story.FromBytes(storyBytes), profiler: profiler);
+            machine = new CompiledZMachine(story, profiler: profiler);
             machine.RegisterScreen(this);
             machine.SetRandomSeed(42);
 
@@ -397,76 +398,94 @@ namespace ZDebug.Terp
             throw new NotImplementedException();
         }
 
+        private bool IsScoreGame()
+        {
+            // TODO: Move into appropriate API
+            if (story.Version > 3)
+            {
+                throw new InvalidOperationException("status line should only be drawn be V1- V3");
+            }
+
+            if (story.Version < 3)
+            {
+                return true;
+            }
+
+            return (story.Memory.ReadByte(0x01) & 0x01) == 0x00;
+        }
+
         public void ShowStatus()
         {
-            //var story = DebuggerService.Story;
-            //if (story.Version > 3)
-            //{
-            //    return;
-            //}
+            if (story.Version > 3)
+            {
+                return;
+            }
 
-            //if (upperWindow == null)
-            //{
-            //    upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
-            //}
-            //else
-            //{
-            //    int height = upperWindow.GetHeight();
-            //    if (height != 1)
-            //    {
-            //        upperWindow.SetHeight(1);
-            //        currStatusHeight = 1;
-            //        machStatusHeight = 1;
-            //    }
-            //}
+            Dispatch(() =>
+            {
+                if (upperWindow == null)
+                {
+                    upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above, ZWindowSizeType.Fixed, 1);
+                }
+                else
+                {
+                    int height = upperWindow.GetHeight();
+                    if (height != 1)
+                    {
+                        upperWindow.SetHeight(1);
+                        currStatusHeight = 1;
+                        machStatusHeight = 1;
+                    }
+                }
 
-            //upperWindow.Clear();
+                upperWindow.Clear();
 
-            //var charWidth = ScreenWidthInColumns;
-            //var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
+                var charWidth = ScreenWidthInColumns;
+                var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
 
-            //upperWindow.SetReverse(true);
+                upperWindow.SetReverse(true);
 
-            //if (charWidth < 5)
-            //{
-            //    upperWindow.PutString(new string(' ', charWidth));
-            //    return;
-            //}
+                if (charWidth < 5)
+                {
+                    upperWindow.PutString(new string(' ', charWidth));
+                    return;
+                }
 
-            //if (locationText.Length > charWidth)
-            //{
-            //    locationText = locationText.Substring(0, charWidth - 3) + "...";
-            //    upperWindow.PutString(locationText);
-            //    return;
-            //}
+                if (locationText.Length > charWidth)
+                {
+                    locationText = locationText.Substring(0, charWidth - 3) + "...";
+                    upperWindow.PutString(locationText);
+                    return;
+                }
 
-            //upperWindow.PutString(locationText);
+                upperWindow.PutString(locationText);
 
-            //string rightText;
-            //if (IsScoreGame())
-            //{
-            //    int score = (short)story.GlobalVariablesTable[1];
-            //    int moves = (ushort)story.GlobalVariablesTable[2];
-            //    rightText = string.Format("Score: {0,-8} Moves: {1,-6} ", score, moves);
-            //}
-            //else
-            //{
-            //    int hours = (ushort)story.GlobalVariablesTable[1];
-            //    int minutes = (ushort)story.GlobalVariablesTable[2];
-            //    var pm = (hours / 12) > 0;
-            //    if (pm)
-            //    {
-            //        hours = hours % 12;
-            //    }
+                string rightText;
+                if (IsScoreGame())
+                {
+                    int score = (short)story.GlobalVariablesTable[1];
+                    int moves = (ushort)story.GlobalVariablesTable[2];
+                    rightText = string.Format("Score: {0,-8} Moves: {1,-6} ", score, moves);
+                }
+                else
+                {
+                    int hours = (ushort)story.GlobalVariablesTable[1];
+                    int minutes = (ushort)story.GlobalVariablesTable[2];
+                    var pm = (hours / 12) > 0;
+                    if (pm)
+                    {
+                        hours = hours % 12;
+                    }
 
-            //    rightText = string.Format("{0}:{1:n2} {2}", hours, minutes, (pm ? "pm" : "am"));
-            //}
+                    rightText = string.Format("{0}:{1:n2} {2}", hours, minutes, (pm ? "pm" : "am"));
+                }
 
-            //if (rightText.Length < charWidth - locationText.Length - 1)
-            //{
-            //    upperWindow.PutString(new string(' ', charWidth - locationText.Length - rightText.Length));
-            //    upperWindow.PutString(rightText);
-            //}
+                if (rightText.Length < charWidth - locationText.Length - 1)
+                {
+                    upperWindow.PutString(new string(' ', charWidth - locationText.Length - rightText.Length));
+                    upperWindow.PutString(rightText);
+                }
+            });
         }
 
         public byte ScreenHeightInLines
@@ -608,7 +627,7 @@ namespace ZDebug.Terp
                     callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
                     routineGrid.ItemsSource = profiler.Routines;
 
-                    var reader = new InstructionReader(0, storyBytes);
+                    var reader = new InstructionReader(0, story.Memory);
 
                     var instructions = profiler.InstructionTimings.Select(timing =>
                     {
