@@ -14,5 +14,11 @@ namespace ZDebug.Terp.Profiling
 
         double InclusivePercentage { get; }
         double ExclusivePercentage { get; }
+
+        int LocalCount { get; }
+
+        int ZCodeInstructionCount { get; }
+        int ILInstructionCount { get; }
+        int ILByteSize { get; }
     }
 }

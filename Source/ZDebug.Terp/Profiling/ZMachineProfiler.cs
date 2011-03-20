@@ -41,6 +41,12 @@ namespace ZDebug.Terp.Profiling
         void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
         {
             allStatistics.Add(statistics);
+
+            var address = statistics.Routine.Address;
+            if (!routines.ContainsKey(address))
+            {
+                routines.Add(address, new Routine(this, address, statistics));
+            }
         }
 
         void IZMachineProfiler.Call(int address, bool calculated)
@@ -60,12 +66,7 @@ namespace ZDebug.Terp.Profiling
         {
             routinesExecuted++;
 
-            Routine routine;
-            if (!routines.TryGetValue(address, out routine))
-            {
-                routine = new Routine(this, address);
-                routines.Add(address, routine);
-            }
+            Routine routine = routines[address];
 
             var index = calls.Count;
             var parent = callStack.Count > 0

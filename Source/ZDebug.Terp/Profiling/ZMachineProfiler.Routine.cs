@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ZDebug.Compiler.Profiling;
 
 namespace ZDebug.Terp.Profiling
 {
@@ -11,16 +12,18 @@ namespace ZDebug.Terp.Profiling
         {
             private readonly ZMachineProfiler profiler;
             private readonly int address;
+            private readonly RoutineCompilationStatistics statistics;
 
             private List<int> callIndexes;
             private ReadOnlyCollection<ICall> calls;
             private TimeSpan inclusiveTime;
             private TimeSpan exclusiveTime;
 
-            public Routine(ZMachineProfiler profiler, int address)
+            public Routine(ZMachineProfiler profiler, int address, RoutineCompilationStatistics statistics)
             {
                 this.profiler = profiler;
                 this.address = address;
+                this.statistics = statistics;
                 this.callIndexes = new List<int>();
             }
 
@@ -87,6 +90,39 @@ namespace ZDebug.Terp.Profiling
                     return ((double)exclusiveTime.Ticks / (double)profiler.RunningTime.Ticks) * 100;
                 }
             }
+
+            public int LocalCount
+            {
+                get
+                {
+                    return statistics.LocalCount;
+                }
+            }
+
+            public int ZCodeInstructionCount
+            {
+                get
+                {
+                    return statistics.Routine.Instructions.Length;
+                }
+            }
+
+            public int ILInstructionCount
+            {
+                get
+                {
+                    return statistics.OpcodeCount;
+                }
+            }
+
+            public int ILByteSize
+            {
+                get
+                {
+                    return statistics.Size;
+                }
+            }
+
         }
     }
 }
