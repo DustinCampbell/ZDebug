@@ -58,6 +58,10 @@
                 <Button ToolTip="Stop" Click="Stop_Click">
                     <c:AutoDisableImage Source="{StaticResource stopImage}"/>
                 </Button>
+                <Separator/>
+                <Button Name="aboutGameButton" IsEnabled="False"  ToolTip="About Game" Click="AboutGame_Click">
+                    <c:AutoDisableImage Source="{StaticResource infoBigImage}"/>
+                </Button>
             </ToolBar>
         </ToolBarTray>
 

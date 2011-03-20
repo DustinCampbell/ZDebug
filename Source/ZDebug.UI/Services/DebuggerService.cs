@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Linq;
 using ZDebug.Core;
-using ZDebug.Core.Blorb;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;
@@ -23,9 +21,8 @@ namespace ZDebug.UI.Services
         private static bool hasStepped;
 
         private static IInterpreter interpreter;
-        private static Story story;
+        private static StoryService storyService;
         private static InterpretedZMachine processor;
-        private static GameInfo gameInfo;
         private static ZRoutineTable routineTable;
         private static InstructionReader reader;
         private static Instruction currentInstruction;
@@ -36,6 +33,13 @@ namespace ZDebug.UI.Services
         private static int gameScriptCommandIndex;
 
         private static DebuggerState priorState;
+
+        static DebuggerService()
+        {
+            storyService = new StoryService();
+            storyService.StoryOpened += storyService_StoryOpened;
+            storyService.StoryClosing += storyService_StoryClosing;
+        }
 
         private static void ChangeState(DebuggerState newState)
         {
@@ -72,7 +76,7 @@ namespace ZDebug.UI.Services
             if (currentInstruction.Opcode.IsCall)
             {
                 var callOpValue = processor.GetOperandValue(0);
-                var callAddress = story.UnpackRoutineAddress(callOpValue);
+                var callAddress = storyService.Story.UnpackRoutineAddress(callOpValue);
                 if (callAddress != 0)
                 {
                     routineTable.Add(callAddress);
@@ -152,21 +156,12 @@ namespace ZDebug.UI.Services
             GameStorage.SaveStorySettings(story, xml);
         }
 
-        public static void CloseStory()
+        private static void storyService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
-            if (story == null)
-            {
-                return;
-            }
-
-            SaveSettings(story);
-
-            var oldStory = story;
+            SaveSettings(e.Story);
 
             interpreter = null;
-            story = null;
             processor = null;
-            gameInfo = null;
             routineTable = null;
             reader = null;
             currentInstruction = null;
@@ -179,40 +174,22 @@ namespace ZDebug.UI.Services
             var handler = StoryClosed;
             if (handler != null)
             {
-                handler(null, new StoryEventArgs(oldStory));
+                handler(null, new StoryEventArgs(e.Story));
             }
 
             ChangeState(DebuggerState.Unavailable);
         }
 
-        public static Story OpenStory(string fileName)
+        private static void storyService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
-            CloseStory();
-
-            if (Path.GetExtension(fileName) == ".zblorb")
-            {
-                using (var stream = File.OpenRead(fileName))
-                {
-                    var blorb = new BlorbFile(stream);
-                    gameInfo = new GameInfo(blorb);
-                    DebuggerService.story = blorb.LoadStory();
-                }
-            }
-            else
-            {
-                DebuggerService.story = Story.FromBytes(File.ReadAllBytes(fileName));
-            }
-
             interpreter = new Interpreter();
-            story.RegisterInterpreter(interpreter);
+            e.Story.RegisterInterpreter(interpreter);
             var cache = new InstructionCache();
-            processor = new InterpretedZMachine(story);
-            routineTable = new ZRoutineTable(story, cache);
-            reader = new InstructionReader(processor.PC, story.Memory, cache);
+            processor = new InterpretedZMachine(e.Story);
+            routineTable = new ZRoutineTable(e.Story, cache);
+            reader = new InstructionReader(processor.PC, e.Story.Memory, cache);
 
-            DebuggerService.fileName = fileName;
-
-            LoadSettings(story);
+            LoadSettings(e.Story);
 
             gameScriptCommandIndex = gameScript.Count != 0 ? 0 : -1;
             processor.SetRandomSeed(42);
@@ -222,12 +199,21 @@ namespace ZDebug.UI.Services
             var handler = StoryOpened;
             if (handler != null)
             {
-                handler(null, new StoryEventArgs(story));
+                handler(null, new StoryEventArgs(e.Story));
             }
 
             ChangeState(DebuggerState.Stopped);
+        }
 
-            return story;
+        public static void CloseStory()
+        {
+            storyService.CloseStory();
+        }
+
+        public static Story OpenStory(string fileName)
+        {
+            DebuggerService.fileName = fileName;
+            return storyService.OpenStory(fileName);
         }
 
         private static void Processor_Quit(object sender, EventArgs e)
@@ -444,12 +430,12 @@ namespace ZDebug.UI.Services
 
         public static Story Story
         {
-            get { return story; }
+            get { return storyService.Story; }
         }
 
         public static bool HasStory
         {
-            get { return story != null; }
+            get { return storyService.IsStoryOpen; }
         }
 
         public static InterpretedZMachine Processor
@@ -459,17 +445,22 @@ namespace ZDebug.UI.Services
 
         public static GameInfo GameInfo
         {
-            get { return gameInfo; }
+            get { return storyService.GameInfo; }
         }
 
         public static bool HasGameInfo
         {
-            get { return gameInfo != null; }
+            get { return storyService.HasGameInfo; }
         }
 
         public static ZRoutineTable RoutineTable
         {
             get { return routineTable; }
+        }
+
+        public static bool HasFileName
+        {
+            get { return !string.IsNullOrWhiteSpace(fileName); }
         }
 
         public static string FileName

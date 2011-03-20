@@ -67,10 +67,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\GameInfoDialogView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\GameScriptDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -133,7 +129,6 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextSource.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
-    <Compile Include="Services\GameInfo.cs" />
     <Compile Include="Services\Interpreter.cs" />
     <Compile Include="Services\NavigationRequestedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
@@ -150,7 +145,6 @@
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
     <Compile Include="ViewModel\EditRoutineNameViewModel.cs" />
-    <Compile Include="ViewModel\GameInfoViewModel.cs" />
     <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
     <Compile Include="ViewModel\GlobalsViewModel.cs" />
     <Compile Include="ViewModel\GoToAddressViewModel.cs" />

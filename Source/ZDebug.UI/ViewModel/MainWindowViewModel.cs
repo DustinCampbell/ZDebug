@@ -208,6 +208,9 @@ namespace ZDebug.UI.ViewModel
         private void AboutGameExecuted()
         {
             var gameInfoDialog = ViewModelWithView<GameInfoViewModel, Window>.Create();
+            var viewModel = (GameInfoViewModel)gameInfoDialog.DataContext;
+            var gameInfo = DebuggerService.GameInfo;
+            viewModel.SetGameinfo(gameInfo);
             gameInfoDialog.Owner = this.View;
             gameInfoDialog.ShowDialog();
         }
@@ -227,7 +230,7 @@ namespace ZDebug.UI.ViewModel
         {
             get
             {
-                if (DebuggerService.HasStory)
+                if (DebuggerService.HasFileName)
                 {
                     return "Z-Debug - " + Path.GetFileName(DebuggerService.FileName).ToLower();
                 }

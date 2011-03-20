@@ -11,13 +11,14 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
-using ZDebug.Core;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Extensions;
 using ZDebug.Core.Instructions;
 using ZDebug.IO.Services;
 using ZDebug.IO.Windows;
 using ZDebug.Terp.Profiling;
+using ZDebug.UI.Services;
+using ZDebug.UI.ViewModel;
 
 namespace ZDebug.Terp
 {
@@ -33,7 +34,7 @@ namespace ZDebug.Terp
         private int currStatusHeight;
         private int machStatusHeight;
 
-        private Story story;
+        private StoryService storyService;
         private CompiledZMachine machine;
         private Thread machineThread;
         private ZMachineProfiler profiler;
@@ -47,6 +48,41 @@ namespace ZDebug.Terp
             InitializeComponent();
 
             windowManager = new ZWindowManager();
+            storyService = new StoryService();
+            storyService.StoryOpened += storyService_StoryOpened;
+            storyService.StoryClosing += storyService_StoryClosing;
+        }
+
+        private void storyService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        {
+            profiler = new ZMachineProfiler();
+            machine = new CompiledZMachine(e.Story, profiler: profiler);
+            machine.RegisterScreen(this);
+            machine.SetRandomSeed(42);
+
+            mainWindow = windowManager.Open(ZWindowType.TextBuffer);
+            windowContainer.Children.Add(mainWindow);
+            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above);
+
+            windowManager.Activate(mainWindow);
+
+            aboutGameButton.IsEnabled = storyService.HasGameInfo;
+        }
+
+        private void storyService_StoryClosing(object sender, StoryClosingEventArgs e)
+        {
+            windowManager.Root.Close();
+
+            mainWindow = null;
+            upperWindow = null;
+            storyService = null;
+            machine = null;
+            profiler = null;
+            script = null;
+            scriptIndex = 0;
+            watch = null;
+
+            aboutGameButton.IsEnabled = false;
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -89,6 +125,16 @@ namespace ZDebug.Terp
             machine.Stop();
         }
 
+        private void AboutGame_Click(object sender, RoutedEventArgs e)
+        {
+            var gameInfoDialog = ViewModelWithView<GameInfoViewModel, Window>.Create();
+            var viewModel = (GameInfoViewModel)gameInfoDialog.DataContext;
+            var gameInfo = storyService.GameInfo;
+            viewModel.SetGameinfo(gameInfo);
+            gameInfoDialog.Owner = this;
+            gameInfoDialog.ShowDialog();
+        }
+
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             if (machineThread != null)
@@ -99,31 +145,7 @@ namespace ZDebug.Terp
 
         private void OpenStory(string fileName)
         {
-            if (machine != null)
-            {
-                windowManager.Root.Close();
-
-                mainWindow = null;
-                upperWindow = null;
-                story = null;
-                machine = null;
-                profiler = null;
-                script = null;
-                scriptIndex = 0;
-                watch = null;
-            }
-
-            story = Story.FromBytes(File.ReadAllBytes(fileName));
-            profiler = new ZMachineProfiler();
-            machine = new CompiledZMachine(story, profiler: profiler);
-            machine.RegisterScreen(this);
-            machine.SetRandomSeed(42);
-
-            mainWindow = windowManager.Open(ZWindowType.TextBuffer);
-            windowContainer.Children.Add(mainWindow);
-            upperWindow = windowManager.Open(ZWindowType.TextGrid, mainWindow, ZWindowPosition.Above);
-
-            windowManager.Activate(mainWindow);
+            storyService.OpenStory(fileName);
 
             machineThread = new Thread(new ThreadStart(Run));
             machineThread.Start();
@@ -401,22 +423,22 @@ namespace ZDebug.Terp
         private bool IsScoreGame()
         {
             // TODO: Move into appropriate API
-            if (story.Version > 3)
+            if (storyService.Story.Version > 3)
             {
                 throw new InvalidOperationException("status line should only be drawn be V1- V3");
             }
 
-            if (story.Version < 3)
+            if (storyService.Story.Version < 3)
             {
                 return true;
             }
 
-            return (story.Memory.ReadByte(0x01) & 0x01) == 0x00;
+            return (storyService.Story.Memory.ReadByte(0x01) & 0x01) == 0x00;
         }
 
         public void ShowStatus()
         {
-            if (story.Version > 3)
+            if (storyService.Story.Version > 3)
             {
                 return;
             }
@@ -441,7 +463,7 @@ namespace ZDebug.Terp
                 upperWindow.Clear();
 
                 var charWidth = ScreenWidthInColumns;
-                var locationText = " " + story.ObjectTable.GetByNumber(story.GlobalVariablesTable[0]).ShortName;
+                var locationText = " " + storyService.Story.ObjectTable.GetByNumber(storyService.Story.GlobalVariablesTable[0]).ShortName;
 
                 upperWindow.SetReverse(true);
 
@@ -463,14 +485,14 @@ namespace ZDebug.Terp
                 string rightText;
                 if (IsScoreGame())
                 {
-                    int score = (short)story.GlobalVariablesTable[1];
-                    int moves = (ushort)story.GlobalVariablesTable[2];
+                    int score = (short)storyService.Story.GlobalVariablesTable[1];
+                    int moves = (ushort)storyService.Story.GlobalVariablesTable[2];
                     rightText = string.Format("Score: {0,-8} Moves: {1,-6} ", score, moves);
                 }
                 else
                 {
-                    int hours = (ushort)story.GlobalVariablesTable[1];
-                    int minutes = (ushort)story.GlobalVariablesTable[2];
+                    int hours = (ushort)storyService.Story.GlobalVariablesTable[1];
+                    int minutes = (ushort)storyService.Story.GlobalVariablesTable[2];
                     var pm = (hours / 12) > 0;
                     if (pm)
                     {
@@ -627,7 +649,7 @@ namespace ZDebug.Terp
                     callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
                     routineGrid.ItemsSource = profiler.Routines;
 
-                    var reader = new InstructionReader(0, story.Memory);
+                    var reader = new InstructionReader(0, storyService.Story.Memory);
 
                     var instructions = profiler.InstructionTimings.Select(timing =>
                     {
