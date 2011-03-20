@@ -188,12 +188,75 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
+        private class RefLocalWrapper : LocalWrapper, IRefLocal
+        {
+            private readonly Type elementType;
+            private readonly OpCode loadOpCode;
+            private readonly OpCode storeOpCode;
+
+            public RefLocalWrapper(ILBuilder builder, LocalBuilder local)
+                : base(builder, local)
+            {
+                this.elementType = local.LocalType.GetElementType();
+                this.loadOpCode = GetLoadOpCode(elementType);
+                this.storeOpCode = GetStoreOpCode(elementType);
+            }
+
+            private static OpCode GetLoadOpCode(Type type)
+            {
+                if (type == typeof(int))
+                {
+                    return OpCodes.Ldind_I4;
+                }
+                else if (type == typeof(ushort))
+                {
+                    return OpCodes.Ldind_U2;
+                }
+                else
+                {
+                    throw new ZCompilerException("Unsupported ref local type: " + type.FullName);
+                }
+            }
+
+            private static OpCode GetStoreOpCode(Type type)
+            {
+                if (type == typeof(int))
+                {
+                    return OpCodes.Stind_I4;
+                }
+                else if (type == typeof(ushort))
+                {
+                    return OpCodes.Stind_I2;
+                }
+                else
+                {
+                    throw new ZCompilerException("Unsupported ref local type: " + type.FullName);
+                }
+            }
+
+            public void LoadIndirectValue()
+            {
+                builder.Emit(loadOpCode);
+            }
+
+            public void StoreIndirectValue()
+            {
+                builder.Emit(storeOpCode);
+            }
+        }
+
         private static Func<ILBuilder, LocalBuilder, LocalWrapper> CreateLocal = (l, b) => new LocalWrapper(l, b);
         private static Func<ILBuilder, LocalBuilder, ArrayLocalWrapper> CreateArrayLocal = (l, b) => new ArrayLocalWrapper(l, b);
+        private static Func<ILBuilder, LocalBuilder, RefLocalWrapper> CreateRefLocal = (l, b) => new RefLocalWrapper(l, b);
 
-        private TWrapper AllocateLocal<T, TWrapper>(Func<ILBuilder, LocalBuilder, TWrapper> createWrapper) where TWrapper : LocalWrapper
+        private TWrapper AllocateLocal<T, TWrapper>(Func<ILBuilder, LocalBuilder, TWrapper> createWrapper, bool byref = false) where TWrapper : LocalWrapper
         {
             var type = typeof(T);
+            if (byref)
+            {
+                type = type.MakeByRefType();
+            }
+
             Stack<ILocal> stack;
             if (!locals.TryGetValue(type, out stack))
             {
@@ -260,6 +323,27 @@ namespace ZDebug.Compiler.Generate
         {
             var local = AllocateLocal<T[], ArrayLocalWrapper>(CreateArrayLocal);
             loadValue();
+            local.Store();
+            return local;
+        }
+
+        public IRefLocal NewRefLocal<T>()
+        {
+            return AllocateLocal<T, RefLocalWrapper>(CreateRefLocal, byref: true);
+        }
+
+        public IRefLocal NewRefLocal<T>(CodeBuilder loadValue)
+        {
+            var local = AllocateLocal<T, RefLocalWrapper>(CreateRefLocal, byref: true);
+            loadValue();
+            local.Store();
+            return local;
+        }
+
+        public IRefLocal NewRefLocal(int value)
+        {
+            var local = AllocateLocal<int, RefLocalWrapper>(CreateRefLocal, byref: true);
+            Load(value);
             local.Store();
             return local;
         }

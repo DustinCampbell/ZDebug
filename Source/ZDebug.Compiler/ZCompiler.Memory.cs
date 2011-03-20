@@ -1,5 +1,4 @@
-﻿using System.Reflection.Emit;
-using ZDebug.Compiler.Generate;
+﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
@@ -273,8 +272,8 @@ namespace ZDebug.Compiler
         {
             if (debugging)
             {
-                il.Emit(OpCodes.Ldloc, spRef);
-                il.Emit(OpCodes.Ldind_I4);
+                spRef.Load();
+                spRef.LoadIndirectValue();
                 il.Load(-1);
                 il.Compare.Equal();
 
@@ -290,8 +289,8 @@ namespace ZDebug.Compiler
         {
             if (debugging)
             {
-                il.Emit(OpCodes.Ldloc, spRef);
-                il.Emit(OpCodes.Ldind_I4);
+                spRef.Load();
+                spRef.LoadIndirectValue();
                 il.Load(CompiledZMachine.STACK_SIZE - 1);
                 il.Compare.Equal();
 
@@ -310,16 +309,16 @@ namespace ZDebug.Compiler
             stack.LoadElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
+                    spRef.Load();
+                    spRef.LoadIndirectValue();
                 });
 
             // decrement sp
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldind_I4);
+            spRef.Load();
+            spRef.Load();
+            spRef.LoadIndirectValue();
             il.Math.Subtract(1);
-            il.Emit(OpCodes.Stind_I4);
+            spRef.StoreIndirectValue();
         }
 
         private void PeekStack()
@@ -329,29 +328,14 @@ namespace ZDebug.Compiler
             stack.LoadElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
+                    spRef.Load();
+                    spRef.LoadIndirectValue();
                 });
         }
 
         private void PushStack(ILocal value)
         {
-            CheckStackFull();
-
-            // increment sp
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldind_I4);
-            il.Math.Add(1);
-            il.Emit(OpCodes.Stind_I4);
-
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
-                },
-                valueLoader: () => value.Load());
+            PushStack(() => value.Load());
         }
 
         private void PushStack(CodeBuilder valueLoader)
@@ -359,17 +343,17 @@ namespace ZDebug.Compiler
             CheckStackFull();
 
             // increment sp
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldloc, spRef);
-            il.Emit(OpCodes.Ldind_I4);
+            spRef.Load();
+            spRef.Load();
+            spRef.LoadIndirectValue();
             il.Math.Add(1);
-            il.Emit(OpCodes.Stind_I4);
+            spRef.StoreIndirectValue();
 
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
+                    spRef.Load();
+                    spRef.LoadIndirectValue();
                 },
                 valueLoader: valueLoader);
         }
@@ -385,15 +369,7 @@ namespace ZDebug.Compiler
 
         private void SetStackTop(ILocal value)
         {
-            CheckStackEmpty();
-
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
-                },
-                valueLoader: () => value.Load());
+            SetStackTop(() => value.Load());
         }
 
         private void SetStackTop(CodeBuilder valueLoader)
@@ -403,8 +379,8 @@ namespace ZDebug.Compiler
             stack.StoreElement(
                 indexLoader: () =>
                 {
-                    il.Emit(OpCodes.Ldloc, spRef);
-                    il.Emit(OpCodes.Ldind_I4);
+                    spRef.Load();
+                    spRef.LoadIndirectValue();
                 },
                 valueLoader: valueLoader);
         }
@@ -423,8 +399,8 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(int index)
         {
-            il.Emit(OpCodes.Ldloc, localRefs[index]);
-            il.Emit(OpCodes.Ldind_U2);
+            localRefs[index].Load();
+            localRefs[index].LoadIndirectValue();
         }
 
         /// <summary>
@@ -456,9 +432,9 @@ namespace ZDebug.Compiler
 
         private void StoreLocalVariable(int index, CodeBuilder valueLoader)
         {
-            il.Emit(OpCodes.Ldloc, localRefs[index]);
+            localRefs[index].Load();
             valueLoader();
-            il.Emit(OpCodes.Stind_I2);
+            localRefs[index].StoreIndirectValue();
         }
 
         private void StoreLocalVariable(ILocal index, ILocal value)

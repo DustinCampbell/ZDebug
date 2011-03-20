@@ -34,10 +34,10 @@ namespace ZDebug.Compiler
         private bool usesStack;
 
         private IArrayLocal stack;
-        private LocalBuilder spRef;
+        private IRefLocal spRef;
 
         private IArrayLocal locals;
-        private LocalBuilder[] localRefs;
+        private IRefLocal[] localRefs;
 
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
@@ -125,11 +125,10 @@ namespace ZDebug.Compiler
 
                     // sp...
                     var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
-                    var int32ByRefType = typeof(int).MakeByRefType();
-                    this.spRef = ilGen.DeclareLocal(int32ByRefType);
+                    this.spRef = il.NewRefLocal<int>();
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldflda, spField);
-                    il.Emit(OpCodes.Stloc, this.spRef);
+                    spRef.Store();
 
                     break;
                 }
@@ -165,8 +164,7 @@ namespace ZDebug.Compiler
                     }
                 }
 
-                var ushortByRefType = typeof(ushort).MakeByRefType();
-                this.localRefs = new LocalBuilder[localCount];
+                this.localRefs = new IRefLocal[localCount];
 
                 // Try the code below to see if it's more efficent than loading the field once for each local.
                 il.LoadArg(0);
@@ -179,10 +177,10 @@ namespace ZDebug.Compiler
 
                 for (int i = 0; i < localCount; i++)
                 {
-                    this.localRefs[i] = ilGen.DeclareLocal(ushortByRefType);
+                    this.localRefs[i] = il.NewRefLocal<ushort>();
                     il.Load(i);
                     il.Emit(OpCodes.Ldelema, typeof(ushort));
-                    il.Emit(OpCodes.Stloc, this.localRefs[i]);
+                    this.localRefs[i].Store();
                 }
             }
 

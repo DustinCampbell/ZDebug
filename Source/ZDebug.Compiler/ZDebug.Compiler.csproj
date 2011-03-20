@@ -52,6 +52,7 @@
     <Compile Include="Generate\ILBuilder.ConvertFunctions.cs" />
     <Compile Include="Generate\ILBuilder.MathFunctions.cs" />
     <Compile Include="Generate\ILocal.cs" />
+    <Compile Include="Generate\IRefLocal.cs" />
     <Compile Include="InstructionExtensions.cs" />
     <Compile Include="Profiling\IZMachineProfiler.cs" />
     <Compile Include="Profiling\RoutineCompilationStatistics.cs" />
