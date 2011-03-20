@@ -1,5 +1,4 @@
 ﻿using System.Windows.Controls;
-using ZDebug.Core.Execution;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -73,7 +72,7 @@ namespace ZDebug.UI.ViewModel
             Update(storyOpened: true);
         }
 
-        protected internal override void Initialize()
+        protected override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

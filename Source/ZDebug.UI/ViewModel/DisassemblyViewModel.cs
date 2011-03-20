@@ -7,6 +7,7 @@ using System.Windows.Media;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Routines;
+using ZDebug.UI.Collections;
 using ZDebug.UI.Controls;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -388,7 +389,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected internal override void Initialize()
+        protected override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

@@ -5,7 +5,7 @@
 
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Views/Images.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/ZDebug.UI.Core;component/Resources/Images.xaml"/>
                 <ResourceDictionary Source="Views/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -1,6 +1,6 @@
 ﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
+        xmlns:b="clr-namespace:ZDebug.UI.Behaviors;assembly=ZDebug.UI.Core"
         WindowStartupLocation="CenterOwner"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
@@ -39,6 +39,6 @@
                 HorizontalAlignment="Center"
                 IsDefault="True"
                 IsCancel="True"
-                vm:DialogBehaviors.IsAccept="True"/>
+                b:DialogBehaviors.IsAccept="True"/>
     </Grid>
 </Window>

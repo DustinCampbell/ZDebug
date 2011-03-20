@@ -12,7 +12,7 @@ using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;
 using ZDebug.Core.Routines;
-using ZDebug.UI.Utilities;
+using ZDebug.Debugger.Utilities;
 
 namespace ZDebug.UI.Services
 {
@@ -88,7 +88,7 @@ namespace ZDebug.UI.Services
 
         private static void LoadSettings(Story story)
         {
-            var xml = Storage.RestoreStorySettings(story);
+            var xml = GameStorage.RestoreStorySettings(story);
 
             var bpsElem = xml.Element("breakpoints");
             if (bpsElem != null)
@@ -149,7 +149,7 @@ namespace ZDebug.UI.Services
                             new XAttribute("address", r.Address),
                             new XAttribute("name", r.Name)))));
 
-            Storage.SaveStorySettings(story, xml);
+            GameStorage.SaveStorySettings(story, xml);
         }
 
         public static void CloseStory()

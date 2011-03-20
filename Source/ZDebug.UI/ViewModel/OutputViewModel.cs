@@ -31,7 +31,7 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
-        protected internal override void Initialize()
+        protected override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

@@ -115,10 +115,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Resource Include="Views\Images.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Resource>
     <Page Include="Views\MainWindowView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -127,7 +123,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\AutoDisableImage.cs" />
     <Compile Include="Controls\ExceptionToolTip.cs" />
     <Compile Include="Services\BreakpointEventArgs.cs" />
     <Compile Include="Services\DebuggerState.cs" />
@@ -145,14 +140,11 @@
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
     <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
-    <Compile Include="Utilities\BulkObservableCollection`1.cs" />
     <Compile Include="Utilities\DependencyObjectExtensions.cs" />
     <Compile Include="Utilities\FrameworkElementExtensions.cs" />
     <Compile Include="Utilities\ItemsControlExtensions.cs" />
-    <Compile Include="Utilities\Storage.cs" />
-    <Compile Include="Utilities\Storage.WindowPlacement.cs" />
+    <Compile Include="Utilities\GameStorage.cs" />
     <Compile Include="ViewModel\CallStackViewModel.cs" />
-    <Compile Include="ViewModel\DialogBehaviors.cs" />
     <Compile Include="ViewModel\DisassemblyAddressGapLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyLineBehaviors.cs" />
@@ -181,9 +173,6 @@
     <Compile Include="ViewModel\ObjectViewModel.cs" />
     <Compile Include="ViewModel\PropertyViewModel.cs" />
     <Compile Include="ViewModel\VariableViewModel.cs" />
-    <Compile Include="ViewModel\ViewModelWithView.cs" />
-    <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
-    <Compile Include="ViewModel\ViewModelWithViewBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -209,7 +198,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <Compile Include="ViewModel\ViewModelBase.PropertyChanged.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZDebug.Core\ZDebug.Core.csproj">
@@ -220,35 +208,10 @@
       <Project>{FC9F549C-C2F5-4C80-A899-D08610181448}</Project>
       <Name>ZDebug.IO</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\blocked.png" />
-    <Resource Include="Images\breakpoint.png" />
-    <Resource Include="Images\check.png" />
-    <Resource Include="Images\error.png" />
-    <Resource Include="Images\go.png" />
-    <Resource Include="Images\info.png" />
-    <Resource Include="Images\info_big.png" />
-    <Resource Include="Images\ip_arrow.png" />
-    <Resource Include="Images\magnify.png" />
-    <Resource Include="Images\open.png" />
-    <Resource Include="Images\paused.png" />
-    <Resource Include="Images\play.png" />
-    <Resource Include="Images\refresh.png" />
-    <Resource Include="Images\reset.png" />
-    <Resource Include="Images\step.png" />
-    <Resource Include="Images\stopped.png" />
-    <Resource Include="Images\warning.png" />
-    <Resource Include="Images\watch.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\script.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\stop.png" />
+    <ProjectReference Include="..\ZDebug.UI.Core\ZDebug.UI.Core.csproj">
+      <Project>{36EDDC65-AC05-450E-9029-D7297614A8E3}</Project>
+      <Name>ZDebug.UI.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

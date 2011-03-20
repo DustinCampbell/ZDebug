@@ -7,7 +7,6 @@ using AvalonDock;
 using Microsoft.Win32;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
-using System.Windows.Threading;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -248,7 +247,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("Title");
         }
 
-        protected internal override void Initialize()
+        protected override void Initialize()
         {
             DebuggerService.StoryOpened += StoryOpened;
             DebuggerService.StoryClosed += StoryClosed;

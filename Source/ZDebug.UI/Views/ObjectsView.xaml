@@ -1,7 +1,7 @@
 ﻿<UserControl
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:vm="clr-namespace:ZDebug.UI.ViewModel"
+    xmlns:vm="clr-namespace:ZDebug.UI.ViewModel;assembly=ZDebug.UI.Core"
     Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
     vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 

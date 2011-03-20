@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
-using ZDebug.Core.Execution;
+using ZDebug.UI.Collections;
 using ZDebug.UI.Services;
-using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -67,7 +66,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected internal override void Initialize()
+        protected override void Initialize()
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;
