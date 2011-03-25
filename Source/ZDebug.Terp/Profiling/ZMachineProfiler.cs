@@ -144,10 +144,7 @@ namespace ZDebug.Terp.Profiling
         {
             get
             {
-                foreach (var stat in allStatistics)
-                {
-                    yield return stat;
-                }
+                return allStatistics.ToList();
             }
         }
 

@@ -1,17 +1,19 @@
-﻿<Window x:Class="ZDebug.Terp.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:ZDebug.UI.Controls;assembly=ZDebug.UI.Core"
+        xmlns:vm="clr-namespace:ZDebug.UI.ViewModel;assembly=ZDebug.UI.Core"
         xmlns:local="clr-namespace:ZDebug.Terp"
         xmlns:p="clr-namespace:ZDebug.Terp.Profiling"
-        xmlns:c="clr-namespace:ZDebug.UI.Controls;assembly=ZDebug.UI.Core"
-        Title="Z-Terp" Height="960" Width="1280"
-        Closing="Window_Closing"
-        FontFamily="Calibri">
+        Title="{Binding Title}"
+        ResizeMode="CanResizeWithGrip"
+        Height="960"
+        Width="1280"
+        vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 
     <Window.Resources>
         <local:TimeSpanToStringValueConverter x:Key="timeSpanToString"/>
     </Window.Resources>
-
+    
     <Grid>
         <Grid.Resources>
             <Style TargetType="{x:Type c:AutoDisableImage}">
@@ -19,7 +21,7 @@
                 <Setter Property="Width" Value="16"/>
             </Style>
         </Grid.Resources>
-
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
             <RowDefinition Height="Auto"/>
@@ -29,37 +31,37 @@
 
         <Menu Grid.Row="0">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open Story File..." Click="Open_Click">
+                <MenuItem Command="{Binding OpenStoryCommand}" Header="_Open Story File...">
                     <MenuItem.Icon>
                         <c:AutoDisableImage Source="{StaticResource openImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="_Open Game Script..." Click="OpenScript_Click">
+                <!--<MenuItem Header="_Open Game Script..." Click="OpenScript_Click">
                     <MenuItem.Icon>
                         <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <Separator/>
-                <MenuItem Header="E_xit" Click="Exit_Click"/>
+                <Separator/>-->
+                <MenuItem Command="{Binding ExitCommand}" Header="E_xit"/>
             </MenuItem>
         </Menu>
 
         <ToolBarTray Grid.Row="1" RenderOptions.BitmapScalingMode="NearestNeighbor">
             <ToolBar>
-                <Button ToolTip="Open a Z-Code File" Click="Open_Click">
+                <Button Command="{Binding OpenStoryCommand}" ToolTip="Open a Z-Code File">
                     <c:AutoDisableImage Source="{StaticResource openImage}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Open a Game Script" Click="OpenScript_Click">
+                <!--<Button ToolTip="Open a Game Script" Click="OpenScript_Click">
                     <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                 </Button>
                 <Separator/>
                 <Button ToolTip="Stop" Click="Stop_Click">
                     <c:AutoDisableImage Source="{StaticResource stopImage}"/>
                 </Button>
-                <Separator/>
-                <Button Name="aboutGameButton" IsEnabled="False"  ToolTip="About Game" Click="AboutGame_Click">
+                <Separator/>-->
+                <Button Command="{Binding AboutGameCommand}" ToolTip="About Game">
                     <c:AutoDisableImage Source="{StaticResource infoBigImage}"/>
                 </Button>
             </ToolBar>
@@ -73,7 +75,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="0" Name="windowContainer">
+                <Grid Grid.Column="0" Name="screenContent">
 
                 </Grid>
 
@@ -184,14 +186,15 @@
 
             <TextBlock Grid.Column="0" VerticalAlignment="Center">
                 <Run Text="Compile Time:" Foreground="Gray"/>
-                <Run Name="elapsedTimeText" FontWeight="Bold"/>
+                <Run FontWeight="Bold" Text="{Binding CompileTime.Seconds, Mode=OneWay, StringFormat=\{0:#\,0\}\.}"/><Run
+                     FontWeight="Bold" Text="{Binding CompileTime.Milliseconds, Mode=OneWay, StringFormat=\{0:000\}}"/>
             </TextBlock>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Separator/>
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="# Routines:" Foreground="Gray"/>
-                    <Run Name="routinesCompiled" FontWeight="Bold"/>
+                    <Run FontWeight="Bold" Text="{Binding RoutinesCompiled, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                 </TextBlock>
             </StackPanel>
 
@@ -199,7 +202,11 @@
                 <Separator/>
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="Z-Code / IL:" Foreground="Gray"/>
-                    <Run Name="zcodeToILRatio" FontWeight="Bold"/>
+                    <Run FontWeight="Bold" Text="1 / "/><Run
+                         FontWeight="Bold" Text="{Binding ZCodeToILRatio, Mode=OneWay, StringFormat=\{0:0\.###\}}"/><Run
+                         FontWeight="Bold" Text=" ("/><Run
+                         FontWeight="Bold" Text="{Binding ZCodeToILRatioPercent, Mode=OneWay, StringFormat=\{0:0.###\}}"/><Run
+                         FontWeight="Bold" Text="%)"/>
                 </TextBlock>
             </StackPanel>
 
@@ -207,7 +214,9 @@
                 <Separator/>
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="Executed (R/I):" Foreground="Gray"/>
-                    <Run Name="routinesAndInstructionsExecuted" FontWeight="Bold"/>
+                    <Run FontWeight="Bold" Text="{Binding RoutinesExecuted, Mode=OneWay, StringFormat=\{0:#\,0\}}"/><Run
+                         FontWeight="Bold" Text=" / "/><Run
+                         FontWeight="Bold" Text="{Binding InstructionsExecuted, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                 </TextBlock>
             </StackPanel>
 
@@ -215,7 +224,9 @@
                 <Separator/>
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="Calculated Variables (L/S):" Foreground="Gray"/>
-                    <Run Name="calculatedVariables" FontWeight="Bold"/>
+                    <Run FontWeight="Bold" Text="{Binding CalculatedVariableLoads, Mode=OneWay, StringFormat=\{0:#\,0\}}"/><Run
+                         FontWeight="Bold" Text=" / "/><Run
+                         FontWeight="Bold" Text="{Binding CalculatedVariableStores, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                 </TextBlock>
             </StackPanel>
 
@@ -223,7 +234,9 @@
                 <Separator/>
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="Calls (D/C):" Foreground="Gray"/>
-                    <Run Name="calls" FontWeight="Bold"/>
+                    <Run FontWeight="Bold" Text="{Binding DirectCalls, Mode=OneWay, StringFormat=\{0:#\,0\}}"/><Run
+                         FontWeight="Bold" Text=" / "/><Run
+                         FontWeight="Bold" Text="{Binding CalculatedCalls, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                 </TextBlock>
             </StackPanel>
         </StatusBar>

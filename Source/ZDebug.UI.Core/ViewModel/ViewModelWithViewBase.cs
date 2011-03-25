@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace ZDebug.UI.ViewModel
 {
@@ -22,6 +24,16 @@ namespace ZDebug.UI.ViewModel
         protected TView View
         {
             get { return view; }
+        }
+
+        protected void Dispatch(Action method, DispatcherPriority priority)
+        {
+            this.View.Dispatcher.BeginInvoke(method, priority);
+        }
+
+        protected void Dispatch(Action method)
+        {
+            Dispatch(method, DispatcherPriority.Normal);
         }
 
         protected internal virtual void Initialize()
