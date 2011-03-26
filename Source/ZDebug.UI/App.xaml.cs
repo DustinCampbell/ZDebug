@@ -23,6 +23,9 @@ namespace ZDebug.UI
 
             this.container = new CompositionContainer(catelog);
 
+            // retrieve StorageService to allow it to be connected properly.
+            container.GetExportedValue<StorageService>();
+
             var mainWindowViewModel = container.GetExportedValue<MainWindowViewModel>();
 
             this.MainWindow = mainWindowViewModel.CreateView();

@@ -7,7 +7,7 @@ using System.Xml.Linq;
 namespace ZDebug.UI.Services
 {
     [Export]
-    internal class GameScriptService : IService, IPersistable
+    public class GameScriptService : IService, IPersistable
     {
         private readonly StoryService storyService;
         private readonly List<string> commands = new List<string>();
@@ -68,7 +68,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public void Load(XElement xml)
+        void IPersistable.Load(XElement xml)
         {
             commands.Clear();
 
@@ -82,7 +82,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public XElement Store()
+        XElement IPersistable.Store()
         {
             return new XElement("gamescript",
                 commands.Select(c => new XElement("command", c)));

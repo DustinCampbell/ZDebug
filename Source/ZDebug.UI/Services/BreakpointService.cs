@@ -97,7 +97,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public void Load(XElement xml)
+        void IPersistable.Load(XElement xml)
         {
             breakpoints.Clear();
 
@@ -114,7 +114,7 @@ namespace ZDebug.UI.Services
             OnReset();
         }
 
-        public XElement Store()
+        XElement IPersistable.Store()
         {
             return new XElement("breakpoints",
                 breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b))));

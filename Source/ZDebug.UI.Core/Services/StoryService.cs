@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Xml.Linq;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
 
 namespace ZDebug.UI.Services
 {
     [Export]
-    public class StoryService : IService
+    public class StoryService : IService, IPersistable
     {
         private string fileName;
         private Story story;
@@ -126,5 +127,17 @@ namespace ZDebug.UI.Services
         public event EventHandler<StoryOpenedEventArgs> StoryOpened;
         public event EventHandler<StoryClosingEventArgs> StoryClosing;
         public event EventHandler<StoryClosedEventArgs> StoryClosed;
+
+        void IPersistable.Load(XElement xml)
+        {
+        }
+
+        XElement IPersistable.Store()
+        {
+            return new XElement("story",
+                new XAttribute("serial", story.SerialNumber),
+                new XAttribute("release", story.ReleaseNumber),
+                new XAttribute("version", story.Version));
+        }
     }
 }

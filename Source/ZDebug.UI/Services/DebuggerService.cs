@@ -3,12 +3,9 @@ using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Xml.Linq;
-using ZDebug.Core;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Interpreter;
-using ZDebug.Debugger.Utilities;
 
 namespace ZDebug.UI.Services
 {
@@ -17,7 +14,6 @@ namespace ZDebug.UI.Services
     {
         private readonly StoryService storyService;
         private readonly BreakpointService breakpointService;
-        private readonly GameScriptService gameScriptService;
         private readonly RoutineService routineService;
 
         private DebuggerState state;
@@ -36,16 +32,14 @@ namespace ZDebug.UI.Services
         private DebuggerService(
             StoryService storyService,
             BreakpointService breakpointService,
-            GameScriptService gameScriptService,
             RoutineService routineService)
         {
             this.storyService = storyService;
-            this.breakpointService = breakpointService;
-            this.gameScriptService = gameScriptService;
-            this.routineService = routineService;
-
             this.storyService.StoryOpened += StoryService_StoryOpened;
             this.storyService.StoryClosing += StoryService_StoryClosing;
+
+            this.breakpointService = breakpointService;
+            this.routineService = routineService;
         }
 
         private void ChangeState(DebuggerState newState)
@@ -97,34 +91,8 @@ namespace ZDebug.UI.Services
             return newPC;
         }
 
-        private void LoadSettings(Story story)
-        {
-            var xml = GameStorage.RestoreStorySettings(story);
-
-            breakpointService.Load(xml);
-            gameScriptService.Load(xml);
-            routineService.Load(xml);
-        }
-
-        private void SaveSettings(Story story)
-        {
-            var xml =
-                new XElement("settings",
-                    new XElement("story",
-                        new XAttribute("serial", story.SerialNumber),
-                        new XAttribute("release", story.ReleaseNumber),
-                        new XAttribute("version", story.Version)),
-                    breakpointService.Store(),
-                    gameScriptService.Store(),
-                    routineService.Store());
-
-            GameStorage.SaveStorySettings(story, xml);
-        }
-
         private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
-            SaveSettings(e.Story);
-
             interpreter = null;
             machine = null;
             reader = null;
@@ -146,8 +114,6 @@ namespace ZDebug.UI.Services
             e.Story.RegisterInterpreter(interpreter);
             machine = new InterpretedZMachine(e.Story);
             reader = new InstructionReader(machine.PC, e.Story.Memory);
-
-            LoadSettings(e.Story);
 
             machine.SetRandomSeed(42);
             machine.Quit += Machine_Quit;
@@ -186,7 +152,10 @@ namespace ZDebug.UI.Services
 
         public bool CanStartDebugging
         {
-            get { return state == DebuggerState.Stopped; }
+            get
+            {
+                return state == DebuggerState.Stopped;
+            }
         }
 
         private void RunModePump()
@@ -230,7 +199,10 @@ namespace ZDebug.UI.Services
 
         public bool CanStopDebugging
         {
-            get { return state == DebuggerState.Running; }
+            get
+            {
+                return state == DebuggerState.Running;
+            }
         }
 
         public void StopDebugging()
@@ -258,7 +230,11 @@ namespace ZDebug.UI.Services
 
         public bool CanResetSession
         {
-            get { return state != DebuggerState.Running && state != DebuggerState.Unavailable && hasStepped; }
+            get
+            {
+                return state != DebuggerState.Running
+                    && state != DebuggerState.Unavailable && hasStepped;
+            }
         }
 
         public void ResetSession()

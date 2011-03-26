@@ -63,7 +63,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public void Load(XElement xml)
+        void IPersistable.Load(XElement xml)
         {
             var routinesElem = xml.Element("knownroutines");
             if (routinesElem != null)
@@ -88,7 +88,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public XElement Store()
+        XElement IPersistable.Store()
         {
             return new XElement("knownroutines",
                 routineTable.Select(r => new XElement("routine",

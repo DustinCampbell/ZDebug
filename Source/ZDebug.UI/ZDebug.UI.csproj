@@ -131,7 +131,6 @@
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextSource.cs" />
     <Compile Include="Controls\InstructionTextDisplayElement.InstructionTextBuilder.cs" />
     <Compile Include="Services\DebuggerService.cs" />
-    <Compile Include="Services\GameScriptService.cs" />
     <Compile Include="Services\Interpreter.cs" />
     <Compile Include="Services\MachineCreatedEventArgs.cs" />
     <Compile Include="Services\MachineDestroyedEventArgs.cs" />
@@ -142,7 +141,7 @@
     <Compile Include="Services\ResetEventArgs.cs" />
     <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
     <Compile Include="Services\RoutineService.cs" />
-    <Compile Include="Utilities\GameStorage.cs" />
+    <Compile Include="Services\StorageService.cs" />
     <Compile Include="ViewModel\CallStackViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyAddressGapLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyInstructionLineViewModel.cs" />
