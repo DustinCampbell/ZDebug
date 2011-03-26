@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Windows.Controls;
 using ZDebug.Core.Basics;
 using ZDebug.UI.Collections;
@@ -8,6 +9,7 @@ using ZDebug.UI.Services;
 namespace ZDebug.UI.ViewModel
 {
     // TODO: This is officially broken and needs updating.
+    [Export]
     internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly BulkObservableCollection<MemoryLineViewModel> lines;
@@ -109,7 +111,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

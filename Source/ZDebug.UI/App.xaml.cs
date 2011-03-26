@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.ComponentModel.Composition.Hosting;
+using System.Windows;
+using ZDebug.UI.Services;
 using ZDebug.UI.ViewModel;
 
 namespace ZDebug.UI
@@ -7,7 +9,15 @@ namespace ZDebug.UI
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            this.MainWindow = ViewModelWithView<MainWindowViewModel, Window>.Create();
+            var catelog = new AggregateCatalog(
+                new AssemblyCatalog(typeof(App).Assembly),
+                new AssemblyCatalog(typeof(StoryService).Assembly));
+
+            var container = new CompositionContainer(catelog);
+
+            var mainWindowViewModel = container.GetExportedValue<MainWindowViewModel>();
+
+            this.MainWindow = mainWindowViewModel.CreateView();
             this.MainWindow.Show();
         }
     }

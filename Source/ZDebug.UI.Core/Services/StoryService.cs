@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
 
 namespace ZDebug.UI.Services
 {
+    [Export]
     public class StoryService
     {
         private Story story;

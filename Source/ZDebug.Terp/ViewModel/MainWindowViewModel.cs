@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using System.Media;
@@ -17,8 +18,12 @@ using ZDebug.UI.ViewModel;
 
 namespace ZDebug.Terp.ViewModel
 {
+    [Export]
     internal class MainWindowViewModel : ViewModelWithViewBase<Window>, ISoundEngine
     {
+        private readonly StoryService storyService;
+        private readonly ScreenViewModel screenViewModel;
+
         private IScreen screen;
         private CompiledZMachine zmachine;
         private Thread zmachineThread;
@@ -36,9 +41,15 @@ namespace ZDebug.Terp.ViewModel
         private int directCalls;
         private int calculatedCalls;
 
-        public MainWindowViewModel()
+        [ImportingConstructor]
+        public MainWindowViewModel(
+            StoryService storyService,
+            ScreenViewModel screenViewModel)
             : base("MainWindowView")
         {
+            this.storyService = storyService;
+            this.screenViewModel = screenViewModel;
+
             this.OpenStoryCommand = RegisterCommand(
                 text: "Open",
                 name: "Open",
@@ -96,7 +107,7 @@ namespace ZDebug.Terp.ViewModel
 
             if (dialog.ShowDialog(this.View) == true)
             {
-                Services.StoryService.OpenStory(dialog.FileName);
+                storyService.OpenStory(dialog.FileName);
             }
 
             this.updateTimer.Start();
@@ -114,15 +125,14 @@ namespace ZDebug.Terp.ViewModel
 
         private bool AboutGameCanExecute()
         {
-            return Services.StoryService.HasGameInfo;
+            return storyService.HasGameInfo;
         }
 
         private void AboutGameExecuted()
         {
-            var gameInfoDialog = ViewModelWithView<GameInfoViewModel, Window>.Create();
-            var viewModel = (GameInfoViewModel)gameInfoDialog.DataContext;
-            var gameInfo = Services.StoryService.GameInfo;
-            viewModel.SetGameinfo(gameInfo);
+            var gameInfoDialogViewModel = new GameInfoViewModel();
+            var gameInfoDialog = gameInfoDialogViewModel.CreateView();
+            gameInfoDialogViewModel.SetGameinfo(storyService.GameInfo);
             gameInfoDialog.Owner = this.View;
             gameInfoDialog.ShowDialog();
         }
@@ -373,17 +383,17 @@ namespace ZDebug.Terp.ViewModel
             SystemSounds.Beep.Play();
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(Window view)
         {
-            Services.StoryService.StoryOpened += StoryService_StoryOpened;
-            Services.StoryService.StoryClosing += StoryService_StoryClosing;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
 
             this.View.Closing += View_Closing;
 
             var screenContent = this.View.FindName<Grid>("screenContent");
-            var screenView = ViewModelWithView<ScreenViewModel, UserControl>.Create();
+            var screenView = screenViewModel.CreateView();
             screenContent.Children.Add(screenView);
-            this.screen = screenView.DataContext as IScreen;
+            this.screen = screenViewModel;
 
             this.updateTimer = new DispatcherTimer(
                 interval: TimeSpan.FromMilliseconds(100),

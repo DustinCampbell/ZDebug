@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Media;
 using System.Windows;
@@ -13,6 +14,7 @@ using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen, ISoundEngine
     {
         private ZWindowManager windowManager;
@@ -31,7 +33,7 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

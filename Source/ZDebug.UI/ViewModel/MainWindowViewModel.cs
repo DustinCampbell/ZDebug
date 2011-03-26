@@ -1,7 +1,7 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using AvalonDock;
 using Microsoft.Win32;
@@ -11,11 +11,42 @@ using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal class MainWindowViewModel : ViewModelWithViewBase<Window>
     {
-        public MainWindowViewModel()
+        private readonly StoryInfoViewModel storyInfoViewModel;
+        private readonly MemoryMapViewModel memoryMapViewModel;
+        private readonly GlobalsViewModel globalsViewModel;
+        private readonly DisassemblyViewModel disassemblyViewModel;
+        private readonly ObjectsViewModel objectsViewModel;
+        private readonly LocalsViewModel localsViewModel;
+        private readonly CallStackViewModel callStackViewModel;
+        private readonly OutputViewModel outputViewModel;
+        private readonly MessageLogViewModel messageLogViewModel;
+
+        [ImportingConstructor]
+        public MainWindowViewModel(
+            StoryInfoViewModel storyInfoViewModel,
+            MemoryMapViewModel memoryMapViewModel,
+            GlobalsViewModel globalsViewModel,
+            DisassemblyViewModel disassemblyViewModel,
+            ObjectsViewModel objectsViewModel,
+            LocalsViewModel localsViewModel,
+            CallStackViewModel callStackViewModel,
+            OutputViewModel outputViewModel,
+            MessageLogViewModel messageLogViewModel)
             : base("MainWindowView")
         {
+            this.storyInfoViewModel = storyInfoViewModel;
+            this.memoryMapViewModel = memoryMapViewModel;
+            this.globalsViewModel = globalsViewModel;
+            this.disassemblyViewModel = disassemblyViewModel;
+            this.objectsViewModel = objectsViewModel;
+            this.localsViewModel = localsViewModel;
+            this.callStackViewModel = callStackViewModel;
+            this.outputViewModel = outputViewModel;
+            this.messageLogViewModel = messageLogViewModel;
+
             this.OpenStoryCommand = RegisterCommand(
                 text: "Open",
                 name: "Open",
@@ -113,12 +144,12 @@ namespace ZDebug.UI.ViewModel
 
         private void EditGameScriptExecuted()
         {
-            var gameScriptDialog = ViewModelWithView<GameScriptDialogViewModel, Window>.Create();
+            var gameScriptDialogViewModel = new GameScriptDialogViewModel();
+            var gameScriptDialog = gameScriptDialogViewModel.CreateView();
             gameScriptDialog.Owner = this.View;
             if (gameScriptDialog.ShowDialog() == true)
             {
-                var viewModel = (GameScriptDialogViewModel)gameScriptDialog.DataContext;
-                DebuggerService.SetGameScriptCommands(viewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                DebuggerService.SetGameScriptCommands(gameScriptDialogViewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
         }
 
@@ -130,12 +161,12 @@ namespace ZDebug.UI.ViewModel
 
         private void GoToAddressExecuted()
         {
-            var dialog = ViewModelWithView<GoToAddressViewModel, Window>.Create();
+            var goToAddressDialogViewModel = new GoToAddressViewModel();
+            var dialog = goToAddressDialogViewModel.CreateView();
             dialog.Owner = this.View;
             if (dialog.ShowDialog() == true)
             {
-                var viewModel = (GoToAddressViewModel)dialog.DataContext;
-                DebuggerService.RequestNavigation(viewModel.Address);
+                DebuggerService.RequestNavigation(goToAddressDialogViewModel.Address);
             }
         }
 
@@ -207,10 +238,9 @@ namespace ZDebug.UI.ViewModel
 
         private void AboutGameExecuted()
         {
-            var gameInfoDialog = ViewModelWithView<GameInfoViewModel, Window>.Create();
-            var viewModel = (GameInfoViewModel)gameInfoDialog.DataContext;
-            var gameInfo = DebuggerService.GameInfo;
-            viewModel.SetGameinfo(gameInfo);
+            var gameInfoDialogViewModel = new GameInfoViewModel();
+            var gameInfoDialog = gameInfoDialogViewModel.CreateView();
+            gameInfoDialogViewModel.SetGameinfo(DebuggerService.GameInfo);
             gameInfoDialog.Owner = this.View;
             gameInfoDialog.ShowDialog();
         }
@@ -251,40 +281,40 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("Title");
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(Window view)
         {
             DebuggerService.StoryOpened += StoryOpened;
             DebuggerService.StoryClosed += StoryClosed;
 
             var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
-            storyInfoContent.Content = ViewModelWithView<StoryInfoViewModel, UserControl>.Create();
+            storyInfoContent.Content = this.storyInfoViewModel.CreateView();
 
             var memoryMapContent = this.View.FindName<DockableContent>("memoryMapContent");
-            memoryMapContent.Content = ViewModelWithView<MemoryMapViewModel, UserControl>.Create();
+            memoryMapContent.Content = this.memoryMapViewModel.CreateView();
 
             var globalsContent = this.View.FindName<DockableContent>("globalsContent");
-            globalsContent.Content = ViewModelWithView<GlobalsViewModel, UserControl>.Create();
+            globalsContent.Content = this.globalsViewModel.CreateView();
 
             var disassemblyContent = this.View.FindName<DocumentContent>("disassemblyContent");
-            disassemblyContent.Content = ViewModelWithView<DisassemblyViewModel, UserControl>.Create();
+            disassemblyContent.Content = this.disassemblyViewModel.CreateView();
 
             var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
-            objectsContent.Content = ViewModelWithView<ObjectsViewModel, UserControl>.Create();
+            objectsContent.Content = this.objectsViewModel.CreateView();
 
             //var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             //memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
             var localsContent = this.View.FindName<DockableContent>("localsContent");
-            localsContent.Content = ViewModelWithView<LocalsViewModel, UserControl>.Create();
+            localsContent.Content = this.localsViewModel.CreateView();
 
             var callStackContent = this.View.FindName<DockableContent>("callStackContent");
-            callStackContent.Content = ViewModelWithView<CallStackViewModel, UserControl>.Create();
+            callStackContent.Content = this.callStackViewModel.CreateView();
 
             var outputContent = this.View.FindName<DockableContent>("outputContent");
-            outputContent.Content = ViewModelWithView<OutputViewModel, UserControl>.Create();
+            outputContent.Content = this.outputViewModel.CreateView();
 
             var messagesContent = this.View.FindName<DockableContent>("messagesContent");
-            messagesContent.Content = ViewModelWithView<MessageLogViewModel, UserControl>.Create();
+            messagesContent.Content = this.messageLogViewModel.CreateView();
 
             this.View.SourceInitialized += (s, e) =>
             {

@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.Composition;
 using System.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class EditRoutineNameViewModel : ViewModelWithViewBase<Window>
     {
         private string name;
@@ -25,7 +23,7 @@ namespace ZDebug.UI.ViewModel
             get { return name; }
             set
             {
-            	name = value;
+                name = value;
                 PropertyChanged("AcceptableName");
             }
         }

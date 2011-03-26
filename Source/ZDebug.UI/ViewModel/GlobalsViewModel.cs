@@ -1,8 +1,10 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class GlobalsViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly IndexedVariableViewModel[] globals;
@@ -72,7 +74,7 @@ namespace ZDebug.UI.ViewModel
             Update(storyOpened: true);
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

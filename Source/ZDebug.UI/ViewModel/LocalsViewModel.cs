@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Windows.Controls;
 using ZDebug.Core.Extensions;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly IndexedVariableViewModel[] locals;
@@ -112,7 +114,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

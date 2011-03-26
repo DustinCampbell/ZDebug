@@ -1,8 +1,10 @@
-﻿using System.Windows;
+﻿using System.ComponentModel.Composition;
+using System.Windows;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class GameScriptDialogViewModel : ViewModelWithViewBase<Window>
     {
         private string commands;

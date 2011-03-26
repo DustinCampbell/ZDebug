@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
+using System.ComponentModel.Composition;
 using System.Globalization;
+using System.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class GoToAddressViewModel : ViewModelWithViewBase<Window>
     {
         private int address;

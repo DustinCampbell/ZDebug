@@ -1,9 +1,11 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using ZDebug.UI.Collections;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class CallStackViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly BulkObservableCollection<StackFrameViewModel> stackFrames;
@@ -66,7 +68,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

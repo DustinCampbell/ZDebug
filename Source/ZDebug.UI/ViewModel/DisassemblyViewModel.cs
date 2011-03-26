@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,7 @@ using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class DisassemblyViewModel : ViewModelWithViewBase<UserControl>
     {
         private struct AddressAndIndex
@@ -62,10 +64,9 @@ namespace ZDebug.UI.ViewModel
                 return;
             }
 
-            var dialog = ViewModelWithView<EditRoutineNameViewModel, Window>.Create();
-
-            var dialogViewModel = (EditRoutineNameViewModel)dialog.DataContext;
+            var dialogViewModel = new EditRoutineNameViewModel();
             dialogViewModel.Name = routineViewModel.Name;
+            var dialog = dialogViewModel.CreateView();
 
             dialog.Owner = Application.Current.MainWindow;
             if (dialog.ShowDialog() == true)
@@ -389,7 +390,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

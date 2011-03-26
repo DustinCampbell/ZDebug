@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using System.Windows.Input;
 using ZDebug.UI.Collections;
 using ZDebug.UI.Extensions;
@@ -6,6 +7,7 @@ using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class ObjectsViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly BulkObservableCollection<ObjectViewModel> objects;
@@ -59,7 +61,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

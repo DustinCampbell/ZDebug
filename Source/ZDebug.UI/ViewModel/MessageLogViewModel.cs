@@ -1,10 +1,12 @@
-﻿using System.Windows.Controls;
+﻿using System.ComponentModel.Composition;
+using System.Windows.Controls;
 using ZDebug.Core.Execution;
 using ZDebug.UI.Collections;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
 {
+    [Export]
     internal sealed class MessageLogViewModel : ViewModelWithViewBase<UserControl>, IMessageLog
     {
         private readonly BulkObservableCollection<MessageViewModel> messages;
@@ -45,7 +47,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             DebuggerService.StoryOpened += DebuggerService_StoryOpened;
             DebuggerService.StoryClosed += DebuggerService_StoryClosed;

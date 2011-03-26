@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
@@ -13,12 +14,6 @@ namespace ZDebug.UI.ViewModel
         protected ViewModelWithViewBase(string viewName)
         {
             this.viewName = viewName;
-        }
-
-        internal void SetView(TView view)
-        {
-            this.view = view;
-            this.view.DataContext = this;
         }
 
         protected TView View
@@ -36,14 +31,27 @@ namespace ZDebug.UI.ViewModel
             Dispatch(method, DispatcherPriority.Normal);
         }
 
-        protected internal virtual void Initialize()
+        protected virtual void ViewCreated(TView view)
         {
             // do nothing...
         }
 
-        internal string ViewName
+        private string GetViewUriString()
         {
-            get { return viewName; }
+            return string.Format("/{0};component/Views/{1}.xaml",
+                this.GetType().Assembly.GetName().Name,
+                viewName);
+        }
+
+        public TView CreateView()
+        {
+            var uri = new Uri(GetViewUriString(), UriKind.Relative);
+            this.view = Application.LoadComponent(uri) as TView;
+            this.view.DataContext = this;
+
+            ViewCreated(this.view);
+
+            return this.view;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,8 +14,11 @@ using ZDebug.UI.ViewModel;
 
 namespace ZDebug.Terp.ViewModel
 {
+    [Export]
     internal class ScreenViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
+        private readonly StoryService storyService;
+
         private ZWindowManager windowManager;
         private Grid windowContainer;
 
@@ -26,14 +30,18 @@ namespace ZDebug.Terp.ViewModel
         private int currStatusHeight;
         private int machStatusHeight;
 
-        public ScreenViewModel()
+        [ImportingConstructor]
+        public ScreenViewModel(
+            StoryService storyService)
             : base("ScreenView")
         {
-            Services.StoryService.StoryOpened += StoryService_StoryOpened;
-            Services.StoryService.StoryClosing += StoryService_StoryClosing;
+            this.storyService = storyService;
+
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
-        protected override void Initialize()
+        protected override void ViewCreated(UserControl view)
         {
             windowManager = new ZWindowManager();
             windowContainer = this.View.FindName<Grid>("windowContainer");
@@ -70,13 +78,13 @@ namespace ZDebug.Terp.ViewModel
         private bool ForceFixedWidthFont()
         {
             // TODO: Move into appropriate API
-            return (Services.StoryService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
+            return (storyService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
         }
 
         private bool IsScoreGame()
         {
             // TODO: Move into appropriate API
-            var story = Services.StoryService.Story;
+            var story = storyService.Story;
             if (story.Version > 3)
             {
                 throw new InvalidOperationException("status line should only be drawn be V1- V3");
@@ -191,7 +199,7 @@ namespace ZDebug.Terp.ViewModel
 
                 machStatusHeight = lines;
 
-                if (Services.StoryService.Story.Version == 3)
+                if (storyService.Story.Version == 3)
                 {
                     upperWindow.Clear();
                 }
@@ -331,7 +339,7 @@ namespace ZDebug.Terp.ViewModel
         {
             Dispatch(() =>
             {
-                var story = Services.StoryService.Story;
+                var story = storyService.Story;
                 if (story.Version > 3)
                 {
                     return;
