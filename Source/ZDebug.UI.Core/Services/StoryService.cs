@@ -7,8 +7,9 @@ using ZDebug.Core.Blorb;
 namespace ZDebug.UI.Services
 {
     [Export]
-    public class StoryService
+    public class StoryService : IService
     {
+        private string fileName;
         private Story story;
         private GameInfo gameInfo;
 
@@ -39,6 +40,7 @@ namespace ZDebug.UI.Services
 
             OnStoryClosing();
 
+            fileName = null;
             story = null;
             gameInfo = null;
         }
@@ -61,9 +63,19 @@ namespace ZDebug.UI.Services
                 story = Story.FromBytes(File.ReadAllBytes(fileName));
             }
 
+            this.fileName = fileName;
+
             OnStoryOpened();
 
             return story;
+        }
+
+        public string FileName
+        {
+            get
+            {
+                return fileName;
+            }
         }
 
         public Story Story

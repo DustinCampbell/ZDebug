@@ -9,14 +9,18 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
     {
+        private readonly StoryService storyService;
         private readonly IndexedVariableViewModel[] locals;
 
         private VariableViewModel[] stack;
         private VariableViewModel[] reversedStack;
 
-        public LocalsViewModel()
+        [ImportingConstructor]
+        public LocalsViewModel(
+            StoryService storyService)
             : base("LocalsView")
         {
+            this.storyService = storyService;
             locals = new IndexedVariableViewModel[15];
 
             for (int i = 0; i < 15; i++)
@@ -97,7 +101,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             for (int i = 0; i < 15; i++)
             {
@@ -107,7 +111,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             Update();
 
@@ -116,8 +120,8 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
             DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
         }
@@ -134,7 +138,7 @@ namespace ZDebug.UI.ViewModel
 
         public bool HasStory
         {
-            get { return DebuggerService.HasStory; }
+            get { return storyService.IsStoryOpen; }
         }
     }
 }

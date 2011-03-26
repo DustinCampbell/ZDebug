@@ -17,6 +17,8 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen, ISoundEngine
     {
+        private readonly StoryService storyService;
+
         private ZWindowManager windowManager;
         private Grid windowContainer;
 
@@ -28,21 +30,29 @@ namespace ZDebug.UI.ViewModel
         private int currStatusHeight;
         private int machStatusHeight;
 
-        public OutputViewModel()
+        [ImportingConstructor]
+        public OutputViewModel(
+            StoryService storyService)
             : base("OutputView")
         {
+            this.storyService = storyService;
         }
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
 
             windowManager = new ZWindowManager();
             windowContainer = this.View.FindName<Grid>("windowContainer");
         }
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        void storyService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -54,7 +64,7 @@ namespace ZDebug.UI.ViewModel
             DebuggerService.Processor.RegisterSoundEngine(this);
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             windowManager.Root.Close();
 
@@ -76,13 +86,13 @@ namespace ZDebug.UI.ViewModel
         private bool ForceFixedWidthFont()
         {
             // TODO: Move into appropriate API
-            return (DebuggerService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
+            return (storyService.Story.Memory.ReadWord(0x10) & 0x02) == 0x02;
         }
 
         private bool IsScoreGame()
         {
             // TODO: Move into appropriate API
-            var story = DebuggerService.Story;
+            var story = storyService.Story;
             if (story.Version > 3)
             {
                 throw new InvalidOperationException("status line should only be drawn be V1- V3");
@@ -93,7 +103,7 @@ namespace ZDebug.UI.ViewModel
                 return true;
             }
 
-            return (DebuggerService.Story.Memory.ReadByte(0x01) & 0x01) == 0x00;
+            return (story.Memory.ReadByte(0x01) & 0x01) == 0x00;
         }
 
         private void ResetStatusHeight()
@@ -226,7 +236,7 @@ namespace ZDebug.UI.ViewModel
 
             machStatusHeight = lines;
 
-            if (DebuggerService.Story.Version == 3)
+            if (storyService.Story.Version == 3)
             {
                 upperWindow.Clear();
             }
@@ -367,7 +377,7 @@ namespace ZDebug.UI.ViewModel
 
         public void ShowStatus()
         {
-            var story = DebuggerService.Story;
+            var story = storyService.Story;
             if (story.Version > 3)
             {
                 return;

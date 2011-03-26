@@ -7,13 +7,24 @@ namespace ZDebug.UI
 {
     public partial class App : Application
     {
+        private CompositionContainer container;
+
+        public T GetService<T>()
+            where T : IService
+        {
+            return container.GetExportedValue<T>();
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             var catelog = new AggregateCatalog(
                 new AssemblyCatalog(typeof(App).Assembly),
                 new AssemblyCatalog(typeof(StoryService).Assembly));
 
-            var container = new CompositionContainer(catelog);
+            this.container = new CompositionContainer(catelog);
+
+            var storyService = container.GetExportedValue<StoryService>();
+            DebuggerService.SetStoryService(storyService);
 
             var mainWindowViewModel = container.GetExportedValue<MainWindowViewModel>();
 

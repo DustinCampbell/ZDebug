@@ -14,6 +14,7 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal class MainWindowViewModel : ViewModelWithViewBase<Window>
     {
+        private readonly StoryService storyService;
         private readonly StoryInfoViewModel storyInfoViewModel;
         private readonly MemoryMapViewModel memoryMapViewModel;
         private readonly GlobalsViewModel globalsViewModel;
@@ -26,6 +27,7 @@ namespace ZDebug.UI.ViewModel
 
         [ImportingConstructor]
         public MainWindowViewModel(
+            StoryService storyService,
             StoryInfoViewModel storyInfoViewModel,
             MemoryMapViewModel memoryMapViewModel,
             GlobalsViewModel globalsViewModel,
@@ -37,6 +39,7 @@ namespace ZDebug.UI.ViewModel
             MessageLogViewModel messageLogViewModel)
             : base("MainWindowView")
         {
+            this.storyService = storyService;
             this.storyInfoViewModel = storyInfoViewModel;
             this.memoryMapViewModel = memoryMapViewModel;
             this.globalsViewModel = globalsViewModel;
@@ -132,13 +135,13 @@ namespace ZDebug.UI.ViewModel
 
             if (dialog.ShowDialog(this.View) == true)
             {
-                DebuggerService.OpenStory(dialog.FileName);
+                storyService.OpenStory(dialog.FileName);
             }
         }
 
         private bool CanEditGameScriptExecute()
         {
-            return DebuggerService.HasStory &&
+            return storyService.IsStoryOpen &&
                 DebuggerService.State != DebuggerState.Running;
         }
 
@@ -155,7 +158,7 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanGoToAddressExecute()
         {
-            return DebuggerService.HasStory &&
+            return storyService.IsStoryOpen &&
                 DebuggerService.State != DebuggerState.Running;
         }
 
@@ -233,14 +236,14 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanAboutGameExecute()
         {
-            return DebuggerService.HasGameInfo;
+            return storyService.HasGameInfo;
         }
 
         private void AboutGameExecuted()
         {
             var gameInfoDialogViewModel = new GameInfoViewModel();
             var gameInfoDialog = gameInfoDialogViewModel.CreateView();
-            gameInfoDialogViewModel.SetGameinfo(DebuggerService.GameInfo);
+            gameInfoDialogViewModel.SetGameinfo(storyService.GameInfo);
             gameInfoDialog.Owner = this.View;
             gameInfoDialog.ShowDialog();
         }
@@ -260,9 +263,9 @@ namespace ZDebug.UI.ViewModel
         {
             get
             {
-                if (DebuggerService.HasFileName)
+                if (storyService.IsStoryOpen)
                 {
-                    return "Z-Debug - " + Path.GetFileName(DebuggerService.FileName).ToLower();
+                    return "Z-Debug - " + Path.GetFileName(storyService.FileName).ToLower();
                 }
                 else
                 {
@@ -271,20 +274,20 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             PropertyChanged("Title");
         }
 
-        private void StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             PropertyChanged("Title");
         }
 
         protected override void ViewCreated(Window view)
         {
-            DebuggerService.StoryOpened += StoryOpened;
-            DebuggerService.StoryClosed += StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
 
             var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
             storyInfoContent.Content = this.storyInfoViewModel.CreateView();
@@ -330,7 +333,7 @@ namespace ZDebug.UI.ViewModel
 
             this.View.Closing += (s, e) =>
             {
-                DebuggerService.CloseStory();
+                storyService.CloseStory();
                 Storage.SaveDockingLayout(dockManager);
                 Storage.SaveWindowLayout(this.View);
             };

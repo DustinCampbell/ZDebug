@@ -7,12 +7,17 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class GlobalsViewModel : ViewModelWithViewBase<UserControl>
     {
+        private readonly StoryService storyService;
         private readonly IndexedVariableViewModel[] globals;
 
-        public GlobalsViewModel()
+        [ImportingConstructor]
+        public GlobalsViewModel(
+            StoryService storyService)
             : base("GlobalsView")
         {
-            globals = new IndexedVariableViewModel[240];
+            this.storyService = storyService;
+
+            this.globals = new IndexedVariableViewModel[240];
 
             for (int i = 0; i < 240; i++)
             {
@@ -26,7 +31,7 @@ namespace ZDebug.UI.ViewModel
         {
             if (DebuggerService.State != DebuggerState.Running)
             {
-                var story = DebuggerService.Story;
+                var story = storyService.Story;
 
                 // Update globals...
                 for (int i = 0; i < 240; i++)
@@ -56,7 +61,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             for (int i = 0; i < 240; i++)
             {
@@ -64,7 +69,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             for (int i = 0; i < 240; i++)
             {
@@ -76,8 +81,8 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
             DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
         }

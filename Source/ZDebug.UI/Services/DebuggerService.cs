@@ -26,7 +26,6 @@ namespace ZDebug.UI.Services
         private static ZRoutineTable routineTable;
         private static InstructionReader reader;
         private static Instruction currentInstruction;
-        private static string fileName;
         private static Exception currentException;
         private readonly static SortedSet<int> breakpoints = new SortedSet<int>();
         private readonly static List<string> gameScript = new List<string>();
@@ -34,11 +33,11 @@ namespace ZDebug.UI.Services
 
         private static DebuggerState priorState;
 
-        static DebuggerService()
+        public static void SetStoryService(StoryService storyService)
         {
-            storyService = new StoryService();
-            storyService.StoryOpened += storyService_StoryOpened;
-            storyService.StoryClosing += storyService_StoryClosing;
+            DebuggerService.storyService = storyService;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         private static void ChangeState(DebuggerState newState)
@@ -156,7 +155,7 @@ namespace ZDebug.UI.Services
             GameStorage.SaveStorySettings(story, xml);
         }
 
-        private static void storyService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private static void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             SaveSettings(e.Story);
 
@@ -165,22 +164,15 @@ namespace ZDebug.UI.Services
             routineTable = null;
             reader = null;
             currentInstruction = null;
-            fileName = null;
             hasStepped = false;
 
             breakpoints.Clear();
             gameScript.Clear();
 
-            var handler = StoryClosed;
-            if (handler != null)
-            {
-                handler(null, new StoryEventArgs(e.Story));
-            }
-
             ChangeState(DebuggerState.Unavailable);
         }
 
-        private static void storyService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private static void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             interpreter = new Interpreter();
             e.Story.RegisterInterpreter(interpreter);
@@ -196,24 +188,7 @@ namespace ZDebug.UI.Services
 
             processor.Quit += Processor_Quit;
 
-            var handler = StoryOpened;
-            if (handler != null)
-            {
-                handler(null, new StoryEventArgs(e.Story));
-            }
-
             ChangeState(DebuggerState.Stopped);
-        }
-
-        public static void CloseStory()
-        {
-            storyService.CloseStory();
-        }
-
-        public static Story OpenStory(string fileName)
-        {
-            DebuggerService.fileName = fileName;
-            return storyService.OpenStory(fileName);
         }
 
         private static void Processor_Quit(object sender, EventArgs e)
@@ -383,9 +358,9 @@ namespace ZDebug.UI.Services
 
         public static void ResetSession()
         {
-            string fileName = DebuggerService.fileName;
-            CloseStory();
-            OpenStory(fileName);
+            string fileName = storyService.FileName;
+            storyService.CloseStory();
+            storyService.OpenStory(fileName);
         }
 
         public static void BeginAwaitingInput()
@@ -428,44 +403,14 @@ namespace ZDebug.UI.Services
             get { return state; }
         }
 
-        public static Story Story
-        {
-            get { return storyService.Story; }
-        }
-
-        public static bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
-
         public static InterpretedZMachine Processor
         {
             get { return processor; }
         }
 
-        public static GameInfo GameInfo
-        {
-            get { return storyService.GameInfo; }
-        }
-
-        public static bool HasGameInfo
-        {
-            get { return storyService.HasGameInfo; }
-        }
-
         public static ZRoutineTable RoutineTable
         {
             get { return routineTable; }
-        }
-
-        public static bool HasFileName
-        {
-            get { return !string.IsNullOrWhiteSpace(fileName); }
-        }
-
-        public static string FileName
-        {
-            get { return fileName; }
         }
 
         public static Exception CurrentException
@@ -516,9 +461,6 @@ namespace ZDebug.UI.Services
         }
 
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
-
-        public static event EventHandler<StoryEventArgs> StoryClosed;
-        public static event EventHandler<StoryEventArgs> StoryOpened;
 
         public static event EventHandler<BreakpointEventArgs> BreakpointAdded;
         public static event EventHandler<BreakpointEventArgs> BreakpointRemoved;

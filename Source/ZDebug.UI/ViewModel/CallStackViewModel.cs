@@ -8,12 +8,16 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class CallStackViewModel : ViewModelWithViewBase<UserControl>
     {
+        private readonly StoryService storyService;
         private readonly BulkObservableCollection<StackFrameViewModel> stackFrames;
 
-        public CallStackViewModel()
+        [ImportingConstructor]
+        public CallStackViewModel(
+            StoryService storyService)
             : base("CallStackView")
         {
-            stackFrames = new BulkObservableCollection<StackFrameViewModel>();
+            this.storyService = storyService;
+            this.stackFrames = new BulkObservableCollection<StackFrameViewModel>();
         }
 
         private void Update()
@@ -39,12 +43,12 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             Update();
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             stackFrames.Clear();
         }
@@ -70,8 +74,8 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
             DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
         }

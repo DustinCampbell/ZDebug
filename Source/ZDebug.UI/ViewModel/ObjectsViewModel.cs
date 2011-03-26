@@ -10,11 +10,16 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class ObjectsViewModel : ViewModelWithViewBase<UserControl>
     {
+        private readonly StoryService storyService;
         private readonly BulkObservableCollection<ObjectViewModel> objects;
 
-        public ObjectsViewModel()
+        [ImportingConstructor]
+        public ObjectsViewModel(
+            StoryService storyService)
             : base("ObjectsView")
         {
+            this.storyService = storyService;
+
             this.NavigateCommand = RegisterCommand<int>(
                 text: "Navigate",
                 name: "Navigate",
@@ -36,7 +41,7 @@ namespace ZDebug.UI.ViewModel
             listObjects.ScrollIntoView(listObjects.SelectedItem);
         }
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             objects.BeginBulkOperation();
             try
@@ -54,7 +59,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             objects.Clear();
 
@@ -63,15 +68,15 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         public ICommand NavigateCommand { get; private set; }
 
         public bool HasStory
         {
-            get { return DebuggerService.HasStory; }
+            get { return storyService.IsStoryOpen; }
         }
 
         public BulkObservableCollection<ObjectViewModel> Objects

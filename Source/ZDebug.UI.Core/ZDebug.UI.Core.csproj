@@ -56,6 +56,7 @@
     <Compile Include="Extensions\ItemsControlExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\GameInfo.cs" />
+    <Compile Include="Services\IService.cs" />
     <Compile Include="Services\StoryClosingEventArgs.cs" />
     <Compile Include="Services\StoryOpenedEventArgs.cs" />
     <Compile Include="Services\StoryService.cs" />

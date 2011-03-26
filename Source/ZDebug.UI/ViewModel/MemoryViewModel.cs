@@ -12,12 +12,16 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
     {
+        private readonly StoryService storyService;
         private readonly BulkObservableCollection<MemoryLineViewModel> lines;
 
-        public MemoryViewModel()
+        [ImportingConstructor]
+        public MemoryViewModel(
+            StoryService storyService)
             : base("MemoryView")
         {
-            lines = new BulkObservableCollection<MemoryLineViewModel>();
+            this.storyService = storyService;
+            this.lines = new BulkObservableCollection<MemoryLineViewModel>();
         }
 
         //private void MemoryChanged(object sender, MemoryEventArgs e)
@@ -40,7 +44,7 @@ namespace ZDebug.UI.ViewModel
         //    // TODO: Highlight modified memory
         //}
 
-        private void DebuggerService_StoryOpened(object sender, StoryEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             var reader = new MemoryReader(e.Story.Memory, 0);
 
@@ -92,7 +96,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        private void DebuggerService_StoryClosed(object sender, StoryEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             lines.Clear();
 
@@ -113,14 +117,14 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            DebuggerService.StoryOpened += DebuggerService_StoryOpened;
-            DebuggerService.StoryClosed += DebuggerService_StoryClosed;
+            storyService.StoryOpened += StoryService_StoryOpened;
+            storyService.StoryClosing += StoryService_StoryClosing;
             DebuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
         public bool HasStory
         {
-            get { return DebuggerService.HasStory; }
+            get { return storyService.IsStoryOpen; }
         }
 
         public BulkObservableCollection<MemoryLineViewModel> Lines

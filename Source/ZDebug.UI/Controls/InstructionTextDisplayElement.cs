@@ -9,6 +9,7 @@ namespace ZDebug.UI.Controls
 {
     internal partial class InstructionTextDisplayElement : FrameworkElement
     {
+        private readonly StoryService storyService;
         private readonly InstructionTextBuilder builder;
         private bool update = true;
 
@@ -29,6 +30,7 @@ namespace ZDebug.UI.Controls
 
         public InstructionTextDisplayElement()
         {
+            this.storyService = ((App)Application.Current).GetService<StoryService>();
             this.builder = new InstructionTextBuilder();
 
             TextOptions.SetTextHintingMode(this, TextHintingMode.Fixed);
@@ -71,9 +73,9 @@ namespace ZDebug.UI.Controls
                     else
                     {
                         var callAddress = callOp.Value;
-                        if (DebuggerService.HasStory)
+                        if (storyService.IsStoryOpen)
                         {
-                            builder.AddAddress(DebuggerService.Story.UnpackRoutineAddress(callAddress));
+                            builder.AddAddress(storyService.Story.UnpackRoutineAddress(callAddress));
                         }
                         else
                         {
@@ -111,9 +113,9 @@ namespace ZDebug.UI.Controls
                 }
             }
 
-            if (instruction.HasZText && DebuggerService.HasStory)
+            if (instruction.HasZText && storyService.IsStoryOpen)
             {
-                var ztextBuilder = new StringBuilder(DebuggerService.Story.ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All));
+                var ztextBuilder = new StringBuilder(storyService.Story.ZText.ZWordsAsString(instruction.ZText, ZTextFlags.All));
                 var ztext = ztextBuilder.ToString();
 
                 if (ztext.Length > 0)
