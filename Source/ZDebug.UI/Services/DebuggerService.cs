@@ -102,7 +102,7 @@ namespace ZDebug.UI.Services
                 foreach (var bpElem in bpsElem.Elements("breakpoint"))
                 {
                     var addAttr = bpElem.Attribute("address");
-                    breakpointService.AddBreakpoint((int)addAttr);
+                    breakpointService.Add((int)addAttr);
                 }
             }
 
@@ -263,7 +263,7 @@ namespace ZDebug.UI.Services
                         ChangeState(DebuggerState.Stopped);
                     }
 
-                    if (state == DebuggerState.Running && breakpointService.BreakpointExists(newPC))
+                    if (state == DebuggerState.Running && breakpointService.Exists(newPC))
                     {
                         ChangeState(DebuggerState.Stopped);
                     }
@@ -347,7 +347,7 @@ namespace ZDebug.UI.Services
 
             if (priorState == DebuggerState.Running)
             {
-                if (breakpointService.BreakpointExists(processor.PC))
+                if (breakpointService.Exists(processor.PC))
                 {
                     ChangeState(DebuggerState.Stopped);
                 }

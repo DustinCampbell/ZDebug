@@ -28,7 +28,7 @@ namespace ZDebug.UI.ViewModel
                     if (line != null)
                     {
                         var breakpointService = App.Current.GetService<BreakpointService>();
-                        breakpointService.ToggleBreakpoint(line.Address);
+                        breakpointService.Toggle(line.Address);
                     }
                 }
             }

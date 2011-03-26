@@ -10,41 +10,41 @@ namespace ZDebug.UI.Services
     {
         private readonly SortedSet<int> breakpoints = new SortedSet<int>();
 
-        public void AddBreakpoint(int address)
+        public void Add(int address)
         {
             breakpoints.Add(address);
 
-            var handler = BreakpointAdded;
+            var handler = Added;
             if (handler != null)
             {
                 handler(null, new BreakpointEventArgs(address));
             }
         }
 
-        public void RemoveBreakpoint(int address)
+        public void Remove(int address)
         {
             breakpoints.Remove(address);
 
-            var handler = BreakpointRemoved;
+            var handler = Removed;
             if (handler != null)
             {
                 handler(null, new BreakpointEventArgs(address));
             }
         }
 
-        public void ToggleBreakpoint(int address)
+        public void Toggle(int address)
         {
             if (breakpoints.Contains(address))
             {
-                RemoveBreakpoint(address);
+                Remove(address);
             }
             else
             {
-                AddBreakpoint(address);
+                Add(address);
             }
         }
 
-        public bool BreakpointExists(int address)
+        public bool Exists(int address)
         {
             return breakpoints.Contains(address);
         }
@@ -53,7 +53,7 @@ namespace ZDebug.UI.Services
         {
             foreach (var breakpoint in breakpoints.ToArray())
             {
-                RemoveBreakpoint(breakpoint);
+                Remove(breakpoint);
             }
         }
 
@@ -68,7 +68,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public event EventHandler<BreakpointEventArgs> BreakpointAdded;
-        public event EventHandler<BreakpointEventArgs> BreakpointRemoved;
+        public event EventHandler<BreakpointEventArgs> Added;
+        public event EventHandler<BreakpointEventArgs> Removed;
     }
 }

@@ -137,7 +137,7 @@ namespace ZDebug.UI.ViewModel
                         var instruction = instructions[i];
                         var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
 
-                        if (breakpointService.BreakpointExists(instruction.Address))
+                        if (breakpointService.Exists(instruction.Address))
                         {
                             instructionLine.HasBreakpoint = true;
                         }
@@ -260,7 +260,7 @@ namespace ZDebug.UI.ViewModel
                     var instruction = instructions[i];
                     var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
 
-                    if (breakpointService.BreakpointExists(instruction.Address))
+                    if (breakpointService.Exists(instruction.Address))
                     {
                         instructionLine.HasBreakpoint = true;
                     }
@@ -355,7 +355,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void BreakpointService_BreakpointRemoved(object sender, BreakpointEventArgs e)
+        private void BreakpointService_Removed(object sender, BreakpointEventArgs e)
         {
             var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
             if (bpLine != null)
@@ -364,7 +364,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void BreakpointService_BreakpointAdded(object sender, BreakpointEventArgs e)
+        private void BreakpointService_Added(object sender, BreakpointEventArgs e)
         {
             var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
             if (bpLine != null)
@@ -406,8 +406,8 @@ namespace ZDebug.UI.ViewModel
 
             DebuggerService.StateChanged += DebuggerService_StateChanged;
 
-            breakpointService.BreakpointAdded += BreakpointService_BreakpointAdded;
-            breakpointService.BreakpointRemoved += BreakpointService_BreakpointRemoved;
+            breakpointService.Added += BreakpointService_Added;
+            breakpointService.Removed += BreakpointService_Removed;
 
             DebuggerService.ProcessorStepped += DebuggerService_Stepped;
 
