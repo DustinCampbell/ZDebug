@@ -14,6 +14,7 @@ using ZDebug.Core.Execution;
 using ZDebug.Terp.Profiling;
 using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
+using ZDebug.UI.Utilities;
 using ZDebug.UI.ViewModel;
 
 namespace ZDebug.Terp.ViewModel
@@ -228,7 +229,8 @@ namespace ZDebug.Terp.ViewModel
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             profiler = new ZMachineProfiler();
-            zmachine = new CompiledZMachine(e.Story, profiler: profiler);
+            e.Story.RegisterInterpreter(new Interpreter());
+            zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profiler);
             zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);
@@ -307,27 +309,29 @@ namespace ZDebug.Terp.ViewModel
             }
 
             var compilationStatistics = profiler.CompilationStatistics.ToList();
+            if (compilationStatistics.Count > 0)
+            {
+                this.compileTime = new TimeSpan(compilationStatistics.Sum(s => s.CompileTime.Ticks));
+                this.routinesCompiled = profiler.RoutinesCompiled;
+                this.zcodeToILRatio = compilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length).Average();
+                this.routinesExecuted = profiler.RoutinesExecuted;
+                this.instructionsExecuted = profiler.InstructionsExecuted;
+                this.calculatedVariableLoads = compilationStatistics.Sum(s => s.CalculatedLoadVariableCount);
+                this.calculatedVariableStores = compilationStatistics.Sum(s => s.CalculatedStoreVariableCount);
+                this.directCalls = profiler.DirectCallCount;
+                this.calculatedCalls = profiler.CalculatedCallCount;
 
-            this.compileTime = new TimeSpan(compilationStatistics.Sum(s => s.CompileTime.Ticks));
-            this.routinesCompiled = profiler.RoutinesCompiled;
-            this.zcodeToILRatio = compilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length).Average();
-            this.routinesExecuted = profiler.RoutinesExecuted;
-            this.instructionsExecuted = profiler.InstructionsExecuted;
-            this.calculatedVariableLoads = compilationStatistics.Sum(s => s.CalculatedLoadVariableCount);
-            this.calculatedVariableStores = compilationStatistics.Sum(s => s.CalculatedStoreVariableCount);
-            this.directCalls = profiler.DirectCallCount;
-            this.calculatedCalls = profiler.CalculatedCallCount;
-
-            PropertyChanged("CompileTime");
-            PropertyChanged("RoutinesCompiled");
-            PropertyChanged("ZCodeToILRatio");
-            PropertyChanged("ZCodeToILRatioPercent");
-            PropertyChanged("RoutinesExecuted");
-            PropertyChanged("InstructionsExecuted");
-            PropertyChanged("CalculatedVariableLoads");
-            PropertyChanged("CalculatedVariableStores");
-            PropertyChanged("DirectCalls");
-            PropertyChanged("CalculatedCalls");
+                PropertyChanged("CompileTime");
+                PropertyChanged("RoutinesCompiled");
+                PropertyChanged("ZCodeToILRatio");
+                PropertyChanged("ZCodeToILRatioPercent");
+                PropertyChanged("RoutinesExecuted");
+                PropertyChanged("InstructionsExecuted");
+                PropertyChanged("CalculatedVariableLoads");
+                PropertyChanged("CalculatedVariableStores");
+                PropertyChanged("DirectCalls");
+                PropertyChanged("CalculatedCalls");
+            }
         }
 
         private void PopulateProfilerData()

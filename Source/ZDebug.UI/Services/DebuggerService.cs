@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
-using ZDebug.Core.Interpreter;
+using ZDebug.UI.Utilities;
 
 namespace ZDebug.UI.Services
 {
@@ -21,7 +21,6 @@ namespace ZDebug.UI.Services
         private bool hasStepped;
 
         private InterpretedZMachine machine;
-        private IInterpreter interpreter;
         private InstructionReader reader;
         private Instruction currentInstruction;
         private Exception currentException;
@@ -93,7 +92,6 @@ namespace ZDebug.UI.Services
 
         private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
-            interpreter = null;
             machine = null;
             reader = null;
             currentInstruction = null;
@@ -110,8 +108,7 @@ namespace ZDebug.UI.Services
 
         private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
-            interpreter = new Interpreter();
-            e.Story.RegisterInterpreter(interpreter);
+            e.Story.RegisterInterpreter(new Interpreter());
             machine = new InterpretedZMachine(e.Story);
             reader = new InstructionReader(machine.PC, e.Story.Memory);
 

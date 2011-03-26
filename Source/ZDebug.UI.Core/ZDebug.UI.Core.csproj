@@ -63,6 +63,7 @@
     <Compile Include="Services\StoryClosingEventArgs.cs" />
     <Compile Include="Services\StoryOpenedEventArgs.cs" />
     <Compile Include="Services\StoryService.cs" />
+    <Compile Include="Utilities\Interpreter.cs" />
     <Compile Include="Utilities\Storage.cs" />
     <Compile Include="Utilities\Storage.WindowPlacement.cs" />
     <Compile Include="ViewModel\GameInfoViewModel.cs" />

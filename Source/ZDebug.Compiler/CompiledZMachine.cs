@@ -16,6 +16,7 @@ namespace ZDebug.Compiler
         internal const int STACK_SIZE = 32768;
 
         private readonly IZMachineProfiler profiler;
+        private readonly bool precompile;
 
         // routine state
         private readonly ushort[] stack;
@@ -55,10 +56,11 @@ namespace ZDebug.Compiler
         private int currentAddress = -1;
         private volatile bool inputReceived;
 
-        public CompiledZMachine(Story story, IZMachineProfiler profiler = null)
+        public CompiledZMachine(Story story, bool precompile = false, IZMachineProfiler profiler = null)
             : base(story)
         {
             this.profiler = profiler;
+            this.precompile = precompile;
 
             this.stack = new ushort[STACK_SIZE];
             this.sp = -1;
@@ -93,6 +95,27 @@ namespace ZDebug.Compiler
             this.routineTable = new ZRoutineTable(story);
             this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>(8192);
             this.compilationResults = new IntegerMap<ZCompilerResult>(8192);
+
+            if (this.precompile)
+            {
+                foreach (var routine in routineTable)
+                {
+                    GetRoutineCall(routine.Address);
+                }
+
+                this.precompile = false;
+            }
+        }
+
+        private int GetMainRoutineAddress()
+        {
+            var mainAddress = this.Memory.ReadWord(0x06);
+            if (this.Version != 6)
+            {
+                mainAddress--;
+            }
+
+            return mainAddress;
         }
 
         internal bool Verify()
@@ -179,6 +202,8 @@ namespace ZDebug.Compiler
             return result;
         }
 
+        private bool compiling;
+
         internal ZRoutineCall GetRoutineCall(int address)
         {
             ZRoutineCall routineCall;
@@ -187,6 +212,13 @@ namespace ZDebug.Compiler
                 var routine = GetRoutineByAddress(address);
                 routineCall = new ZRoutineCall(routine, machine: this);
                 addressToRoutineCallMap.Add(address, routineCall);
+            }
+
+            if (this.precompile && !compiling)
+            {
+                compiling = true;
+                routineCall.Compile();
+                compiling = false;
             }
 
             return routineCall;
@@ -681,13 +713,7 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
-            var mainAddress = this.Memory.ReadWord(0x06);
-            if (this.Version != 6)
-            {
-                mainAddress--;
-            }
-
-            var routineCall = GetRoutineCall(mainAddress);
+            var routineCall = GetRoutineCall(GetMainRoutineAddress());
             routineCall.Invoke();
         }
 
@@ -699,6 +725,14 @@ namespace ZDebug.Compiler
         public bool Profiling
         {
             get { return profiler != null; }
+        }
+
+        public bool Precompile
+        {
+            get
+            {
+                return precompile;
+            }
         }
 
         public ushort ObjectTableAddress

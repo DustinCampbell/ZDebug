@@ -14,12 +14,17 @@ namespace ZDebug.Compiler
             this.routine = routine;
         }
 
-        public ushort Invoke()
+        public void Compile()
         {
             if (compilationResult == null)
             {
                 compilationResult = machine.Compile(routine);
             }
+        }
+
+        public ushort Invoke()
+        {
+            Compile();
 
             return compilationResult.Code(compilationResult.Calls);
         }

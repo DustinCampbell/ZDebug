@@ -30,7 +30,7 @@ namespace ZDebug.PerfHarness
             Action doneAction = () => { machine.Stop(); };
 
             var mockScreen = new MockScreen(ScriptFilePath, doneAction);
-            machine = new CompiledZMachine(Story.FromBytes(bytes), profile ? this : null);
+            machine = new CompiledZMachine(Story.FromBytes(bytes), profiler: profile ? this : null);
             machine.RegisterScreen(mockScreen);
             machine.SetRandomSeed(42);
 

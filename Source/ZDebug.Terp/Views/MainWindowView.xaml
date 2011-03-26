@@ -66,8 +66,12 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
+        
+        <Grid Grid.Row="2" Name="screenContent">
 
-        <Grid Grid.Row="2">
+        </Grid>
+
+        <!--<Grid Grid.Row="2">
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -161,7 +165,7 @@
                     </TabItem>
                 </TabControl>
             </Grid>
-        </Grid>
+        </Grid>-->
 
         <StatusBar Grid.Row="3">
             <StatusBar.Resources>
