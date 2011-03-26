@@ -18,7 +18,7 @@ namespace ZDebug.UI.Services
             var handler = Added;
             if (handler != null)
             {
-                handler(null, new BreakpointEventArgs(address));
+                handler(this, new BreakpointEventArgs(address));
             }
         }
 
@@ -29,7 +29,7 @@ namespace ZDebug.UI.Services
             var handler = Removed;
             if (handler != null)
             {
-                handler(null, new BreakpointEventArgs(address));
+                handler(this, new BreakpointEventArgs(address));
             }
         }
 

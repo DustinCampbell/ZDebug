@@ -10,6 +10,8 @@ namespace ZDebug.UI.ViewModel
     internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly StoryService storyService;
+        private readonly DebuggerService debuggerService;
+
         private readonly IndexedVariableViewModel[] locals;
 
         private VariableViewModel[] stack;
@@ -17,10 +19,13 @@ namespace ZDebug.UI.ViewModel
 
         [ImportingConstructor]
         public LocalsViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            DebuggerService debuggerService)
             : base("LocalsView")
         {
             this.storyService = storyService;
+            this.debuggerService = debuggerService;
+
             locals = new IndexedVariableViewModel[15];
 
             for (int i = 0; i < 15; i++)
@@ -34,9 +39,9 @@ namespace ZDebug.UI.ViewModel
 
         private void Update()
         {
-            if (DebuggerService.State != DebuggerState.Running)
+            if (debuggerService.State != DebuggerState.Running)
             {
-                var processor = DebuggerService.Processor;
+                var processor = debuggerService.Machine;
 
                 // Update locals...
                 var localCount = processor.LocalCount;
@@ -85,7 +90,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_ProcessorStepped(object sender, ProcessorSteppedEventArgs e)
+        private void DebuggerService_ProcessorStepped(object sender, SteppedEventArgs e)
         {
             Update();
         }
@@ -111,7 +116,7 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
         {
             Update();
 
@@ -120,10 +125,10 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
+            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
             storyService.StoryClosing += StoryService_StoryClosing;
-            DebuggerService.StateChanged += DebuggerService_StateChanged;
-            DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
+            debuggerService.StateChanged += DebuggerService_StateChanged;
+            debuggerService.Stepped += DebuggerService_ProcessorStepped;
         }
 
         public IndexedVariableViewModel[] Locals

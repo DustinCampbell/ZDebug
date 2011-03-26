@@ -51,7 +51,7 @@ namespace ZDebug.UI.Services
             var handler = RoutineNameChanged;
             if (handler != null)
             {
-                handler(null, new RoutineNameChangedEventArgs(routine));
+                handler(this, new RoutineNameChangedEventArgs(routine));
             }
         }
 

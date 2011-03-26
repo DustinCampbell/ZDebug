@@ -8,14 +8,18 @@ namespace ZDebug.UI.ViewModel
     internal sealed class GlobalsViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly StoryService storyService;
+        private readonly DebuggerService debuggerService;
+
         private readonly IndexedVariableViewModel[] globals;
 
         [ImportingConstructor]
         public GlobalsViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            DebuggerService debuggerService)
             : base("GlobalsView")
         {
             this.storyService = storyService;
+            this.debuggerService = debuggerService;
 
             this.globals = new IndexedVariableViewModel[240];
 
@@ -29,7 +33,7 @@ namespace ZDebug.UI.ViewModel
 
         private void Update(bool storyOpened = false)
         {
-            if (DebuggerService.State != DebuggerState.Running)
+            if (debuggerService.State != DebuggerState.Running)
             {
                 var story = storyService.Story;
 
@@ -45,7 +49,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_ProcessorStepped(object sender, ProcessorSteppedEventArgs e)
+        private void DebuggerService_ProcessorStepped(object sender, SteppedEventArgs e)
         {
             Update();
         }
@@ -83,8 +87,8 @@ namespace ZDebug.UI.ViewModel
         {
             storyService.StoryOpened += StoryService_StoryOpened;
             storyService.StoryClosing += StoryService_StoryClosing;
-            DebuggerService.StateChanged += DebuggerService_StateChanged;
-            DebuggerService.ProcessorStepped += DebuggerService_ProcessorStepped;
+            debuggerService.StateChanged += DebuggerService_StateChanged;
+            debuggerService.Stepped += DebuggerService_ProcessorStepped;
         }
 
         public IndexedVariableViewModel[] Globals

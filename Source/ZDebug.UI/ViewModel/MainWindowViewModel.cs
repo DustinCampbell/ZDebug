@@ -16,6 +16,7 @@ namespace ZDebug.UI.ViewModel
     {
         private readonly StoryService storyService;
         private readonly GameScriptService gameScriptService;
+        private readonly DebuggerService debuggerService;
 
         private readonly StoryInfoViewModel storyInfoViewModel;
         private readonly MemoryMapViewModel memoryMapViewModel;
@@ -31,6 +32,7 @@ namespace ZDebug.UI.ViewModel
         private MainWindowViewModel(
             StoryService storyService,
             GameScriptService gameScriptService,
+            DebuggerService debuggerService,
             StoryInfoViewModel storyInfoViewModel,
             MemoryMapViewModel memoryMapViewModel,
             GlobalsViewModel globalsViewModel,
@@ -44,6 +46,7 @@ namespace ZDebug.UI.ViewModel
         {
             this.storyService = storyService;
             this.gameScriptService = gameScriptService;
+            this.debuggerService = debuggerService;
             this.storyInfoViewModel = storyInfoViewModel;
             this.memoryMapViewModel = memoryMapViewModel;
             this.globalsViewModel = globalsViewModel;
@@ -123,7 +126,7 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanOpenStoryExecute()
         {
-            return DebuggerService.State != DebuggerState.Running;
+            return debuggerService.State != DebuggerState.Running;
         }
 
         private void OpenStoryExecuted()
@@ -146,7 +149,7 @@ namespace ZDebug.UI.ViewModel
         private bool CanEditGameScriptExecute()
         {
             return storyService.IsStoryOpen &&
-                DebuggerService.State != DebuggerState.Running;
+                debuggerService.State != DebuggerState.Running;
         }
 
         private void EditGameScriptExecuted()
@@ -163,7 +166,7 @@ namespace ZDebug.UI.ViewModel
         private bool CanGoToAddressExecute()
         {
             return storyService.IsStoryOpen &&
-                DebuggerService.State != DebuggerState.Running;
+                debuggerService.State != DebuggerState.Running;
         }
 
         private void GoToAddressExecuted()
@@ -173,13 +176,13 @@ namespace ZDebug.UI.ViewModel
             dialog.Owner = this.View;
             if (dialog.ShowDialog() == true)
             {
-                DebuggerService.RequestNavigation(goToAddressDialogViewModel.Address);
+                debuggerService.RequestNavigation(goToAddressDialogViewModel.Address);
             }
         }
 
         private bool CanExitExecute()
         {
-            return DebuggerService.State != DebuggerState.Running;
+            return debuggerService.State != DebuggerState.Running;
         }
 
         private void ExitExecuted()
@@ -189,42 +192,42 @@ namespace ZDebug.UI.ViewModel
 
         private bool CanStartDebuggingExecute()
         {
-            return DebuggerService.CanStartDebugging;
+            return debuggerService.CanStartDebugging;
         }
 
         private void StartDebuggingExecuted()
         {
-            DebuggerService.StartDebugging();
+            debuggerService.StartDebugging();
         }
 
         private bool CanStopDebuggingExecute()
         {
-            return DebuggerService.CanStopDebugging;
+            return debuggerService.CanStopDebugging;
         }
 
         private void StopDebuggingExecuted()
         {
-            DebuggerService.StopDebugging();
+            debuggerService.StopDebugging();
         }
 
         private bool CanStepNextExecute()
         {
-            return DebuggerService.CanStepNext;
+            return debuggerService.CanStepNext;
         }
 
         private void StepNextExecuted()
         {
-            DebuggerService.StepNext();
+            debuggerService.StepNext();
         }
 
         private bool CanResetSessionExecute()
         {
-            return DebuggerService.CanResetSession;
+            return debuggerService.CanResetSession;
         }
 
         private void ResetSessionExecuted()
         {
-            DebuggerService.ResetSession();
+            debuggerService.ResetSession();
         }
 
         private bool CanResetWindowLayoutExecute()

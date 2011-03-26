@@ -33,6 +33,7 @@ namespace ZDebug.UI.ViewModel
         private readonly StoryService storyService;
         private readonly BreakpointService breakpointService;
         private readonly RoutineService routineService;
+        private readonly DebuggerService debuggerService;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
@@ -44,12 +45,14 @@ namespace ZDebug.UI.ViewModel
         public DisassemblyViewModel(
             StoryService storyService,
             BreakpointService breakpointService,
-            RoutineService routineService)
+            RoutineService routineService,
+            DebuggerService debuggerService)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
             this.breakpointService = breakpointService;
             this.routineService = routineService;
+            this.debuggerService = debuggerService;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
@@ -100,9 +103,9 @@ namespace ZDebug.UI.ViewModel
             return null;
         }
 
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
         {
-            var reader = new MemoryReader(e.Story.Memory, 0);
+            var reader = new MemoryReader(storyService.Story.Memory, 0);
 
             DisassemblyLineViewModel ipLine;
 
@@ -156,7 +159,7 @@ namespace ZDebug.UI.ViewModel
                     }
                 }
 
-                ipLine = GetLineByAddress(DebuggerService.Processor.PC);
+                ipLine = GetLineByAddress(debuggerService.Machine.PC);
                 ipLine.HasIP = true;
             }
             finally
@@ -175,9 +178,9 @@ namespace ZDebug.UI.ViewModel
             lines.BringIntoView(line);
         }
 
-        private void DebuggerService_Stepped(object sender, ProcessorSteppedEventArgs e)
+        private void DebuggerService_Stepped(object sender, SteppedEventArgs e)
         {
-            if (DebuggerService.State == DebuggerState.Running)
+            if (debuggerService.State == DebuggerState.Running)
             {
                 return;
             }
@@ -185,8 +188,8 @@ namespace ZDebug.UI.ViewModel
             var oldLine = GetLineByAddress(e.OldPC);
             oldLine.HasIP = false;
 
-            if (DebuggerService.State == DebuggerState.AwaitingInput ||
-                DebuggerService.State == DebuggerState.Done)
+            if (debuggerService.State == DebuggerState.AwaitingInput ||
+                debuggerService.State == DebuggerState.Done)
             {
                 return;
             }
@@ -333,32 +336,32 @@ namespace ZDebug.UI.ViewModel
 
             if (e.NewState == DebuggerState.Running)
             {
-                var line = GetLineByAddress(DebuggerService.Processor.PC);
+                var line = GetLineByAddress(debuggerService.Machine.PC);
                 line.HasIP = false;
             }
             else if (e.NewState == DebuggerState.StoppedAtError)
             {
-                var line = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
+                var line = GetLineByAddress(debuggerService.Machine.ExecutingAddress);
                 line.State = DisassemblyLineState.Blocked;
-                line.ToolTip = new ExceptionToolTip(DebuggerService.CurrentException);
+                line.ToolTip = new ExceptionToolTip(debuggerService.CurrentException);
                 BringLineIntoView(line);
             }
             else if (e.NewState == DebuggerState.Done)
             {
-                var line = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
+                var line = GetLineByAddress(debuggerService.Machine.ExecutingAddress);
                 line.State = DisassemblyLineState.Stopped;
                 BringLineIntoView(line);
             }
             else if (e.NewState == DebuggerState.AwaitingInput)
             {
-                inputLine = GetLineByAddress(DebuggerService.Processor.ExecutingAddress);
+                inputLine = GetLineByAddress(debuggerService.Machine.ExecutingAddress);
                 inputLine.State = DisassemblyLineState.Paused;
                 BringLineIntoView(inputLine);
             }
             else if (e.NewState == DebuggerState.Stopped &&
                 (e.OldState == DebuggerState.Running || e.OldState == DebuggerState.AwaitingInput))
             {
-                var line = GetLineByAddress(DebuggerService.Processor.PC);
+                var line = GetLineByAddress(debuggerService.Machine.PC);
                 line.HasIP = true;
                 BringLineIntoView(line);
             }
@@ -410,17 +413,17 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
+            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
             storyService.StoryClosing += StoryService_StoryClosing;
 
-            DebuggerService.StateChanged += DebuggerService_StateChanged;
+            debuggerService.StateChanged += DebuggerService_StateChanged;
 
             breakpointService.Added += BreakpointService_Added;
             breakpointService.Removed += BreakpointService_Removed;
 
-            DebuggerService.ProcessorStepped += DebuggerService_Stepped;
+            debuggerService.Stepped += DebuggerService_Stepped;
 
-            DebuggerService.NavigationRequested += DebuggerService_NavigationRequested;
+            debuggerService.NavigationRequested += DebuggerService_NavigationRequested;
 
             routineService.RoutineNameChanged += RoutineService_RoutineNameChanged;
 

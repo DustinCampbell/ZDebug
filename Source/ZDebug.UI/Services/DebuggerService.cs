@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -11,41 +12,43 @@ using ZDebug.Debugger.Utilities;
 
 namespace ZDebug.UI.Services
 {
-    internal static class DebuggerService
+    [Export]
+    internal class DebuggerService : IService
     {
-        private static StoryService storyService;
-        private static BreakpointService breakpointService;
-        private static GameScriptService gameScriptService;
-        private static RoutineService routineService;
+        private readonly StoryService storyService;
+        private readonly BreakpointService breakpointService;
+        private readonly GameScriptService gameScriptService;
+        private readonly RoutineService routineService;
 
-        private static DebuggerState state;
-        private static bool stopping;
-        private static bool hasStepped;
+        private DebuggerState state;
+        private bool stopping;
+        private bool hasStepped;
 
-        private static IInterpreter interpreter;
-        private static InterpretedZMachine processor;
-        private static InstructionReader reader;
-        private static Instruction currentInstruction;
-        private static Exception currentException;
+        private InterpretedZMachine machine;
+        private IInterpreter interpreter;
+        private InstructionReader reader;
+        private Instruction currentInstruction;
+        private Exception currentException;
 
-        private static DebuggerState priorState;
+        private DebuggerState priorState;
 
-        public static void SetServices(
+        [ImportingConstructor]
+        private DebuggerService(
             StoryService storyService,
             BreakpointService breakpointService,
             GameScriptService gameScriptService,
             RoutineService routineService)
         {
-            DebuggerService.storyService = storyService;
-            DebuggerService.breakpointService = breakpointService;
-            DebuggerService.gameScriptService = gameScriptService;
-            DebuggerService.routineService = routineService;
+            this.storyService = storyService;
+            this.breakpointService = breakpointService;
+            this.gameScriptService = gameScriptService;
+            this.routineService = routineService;
 
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
         }
 
-        private static void ChangeState(DebuggerState newState)
+        private void ChangeState(DebuggerState newState)
         {
             DebuggerState oldState = state;
             state = newState;
@@ -62,15 +65,15 @@ namespace ZDebug.UI.Services
         /// <summary>
         /// Performs a single processor step.
         /// </summary>
-        private static int Step()
+        private int Step()
         {
-            reader.Address = processor.PC;
+            reader.Address = machine.PC;
             currentInstruction = reader.NextInstruction();
 
-            var oldPC = processor.PC;
+            var oldPC = machine.PC;
             OnProcessorStepping(oldPC);
 
-            var newPC = processor.Step();
+            var newPC = machine.Step();
 
             // If the instruction just executed was a call, we should add the address to the
             // routine table. The address is packed inside the first operand value. Note that
@@ -79,7 +82,7 @@ namespace ZDebug.UI.Services
             // to set the new IP.
             if (currentInstruction.Opcode.IsCall)
             {
-                var callOpValue = processor.GetOperandValue(0);
+                var callOpValue = machine.GetOperandValue(0);
                 var callAddress = storyService.Story.UnpackRoutineAddress(callOpValue);
                 if (callAddress != 0)
                 {
@@ -94,7 +97,7 @@ namespace ZDebug.UI.Services
             return newPC;
         }
 
-        private static void LoadSettings(Story story)
+        private void LoadSettings(Story story)
         {
             var xml = GameStorage.RestoreStorySettings(story);
 
@@ -103,7 +106,7 @@ namespace ZDebug.UI.Services
             routineService.Load(xml);
         }
 
-        private static void SaveSettings(Story story)
+        private void SaveSettings(Story story)
         {
             var xml =
                 new XElement("settings",
@@ -118,12 +121,12 @@ namespace ZDebug.UI.Services
             GameStorage.SaveStorySettings(story, xml);
         }
 
-        private static void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             SaveSettings(e.Story);
 
             interpreter = null;
-            processor = null;
+            machine = null;
             reader = null;
             currentInstruction = null;
             hasStepped = false;
@@ -134,60 +137,66 @@ namespace ZDebug.UI.Services
             ChangeState(DebuggerState.Unavailable);
         }
 
-        private static void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             interpreter = new Interpreter();
             e.Story.RegisterInterpreter(interpreter);
-            processor = new InterpretedZMachine(e.Story);
-            reader = new InstructionReader(processor.PC, e.Story.Memory);
+            machine = new InterpretedZMachine(e.Story);
+            reader = new InstructionReader(machine.PC, e.Story.Memory);
 
             LoadSettings(e.Story);
 
-            processor.SetRandomSeed(42);
+            machine.SetRandomSeed(42);
 
-            processor.Quit += Processor_Quit;
+            machine.Quit += Processor_Quit;
 
             ChangeState(DebuggerState.Stopped);
+
+            var handler = MachineInitialized;
+            if (handler != null)
+            {
+                handler(this, new MachineInitializedEventArgs());
+            }
         }
 
-        private static void Processor_Quit(object sender, EventArgs e)
+        private void Processor_Quit(object sender, EventArgs e)
         {
             ChangeState(DebuggerState.Done);
         }
 
-        private static void OnProcessorStepping(int oldPC)
+        private void OnProcessorStepping(int oldPC)
         {
-            var handler = ProcessorStepping;
+            var handler = Stepping;
             if (handler != null)
             {
-                handler(null, new ProcessorSteppingEventArgs(oldPC));
+                handler(this, new SteppingEventArgs(oldPC));
             }
         }
 
-        private static void OnProcessorStepped(int oldPC, int newPC)
+        private void OnProcessorStepped(int oldPC, int newPC)
         {
-            var handler = ProcessorStepped;
+            var handler = Stepped;
             if (handler != null)
             {
-                handler(null, new ProcessorSteppedEventArgs(oldPC, newPC));
+                handler(this, new SteppedEventArgs(oldPC, newPC));
             }
         }
 
-        public static void RequestNavigation(int address)
+        public void RequestNavigation(int address)
         {
             var handler = NavigationRequested;
             if (handler != null)
             {
-                handler(null, new NavigationRequestedEventArgs(address));
+                handler(this, new NavigationRequestedEventArgs(address));
             }
         }
 
-        public static bool CanStartDebugging
+        public bool CanStartDebugging
         {
             get { return state == DebuggerState.Stopped; }
         }
 
-        private static void RunModePump()
+        private void RunModePump()
         {
             try
             {
@@ -219,29 +228,29 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public static void StartDebugging()
+        public void StartDebugging()
         {
             ChangeState(DebuggerState.Running);
 
             Application.Current.Dispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
         }
 
-        public static bool CanStopDebugging
+        public bool CanStopDebugging
         {
             get { return state == DebuggerState.Running; }
         }
 
-        public static void StopDebugging()
+        public void StopDebugging()
         {
             stopping = true;
         }
 
-        public static bool CanStepNext
+        public bool CanStepNext
         {
             get { return state == DebuggerState.Stopped; }
         }
 
-        public static void StepNext()
+        public void StepNext()
         {
             try
             {
@@ -254,19 +263,19 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public static bool CanResetSession
+        public bool CanResetSession
         {
             get { return state != DebuggerState.Running && state != DebuggerState.Unavailable && hasStepped; }
         }
 
-        public static void ResetSession()
+        public void ResetSession()
         {
             string fileName = storyService.FileName;
             storyService.CloseStory();
             storyService.OpenStory(fileName);
         }
 
-        public static void BeginAwaitingInput()
+        public void BeginAwaitingInput()
         {
             if (state == DebuggerState.AwaitingInput)
             {
@@ -277,7 +286,7 @@ namespace ZDebug.UI.Services
             ChangeState(DebuggerState.AwaitingInput);
         }
 
-        public static void EndAwaitingInput()
+        public void EndAwaitingInput()
         {
             if (state != DebuggerState.AwaitingInput)
             {
@@ -286,7 +295,7 @@ namespace ZDebug.UI.Services
 
             if (priorState == DebuggerState.Running)
             {
-                if (breakpointService.Exists(processor.PC))
+                if (breakpointService.Exists(machine.PC))
                 {
                     ChangeState(DebuggerState.Stopped);
                 }
@@ -301,26 +310,28 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public static DebuggerState State
+        public DebuggerState State
         {
             get { return state; }
         }
 
-        public static InterpretedZMachine Processor
+        public InterpretedZMachine Machine
         {
-            get { return processor; }
+            get { return machine; }
         }
 
-        public static Exception CurrentException
+        public Exception CurrentException
         {
             get { return currentException; }
         }
 
-        public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
+        public event EventHandler<MachineInitializedEventArgs> MachineInitialized;
 
-        public static event EventHandler<ProcessorSteppingEventArgs> ProcessorStepping;
-        public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
+        public event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
 
-        public static event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
+        public event EventHandler<SteppingEventArgs> Stepping;
+        public event EventHandler<SteppedEventArgs> Stepped;
+
+        public event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
     }
 }

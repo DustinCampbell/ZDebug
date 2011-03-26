@@ -10,15 +10,20 @@ namespace ZDebug.UI.ViewModel
     internal sealed class MessageLogViewModel : ViewModelWithViewBase<UserControl>, IMessageLog
     {
         private readonly StoryService storyService;
+        private readonly DebuggerService debuggerService;
+
         private readonly BulkObservableCollection<MessageViewModel> messages;
 
         [ImportingConstructor]
         public MessageLogViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            DebuggerService debuggerService)
             : base("MessageLogView")
         {
             this.storyService = storyService;
-            messages = new BulkObservableCollection<MessageViewModel>();
+            this.debuggerService = debuggerService;
+
+            this.messages = new BulkObservableCollection<MessageViewModel>();
         }
 
         public void SendError(string message)
@@ -31,29 +36,29 @@ namespace ZDebug.UI.ViewModel
             messages.Add(MessageViewModel.CreateWarning(message));
         }
 
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
         {
-            DebuggerService.StateChanged += DebuggerService_StateChanged;
-            DebuggerService.Processor.RegisterMessageLog(this);
+            debuggerService.StateChanged += DebuggerService_StateChanged;
+            debuggerService.Machine.RegisterMessageLog(this);
         }
 
         private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
             messages.Clear();
-            DebuggerService.StateChanged -= DebuggerService_StateChanged;
+            debuggerService.StateChanged -= DebuggerService_StateChanged;
         }
 
         private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
         {
             if (e.NewState == DebuggerState.StoppedAtError)
             {
-                SendError(DebuggerService.CurrentException.Message);
+                SendError(debuggerService.CurrentException.Message);
             }
         }
 
         protected override void ViewCreated(UserControl view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
+            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
             storyService.StoryClosing += StoryService_StoryClosing;
         }
 

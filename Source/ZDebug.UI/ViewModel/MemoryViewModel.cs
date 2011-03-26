@@ -13,14 +13,18 @@ namespace ZDebug.UI.ViewModel
     internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly StoryService storyService;
+        private readonly DebuggerService debuggerService;
+
         private readonly BulkObservableCollection<MemoryLineViewModel> lines;
 
         [ImportingConstructor]
         public MemoryViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            DebuggerService debuggerService)
             : base("MemoryView")
         {
             this.storyService = storyService;
+            this.debuggerService = debuggerService;
             this.lines = new BulkObservableCollection<MemoryLineViewModel>();
         }
 
@@ -119,7 +123,7 @@ namespace ZDebug.UI.ViewModel
         {
             storyService.StoryOpened += StoryService_StoryOpened;
             storyService.StoryClosing += StoryService_StoryClosing;
-            DebuggerService.StateChanged += DebuggerService_StateChanged;
+            debuggerService.StateChanged += DebuggerService_StateChanged;
         }
 
         public bool HasStory

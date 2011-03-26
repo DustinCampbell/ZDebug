@@ -19,6 +19,7 @@ namespace ZDebug.UI.ViewModel
     {
         private readonly StoryService storyService;
         private readonly GameScriptService gameScriptService;
+        private readonly DebuggerService debuggerService;
 
         private ZWindowManager windowManager;
         private Grid windowContainer;
@@ -34,16 +35,18 @@ namespace ZDebug.UI.ViewModel
         [ImportingConstructor]
         public OutputViewModel(
             StoryService storyService,
-            GameScriptService gameScriptService)
+            GameScriptService gameScriptService,
+            DebuggerService debuggerService)
             : base("OutputView")
         {
             this.storyService = storyService;
             this.gameScriptService = gameScriptService;
+            this.debuggerService = debuggerService;
         }
 
         protected override void ViewCreated(UserControl view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
+            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
             storyService.StoryClosing += StoryService_StoryClosing;
 
             windowManager = new ZWindowManager();
@@ -55,7 +58,7 @@ namespace ZDebug.UI.ViewModel
             throw new NotImplementedException();
         }
 
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
         {
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);
@@ -63,8 +66,8 @@ namespace ZDebug.UI.ViewModel
 
             windowManager.Activate(mainWindow);
 
-            DebuggerService.Processor.RegisterScreen(this);
-            DebuggerService.Processor.RegisterSoundEngine(this);
+            debuggerService.Machine.RegisterScreen(this);
+            debuggerService.Machine.RegisterSoundEngine(this);
         }
 
         private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
@@ -151,7 +154,7 @@ namespace ZDebug.UI.ViewModel
 
         public void ReadChar(Action<char> callback)
         {
-            DebuggerService.BeginAwaitingInput();
+            debuggerService.BeginAwaitingInput();
 
             mainWindow.ReadChar(ch =>
             {
@@ -159,7 +162,7 @@ namespace ZDebug.UI.ViewModel
                 currStatusHeight = 0;
 
                 callback(ch);
-                DebuggerService.EndAwaitingInput();
+                debuggerService.EndAwaitingInput();
             });
         }
 
@@ -176,7 +179,7 @@ namespace ZDebug.UI.ViewModel
             }
             else
             {
-                DebuggerService.BeginAwaitingInput();
+                debuggerService.BeginAwaitingInput();
 
                 mainWindow.ReadCommand(maxChars, text =>
                 {
@@ -184,7 +187,7 @@ namespace ZDebug.UI.ViewModel
                     currStatusHeight = 0;
 
                     callback(text);
-                    DebuggerService.EndAwaitingInput();
+                    debuggerService.EndAwaitingInput();
                 });
             }
         }

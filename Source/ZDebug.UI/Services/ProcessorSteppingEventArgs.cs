@@ -2,11 +2,11 @@
 
 namespace ZDebug.UI.Services
 {
-    public class ProcessorSteppingEventArgs : EventArgs
+    public class SteppingEventArgs : EventArgs
     {
         private readonly int oldPC;
 
-        public ProcessorSteppingEventArgs(int oldPC)
+        public SteppingEventArgs(int oldPC)
         {
             this.oldPC = oldPC;
         }
