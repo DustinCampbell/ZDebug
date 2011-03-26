@@ -27,7 +27,8 @@ namespace ZDebug.UI.ViewModel
                     var line = element.DataContext as DisassemblyInstructionLineViewModel;
                     if (line != null)
                     {
-                        DebuggerService.ToggleBreakpoint(line.Address);
+                        var breakpointService = App.Current.GetService<BreakpointService>();
+                        breakpointService.ToggleBreakpoint(line.Address);
                     }
                 }
             }

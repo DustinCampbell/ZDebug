@@ -24,12 +24,21 @@ namespace ZDebug.UI
             this.container = new CompositionContainer(catelog);
 
             var storyService = container.GetExportedValue<StoryService>();
-            DebuggerService.SetStoryService(storyService);
+            var breakpointService = container.GetExportedValue<BreakpointService>();
+            DebuggerService.SetServices(storyService, breakpointService);
 
             var mainWindowViewModel = container.GetExportedValue<MainWindowViewModel>();
 
             this.MainWindow = mainWindowViewModel.CreateView();
             this.MainWindow.Show();
+        }
+
+        public new static App Current
+        {
+            get
+            {
+                return ((App)Application.Current);
+            }
         }
     }
 }

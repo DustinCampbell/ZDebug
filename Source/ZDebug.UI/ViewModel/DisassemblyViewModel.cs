@@ -31,6 +31,8 @@ namespace ZDebug.UI.ViewModel
         }
 
         private readonly StoryService storyService;
+        private readonly BreakpointService breakpointService;
+
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
         private readonly List<AddressAndIndex> routineAddressAndIndexList;
@@ -39,10 +41,13 @@ namespace ZDebug.UI.ViewModel
 
         [ImportingConstructor]
         public DisassemblyViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            BreakpointService breakpointService)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
+            this.breakpointService = breakpointService;
+
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
             routineAddressAndIndexList = new List<AddressAndIndex>();
@@ -132,7 +137,7 @@ namespace ZDebug.UI.ViewModel
                         var instruction = instructions[i];
                         var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
 
-                        if (DebuggerService.BreakpointExists(instruction.Address))
+                        if (breakpointService.BreakpointExists(instruction.Address))
                         {
                             instructionLine.HasBreakpoint = true;
                         }
@@ -255,7 +260,7 @@ namespace ZDebug.UI.ViewModel
                     var instruction = instructions[i];
                     var instructionLine = new DisassemblyInstructionLineViewModel(instruction, i == lastIndex);
 
-                    if (DebuggerService.BreakpointExists(instruction.Address))
+                    if (breakpointService.BreakpointExists(instruction.Address))
                     {
                         instructionLine.HasBreakpoint = true;
                     }
@@ -350,7 +355,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_BreakpointRemoved(object sender, BreakpointEventArgs e)
+        private void BreakpointService_BreakpointRemoved(object sender, BreakpointEventArgs e)
         {
             var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
             if (bpLine != null)
@@ -359,7 +364,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_BreakpointAdded(object sender, BreakpointEventArgs e)
+        private void BreakpointService_BreakpointAdded(object sender, BreakpointEventArgs e)
         {
             var bpLine = GetLineByAddress(e.Address) as DisassemblyInstructionLineViewModel;
             if (bpLine != null)
@@ -401,8 +406,8 @@ namespace ZDebug.UI.ViewModel
 
             DebuggerService.StateChanged += DebuggerService_StateChanged;
 
-            DebuggerService.BreakpointAdded += DebuggerService_BreakpointAdded;
-            DebuggerService.BreakpointRemoved += DebuggerService_BreakpointRemoved;
+            breakpointService.BreakpointAdded += BreakpointService_BreakpointAdded;
+            breakpointService.BreakpointRemoved += BreakpointService_BreakpointRemoved;
 
             DebuggerService.ProcessorStepped += DebuggerService_Stepped;
 

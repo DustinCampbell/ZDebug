@@ -30,7 +30,7 @@ namespace ZDebug.UI.Controls
 
         public InstructionTextDisplayElement()
         {
-            this.storyService = ((App)Application.Current).GetService<StoryService>();
+            this.storyService = App.Current.GetService<StoryService>();
             this.builder = new InstructionTextBuilder();
 
             TextOptions.SetTextHintingMode(this, TextHintingMode.Fixed);

@@ -16,26 +16,29 @@ namespace ZDebug.UI.Services
 {
     internal static class DebuggerService
     {
+        private static StoryService storyService;
+        private static BreakpointService breakpointService;
+
         private static DebuggerState state;
         private static bool stopping;
         private static bool hasStepped;
 
         private static IInterpreter interpreter;
-        private static StoryService storyService;
         private static InterpretedZMachine processor;
         private static ZRoutineTable routineTable;
         private static InstructionReader reader;
         private static Instruction currentInstruction;
         private static Exception currentException;
-        private readonly static SortedSet<int> breakpoints = new SortedSet<int>();
         private readonly static List<string> gameScript = new List<string>();
         private static int gameScriptCommandIndex;
 
         private static DebuggerState priorState;
 
-        public static void SetStoryService(StoryService storyService)
+        public static void SetServices(StoryService storyService, BreakpointService breakpointService)
         {
             DebuggerService.storyService = storyService;
+            DebuggerService.breakpointService = breakpointService;
+
             storyService.StoryOpened += StoryService_StoryOpened;
             storyService.StoryClosing += StoryService_StoryClosing;
         }
@@ -99,7 +102,7 @@ namespace ZDebug.UI.Services
                 foreach (var bpElem in bpsElem.Elements("breakpoint"))
                 {
                     var addAttr = bpElem.Attribute("address");
-                    breakpoints.Add((int)addAttr);
+                    breakpointService.AddBreakpoint((int)addAttr);
                 }
             }
 
@@ -144,7 +147,7 @@ namespace ZDebug.UI.Services
                         new XAttribute("release", story.ReleaseNumber),
                         new XAttribute("version", story.Version)),
                     new XElement("breakpoints",
-                        breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))),
+                        breakpointService.Breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))),
                     new XElement("gamescript",
                         gameScript.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
@@ -166,7 +169,7 @@ namespace ZDebug.UI.Services
             currentInstruction = null;
             hasStepped = false;
 
-            breakpoints.Clear();
+            breakpointService.Clear();
             gameScript.Clear();
 
             ChangeState(DebuggerState.Unavailable);
@@ -212,45 +215,6 @@ namespace ZDebug.UI.Services
             {
                 handler(null, new ProcessorSteppedEventArgs(oldPC, newPC));
             }
-        }
-
-        public static void AddBreakpoint(int address)
-        {
-            breakpoints.Add(address);
-
-            var handler = BreakpointAdded;
-            if (handler != null)
-            {
-                handler(null, new BreakpointEventArgs(address));
-            }
-        }
-
-        public static void RemoveBreakpoint(int address)
-        {
-            breakpoints.Remove(address);
-
-            var handler = BreakpointRemoved;
-            if (handler != null)
-            {
-                handler(null, new BreakpointEventArgs(address));
-            }
-        }
-
-        public static void ToggleBreakpoint(int address)
-        {
-            if (breakpoints.Contains(address))
-            {
-                RemoveBreakpoint(address);
-            }
-            else
-            {
-                AddBreakpoint(address);
-            }
-        }
-
-        public static bool BreakpointExists(int address)
-        {
-            return breakpoints.Contains(address);
         }
 
         public static void RequestNavigation(int address)
@@ -299,7 +263,7 @@ namespace ZDebug.UI.Services
                         ChangeState(DebuggerState.Stopped);
                     }
 
-                    if (state == DebuggerState.Running && breakpoints.Contains(newPC))
+                    if (state == DebuggerState.Running && breakpointService.BreakpointExists(newPC))
                     {
                         ChangeState(DebuggerState.Stopped);
                     }
@@ -383,7 +347,7 @@ namespace ZDebug.UI.Services
 
             if (priorState == DebuggerState.Running)
             {
-                if (breakpoints.Contains(processor.PC))
+                if (breakpointService.BreakpointExists(processor.PC))
                 {
                     ChangeState(DebuggerState.Stopped);
                 }
@@ -418,17 +382,6 @@ namespace ZDebug.UI.Services
             get { return currentException; }
         }
 
-        public static IEnumerable<int> Breakpoints
-        {
-            get
-            {
-                foreach (var address in breakpoints)
-                {
-                    yield return address;
-                }
-            }
-        }
-
         public static void SetGameScriptCommands(IEnumerable<string> commands)
         {
             gameScript.Clear();
@@ -461,9 +414,6 @@ namespace ZDebug.UI.Services
         }
 
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
-
-        public static event EventHandler<BreakpointEventArgs> BreakpointAdded;
-        public static event EventHandler<BreakpointEventArgs> BreakpointRemoved;
 
         public static event EventHandler<ProcessorSteppingEventArgs> ProcessorStepping;
         public static event EventHandler<ProcessorSteppedEventArgs> ProcessorStepped;
