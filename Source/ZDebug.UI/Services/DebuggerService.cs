@@ -18,6 +18,7 @@ namespace ZDebug.UI.Services
     {
         private static StoryService storyService;
         private static BreakpointService breakpointService;
+        private static GameScriptService gameScriptService;
 
         private static DebuggerState state;
         private static bool stopping;
@@ -29,15 +30,17 @@ namespace ZDebug.UI.Services
         private static InstructionReader reader;
         private static Instruction currentInstruction;
         private static Exception currentException;
-        private readonly static List<string> gameScript = new List<string>();
-        private static int gameScriptCommandIndex;
 
         private static DebuggerState priorState;
 
-        public static void SetServices(StoryService storyService, BreakpointService breakpointService)
+        public static void SetServices(
+            StoryService storyService,
+            BreakpointService breakpointService,
+            GameScriptService gameScriptService)
         {
             DebuggerService.storyService = storyService;
             DebuggerService.breakpointService = breakpointService;
+            DebuggerService.gameScriptService = gameScriptService;
 
             storyService.StoryOpened += StoryService_StoryOpened;
             storyService.StoryClosing += StoryService_StoryClosing;
@@ -99,20 +102,24 @@ namespace ZDebug.UI.Services
             var bpsElem = xml.Element("breakpoints");
             if (bpsElem != null)
             {
+                var breakpoints = new List<int>();
                 foreach (var bpElem in bpsElem.Elements("breakpoint"))
                 {
                     var addAttr = bpElem.Attribute("address");
-                    breakpointService.Add((int)addAttr);
+                    breakpoints.Add((int)addAttr);
                 }
+                breakpointService.SetBreakpoints(breakpoints);
             }
 
             var scriptElem = xml.Element("gamescript");
             if (scriptElem != null)
             {
+                var commands = new List<string>();
                 foreach (var commandElem in scriptElem.Elements("command"))
                 {
-                    gameScript.Add(commandElem.Value);
+                    commands.Add(commandElem.Value);
                 }
+                gameScriptService.SetCommands(commands);
             }
 
             var routinesElem = xml.Element("knownroutines");
@@ -149,7 +156,7 @@ namespace ZDebug.UI.Services
                     new XElement("breakpoints",
                         breakpointService.Breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b)))),
                     new XElement("gamescript",
-                        gameScript.Select(c => new XElement("command", c))),
+                        gameScriptService.Commands.Select(c => new XElement("command", c))),
                     new XElement("knownroutines",
                         routineTable.Select(r => new XElement("routine",
                             new XAttribute("address", r.Address),
@@ -170,7 +177,7 @@ namespace ZDebug.UI.Services
             hasStepped = false;
 
             breakpointService.Clear();
-            gameScript.Clear();
+            gameScriptService.Clear();
 
             ChangeState(DebuggerState.Unavailable);
         }
@@ -186,7 +193,6 @@ namespace ZDebug.UI.Services
 
             LoadSettings(e.Story);
 
-            gameScriptCommandIndex = gameScript.Count != 0 ? 0 : -1;
             processor.SetRandomSeed(42);
 
             processor.Quit += Processor_Quit;
@@ -380,37 +386,6 @@ namespace ZDebug.UI.Services
         public static Exception CurrentException
         {
             get { return currentException; }
-        }
-
-        public static void SetGameScriptCommands(IEnumerable<string> commands)
-        {
-            gameScript.Clear();
-            gameScript.AddRange(commands);
-        }
-
-        public static string[] GetGameScriptCommands()
-        {
-            return gameScript.ToArray();
-        }
-
-        public static bool HasGameScriptCommand()
-        {
-            return gameScriptCommandIndex >= 0 && gameScriptCommandIndex < gameScript.Count;
-        }
-
-        public static string GetNextGameScriptCommand()
-        {
-            if (gameScriptCommandIndex < 0 || gameScriptCommandIndex >= gameScript.Count)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return gameScript[gameScriptCommandIndex++];
-        }
-
-        public static int GameScriptCommandCount
-        {
-            get { return gameScript.Count; }
         }
 
         public static event EventHandler<DebuggerStateChangedEventArgs> StateChanged;

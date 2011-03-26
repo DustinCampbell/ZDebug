@@ -7,12 +7,18 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class GameScriptDialogViewModel : ViewModelWithViewBase<Window>
     {
+        private readonly GameScriptService gameScriptService;
+
         private string commands;
 
-        public GameScriptDialogViewModel()
+        [ImportingConstructor]
+        public GameScriptDialogViewModel(
+            GameScriptService gameScriptService)
             : base("GameScriptDialogView")
         {
-            commands = string.Join("\r\n", DebuggerService.GetGameScriptCommands());
+            this.gameScriptService = gameScriptService;
+
+            commands = string.Join("\r\n", gameScriptService.Commands);
         }
 
         public string Commands

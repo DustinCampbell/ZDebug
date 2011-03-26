@@ -10,6 +10,16 @@ namespace ZDebug.UI.Services
     {
         private readonly SortedSet<int> breakpoints = new SortedSet<int>();
 
+        public void SetBreakpoints(IEnumerable<int> breakpoints)
+        {
+            this.breakpoints.Clear();
+
+            foreach (var breakpoint in breakpoints)
+            {
+                this.breakpoints.Add(breakpoint);
+            }
+        }
+
         public void Add(int address)
         {
             breakpoints.Add(address);

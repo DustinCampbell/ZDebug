@@ -18,6 +18,7 @@ namespace ZDebug.UI.ViewModel
     internal sealed class OutputViewModel : ViewModelWithViewBase<UserControl>, IScreen, ISoundEngine
     {
         private readonly StoryService storyService;
+        private readonly GameScriptService gameScriptService;
 
         private ZWindowManager windowManager;
         private Grid windowContainer;
@@ -32,10 +33,12 @@ namespace ZDebug.UI.ViewModel
 
         [ImportingConstructor]
         public OutputViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            GameScriptService gameScriptService)
             : base("OutputView")
         {
             this.storyService = storyService;
+            this.gameScriptService = gameScriptService;
         }
 
         protected override void ViewCreated(UserControl view)
@@ -162,12 +165,12 @@ namespace ZDebug.UI.ViewModel
 
         public void ReadCommand(int maxChars, Action<string> callback)
         {
-            if (DebuggerService.HasGameScriptCommand())
+            if (gameScriptService.HasNextCommand())
             {
                 ResetStatusHeight();
                 currStatusHeight = 0;
 
-                string command = DebuggerService.GetNextGameScriptCommand();
+                string command = gameScriptService.GetNextCommand();
                 windowManager.ActiveWindow.PutString(command + "\r\n");
                 callback(command);
             }

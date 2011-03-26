@@ -15,6 +15,8 @@ namespace ZDebug.UI.ViewModel
     internal class MainWindowViewModel : ViewModelWithViewBase<Window>
     {
         private readonly StoryService storyService;
+        private readonly GameScriptService gameScriptService;
+
         private readonly StoryInfoViewModel storyInfoViewModel;
         private readonly MemoryMapViewModel memoryMapViewModel;
         private readonly GlobalsViewModel globalsViewModel;
@@ -26,8 +28,9 @@ namespace ZDebug.UI.ViewModel
         private readonly MessageLogViewModel messageLogViewModel;
 
         [ImportingConstructor]
-        public MainWindowViewModel(
+        private MainWindowViewModel(
             StoryService storyService,
+            GameScriptService gameScriptService,
             StoryInfoViewModel storyInfoViewModel,
             MemoryMapViewModel memoryMapViewModel,
             GlobalsViewModel globalsViewModel,
@@ -40,6 +43,7 @@ namespace ZDebug.UI.ViewModel
             : base("MainWindowView")
         {
             this.storyService = storyService;
+            this.gameScriptService = gameScriptService;
             this.storyInfoViewModel = storyInfoViewModel;
             this.memoryMapViewModel = memoryMapViewModel;
             this.globalsViewModel = globalsViewModel;
@@ -147,12 +151,12 @@ namespace ZDebug.UI.ViewModel
 
         private void EditGameScriptExecuted()
         {
-            var gameScriptDialogViewModel = new GameScriptDialogViewModel();
+            var gameScriptDialogViewModel = new GameScriptDialogViewModel(this.gameScriptService);
             var gameScriptDialog = gameScriptDialogViewModel.CreateView();
             gameScriptDialog.Owner = this.View;
             if (gameScriptDialog.ShowDialog() == true)
             {
-                DebuggerService.SetGameScriptCommands(gameScriptDialogViewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                this.gameScriptService.SetCommands(gameScriptDialogViewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
         }
 

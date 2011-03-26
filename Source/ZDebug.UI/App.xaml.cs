@@ -25,7 +25,8 @@ namespace ZDebug.UI
 
             var storyService = container.GetExportedValue<StoryService>();
             var breakpointService = container.GetExportedValue<BreakpointService>();
-            DebuggerService.SetServices(storyService, breakpointService);
+            var gameScriptService = container.GetExportedValue<GameScriptService>();
+            DebuggerService.SetServices(storyService, breakpointService, gameScriptService);
 
             var mainWindowViewModel = container.GetExportedValue<MainWindowViewModel>();
 
