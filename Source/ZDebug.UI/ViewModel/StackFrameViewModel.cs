@@ -1,22 +1,24 @@
 ﻿using System.Linq;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Extensions;
-using ZDebug.UI.Services;
+using ZDebug.Core.Routines;
 
 namespace ZDebug.UI.ViewModel
 {
     internal sealed class StackFrameViewModel : ViewModelBase
     {
         private readonly StackFrame stackFrame;
+        private readonly ZRoutineTable routineTable;
 
-        public StackFrameViewModel(StackFrame stackFrame)
+        public StackFrameViewModel(StackFrame stackFrame, ZRoutineTable routineTable)
         {
             this.stackFrame = stackFrame;
+            this.routineTable = routineTable;
         }
 
         public string Name
         {
-            get { return DebuggerService.RoutineTable.GetByAddress((int)stackFrame.CallAddress).Name; }
+            get { return routineTable.GetByAddress((int)stackFrame.CallAddress).Name; }
         }
 
         public bool HasName

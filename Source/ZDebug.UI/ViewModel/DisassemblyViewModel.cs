@@ -32,6 +32,7 @@ namespace ZDebug.UI.ViewModel
 
         private readonly StoryService storyService;
         private readonly BreakpointService breakpointService;
+        private readonly RoutineService routineService;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
@@ -42,11 +43,13 @@ namespace ZDebug.UI.ViewModel
         [ImportingConstructor]
         public DisassemblyViewModel(
             StoryService storyService,
-            BreakpointService breakpointService)
+            BreakpointService breakpointService,
+            RoutineService routineService)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
             this.breakpointService = breakpointService;
+            this.routineService = routineService;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
@@ -80,7 +83,7 @@ namespace ZDebug.UI.ViewModel
             dialog.Owner = Application.Current.MainWindow;
             if (dialog.ShowDialog() == true)
             {
-                DebuggerService.SetRoutineName(address, dialogViewModel.Name);
+                routineService.SetRoutineName(address, dialogViewModel.Name);
             }
         }
 
@@ -106,7 +109,7 @@ namespace ZDebug.UI.ViewModel
             lines.BeginBulkOperation();
             try
             {
-                var routineTable = DebuggerService.RoutineTable;
+                var routineTable = routineService.RoutineTable;
 
                 for (int rIndex = 0; rIndex < routineTable.Count; rIndex++)
                 {
@@ -163,7 +166,7 @@ namespace ZDebug.UI.ViewModel
 
             BringLineIntoView(ipLine);
 
-            DebuggerService.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
+            routineService.RoutineTable.RoutineAdded += RoutineTable_RoutineAdded;
         }
 
         private void BringLineIntoView(DisassemblyLineViewModel line)
@@ -392,7 +395,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_RoutineNameChanged(object sender, RoutineNameChangedEventArgs e)
+        private void RoutineService_RoutineNameChanged(object sender, RoutineNameChangedEventArgs e)
         {
             var line = GetLineByAddress(e.Routine.Address) as DisassemblyRoutineHeaderLineViewModel;
             if (line != null)
@@ -419,7 +422,7 @@ namespace ZDebug.UI.ViewModel
 
             DebuggerService.NavigationRequested += DebuggerService_NavigationRequested;
 
-            DebuggerService.RoutineNameChanged += DebuggerService_RoutineNameChanged;
+            routineService.RoutineNameChanged += RoutineService_RoutineNameChanged;
 
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 

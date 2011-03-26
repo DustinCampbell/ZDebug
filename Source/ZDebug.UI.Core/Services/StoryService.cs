@@ -13,7 +13,7 @@ namespace ZDebug.UI.Services
         private Story story;
         private GameInfo gameInfo;
 
-        private void OnStoryOpened()
+        private void OnStoryOpened(Story story)
         {
             var handler = StoryOpened;
             if (handler != null)
@@ -22,12 +22,21 @@ namespace ZDebug.UI.Services
             }
         }
 
-        private void OnStoryClosing()
+        private void OnStoryClosing(Story story)
         {
             var handler = StoryClosing;
             if (handler != null)
             {
                 handler(this, new StoryClosingEventArgs(story));
+            }
+        }
+
+        private void OnStoryClosed(Story story)
+        {
+            var handler = StoryClosed;
+            if (handler != null)
+            {
+                handler(this, new StoryClosedEventArgs(story));
             }
         }
 
@@ -38,11 +47,15 @@ namespace ZDebug.UI.Services
                 return;
             }
 
-            OnStoryClosing();
+            OnStoryClosing(story);
+
+            var oldStory = story;
 
             fileName = null;
             story = null;
             gameInfo = null;
+
+            OnStoryClosed(oldStory);
         }
 
         public Story OpenStory(string fileName)
@@ -65,7 +78,7 @@ namespace ZDebug.UI.Services
 
             this.fileName = fileName;
 
-            OnStoryOpened();
+            OnStoryOpened(story);
 
             return story;
         }
@@ -112,5 +125,6 @@ namespace ZDebug.UI.Services
 
         public event EventHandler<StoryOpenedEventArgs> StoryOpened;
         public event EventHandler<StoryClosingEventArgs> StoryClosing;
+        public event EventHandler<StoryClosedEventArgs> StoryClosed;
     }
 }

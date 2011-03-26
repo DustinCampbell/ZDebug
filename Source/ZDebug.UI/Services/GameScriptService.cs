@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace ZDebug.UI.Services
 {
     [Export]
-    internal class GameScriptService : IService
+    internal class GameScriptService : IService, IPersistable
     {
         private readonly List<string> commands = new List<string>();
         private int commandIndex;
@@ -51,6 +53,26 @@ namespace ZDebug.UI.Services
                     yield return command;
                 }
             }
+        }
+
+        public void Load(XElement xml)
+        {
+            commands.Clear();
+
+            var scriptElem = xml.Element("gamescript");
+            if (scriptElem != null)
+            {
+                foreach (var commandElem in scriptElem.Elements("command"))
+                {
+                    commands.Add(commandElem.Value);
+                }
+            }
+        }
+
+        public XElement Store()
+        {
+            return new XElement("gamescript",
+                commands.Select(c => new XElement("command", c)));
         }
     }
 }

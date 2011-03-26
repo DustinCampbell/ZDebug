@@ -2,23 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace ZDebug.UI.Services
 {
     [Export]
-    internal class BreakpointService : IService
+    internal class BreakpointService : IService, IPersistable
     {
         private readonly SortedSet<int> breakpoints = new SortedSet<int>();
-
-        public void SetBreakpoints(IEnumerable<int> breakpoints)
-        {
-            this.breakpoints.Clear();
-
-            foreach (var breakpoint in breakpoints)
-            {
-                this.breakpoints.Add(breakpoint);
-            }
-        }
 
         public void Add(int address)
         {
@@ -76,6 +67,27 @@ namespace ZDebug.UI.Services
                     yield return address;
                 }
             }
+        }
+
+        public void Load(XElement xml)
+        {
+            breakpoints.Clear();
+
+            var bpsElem = xml.Element("breakpoints");
+            if (bpsElem != null)
+            {
+                foreach (var bpElem in bpsElem.Elements("breakpoint"))
+                {
+                    var addAttr = bpElem.Attribute("address");
+                    breakpoints.Add((int)addAttr);
+                }
+            }
+        }
+
+        public XElement Store()
+        {
+            return new XElement("breakpoints",
+                breakpoints.Select(b => new XElement("breakpoint", new XAttribute("address", b))));
         }
 
         public event EventHandler<BreakpointEventArgs> Added;

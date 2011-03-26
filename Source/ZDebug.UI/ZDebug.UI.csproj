@@ -137,6 +137,7 @@
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
     <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
+    <Compile Include="Services\RoutineService.cs" />
     <Compile Include="Services\StoryEventArgs.cs" />
     <Compile Include="Utilities\GameStorage.cs" />
     <Compile Include="ViewModel\CallStackViewModel.cs" />

@@ -9,14 +9,19 @@ namespace ZDebug.UI.ViewModel
     internal sealed class CallStackViewModel : ViewModelWithViewBase<UserControl>
     {
         private readonly StoryService storyService;
+        private readonly RoutineService routineService;
+
         private readonly BulkObservableCollection<StackFrameViewModel> stackFrames;
 
         [ImportingConstructor]
         public CallStackViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            RoutineService routineService)
             : base("CallStackView")
         {
             this.storyService = storyService;
+            this.routineService = routineService;
+
             this.stackFrames = new BulkObservableCollection<StackFrameViewModel>();
         }
 
@@ -33,7 +38,7 @@ namespace ZDebug.UI.ViewModel
 
                     foreach (var frame in frames)
                     {
-                        stackFrames.Add(new StackFrameViewModel(frame));
+                        stackFrames.Add(new StackFrameViewModel(frame, routineService.RoutineTable));
                     }
                 }
                 finally
