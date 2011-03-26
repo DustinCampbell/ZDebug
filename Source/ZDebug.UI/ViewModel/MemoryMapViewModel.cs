@@ -13,11 +13,13 @@ namespace ZDebug.UI.ViewModel
         private ReadOnlyCollection<MemoryMapRegionViewModel> regions;
 
         [ImportingConstructor]
-        public MemoryMapViewModel(
+        private MemoryMapViewModel(
             StoryService storyService)
             : base("MemoryMapView")
         {
             this.storyService = storyService;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
@@ -41,12 +43,6 @@ namespace ZDebug.UI.ViewModel
 
             PropertyChanged("Regions");
             PropertyChanged("HasStory");
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         public ReadOnlyCollection<MemoryMapRegionViewModel> Regions

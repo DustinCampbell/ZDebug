@@ -9,19 +9,16 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class MessageLogViewModel : ViewModelWithViewBase<UserControl>, IMessageLog
     {
-        private readonly StoryService storyService;
         private readonly DebuggerService debuggerService;
-
         private readonly BulkObservableCollection<MessageViewModel> messages;
 
         [ImportingConstructor]
-        public MessageLogViewModel(
-            StoryService storyService,
-            DebuggerService debuggerService)
+        private MessageLogViewModel(DebuggerService debuggerService)
             : base("MessageLogView")
         {
-            this.storyService = storyService;
             this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+            this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
 
             this.messages = new BulkObservableCollection<MessageViewModel>();
         }
@@ -36,13 +33,13 @@ namespace ZDebug.UI.ViewModel
             messages.Add(MessageViewModel.CreateWarning(message));
         }
 
-        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
         {
             debuggerService.StateChanged += DebuggerService_StateChanged;
             debuggerService.Machine.RegisterMessageLog(this);
         }
 
-        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
         {
             messages.Clear();
             debuggerService.StateChanged -= DebuggerService_StateChanged;
@@ -54,12 +51,6 @@ namespace ZDebug.UI.ViewModel
             {
                 SendError(debuggerService.CurrentException.Message);
             }
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
-            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         public BulkObservableCollection<MessageViewModel> Messages

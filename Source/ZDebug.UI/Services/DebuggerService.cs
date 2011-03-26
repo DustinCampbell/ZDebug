@@ -71,7 +71,7 @@ namespace ZDebug.UI.Services
             currentInstruction = reader.NextInstruction();
 
             var oldPC = machine.PC;
-            OnProcessorStepping(oldPC);
+            OnStepping(oldPC);
 
             var newPC = machine.Step();
 
@@ -90,7 +90,7 @@ namespace ZDebug.UI.Services
                 }
             }
 
-            OnProcessorStepped(oldPC, newPC);
+            OnStepped(oldPC, newPC);
 
             hasStepped = true;
 
@@ -131,10 +131,13 @@ namespace ZDebug.UI.Services
             currentInstruction = null;
             hasStepped = false;
 
-            breakpointService.Clear();
-            gameScriptService.Clear();
-
             ChangeState(DebuggerState.Unavailable);
+
+            var handler = MachineDestroyed;
+            if (handler != null)
+            {
+                handler(this, new MachineDestroyedEventArgs());
+            }
         }
 
         private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
@@ -147,24 +150,23 @@ namespace ZDebug.UI.Services
             LoadSettings(e.Story);
 
             machine.SetRandomSeed(42);
-
-            machine.Quit += Processor_Quit;
+            machine.Quit += Machine_Quit;
 
             ChangeState(DebuggerState.Stopped);
 
-            var handler = MachineInitialized;
+            var handler = MachineCreated;
             if (handler != null)
             {
-                handler(this, new MachineInitializedEventArgs());
+                handler(this, new MachineCreatedEventArgs());
             }
         }
 
-        private void Processor_Quit(object sender, EventArgs e)
+        private void Machine_Quit(object sender, EventArgs e)
         {
             ChangeState(DebuggerState.Done);
         }
 
-        private void OnProcessorStepping(int oldPC)
+        private void OnStepping(int oldPC)
         {
             var handler = Stepping;
             if (handler != null)
@@ -173,7 +175,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        private void OnProcessorStepped(int oldPC, int newPC)
+        private void OnStepped(int oldPC, int newPC)
         {
             var handler = Stepped;
             if (handler != null)
@@ -316,7 +318,8 @@ namespace ZDebug.UI.Services
             get { return currentException; }
         }
 
-        public event EventHandler<MachineInitializedEventArgs> MachineInitialized;
+        public event EventHandler<MachineCreatedEventArgs> MachineCreated;
+        public event EventHandler<MachineDestroyedEventArgs> MachineDestroyed;
 
         public event EventHandler<DebuggerStateChangedEventArgs> StateChanged;
 

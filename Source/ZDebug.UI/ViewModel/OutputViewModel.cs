@@ -33,22 +33,22 @@ namespace ZDebug.UI.ViewModel
         private int machStatusHeight;
 
         [ImportingConstructor]
-        public OutputViewModel(
-            StoryService storyService,
-            GameScriptService gameScriptService,
-            DebuggerService debuggerService)
+        private OutputViewModel(StoryService storyService,
+            DebuggerService debuggerService,
+            GameScriptService gameScriptService)
             : base("OutputView")
         {
             this.storyService = storyService;
-            this.gameScriptService = gameScriptService;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
+
             this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+
+            this.gameScriptService = gameScriptService;
         }
 
         protected override void ViewCreated(UserControl view)
         {
-            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
-            storyService.StoryClosing += StoryService_StoryClosing;
-
             windowManager = new ZWindowManager();
             windowContainer = this.View.FindName<Grid>("windowContainer");
         }
@@ -58,7 +58,7 @@ namespace ZDebug.UI.ViewModel
             throw new NotImplementedException();
         }
 
-        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
         {
             mainWindow = windowManager.Open(ZWindowType.TextBuffer);
             windowContainer.Children.Add(mainWindow);

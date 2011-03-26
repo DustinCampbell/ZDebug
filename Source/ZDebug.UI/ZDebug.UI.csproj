@@ -133,11 +133,13 @@
     <Compile Include="Services\DebuggerService.cs" />
     <Compile Include="Services\GameScriptService.cs" />
     <Compile Include="Services\Interpreter.cs" />
-    <Compile Include="Services\MachineInitializedEventArgs.cs" />
+    <Compile Include="Services\MachineCreatedEventArgs.cs" />
+    <Compile Include="Services\MachineDestroyedEventArgs.cs" />
     <Compile Include="Services\NavigationRequestedEventArgs.cs" />
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
+    <Compile Include="Services\ResetEventArgs.cs" />
     <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
     <Compile Include="Services\RoutineService.cs" />
     <Compile Include="Utilities\GameStorage.cs" />

@@ -9,12 +9,23 @@ namespace ZDebug.UI.Services
     [Export]
     internal class BreakpointService : IService, IPersistable
     {
+        private readonly StoryService storyService;
         private readonly SortedSet<int> breakpoints = new SortedSet<int>();
 
-        public void Add(int address)
+        [ImportingConstructor]
+        private BreakpointService(StoryService storyService)
         {
-            breakpoints.Add(address);
+            this.storyService = storyService;
+            this.storyService.StoryClosed += StoryService_StoryClosed;
+        }
 
+        private void StoryService_StoryClosed(object sender, StoryClosedEventArgs e)
+        {
+            breakpoints.Clear();
+        }
+
+        private void OnAdded(int address)
+        {
             var handler = Added;
             if (handler != null)
             {
@@ -22,15 +33,34 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public void Remove(int address)
+        private void OnRemoved(int address)
         {
-            breakpoints.Remove(address);
-
             var handler = Removed;
             if (handler != null)
             {
                 handler(this, new BreakpointEventArgs(address));
             }
+        }
+
+        private void OnReset()
+        {
+            var handler = Reset;
+            if (handler != null)
+            {
+                handler(this, new ResetEventArgs());
+            }
+        }
+
+        public void Add(int address)
+        {
+            breakpoints.Add(address);
+            OnAdded(address);
+        }
+
+        public void Remove(int address)
+        {
+            breakpoints.Remove(address);
+            OnRemoved(address);
         }
 
         public void Toggle(int address)
@@ -52,10 +82,8 @@ namespace ZDebug.UI.Services
 
         public void Clear()
         {
-            foreach (var breakpoint in breakpoints.ToArray())
-            {
-                Remove(breakpoint);
-            }
+            breakpoints.Clear();
+            OnReset();
         }
 
         public IEnumerable<int> Breakpoints
@@ -82,6 +110,8 @@ namespace ZDebug.UI.Services
                     breakpoints.Add((int)addAttr);
                 }
             }
+
+            OnReset();
         }
 
         public XElement Store()
@@ -92,5 +122,6 @@ namespace ZDebug.UI.Services
 
         public event EventHandler<BreakpointEventArgs> Added;
         public event EventHandler<BreakpointEventArgs> Removed;
+        public event EventHandler<ResetEventArgs> Reset;
     }
 }

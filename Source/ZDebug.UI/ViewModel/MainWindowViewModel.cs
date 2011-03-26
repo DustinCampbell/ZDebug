@@ -47,9 +47,13 @@ namespace ZDebug.UI.ViewModel
             : base("MainWindowView")
         {
             this.storyService = storyService;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
+
             this.gameScriptService = gameScriptService;
             this.debuggerService = debuggerService;
             this.navigationService = navigationService;
+
             this.storyInfoViewModel = storyInfoViewModel;
             this.memoryMapViewModel = memoryMapViewModel;
             this.globalsViewModel = globalsViewModel;
@@ -296,9 +300,6 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(Window view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
-
             var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
             storyInfoContent.Content = this.storyInfoViewModel.CreateView();
 

@@ -9,8 +9,21 @@ namespace ZDebug.UI.Services
     [Export]
     internal class GameScriptService : IService, IPersistable
     {
+        private readonly StoryService storyService;
         private readonly List<string> commands = new List<string>();
         private int commandIndex;
+
+        [ImportingConstructor]
+        private GameScriptService(StoryService storyService)
+        {
+            this.storyService = storyService;
+            this.storyService.StoryClosed += StoryService_StoryClosed;
+        }
+
+        private void StoryService_StoryClosed(object sender, StoryClosedEventArgs e)
+        {
+            commands.Clear();
+        }
 
         public void Clear()
         {

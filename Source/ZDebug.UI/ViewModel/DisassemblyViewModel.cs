@@ -31,9 +31,9 @@ namespace ZDebug.UI.ViewModel
         }
 
         private readonly StoryService storyService;
+        private readonly DebuggerService debuggerService;
         private readonly BreakpointService breakpointService;
         private readonly RoutineService routineService;
-        private readonly DebuggerService debuggerService;
         private readonly NavigationService navigationService;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
@@ -43,19 +43,31 @@ namespace ZDebug.UI.ViewModel
         private DisassemblyLineViewModel inputLine;
 
         [ImportingConstructor]
-        public DisassemblyViewModel(
+        private DisassemblyViewModel(
             StoryService storyService,
+            DebuggerService debuggerService,
             BreakpointService breakpointService,
             RoutineService routineService,
-            DebuggerService debuggerService,
             NavigationService navigationService)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
-            this.breakpointService = breakpointService;
-            this.routineService = routineService;
+
             this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+            this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
+            this.debuggerService.StateChanged += DebuggerService_StateChanged;
+            this.debuggerService.Stepped += DebuggerService_Stepped;
+
+            this.breakpointService = breakpointService;
+            this.breakpointService.Added += BreakpointService_Added;
+            this.breakpointService.Removed += BreakpointService_Removed;
+
+            this.routineService = routineService;
+            this.routineService.RoutineNameChanged += RoutineService_RoutineNameChanged;
+
             this.navigationService = navigationService;
+            this.navigationService.NavigationRequested += NavigationService_NavigationRequested;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
@@ -106,7 +118,7 @@ namespace ZDebug.UI.ViewModel
             return null;
         }
 
-        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
         {
             var reader = new MemoryReader(storyService.Story.Memory, 0);
 
@@ -317,7 +329,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
         {
             lines.Clear();
             addressToLineMap.Clear();
@@ -416,20 +428,6 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(UserControl view)
         {
-            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
-            storyService.StoryClosing += StoryService_StoryClosing;
-
-            debuggerService.StateChanged += DebuggerService_StateChanged;
-
-            breakpointService.Added += BreakpointService_Added;
-            breakpointService.Removed += BreakpointService_Removed;
-
-            debuggerService.Stepped += DebuggerService_Stepped;
-
-            navigationService.NavigationRequested += NavigationService_NavigationRequested;
-
-            routineService.RoutineNameChanged += RoutineService_RoutineNameChanged;
-
             var typeface = new Typeface(this.View.FontFamily, this.View.FontStyle, this.View.FontWeight, this.View.FontStretch);
 
             var addressText = new FormattedText("  000000: ", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, this.View.FontSize, this.View.Foreground);

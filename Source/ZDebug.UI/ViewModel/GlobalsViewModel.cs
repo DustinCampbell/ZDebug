@@ -13,13 +13,18 @@ namespace ZDebug.UI.ViewModel
         private readonly IndexedVariableViewModel[] globals;
 
         [ImportingConstructor]
-        public GlobalsViewModel(
+        private GlobalsViewModel(
             StoryService storyService,
             DebuggerService debuggerService)
             : base("GlobalsView")
         {
             this.storyService = storyService;
+
             this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+            this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
+            this.debuggerService.StateChanged += DebuggerService_StateChanged;
+            this.debuggerService.Stepped += DebuggerService_ProcessorStepped;
 
             this.globals = new IndexedVariableViewModel[240];
 
@@ -49,6 +54,24 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
+        {
+            for (int i = 0; i < 240; i++)
+            {
+                globals[i].Visible = true;
+            }
+
+            Update(storyOpened: true);
+        }
+
+        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
+        {
+            for (int i = 0; i < 240; i++)
+            {
+                globals[i].Visible = false;
+            }
+        }
+
         private void DebuggerService_ProcessorStepped(object sender, SteppedEventArgs e)
         {
             Update();
@@ -63,32 +86,6 @@ namespace ZDebug.UI.ViewModel
             {
                 Update();
             }
-        }
-
-        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
-        {
-            for (int i = 0; i < 240; i++)
-            {
-                globals[i].Visible = false;
-            }
-        }
-
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
-        {
-            for (int i = 0; i < 240; i++)
-            {
-                globals[i].Visible = true;
-            }
-
-            Update(storyOpened: true);
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
-            debuggerService.StateChanged += DebuggerService_StateChanged;
-            debuggerService.Stepped += DebuggerService_ProcessorStepped;
         }
 
         public IndexedVariableViewModel[] Globals

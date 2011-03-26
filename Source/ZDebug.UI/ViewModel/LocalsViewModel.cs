@@ -18,23 +18,28 @@ namespace ZDebug.UI.ViewModel
         private VariableViewModel[] reversedStack;
 
         [ImportingConstructor]
-        public LocalsViewModel(
+        private LocalsViewModel(
             StoryService storyService,
             DebuggerService debuggerService)
             : base("LocalsView")
         {
             this.storyService = storyService;
-            this.debuggerService = debuggerService;
 
-            locals = new IndexedVariableViewModel[15];
+            this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+            this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
+            this.debuggerService.StateChanged += DebuggerService_StateChanged;
+            this.debuggerService.Stepped += DebuggerService_ProcessorStepped;
+
+            this.locals = new IndexedVariableViewModel[15];
 
             for (int i = 0; i < 15; i++)
             {
-                locals[i] = new IndexedVariableViewModel(i, 0);
+                this.locals[i] = new IndexedVariableViewModel(i, 0);
             }
 
-            stack = new VariableViewModel[0];
-            reversedStack = new VariableViewModel[0];
+            this.stack = new VariableViewModel[0];
+            this.reversedStack = new VariableViewModel[0];
         }
 
         private void Update()
@@ -106,7 +111,14 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
+        {
+            Update();
+
+            PropertyChanged("HasStory");
+        }
+
+        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
         {
             for (int i = 0; i < 15; i++)
             {
@@ -114,21 +126,6 @@ namespace ZDebug.UI.ViewModel
             }
 
             PropertyChanged("HasStory");
-        }
-
-        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
-        {
-            Update();
-
-            PropertyChanged("HasStory");
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
-            storyService.StoryClosing += StoryService_StoryClosing;
-            debuggerService.StateChanged += DebuggerService_StateChanged;
-            debuggerService.Stepped += DebuggerService_ProcessorStepped;
         }
 
         public IndexedVariableViewModel[] Locals

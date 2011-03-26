@@ -14,11 +14,13 @@ namespace ZDebug.UI.ViewModel
         private readonly BulkObservableCollection<ObjectViewModel> objects;
 
         [ImportingConstructor]
-        public ObjectsViewModel(
+        private ObjectsViewModel(
             StoryService storyService)
             : base("ObjectsView")
         {
             this.storyService = storyService;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
 
             this.NavigateCommand = RegisterCommand<int>(
                 text: "Navigate",
@@ -64,12 +66,6 @@ namespace ZDebug.UI.ViewModel
             objects.Clear();
 
             PropertyChanged("HasStory");
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
         }
 
         public ICommand NavigateCommand { get; private set; }

@@ -8,22 +8,24 @@ namespace ZDebug.UI.ViewModel
     [Export]
     internal sealed class CallStackViewModel : ViewModelWithViewBase<UserControl>
     {
-        private readonly StoryService storyService;
-        private readonly RoutineService routineService;
         private readonly DebuggerService debuggerService;
+        private readonly RoutineService routineService;
 
         private readonly BulkObservableCollection<StackFrameViewModel> stackFrames;
 
         [ImportingConstructor]
-        public CallStackViewModel(
-            StoryService storyService,
-            RoutineService routineService,
-            DebuggerService debuggerService)
+        private CallStackViewModel(
+            DebuggerService debuggerService,
+            RoutineService routineService)
             : base("CallStackView")
         {
-            this.storyService = storyService;
-            this.routineService = routineService;
             this.debuggerService = debuggerService;
+            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+            this.debuggerService.MachineDestroyed += new System.EventHandler<MachineDestroyedEventArgs>(DebuggerService_MachineDestroyed);
+            this.debuggerService.StateChanged += DebuggerService_StateChanged;
+            this.debuggerService.Stepped += DebuggerService_ProcessorStepped;
+
+            this.routineService = routineService;
 
             this.stackFrames = new BulkObservableCollection<StackFrameViewModel>();
         }
@@ -51,12 +53,12 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_MachineInitialized(object sender, MachineInitializedEventArgs e)
+        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
         {
             Update();
         }
 
-        private void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
         {
             stackFrames.Clear();
         }
@@ -78,14 +80,6 @@ namespace ZDebug.UI.ViewModel
             {
                 Update();
             }
-        }
-
-        protected override void ViewCreated(UserControl view)
-        {
-            debuggerService.MachineInitialized += DebuggerService_MachineInitialized;
-            storyService.StoryClosing += StoryService_StoryClosing;
-            debuggerService.StateChanged += DebuggerService_StateChanged;
-            debuggerService.Stepped += DebuggerService_ProcessorStepped;
         }
 
         public BulkObservableCollection<StackFrameViewModel> StackFrames
