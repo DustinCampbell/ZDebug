@@ -34,6 +34,7 @@ namespace ZDebug.UI.ViewModel
         private readonly BreakpointService breakpointService;
         private readonly RoutineService routineService;
         private readonly DebuggerService debuggerService;
+        private readonly NavigationService navigationService;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
@@ -46,13 +47,15 @@ namespace ZDebug.UI.ViewModel
             StoryService storyService,
             BreakpointService breakpointService,
             RoutineService routineService,
-            DebuggerService debuggerService)
+            DebuggerService debuggerService,
+            NavigationService navigationService)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
             this.breakpointService = breakpointService;
             this.routineService = routineService;
             this.debuggerService = debuggerService;
+            this.navigationService = navigationService;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
@@ -385,7 +388,7 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        private void DebuggerService_NavigationRequested(object sender, NavigationRequestedEventArgs e)
+        private void NavigationService_NavigationRequested(object sender, NavigationRequestedEventArgs e)
         {
             var line = GetLineByAddress(e.Address);
             if (line != null)
@@ -423,7 +426,7 @@ namespace ZDebug.UI.ViewModel
 
             debuggerService.Stepped += DebuggerService_Stepped;
 
-            debuggerService.NavigationRequested += DebuggerService_NavigationRequested;
+            navigationService.NavigationRequested += NavigationService_NavigationRequested;
 
             routineService.RoutineNameChanged += RoutineService_RoutineNameChanged;
 

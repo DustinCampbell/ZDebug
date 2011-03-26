@@ -17,6 +17,7 @@ namespace ZDebug.UI.ViewModel
         private readonly StoryService storyService;
         private readonly GameScriptService gameScriptService;
         private readonly DebuggerService debuggerService;
+        private readonly NavigationService navigationService;
 
         private readonly StoryInfoViewModel storyInfoViewModel;
         private readonly MemoryMapViewModel memoryMapViewModel;
@@ -33,6 +34,7 @@ namespace ZDebug.UI.ViewModel
             StoryService storyService,
             GameScriptService gameScriptService,
             DebuggerService debuggerService,
+            NavigationService navigationService,
             StoryInfoViewModel storyInfoViewModel,
             MemoryMapViewModel memoryMapViewModel,
             GlobalsViewModel globalsViewModel,
@@ -47,6 +49,7 @@ namespace ZDebug.UI.ViewModel
             this.storyService = storyService;
             this.gameScriptService = gameScriptService;
             this.debuggerService = debuggerService;
+            this.navigationService = navigationService;
             this.storyInfoViewModel = storyInfoViewModel;
             this.memoryMapViewModel = memoryMapViewModel;
             this.globalsViewModel = globalsViewModel;
@@ -176,7 +179,7 @@ namespace ZDebug.UI.ViewModel
             dialog.Owner = this.View;
             if (dialog.ShowDialog() == true)
             {
-                debuggerService.RequestNavigation(goToAddressDialogViewModel.Address);
+                navigationService.RequestNavigation(goToAddressDialogViewModel.Address);
             }
         }
 

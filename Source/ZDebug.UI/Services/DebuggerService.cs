@@ -182,15 +182,6 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public void RequestNavigation(int address)
-        {
-            var handler = NavigationRequested;
-            if (handler != null)
-            {
-                handler(this, new NavigationRequestedEventArgs(address));
-            }
-        }
-
         public bool CanStartDebugging
         {
             get { return state == DebuggerState.Stopped; }
@@ -331,7 +322,5 @@ namespace ZDebug.UI.Services
 
         public event EventHandler<SteppingEventArgs> Stepping;
         public event EventHandler<SteppedEventArgs> Stepped;
-
-        public event EventHandler<NavigationRequestedEventArgs> NavigationRequested;
     }
 }
