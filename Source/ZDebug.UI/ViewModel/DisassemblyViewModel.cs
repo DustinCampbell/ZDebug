@@ -88,7 +88,13 @@ namespace ZDebug.UI.ViewModel
 
         private DisassemblyLineViewModel GetLineByAddress(int address)
         {
-            return addressToLineMap[address];
+            DisassemblyLineViewModel result;
+            if (addressToLineMap.TryGetValue(address, out result))
+            {
+                return result;
+            }
+
+            return null;
         }
 
         private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
