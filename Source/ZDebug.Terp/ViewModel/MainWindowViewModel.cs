@@ -377,6 +377,14 @@ namespace ZDebug.Terp.ViewModel
             });
         }
 
+        public bool Profiling
+        {
+            get
+            {
+                return profiler != null;
+            }
+        }
+
         void ISoundEngine.HighBeep()
         {
             SystemSounds.Asterisk.Play();
