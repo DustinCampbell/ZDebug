@@ -4,21 +4,21 @@ namespace ZDebug.Compiler
 {
     public sealed class ZRoutineCall
     {
-        private readonly CompiledZMachine machine;
-        private readonly ZRoutine routine;
+        public readonly CompiledZMachine Machine;
+        public readonly ZRoutine Routine;
         private ZCompilerResult compilationResult;
 
         public ZRoutineCall(ZRoutine routine, CompiledZMachine machine)
         {
-            this.machine = machine;
-            this.routine = routine;
+            this.Machine = machine;
+            this.Routine = routine;
         }
 
         public void Compile()
         {
             if (compilationResult == null)
             {
-                compilationResult = machine.Compile(routine);
+                compilationResult = Machine.Compile(Routine);
             }
         }
 
@@ -27,14 +27,6 @@ namespace ZDebug.Compiler
             Compile();
 
             return compilationResult.Code(compilationResult.Calls);
-        }
-
-        /// <summary>
-        /// The Z-machine routine that was compiled.
-        /// </summary>
-        public ZRoutine Routine
-        {
-            get { return routine; }
         }
     }
 }

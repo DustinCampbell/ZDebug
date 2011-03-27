@@ -17,6 +17,7 @@ namespace ZDebug.Compiler
 
         private readonly IZMachineProfiler profiler;
         private readonly bool precompile;
+        private readonly bool debugging;
 
         // routine state
         private readonly ushort[] stack;
@@ -59,7 +60,7 @@ namespace ZDebug.Compiler
         private volatile bool inputReceived;
         private volatile bool stopping;
 
-        public CompiledZMachine(Story story, bool precompile = false, IZMachineProfiler profiler = null)
+        public CompiledZMachine(Story story, bool precompile = false, bool debugging = false, IZMachineProfiler profiler = null)
             : base(story)
         {
             this.profiler = profiler;
@@ -1265,63 +1266,43 @@ namespace ZDebug.Compiler
             }
         }
 
-        internal ushort Read_Z5(ushort textBuffer, ushort parseBuffer)
+        internal unsafe ushort Read_Z5(ushort textBuffer, ushort parseBuffer)
         {
             // TODO: Support timed input
 
             inputReceived = false;
             ushort result = 0;
 
-            byte maxChars = this.Memory.ReadByte(textBuffer);
-
-            this.Screen.ReadCommand(maxChars, s =>
+            fixed (byte* pMemory = Memory)
             {
-                string text = s.ToLower();
+                byte* pTextBuffer = pMemory + textBuffer;
 
-                byte existingTextCount = this.Memory.ReadByte(textBuffer + 1);
+                byte maxChars = *pTextBuffer++;
 
-                this.Memory.WriteByte(textBuffer + existingTextCount + 1, (byte)text.Length);
-
-                for (int i = 0; i < text.Length; i++)
+                this.Screen.ReadCommand(maxChars, s =>
                 {
-                    this.Memory.WriteByte(textBuffer + existingTextCount + 2 + i, (byte)text[i]);
-                }
+                    string text = s.ToLower();
 
-                if (parseBuffer > 0)
-                {
-                    // TODO: Use ztext.TokenizeLine.
+                    byte existingTextCount = *pTextBuffer;
+                    *pTextBuffer++ = (byte)text.Length;
+                    pTextBuffer += existingTextCount;
 
-                    ZCommandToken[] tokens = this.ZText.TokenizeCommand(text, dictionaryAddress);
-
-                    byte maxWords = this.Memory.ReadByte(parseBuffer);
-                    byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
-
-                    this.Memory.WriteByte(parseBuffer + 1, parsedWords);
-
-                    for (int i = 0; i < parsedWords; i++)
+                    for (int i = 0; i < text.Length; i++)
                     {
-                        ZCommandToken token = tokens[i];
-
-                        ushort address = this.ZText.LookupWord(token.Text, dictionaryAddress);
-                        if (address > 0)
-                        {
-                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
-                        }
-                        else
-                        {
-                            this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
-                        }
-
-                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                        this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 2));
+                        *pTextBuffer++ = (byte)text[i];
                     }
-                }
 
-                // TODO: Update this when timed input is supported
-                result = 10;
+                    if (parseBuffer > 0)
+                    {
+                        this.ZText.TokenizeLine(textBuffer, parseBuffer, dictionaryAddress, flag: false);
+                    }
 
-                inputReceived = true;
-            });
+                    // TODO: Update this when timed input is supported
+                    result = 10;
+
+                    inputReceived = true;
+                });
+            }
 
             while (!inputReceived && !stopping)
             {
@@ -1394,6 +1375,14 @@ namespace ZDebug.Compiler
             get
             {
                 return precompile;
+            }
+        }
+
+        public bool Debugging
+        {
+            get
+            {
+                return debugging;
             }
         }
 

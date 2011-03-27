@@ -59,7 +59,7 @@ namespace ZDebug.Core.Collections
 
         private readonly T[] array;
         private readonly int startIndex;
-        private readonly int length;
+        public readonly int Length;
 
         internal static readonly ReadOnlyArray<T> Empty = new ReadOnlyArray<T>(null);
 
@@ -67,14 +67,14 @@ namespace ZDebug.Core.Collections
         {
             this.array = array;
             this.startIndex = startIndex;
-            this.length = length;
+            this.Length = length;
         }
 
         public ReadOnlyArray(T[] array)
         {
             this.array = array;
             this.startIndex = 0;
-            this.length = array != null ? array.Length : 0;
+            this.Length = array != null ? array.Length : 0;
         }
 
         internal T[] InnerArray
@@ -93,39 +93,34 @@ namespace ZDebug.Core.Collections
             internal set { array[startIndex + index] = value; }
         }
 
-        public int Length
-        {
-            get { return length; }
-        }
-
         public bool IsEmpty
         {
-            get { return length == 0; }
+            get { return Length == 0; }
         }
 
         public ReadOnlyArray<T> Skip(int count)
         {
-            if (count < 0 || length < count)
+            if (count < 0 || Length < count)
             {
                 throw new ArgumentOutOfRangeException("count");
             }
 
-            return new ReadOnlyArray<T>(array, startIndex + count, length - count);
+            return new ReadOnlyArray<T>(array, startIndex + count, Length - count);
         }
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(array, startIndex, length);
+            return new Enumerator(array, startIndex, Length);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new Enumerator(array, startIndex, length);
+            return new Enumerator(array, startIndex, Length);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new Enumerator(array, startIndex, length);
+            return new Enumerator(array, startIndex, Length);
         }
     }
 }

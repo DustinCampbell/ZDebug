@@ -7,8 +7,8 @@ namespace ZDebug.Core.Execution
 {
     public abstract partial class ZMachine
     {
-        private readonly byte version;
-        private readonly ushort globalVariableTableAddress;
+        public readonly byte Version;
+        public readonly ushort GlobalVariableTableAddress;
 
         protected readonly Story Story;
         protected readonly byte[] Memory;
@@ -25,10 +25,10 @@ namespace ZDebug.Core.Execution
         {
             this.Story = story;
             this.Memory = story.Memory;
-            this.version = story.Version;
+            this.Version = story.Version;
             this.ZText = new ZText(this.Memory);
 
-            this.globalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
+            this.GlobalVariableTableAddress = Header.ReadGlobalVariableTableAddress(this.Memory);
 
             this.OutputStreams = new OutputStreamCollection(story);
             RegisterScreen(NullScreen.Instance);
@@ -38,13 +38,13 @@ namespace ZDebug.Core.Execution
 
         private void SetScreenDimensions()
         {
-            if (this.version >= 4)
+            if (this.Version >= 4)
             {
                 Header.WriteScreenHeightInLines(this.Memory, this.Screen.ScreenHeightInLines);
                 Header.WriteScreenWidthInColumns(this.Memory, this.Screen.ScreenWidthInColumns);
             }
 
-            if (this.version >= 5)
+            if (this.Version >= 5)
             {
                 Header.WriteScreenHeightInUnits(this.Memory, this.Screen.ScreenHeightInUnits);
                 Header.WriteScreenWidthInUnits(this.Memory, this.Screen.ScreenWidthInUnits);
@@ -59,7 +59,7 @@ namespace ZDebug.Core.Execution
 
             SetScreenDimensions();
 
-            if (this.version >= 5)
+            if (this.Version >= 5)
             {
                 this.Memory.WriteByte(0x2c, (byte)this.Screen.DefaultBackgroundColor);
                 this.Memory.WriteByte(0x2d, (byte)this.Screen.DefaultForegroundColor);
@@ -86,22 +86,6 @@ namespace ZDebug.Core.Execution
         protected ushort GenerateRandomNumber(ushort minValue, ushort maxValue)
         {
             return (ushort)random.Next(minValue, maxValue);
-        }
-
-        public byte Version
-        {
-            get
-            {
-                return this.version;
-            }
-        }
-
-        public ushort GlobalVariableTableAddress
-        {
-            get
-            {
-                return globalVariableTableAddress;
-            }
         }
     }
 }

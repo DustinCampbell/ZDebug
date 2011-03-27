@@ -214,8 +214,11 @@ namespace ZDebug.Compiler
 
                 currentInstruction = i;
 
-                il.LoadThis();
-                il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+                if (machine.Debugging)
+                {
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+                }
 
                 Profiler_ExecutingInstruction();
                 il.DebugWrite(i.PrettyPrint(machine));
