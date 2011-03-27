@@ -1,5 +1,6 @@
 ﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
         xmlns:c="clr-namespace:ZDebug.UI.Controls;assembly=ZDebug.UI.Core"
         xmlns:vm="clr-namespace:ZDebug.UI.ViewModel;assembly=ZDebug.UI.Core"
         xmlns:local="clr-namespace:ZDebug.Terp"
@@ -62,7 +63,12 @@
             </ToolBar>
         </ToolBarTray>
 
-        <Grid Grid.Row="2" Name="screenContent"/>
+        <ad:DockingManager Name="dockManager" Grid.Row="2">
+            <ad:DocumentPane SelectedIndex="0">
+                <ad:DocumentContent Title="Output" Name="screenContent"/>
+                <ad:DocumentContent Title="Profiler" Name="profilerContent"/>
+            </ad:DocumentPane>
+        </ad:DockingManager>
 
         <StatusBar Grid.Row="3">
             <StatusBar.Style>

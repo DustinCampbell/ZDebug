@@ -3,9 +3,9 @@ using System.ComponentModel.Composition;
 using System.Media;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AvalonDock;
 using Microsoft.Win32;
 using ZDebug.Compiler;
 using ZDebug.Core.Execution;
@@ -251,9 +251,8 @@ namespace ZDebug.Terp.ViewModel
         {
             this.View.Closing += View_Closing;
 
-            var screenContent = this.View.FindName<Grid>("screenContent");
-            var screenView = screenViewModel.CreateView();
-            screenContent.Children.Add(screenView);
+            var screenContent = this.View.FindName<DocumentContent>("screenContent");
+            screenContent.Content = screenViewModel.CreateView();
             this.screen = screenViewModel;
 
             this.updateTimer = new DispatcherTimer(
