@@ -5,6 +5,8 @@ namespace ZDebug.Core.Collections
 {
     public class IntegerMap<T>
     {
+        private const int DEFAULT_BUCKET_SIZE = 4;
+
         private struct Entry
         {
             public readonly int Key;
@@ -60,7 +62,7 @@ namespace ZDebug.Core.Collections
             var bucketSize = bucket.Size;
             if (bucketSize == 0)
             {
-                var entries = new Entry[4];
+                var entries = new Entry[DEFAULT_BUCKET_SIZE];
                 entries[0] = new Entry(key, value);
                 bucket = new Bucket(entries, 1);
                 buckets[hash] = bucket;

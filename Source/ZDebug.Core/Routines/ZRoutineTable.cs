@@ -17,7 +17,7 @@ namespace ZDebug.Core.Routines
         public ZRoutineTable(Story story, InstructionCache cache = null)
         {
             this.story = story;
-            this.cache = cache ?? new InstructionCache();
+            this.cache = cache ?? new InstructionCache(8192);
             this.routines = new IntegerMap<ZRoutine>(8192);
             this.sortedAddresses = new List<int>();
 
