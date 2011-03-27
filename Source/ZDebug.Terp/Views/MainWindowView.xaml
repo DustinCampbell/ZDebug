@@ -36,13 +36,13 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
-                <!--<MenuItem Header="_Open Game Script..." Click="OpenScript_Click">
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command="{Binding EditGameScriptCommand}" Header="Edit Game _Script...">
                     <MenuItem.Icon>
                         <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <Separator/>-->
-                <MenuItem Command="{Binding ExitCommand}" Header="E_xit"/>
             </MenuItem>
         </Menu>
 
@@ -52,14 +52,10 @@
                     <c:AutoDisableImage Source="{StaticResource openImage}"/>
                 </Button>
                 <Separator/>
-                <!--<Button ToolTip="Open a Game Script" Click="OpenScript_Click">
+                <Button Command="{Binding EditGameScriptCommand}" ToolTip="Edit Game Script">
                     <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                 </Button>
                 <Separator/>
-                <Button ToolTip="Stop" Click="Stop_Click">
-                    <c:AutoDisableImage Source="{StaticResource stopImage}"/>
-                </Button>
-                <Separator/>-->
                 <Button Command="{Binding AboutGameCommand}" ToolTip="About Game">
                     <c:AutoDisableImage Source="{StaticResource infoBigImage}"/>
                 </Button>

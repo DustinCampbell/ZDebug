@@ -18,6 +18,7 @@ namespace ZDebug.Terp.ViewModel
     internal class ScreenViewModel : ViewModelWithViewBase<UserControl>, IScreen
     {
         private readonly StoryService storyService;
+        private readonly GameScriptService gameScriptService;
 
         private ZWindowManager windowManager;
         private Grid windowContainer;
@@ -32,13 +33,16 @@ namespace ZDebug.Terp.ViewModel
 
         [ImportingConstructor]
         public ScreenViewModel(
-            StoryService storyService)
+            StoryService storyService,
+            GameScriptService gameScriptService)
             : base("ScreenView")
         {
             this.storyService = storyService;
 
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
+
+            this.gameScriptService = gameScriptService;
         }
 
         protected override void ViewCreated(UserControl view)
@@ -502,25 +506,25 @@ namespace ZDebug.Terp.ViewModel
         {
             Dispatch(() =>
             {
-                //if (DebuggerService.HasGameScriptCommand())
-                //{
-                //    ResetStatusHeight();
-                //    currStatusHeight = 0;
-
-                //    string command = DebuggerService.GetNextGameScriptCommand();
-                //    windowManager.ActiveWindow.PutString(command + "\r\n");
-                //    callback(command);
-                //}
-                //else
-                //{
-                mainWindow.ReadCommand(maxChars, text =>
+                if (gameScriptService.HasNextCommand())
                 {
                     ResetStatusHeight();
                     currStatusHeight = 0;
 
-                    callback(text);
-                });
-                //}
+                    string command = gameScriptService.GetNextCommand();
+                    windowManager.ActiveWindow.PutString(command + "\r\n");
+                    callback(command);
+                }
+                else
+                {
+                    mainWindow.ReadCommand(maxChars, text =>
+                    {
+                        ResetStatusHeight();
+                        currStatusHeight = 0;
+
+                        callback(text);
+                    });
+                }
             });
         }
     }

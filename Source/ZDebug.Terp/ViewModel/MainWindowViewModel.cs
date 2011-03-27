@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
@@ -24,8 +23,11 @@ namespace ZDebug.Terp.ViewModel
     internal class MainWindowViewModel : ViewModelWithViewBase<Window>, ISoundEngine
     {
         private readonly StoryService storyService;
+        private readonly GameScriptService gameScriptService;
+
         private readonly ScreenViewModel screenViewModel;
         private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
+        private readonly GameScriptDialogViewModel gameScriptDialogViewModel;
 
         private IScreen screen;
         private CompiledZMachine zmachine;
@@ -44,21 +46,24 @@ namespace ZDebug.Terp.ViewModel
         private int directCalls;
         private int calculatedCalls;
 
-        private List<ICall> callTree;
-
         [ImportingConstructor]
         public MainWindowViewModel(
             StoryService storyService,
+            GameScriptService gameScriptService,
             ScreenViewModel screenViewModel,
-            GameInfoDialogViewModel gameInfoDialogViewModel)
+            GameInfoDialogViewModel gameInfoDialogViewModel,
+            GameScriptDialogViewModel gameScriptDialogViewModel)
             : base("MainWindowView")
         {
             this.storyService = storyService;
             this.storyService.StoryOpened += StoryService_StoryOpened;
             this.storyService.StoryClosing += StoryService_StoryClosing;
 
+            this.gameScriptService = gameScriptService;
+
             this.screenViewModel = screenViewModel;
             this.gameInfoDialogViewModel = gameInfoDialogViewModel;
+            this.gameScriptDialogViewModel = gameScriptDialogViewModel;
 
             this.OpenStoryCommand = RegisterCommand(
                 text: "Open",
@@ -66,6 +71,12 @@ namespace ZDebug.Terp.ViewModel
                 executed: OpenStoryExecuted,
                 canExecute: OpenStoryCanExecute,
                 inputGestures: new KeyGesture(Key.O, ModifierKeys.Control));
+
+            this.EditGameScriptCommand = RegisterCommand(
+                text: "EditGameScript",
+                name: "Edit Game Script",
+                executed: EditGameScriptExecuted,
+                canExecute: EditGameScriptCanExecute);
 
             this.ExitCommand = RegisterCommand(
                 text: "Exit",
@@ -83,21 +94,9 @@ namespace ZDebug.Terp.ViewModel
 
         // commands...
         public ICommand OpenStoryCommand { get; private set; }
+        public ICommand EditGameScriptCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
         public ICommand AboutGameCommand { get; private set; }
-
-        //private void OpenScript_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var dialog = new OpenFileDialog
-        //    {
-        //        Title = "Open Game Script"
-        //    };
-
-        //    if (dialog.ShowDialog(this) == true)
-        //    {
-        //        script = File.ReadAllLines(dialog.FileName);
-        //    }
-        //}
 
         private bool OpenStoryCanExecute()
         {
@@ -121,6 +120,16 @@ namespace ZDebug.Terp.ViewModel
             }
 
             this.updateTimer.Start();
+        }
+
+        private bool EditGameScriptCanExecute()
+        {
+            return true;
+        }
+
+        private void EditGameScriptExecuted()
+        {
+            gameScriptDialogViewModel.ShowDialog(owner: this.View);
         }
 
         private bool ExitCanExecute()
@@ -233,11 +242,12 @@ namespace ZDebug.Terp.ViewModel
 
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
-            profiler = new ZMachineProfiler();
+            //profiler = new ZMachineProfiler();
             PropertyChanged("Profiling");
 
             e.Story.RegisterInterpreter(new Interpreter());
             zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profiler);
+            zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);
             zmachine.RegisterSoundEngine(this);

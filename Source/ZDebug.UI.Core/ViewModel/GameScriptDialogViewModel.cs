@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using ZDebug.UI.Services;
 
 namespace ZDebug.UI.ViewModel
@@ -24,6 +25,15 @@ namespace ZDebug.UI.ViewModel
         private void GameScriptService_Reset(object sender, ResetEventArgs e)
         {
             commands = string.Join("\r\n", gameScriptService.Commands);
+        }
+
+        protected override void OnDialogShown(bool? result)
+        {
+            if (result == true)
+            {
+                this.gameScriptService.SetCommands(
+                    commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            }
         }
 
         public string Commands

@@ -9,11 +9,19 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
+        protected virtual void OnDialogShown(bool? result)
+        {
+        }
+
         public bool? ShowDialog(Window owner = null)
         {
             var view = base.CreateView();
             view.Owner = owner;
-            return view.ShowDialog();
+
+            var result = view.ShowDialog();
+            OnDialogShown(result);
+
+            return result;
         }
     }
 }

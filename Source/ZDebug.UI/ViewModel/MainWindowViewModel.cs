@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -170,10 +169,7 @@ namespace ZDebug.UI.ViewModel
 
         private void EditGameScriptExecuted()
         {
-            if (gameScriptDialogViewModel.ShowDialog(owner: this.View) == true)
-            {
-                this.gameScriptService.SetCommands(gameScriptDialogViewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
-            }
+            gameScriptDialogViewModel.ShowDialog(owner: this.View);
         }
 
         private bool CanGoToAddressExecute()
