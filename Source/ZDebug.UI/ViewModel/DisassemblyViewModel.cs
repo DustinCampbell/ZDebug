@@ -35,6 +35,7 @@ namespace ZDebug.UI.ViewModel
         private readonly BreakpointService breakpointService;
         private readonly RoutineService routineService;
         private readonly NavigationService navigationService;
+        private readonly EditRoutineNameDialogViewModel editRoutineNameDialogViewModel;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
         private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
@@ -48,7 +49,8 @@ namespace ZDebug.UI.ViewModel
             DebuggerService debuggerService,
             BreakpointService breakpointService,
             RoutineService routineService,
-            NavigationService navigationService)
+            NavigationService navigationService,
+            EditRoutineNameDialogViewModel editRoutineNameDialogViewModel)
             : base("DisassemblyView")
         {
             this.storyService = storyService;
@@ -68,6 +70,8 @@ namespace ZDebug.UI.ViewModel
 
             this.navigationService = navigationService;
             this.navigationService.NavigationRequested += NavigationService_NavigationRequested;
+
+            this.editRoutineNameDialogViewModel = editRoutineNameDialogViewModel;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
             addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
@@ -94,14 +98,10 @@ namespace ZDebug.UI.ViewModel
                 return;
             }
 
-            var dialogViewModel = new EditRoutineNameViewModel();
-            dialogViewModel.Name = routineViewModel.Name;
-            var dialog = dialogViewModel.CreateView();
-
-            dialog.Owner = Application.Current.MainWindow;
-            if (dialog.ShowDialog() == true)
+            editRoutineNameDialogViewModel.Name = routineViewModel.Name;
+            if (editRoutineNameDialogViewModel.ShowDialog(owner: App.Current.MainWindow) == true)
             {
-                routineService.SetRoutineName(address, dialogViewModel.Name);
+                routineService.SetRoutineName(address, editRoutineNameDialogViewModel.Name);
             }
         }
 

@@ -60,7 +60,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\EditRoutineNameView.xaml">
+    <Page Include="Views\EditRoutineNameDialogView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -68,15 +68,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\GameScriptDialogView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\GlobalsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\GoToAddressView.xaml">
+    <Page Include="Views\GoToAddressDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -137,7 +133,6 @@
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\ProcessorSteppedEventArgs.cs" />
     <Compile Include="Services\ProcessorSteppingEventArgs.cs" />
-    <Compile Include="Services\ResetEventArgs.cs" />
     <Compile Include="Services\RoutineNameChangedEventArgs.cs" />
     <Compile Include="Services\RoutineService.cs" />
     <Compile Include="Services\StorageService.cs" />
@@ -149,10 +144,9 @@
     <Compile Include="ViewModel\DisassemblyLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyRoutineHeaderLineViewModel.cs" />
     <Compile Include="ViewModel\DisassemblyViewModel.cs" />
-    <Compile Include="ViewModel\EditRoutineNameViewModel.cs" />
-    <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
+    <Compile Include="ViewModel\EditRoutineNameDialogViewModel.cs" />
     <Compile Include="ViewModel\GlobalsViewModel.cs" />
-    <Compile Include="ViewModel\GoToAddressViewModel.cs" />
+    <Compile Include="ViewModel\GoToAddressDialogViewModel.cs" />
     <Compile Include="ViewModel\LocalsViewModel.cs" />
     <Compile Include="ViewModel\IndexedVariableViewModel.cs" />
     <Compile Include="ViewModel\MessageLogViewModel.cs" />

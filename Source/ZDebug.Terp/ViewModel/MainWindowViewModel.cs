@@ -25,6 +25,7 @@ namespace ZDebug.Terp.ViewModel
     {
         private readonly StoryService storyService;
         private readonly ScreenViewModel screenViewModel;
+        private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
 
         private IScreen screen;
         private CompiledZMachine zmachine;
@@ -48,11 +49,16 @@ namespace ZDebug.Terp.ViewModel
         [ImportingConstructor]
         public MainWindowViewModel(
             StoryService storyService,
-            ScreenViewModel screenViewModel)
+            ScreenViewModel screenViewModel,
+            GameInfoDialogViewModel gameInfoDialogViewModel)
             : base("MainWindowView")
         {
             this.storyService = storyService;
+            this.storyService.StoryOpened += StoryService_StoryOpened;
+            this.storyService.StoryClosing += StoryService_StoryClosing;
+
             this.screenViewModel = screenViewModel;
+            this.gameInfoDialogViewModel = gameInfoDialogViewModel;
 
             this.OpenStoryCommand = RegisterCommand(
                 text: "Open",
@@ -134,11 +140,7 @@ namespace ZDebug.Terp.ViewModel
 
         private void AboutGameExecuted()
         {
-            var gameInfoDialogViewModel = new GameInfoViewModel();
-            var gameInfoDialog = gameInfoDialogViewModel.CreateView();
-            gameInfoDialogViewModel.SetGameinfo(storyService.GameInfo);
-            gameInfoDialog.Owner = this.View;
-            gameInfoDialog.ShowDialog();
+            gameInfoDialogViewModel.ShowDialog(owner: this.View);
         }
 
         public string Title
@@ -407,9 +409,6 @@ namespace ZDebug.Terp.ViewModel
 
         protected override void ViewCreated(Window view)
         {
-            storyService.StoryOpened += StoryService_StoryOpened;
-            storyService.StoryClosing += StoryService_StoryClosing;
-
             this.View.Closing += View_Closing;
 
             var screenContent = this.View.FindName<Grid>("screenContent");

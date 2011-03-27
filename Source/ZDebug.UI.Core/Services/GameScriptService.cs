@@ -25,9 +25,19 @@ namespace ZDebug.UI.Services
             commands.Clear();
         }
 
+        private void OnReset()
+        {
+            var handler = Reset;
+            if (handler != null)
+            {
+                handler(this, new ResetEventArgs());
+            }
+        }
+
         public void Clear()
         {
             commands.Clear();
+            OnReset();
         }
 
         public void SetCommands(IEnumerable<string> commands)
@@ -35,6 +45,7 @@ namespace ZDebug.UI.Services
             this.commands.Clear();
             this.commands.AddRange(commands);
             commandIndex = this.commands.Count != 0 ? 0 : -1;
+            OnReset();
         }
 
         public bool HasNextCommand()
@@ -68,6 +79,8 @@ namespace ZDebug.UI.Services
             }
         }
 
+        public event EventHandler<ResetEventArgs> Reset;
+
         void IPersistable.Load(XElement xml)
         {
             commands.Clear();
@@ -80,6 +93,8 @@ namespace ZDebug.UI.Services
                     commands.Add(commandElem.Value);
                 }
             }
+
+            OnReset();
         }
 
         XElement IPersistable.Store()

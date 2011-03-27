@@ -59,6 +59,7 @@
     <Compile Include="Services\GameScriptService.cs" />
     <Compile Include="Services\IPersistable.cs" />
     <Compile Include="Services\IService.cs" />
+    <Compile Include="Services\ResetEventArgs.cs" />
     <Compile Include="Services\StoryClosedEventArgs.cs" />
     <Compile Include="Services\StoryClosingEventArgs.cs" />
     <Compile Include="Services\StoryOpenedEventArgs.cs" />
@@ -66,7 +67,9 @@
     <Compile Include="Utilities\Interpreter.cs" />
     <Compile Include="Utilities\Storage.cs" />
     <Compile Include="Utilities\Storage.WindowPlacement.cs" />
-    <Compile Include="ViewModel\GameInfoViewModel.cs" />
+    <Compile Include="ViewModel\DialogViewModelBase.cs" />
+    <Compile Include="ViewModel\GameInfoDialogViewModel.cs" />
+    <Compile Include="ViewModel\GameScriptDialogViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.CommandBindings.cs" />
     <Compile Include="ViewModel\ViewModelBase.PropertyChanged.cs" />
     <Compile Include="ViewModel\ViewModelWithViewBase.cs" />
@@ -148,6 +151,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\GameInfoDialogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\GameScriptDialogView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -28,6 +28,9 @@ namespace ZDebug.UI.ViewModel
         private readonly CallStackViewModel callStackViewModel;
         private readonly OutputViewModel outputViewModel;
         private readonly MessageLogViewModel messageLogViewModel;
+        private readonly GoToAddressDialogViewModel goToAddressDialogViewModel;
+        private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
+        private readonly GameScriptDialogViewModel gameScriptDialogViewModel;
 
         [ImportingConstructor]
         private MainWindowViewModel(
@@ -43,7 +46,10 @@ namespace ZDebug.UI.ViewModel
             LocalsViewModel localsViewModel,
             CallStackViewModel callStackViewModel,
             OutputViewModel outputViewModel,
-            MessageLogViewModel messageLogViewModel)
+            MessageLogViewModel messageLogViewModel,
+            GoToAddressDialogViewModel goToAddressDialogViewModel,
+            GameInfoDialogViewModel gameInfoDialogViewModel,
+            GameScriptDialogViewModel gameScriptDialogViewModel)
             : base("MainWindowView")
         {
             this.storyService = storyService;
@@ -63,6 +69,9 @@ namespace ZDebug.UI.ViewModel
             this.callStackViewModel = callStackViewModel;
             this.outputViewModel = outputViewModel;
             this.messageLogViewModel = messageLogViewModel;
+            this.goToAddressDialogViewModel = goToAddressDialogViewModel;
+            this.gameInfoDialogViewModel = gameInfoDialogViewModel;
+            this.gameScriptDialogViewModel = gameScriptDialogViewModel;
 
             this.OpenStoryCommand = RegisterCommand(
                 text: "Open",
@@ -161,10 +170,7 @@ namespace ZDebug.UI.ViewModel
 
         private void EditGameScriptExecuted()
         {
-            var gameScriptDialogViewModel = new GameScriptDialogViewModel(this.gameScriptService);
-            var gameScriptDialog = gameScriptDialogViewModel.CreateView();
-            gameScriptDialog.Owner = this.View;
-            if (gameScriptDialog.ShowDialog() == true)
+            if (gameScriptDialogViewModel.ShowDialog(owner: this.View) == true)
             {
                 this.gameScriptService.SetCommands(gameScriptDialogViewModel.Commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
             }
@@ -178,10 +184,7 @@ namespace ZDebug.UI.ViewModel
 
         private void GoToAddressExecuted()
         {
-            var goToAddressDialogViewModel = new GoToAddressViewModel();
-            var dialog = goToAddressDialogViewModel.CreateView();
-            dialog.Owner = this.View;
-            if (dialog.ShowDialog() == true)
+            if (goToAddressDialogViewModel.ShowDialog(owner: this.View) == true)
             {
                 navigationService.RequestNavigation(goToAddressDialogViewModel.Address);
             }
@@ -255,11 +258,7 @@ namespace ZDebug.UI.ViewModel
 
         private void AboutGameExecuted()
         {
-            var gameInfoDialogViewModel = new GameInfoViewModel();
-            var gameInfoDialog = gameInfoDialogViewModel.CreateView();
-            gameInfoDialogViewModel.SetGameinfo(storyService.GameInfo);
-            gameInfoDialog.Owner = this.View;
-            gameInfoDialog.ShowDialog();
+            gameInfoDialogViewModel.ShowDialog(owner: this.View);
         }
 
         public ICommand OpenStoryCommand { get; private set; }

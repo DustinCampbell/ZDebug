@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.Composition;
-using System.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
     [Export]
-    internal sealed class EditRoutineNameViewModel : ViewModelWithViewBase<Window>
+    internal sealed class EditRoutineNameDialogViewModel : DialogViewModelBase
     {
         private string name;
 
-        public EditRoutineNameViewModel()
-            : base("EditRoutineNameView")
+        [ImportingConstructor]
+        private EditRoutineNameDialogViewModel()
+            : base("EditRoutineNameDialogView")
         {
         }
 

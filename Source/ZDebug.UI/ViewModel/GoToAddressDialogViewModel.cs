@@ -1,18 +1,18 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Globalization;
-using System.Windows;
 
 namespace ZDebug.UI.ViewModel
 {
     [Export]
-    internal sealed class GoToAddressViewModel : ViewModelWithViewBase<Window>
+    internal sealed class GoToAddressDialogViewModel : DialogViewModelBase
     {
         private int address;
         private string addressText;
 
-        public GoToAddressViewModel()
-            : base("GoToAddressView")
+        [ImportingConstructor]
+        private GoToAddressDialogViewModel()
+            : base("GoToAddressDialogView")
         {
         }
 
