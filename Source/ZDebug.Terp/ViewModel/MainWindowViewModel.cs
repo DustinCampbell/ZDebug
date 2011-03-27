@@ -248,15 +248,21 @@ namespace ZDebug.Terp.ViewModel
 
         void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
+            if (zmachineThread != null)
+            {
+                zmachineThread.Abort();
+            }
+
+            zmachineThread = null;
+            zmachine = null;
+            profiler = null;
+
             PropertyChanged("Title");
         }
 
         private void View_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (zmachineThread != null)
-            {
-                zmachineThread.Abort();
-            }
+            storyService.CloseStory();
         }
 
         private void Run()
