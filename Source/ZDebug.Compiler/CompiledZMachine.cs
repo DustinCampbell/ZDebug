@@ -123,7 +123,7 @@ namespace ZDebug.Compiler
             return this.Story.ActualChecksum == Header.ReadChecksum(this.Memory);
         }
 
-        internal void PushFrame(int address)
+        internal unsafe void PushFrame()
         {
             // argument count
             // local variable values (reversed)
@@ -224,9 +224,9 @@ namespace ZDebug.Compiler
             return routineCall;
         }
 
-        private void SetupCall(ZRoutineCall routineCall, ushort argCount)
+        private unsafe void SetupCall(ZRoutineCall routineCall, ushort argCount)
         {
-            PushFrame(routineCall.Routine.Address);
+            // PushFrame();
 
             this.argumentCount = argCount;
 
@@ -275,14 +275,18 @@ namespace ZDebug.Compiler
             return DirectCall1(GetRoutineCall(address), arg0);
         }
 
-        internal ushort DirectCall2(ZRoutineCall routineCall, ushort arg0, ushort arg1)
+        internal unsafe ushort DirectCall2(ZRoutineCall routineCall, ushort arg0, ushort arg1)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 2);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+            }
 
             return routineCall.Invoke();
         }
@@ -294,15 +298,19 @@ namespace ZDebug.Compiler
             return DirectCall2(GetRoutineCall(address), arg0, arg1);
         }
 
-        internal ushort DirectCall3(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2)
+        internal unsafe ushort DirectCall3(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 3);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+                *p++ = arg2;
+            }
 
             return routineCall.Invoke();
         }
@@ -314,16 +322,20 @@ namespace ZDebug.Compiler
             return DirectCall3(GetRoutineCall(address), arg0, arg1, arg2);
         }
 
-        internal ushort DirectCall4(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        internal unsafe ushort DirectCall4(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 4);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
-            this.locals[3] = arg3;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+                *p++ = arg2;
+                *p++ = arg3;
+            }
 
             return routineCall.Invoke();
         }
@@ -335,17 +347,21 @@ namespace ZDebug.Compiler
             return DirectCall4(GetRoutineCall(address), arg0, arg1, arg2, arg3);
         }
 
-        internal ushort DirectCall5(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        internal unsafe ushort DirectCall5(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 5);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
-            this.locals[3] = arg3;
-            this.locals[4] = arg4;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+                *p++ = arg2;
+                *p++ = arg3;
+                *p++ = arg4;
+            }
 
             return routineCall.Invoke();
         }
@@ -357,18 +373,22 @@ namespace ZDebug.Compiler
             return DirectCall5(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4);
         }
 
-        internal ushort DirectCall6(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        internal unsafe ushort DirectCall6(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 6);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
-            this.locals[3] = arg3;
-            this.locals[4] = arg4;
-            this.locals[5] = arg5;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+                *p++ = arg2;
+                *p++ = arg3;
+                *p++ = arg4;
+                *p++ = arg5;
+            }
 
             return routineCall.Invoke();
         }
@@ -380,19 +400,23 @@ namespace ZDebug.Compiler
             return DirectCall6(GetRoutineCall(address), arg0, arg1, arg2, arg3, arg4, arg5);
         }
 
-        internal ushort DirectCall7(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        internal unsafe ushort DirectCall7(ZRoutineCall routineCall, ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
             SetupCall(routineCall, 7);
 
-            this.locals[0] = arg0;
-            this.locals[1] = arg1;
-            this.locals[2] = arg2;
-            this.locals[3] = arg3;
-            this.locals[4] = arg4;
-            this.locals[5] = arg5;
-            this.locals[6] = arg6;
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* p = pLocals;
+                *p++ = arg0;
+                *p++ = arg1;
+                *p++ = arg2;
+                *p++ = arg3;
+                *p++ = arg4;
+                *p++ = arg5;
+                *p++ = arg6;
+            }
 
             return routineCall.Invoke();
         }

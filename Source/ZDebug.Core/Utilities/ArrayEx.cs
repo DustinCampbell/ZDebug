@@ -2,7 +2,7 @@
 
 namespace ZDebug.Core.Utilities
 {
-    internal static class ArrayEx
+    public static class ArrayEx
     {
         public static T[] Create<T>(int length, Func<int, T> createItem = null)
         {

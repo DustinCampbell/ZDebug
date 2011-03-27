@@ -5,9 +5,9 @@ namespace ZDebug.IO.Services
 {
     public static class FontsAndColorsService
     {
-        private static readonly FontFamily normalFontFamily = new FontFamily("Segoe UI");
+        private static readonly FontFamily normalFontFamily = new FontFamily("Cambria");
         private static readonly FontFamily fixedFontFamily = new FontFamily("Consolas");
-        private static readonly double fontSize = 14.0;
+        private static readonly double fontSize = 16.0;
 
         private static FontFamily fontFamily = normalFontFamily;
 

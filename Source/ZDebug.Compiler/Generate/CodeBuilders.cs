@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Reflection.Emit;
-using System;
 
 namespace ZDebug.Compiler.Generate
 {
@@ -33,6 +31,15 @@ namespace ZDebug.Compiler.Generate
             {
                 il.LoadArg(0);
                 il.Load(field);
+            };
+        }
+
+        public static CodeBuilder GenerateLoadInstanceFieldAddress(this ILBuilder il, FieldInfo field)
+        {
+            return () =>
+            {
+                il.LoadArg(0);
+                il.LoadAddress(field);
             };
         }
 

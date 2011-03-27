@@ -33,11 +33,17 @@ namespace ZDebug.Compiler
 
         private bool usesStack;
 
+        private IArrayLocal stackFrames;
+        private IRefLocal sfpRef;
+        private IRefLocal stackFrameRef;
+
         private IArrayLocal stack;
         private IRefLocal spRef;
 
         private IArrayLocal locals;
         private IRefLocal[] localRefs;
+
+        private IRefLocal argumentCountRef;
 
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
@@ -112,24 +118,36 @@ namespace ZDebug.Compiler
                 }
             }
 
+            // stackFrames...
+            var stackFramesField = Reflection<CompiledZMachine>.GetField("stackFrames", @public: false);
+            this.stackFrames = il.NewArrayLocal<int>(il.GenerateLoadInstanceField(stackFramesField));
+
+            // sfp...
+            var sfpField = Reflection<CompiledZMachine>.GetField("sfp", @public: false);
+            this.sfpRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(sfpField));
+
+            // stackFrame...
+            var stackFrameField = Reflection<CompiledZMachine>.GetField("stackFrame", @public: false);
+            this.stackFrameRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(stackFrameField));
+
+            // stack...
+            var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
+            this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
+
+            // sp...
+            var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
+            this.spRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(spField));
+
+            // argument count...
+            var argumentCountField = Reflection<CompiledZMachine>.GetField("argumentCount", @public: false);
+            this.argumentCountRef = il.NewRefLocal<ushort>(il.GenerateLoadInstanceFieldAddress(argumentCountField));
+
             // Second pass: determine whether stack is used
             foreach (var i in routine.Instructions)
             {
                 if (i.UsesStack())
                 {
                     this.usesStack = true;
-
-                    // stack...
-                    var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
-                    this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
-
-                    // sp...
-                    var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
-                    this.spRef = il.NewRefLocal<int>();
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldflda, spField);
-                    spRef.Store();
-
                     break;
                 }
             }
@@ -391,6 +409,9 @@ namespace ZDebug.Compiler
                     LoadOperand(i + 1);
                 }
 
+                // Push frame after loading operands in case any operands manipulate the stack.
+                PushFrame();
+
                 var callName = "DirectCall" + argCount.ToString();
                 var callTypes = GetDirectCallTypes(argCount);
 
@@ -460,6 +481,9 @@ namespace ZDebug.Compiler
                 {
                     LoadOperand(i);
                 }
+
+                // Push frame after loading operands in case any operands manipulate the stack.
+                PushFrame();
 
                 var callName = "CalculatedCall" + argCount.ToString();
                 var callTypes = GetCalculatedCallTypes(argCount);
@@ -550,6 +574,88 @@ namespace ZDebug.Compiler
             }
 
             StoreVariable(currentInstruction.StoreVariable, valueLoader, indirect);
+        }
+
+        private void PushFrame()
+        {
+            il.DebugWrite("PushFrame(sp = {0}, sfp = {1}, stackFrame = {2})", spRef, sfpRef, stackFrameRef);
+            il.DebugIndent();
+
+            il.DebugWrite("stackFrames[++{0}] = {1}", sfpRef, stackFrameRef);
+
+            // stackFrames[++sfp] = stackFrame;
+            sfpRef.Load();
+            sfpRef.Load();
+            sfpRef.LoadIndirectValue();
+            il.Math.Add(1);
+            sfpRef.StoreIndirectValue();
+
+            stackFrames.StoreElement(
+                indexLoader: () =>
+                {
+                    sfpRef.Load();
+                    sfpRef.LoadIndirectValue();
+                },
+                valueLoader: () =>
+                {
+                    stackFrameRef.Load();
+                    stackFrameRef.LoadIndirectValue();
+                });
+
+            il.DebugWrite("stack[++{0}] = this.argumentCount ({1})", spRef, argumentCountRef);
+
+            // stack[++sp] = this.argumentCount;
+            PushStack(() =>
+            {
+                argumentCountRef.Load();
+                argumentCountRef.LoadIndirectValue();
+            });
+
+            if (localRefs != null)
+            {
+                // for (int i = localCount - 1; i >= 0; i--)
+                //   stack[++sp] = locals[i];
+                for (int i = localRefs.Length - 1; i >= 0; i--)
+                {
+                    il.DebugWrite("stack[++{0}] = this.locals[" + i + "] ({1:x4})", spRef, localRefs[i]);
+
+                    PushStack(() =>
+                    {
+                        LoadLocalVariable(i);
+                    });
+
+                    il.DebugWrite("sp = {0}", spRef);
+                }
+
+                il.DebugWrite("stack[++{0}] = localCount (" + localRefs.Length + ")", spRef);
+
+                // stack[++sp] = localCount;
+                PushStack(() =>
+                {
+                    il.Load((ushort)localRefs.Length);
+                });
+            }
+            else
+            {
+                il.DebugWrite("stack[++{0}] = localCount (0)", spRef);
+
+                // stack[++sp] = 0;
+                PushStack(() =>
+                {
+                    il.Load(0);
+                });
+            }
+
+            // stackFrame = sp;
+            stackFrameRef.Load();
+            spRef.Load();
+            spRef.LoadIndirectValue();
+            stackFrameRef.StoreIndirectValue();
+
+            il.DebugWrite("stackFrame = {0}", stackFrameRef);
+            il.DebugWrite("sp = {0}", spRef);
+
+            il.DebugUnindent();
         }
 
         private void Assemble()

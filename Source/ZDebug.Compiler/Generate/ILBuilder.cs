@@ -168,6 +168,16 @@ namespace ZDebug.Compiler.Generate
             Emit(OpCodes.Ldfld, field);
         }
 
+        public void LoadAddress(FieldInfo field, bool @volatile = false)
+        {
+            if (@volatile)
+            {
+                Emit(OpCodes.Volatile);
+            }
+
+            Emit(OpCodes.Ldflda, field);
+        }
+
         public void Store(FieldInfo field, bool @volatile = false)
         {
             if (@volatile)

@@ -229,9 +229,10 @@ namespace ZDebug.Terp.ViewModel
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
             profiler = new ZMachineProfiler();
+            PropertyChanged("Profiling");
+
             e.Story.RegisterInterpreter(new Interpreter());
             zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profiler);
-            zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);
             zmachine.RegisterSoundEngine(this);

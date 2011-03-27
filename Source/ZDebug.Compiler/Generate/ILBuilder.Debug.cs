@@ -42,6 +42,13 @@ namespace ZDebug.Compiler.Generate
         }
 
         [Conditional("LOG")]
+        public void DebugWrite(string format, IRefLocal arg0)
+        {
+            FormatString(format, arg0);
+            Call(debugWriteLine);
+        }
+
+        [Conditional("LOG")]
         public void DebugWrite(string format, ILocal arg0, ILocal arg1)
         {
             FormatString(format, arg0, arg1);
@@ -49,7 +56,21 @@ namespace ZDebug.Compiler.Generate
         }
 
         [Conditional("LOG")]
+        public void DebugWrite(string format, IRefLocal arg0, IRefLocal arg1)
+        {
+            FormatString(format, arg0, arg1);
+            Call(debugWriteLine);
+        }
+
+        [Conditional("LOG")]
         public void DebugWrite(string format, ILocal arg0, ILocal arg1, ILocal arg2)
+        {
+            FormatString(format, arg0, arg1, arg2);
+            Call(debugWriteLine);
+        }
+
+        [Conditional("LOG")]
+        public void DebugWrite(string format, IRefLocal arg0, IRefLocal arg1, IRefLocal arg2)
         {
             FormatString(format, arg0, arg1, arg2);
             Call(debugWriteLine);

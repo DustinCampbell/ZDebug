@@ -239,6 +239,16 @@ namespace ZDebug.Compiler.Generate
                 builder.Emit(loadOpCode);
             }
 
+            public void LoadIndirectValueAndBox()
+            {
+                LoadIndirectValue();
+
+                if (elementType.IsValueType)
+                {
+                    builder.Emit(OpCodes.Box, elementType);
+                }
+            }
+
             public void StoreIndirectValue()
             {
                 builder.Emit(storeOpCode);

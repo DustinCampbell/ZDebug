@@ -11,6 +11,11 @@ namespace ZDebug.Compiler
             return op.Kind == kind && op.Number == number;
         }
 
+        public static bool IsCall(this Instruction i)
+        {
+            return i.Opcode.IsCall;
+        }
+
         public static bool UsesOutputStreams(this Instruction i)
         {
             var op = i.Opcode;
@@ -49,7 +54,8 @@ namespace ZDebug.Compiler
         {
             // TODO: Need to check Z-Machine version
             var op = i.Opcode;
-            if (op.Is(OpcodeKind.VarOp, 0x08) ||  // push
+            if (op.IsCall ||
+                op.Is(OpcodeKind.VarOp, 0x08) ||  // push
                 op.Is(OpcodeKind.VarOp, 0x09) ||  // pull
                 op.Is(OpcodeKind.ZeroOp, 0x08) || // ret_popped
                 op.Is(OpcodeKind.ZeroOp, 0x09))   // pop
