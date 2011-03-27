@@ -27,7 +27,7 @@ namespace ZDebug.PerfHarness
             var bytes = File.ReadAllBytes(StoryFilePath);
 
             CompiledZMachine machine = null;
-            Action doneAction = () => { machine.Stop(); };
+            Action doneAction = () => { throw new ZMachineInterruptedException(); };
 
             var mockScreen = new MockScreen(ScriptFilePath, doneAction);
             machine = new CompiledZMachine(Story.FromBytes(bytes), profiler: profile ? this : null);

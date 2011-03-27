@@ -78,6 +78,12 @@ namespace ZDebug.Terp.ViewModel
                 canExecute: ExitCanExecute,
                 inputGestures: new KeyGesture(Key.F4, ModifierKeys.Alt));
 
+            this.StopCommand = RegisterCommand(
+                text: "Stop",
+                name: "Stop",
+                executed: StopExecuted,
+                canExecute: StopCanExecute);
+
             this.AboutGameCommand = RegisterCommand(
                 text: "AboutGame",
                 name: "About Game",
@@ -126,6 +132,7 @@ namespace ZDebug.Terp.ViewModel
         public ICommand OpenStoryCommand { get; private set; }
         public ICommand EditGameScriptCommand { get; private set; }
         public ICommand ExitCommand { get; private set; }
+        public ICommand StopCommand { get; private set; }
         public ICommand AboutGameCommand { get; private set; }
 
         private bool OpenStoryCanExecute()
@@ -170,6 +177,16 @@ namespace ZDebug.Terp.ViewModel
         private void ExitExecuted()
         {
             this.View.Close();
+        }
+
+        private bool StopCanExecute()
+        {
+            return zmachine != null;
+        }
+
+        private void StopExecuted()
+        {
+            zmachine.Stop();
         }
 
         private bool AboutGameCanExecute()

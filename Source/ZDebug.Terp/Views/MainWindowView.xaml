@@ -55,6 +55,10 @@
                     <c:AutoDisableImage Source="{StaticResource openImage}"/>
                 </Button>
                 <Separator/>
+                <Button Command="{Binding StopCommand}" ToolTip="Stop Game">
+                    <c:AutoDisableImage Source="{StaticResource stopImage}"/>
+                </Button>
+                <Separator/>
                 <Button Command="{Binding EditGameScriptCommand}" ToolTip="Edit Game Script">
                     <c:AutoDisableImage Source="{StaticResource scriptImage}"/>
                 </Button>

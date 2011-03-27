@@ -65,6 +65,7 @@ namespace ZDebug.Terp.Services
         public void Stop()
         {
             watch.Stop();
+            profiler.Stop(watch.Elapsed);
             OnStopped();
         }
 

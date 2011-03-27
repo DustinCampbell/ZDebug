@@ -83,7 +83,7 @@ namespace ZDebug.Terp.ViewModel
                     };
                 });
 
-                this.instructions = instructions.OrderByDescending(x => x.TotalTime);
+                this.instructions = instructions.OrderByDescending(x => x.TotalTime).ToList();
 
                 var opcodes = from i in instructions
                               group i by i.Instruction.Opcode.Name into g
@@ -94,7 +94,7 @@ namespace ZDebug.Terp.ViewModel
                                   Count = g.Sum(x => x.TimesExecuted)
                               };
 
-                this.opcodes = opcodes.OrderByDescending(x => x.TotalTime);
+                this.opcodes = opcodes.OrderByDescending(x => x.TotalTime).ToList();
 
                 AllPropertiesChanged();
             });
@@ -120,7 +120,7 @@ namespace ZDebug.Terp.ViewModel
         {
             get
             {
-                return opcodes;
+                return instructions;
             }
         }
 

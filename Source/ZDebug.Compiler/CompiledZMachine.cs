@@ -57,6 +57,7 @@ namespace ZDebug.Compiler
 
         private int currentAddress = -1;
         private volatile bool inputReceived;
+        private volatile bool stopping;
 
         public CompiledZMachine(Story story, bool precompile = false, IZMachineProfiler profiler = null)
             : base(story)
@@ -1205,7 +1206,7 @@ namespace ZDebug.Compiler
                 inputReceived = true;
             });
 
-            while (!inputReceived)
+            while (!inputReceived && !stopping)
             {
             }
         }
@@ -1259,7 +1260,7 @@ namespace ZDebug.Compiler
                 inputReceived = true;
             });
 
-            while (!inputReceived)
+            while (!inputReceived && !stopping)
             {
             }
         }
@@ -1322,7 +1323,7 @@ namespace ZDebug.Compiler
                 inputReceived = true;
             });
 
-            while (!inputReceived)
+            while (!inputReceived && !stopping)
             {
             }
 
@@ -1364,13 +1365,23 @@ namespace ZDebug.Compiler
 
         public void Run()
         {
+            stopping = false;
             var routineCall = GetRoutineCall(GetMainRoutineAddress());
             routineCall.Invoke();
         }
 
+        internal void Tick()
+        {
+            if (stopping)
+            {
+                stopping = false;
+                throw new ZMachineInterruptedException();
+            }
+        }
+
         public void Stop()
         {
-            throw new ZMachineInterruptedException();
+            stopping = true;
         }
 
         public bool Profiling
