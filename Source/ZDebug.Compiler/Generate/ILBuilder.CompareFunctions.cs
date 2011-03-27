@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection.Emit;
+﻿using System.Reflection.Emit;
 
 namespace ZDebug.Compiler.Generate
 {
@@ -10,13 +6,21 @@ namespace ZDebug.Compiler.Generate
     {
         public sealed class CompareFunctions : FunctionSet
         {
-            public CompareFunctions(ILBuilder builder) : base(builder)
+            public CompareFunctions(ILBuilder builder)
+                : base(builder)
             {
             }
 
             public void Equal()
             {
                 builder.Emit(OpCodes.Ceq);
+            }
+
+            public void NotEqual()
+            {
+                builder.Emit(OpCodes.Ceq);
+                builder.Load(0);
+                this.Equal();
             }
 
             public void GreaterThan()

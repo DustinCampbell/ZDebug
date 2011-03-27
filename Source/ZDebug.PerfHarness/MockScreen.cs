@@ -83,12 +83,12 @@ namespace ZDebug.PerfHarness
 
         public byte ScreenHeightInLines
         {
-            get { return 0; }
+            get { return 25; }
         }
 
         public byte ScreenWidthInColumns
         {
-            get { return 0; }
+            get { return 80; }
         }
 
         public ushort ScreenHeightInUnits

@@ -320,8 +320,6 @@ namespace ZDebug.Core.Execution
 
         internal void op_scan_table()
         {
-            // TODO: Rewrite to scan byte array directly
-
             ushort x = operandValues[0];
             ushort table = operandValues[1];
             ushort len = operandValues[2];

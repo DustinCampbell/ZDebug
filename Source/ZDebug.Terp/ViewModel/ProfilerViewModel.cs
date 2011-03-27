@@ -61,6 +61,11 @@ namespace ZDebug.Terp.ViewModel
 
         private void PopulateProfilerData()
         {
+            if (profilerService.Profiler == null)
+            {
+                return;
+            }
+
             Dispatch(() =>
             {
                 callTreeRoot = new List<ICall>() { profilerService.Profiler.RootCall };

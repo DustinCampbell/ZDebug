@@ -780,6 +780,46 @@ namespace ZDebug.Compiler
         // Table routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        private void op_copy_table()
+        {
+            il.LoadThis();
+            LoadOperand(0);
+            LoadOperand(1);
+            LoadOperand(2);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("op_copy_table", Types.Three<ushort, ushort, ushort>(), @public: false));
+        }
+
+        private void op_scan_table()
+        {
+            using (var result = il.NewLocal<ushort>())
+            {
+                il.LoadThis();
+                LoadOperand(0);
+                LoadOperand(1);
+                LoadOperand(2);
+
+                if (currentInstruction.OperandCount > 3)
+                {
+                    LoadOperand(3);
+                }
+                else
+                {
+                    il.Load(0x82);
+                }
+
+                il.Call(Reflection<CompiledZMachine>.GetMethod("op_scan_table", Types.Four<ushort, ushort, ushort, ushort>(), @public: false));
+
+                result.Store();
+                Store(() => result.Load());
+
+                result.Load();
+                il.Load(0);
+                il.Compare.NotEqual();
+
+                Branch();
+            }
+        }
+
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Stack routines
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1814,6 +1854,11 @@ namespace ZDebug.Compiler
             NotImplemented();
         }
 
+        private void op_restore()
+        {
+            NotImplemented();
+        }
+
         private void op_restore_undo()
         {
             using (var result = il.NewLocal<ushort>())
@@ -1824,6 +1869,11 @@ namespace ZDebug.Compiler
                 result.Store();
                 Store(() => result.Load());
             }
+        }
+
+        private void op_save()
+        {
+            NotImplemented();
         }
 
         private void op_save_undo()

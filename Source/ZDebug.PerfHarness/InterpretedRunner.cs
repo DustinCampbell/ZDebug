@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
-using System;
-using System.Diagnostics;
 using ZDebug.Core.Execution;
 
 namespace ZDebug.PerfHarness

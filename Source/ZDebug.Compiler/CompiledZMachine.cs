@@ -1210,6 +1210,11 @@ namespace ZDebug.Compiler
             while (!inputReceived && !stopping)
             {
             }
+
+            if (stopping)
+            {
+                throw new ZMachineInterruptedException();
+            }
         }
 
         internal void Read_Z4(ushort textBuffer, ushort parseBuffer)
@@ -1264,6 +1269,11 @@ namespace ZDebug.Compiler
             while (!inputReceived && !stopping)
             {
             }
+
+            if (stopping)
+            {
+                throw new ZMachineInterruptedException();
+            }
         }
 
         internal unsafe ushort Read_Z5(ushort textBuffer, ushort parseBuffer)
@@ -1308,6 +1318,11 @@ namespace ZDebug.Compiler
             {
             }
 
+            if (stopping)
+            {
+                throw new ZMachineInterruptedException();
+            }
+
             return result;
         }
 
@@ -1332,6 +1347,68 @@ namespace ZDebug.Compiler
         internal void Tokenize(ushort textBuffer, ushort parseBuffer, ushort dictionary, bool flag)
         {
             this.ZText.TokenizeLine(textBuffer, parseBuffer, dictionary, flag);
+        }
+
+        internal void op_copy_table(ushort first, ushort second, ushort size)
+        {
+            if (second == 0) // zero out first table
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    this.Memory.WriteByte(first + j, 0);
+                }
+            }
+            else if ((short)size < 0 || first > second) // copy forwards
+            {
+                var copySize = size;
+                if ((short)copySize < 0)
+                {
+                    copySize = (ushort)(-((short)size));
+                }
+
+                for (int j = 0; j < copySize; j++)
+                {
+                    var value = this.Memory.ReadByte(first + j);
+                    this.Memory.WriteByte(second + j, value);
+                }
+            }
+            else // copy backwards
+            {
+                for (int j = size - 1; j >= 0; j--)
+                {
+                    var value = this.Memory.ReadByte(first + j);
+                    this.Memory.WriteByte(second + j, value);
+                }
+            }
+        }
+
+        internal ushort op_scan_table(ushort x, ushort table, ushort len, ushort form)
+        {
+            ushort address = table;
+
+            for (int j = 0; j < len; j++)
+            {
+                if ((form & 0x80) != 0)
+                {
+                    var value = this.Memory.ReadWord(address);
+                    if (value == x)
+                    {
+                        return address;
+                    }
+                }
+                else
+                {
+                    var value = this.Memory[address];
+                    if (value == x)
+                    {
+                        return address;
+                    }
+                }
+
+                address += (ushort)(form & 0x7f);
+            }
+
+            return 0;
         }
 
         public int UnpackRoutineAddress(ushort byteAddress)

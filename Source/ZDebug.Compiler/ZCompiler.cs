@@ -933,6 +933,22 @@ namespace ZDebug.Compiler
                         case 0x03:
                             op_print_ret();
                             return;
+                        case 0x05:
+                            if (machine.Version <= 4)
+                            {
+                                op_save();
+                                return;
+                            }
+
+                            break;
+                        case 0x06:
+                            if (machine.Version <= 4)
+                            {
+                                op_restore();
+                                return;
+                            }
+
+                            break;
                         case 0x07:
                             op_restart();
                             return;
@@ -1112,6 +1128,16 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+
+                        case 0x17:
+                            if (machine.Version >= 4)
+                            {
+                                op_scan_table();
+                                return;
+                            }
+
+                            break;
+
                         case 0x18:
                             if (machine.Version >= 5)
                             {
@@ -1144,6 +1170,16 @@ namespace ZDebug.Compiler
                             }
 
                             break;
+
+                        case 0x1d:
+                            if (machine.Version >= 5)
+                            {
+                                op_copy_table();
+                                return;
+                            }
+
+                            break;
+
                         case 0x1f:
                             if (machine.Version >= 5)
                             {
@@ -1158,6 +1194,24 @@ namespace ZDebug.Compiler
                 case OpcodeKind.Ext:
                     switch (currentInstruction.Opcode.Number)
                     {
+                        case 0x00:
+                            if (machine.Version >= 5)
+                            {
+                                op_save();
+                                return;
+                            }
+
+                            break;
+
+                        case 0x01:
+                            if (machine.Version >= 5)
+                            {
+                                op_restore();
+                                return;
+                            }
+
+                            break;
+
                         case 0x02:
                             if (machine.Version >= 5)
                             {
