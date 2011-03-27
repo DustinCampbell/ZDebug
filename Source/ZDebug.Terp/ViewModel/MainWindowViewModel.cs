@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Linq;
 using System.Media;
 using System.Threading;
 using System.Windows;
@@ -11,7 +9,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using ZDebug.Compiler;
 using ZDebug.Core.Execution;
-using ZDebug.Terp.Profiling;
+using ZDebug.Terp.Services;
 using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
@@ -24,33 +22,25 @@ namespace ZDebug.Terp.ViewModel
     {
         private readonly StoryService storyService;
         private readonly GameScriptService gameScriptService;
+        private readonly ProfilerService profilerService;
 
         private readonly ScreenViewModel screenViewModel;
+        private readonly ProfilerViewModel profilerViewModel;
         private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
         private readonly GameScriptDialogViewModel gameScriptDialogViewModel;
 
         private IScreen screen;
         private CompiledZMachine zmachine;
         private Thread zmachineThread;
-        private ZMachineProfiler profiler;
-        private Stopwatch watch;
         private DispatcherTimer updateTimer;
-
-        private TimeSpan compileTime;
-        private int routinesCompiled;
-        private double zcodeToILRatio;
-        private int routinesExecuted;
-        private int instructionsExecuted;
-        private int calculatedVariableLoads;
-        private int calculatedVariableStores;
-        private int directCalls;
-        private int calculatedCalls;
 
         [ImportingConstructor]
         public MainWindowViewModel(
             StoryService storyService,
             GameScriptService gameScriptService,
+            ProfilerService profilerService,
             ScreenViewModel screenViewModel,
+            ProfilerViewModel profilerViewModel,
             GameInfoDialogViewModel gameInfoDialogViewModel,
             GameScriptDialogViewModel gameScriptDialogViewModel)
             : base("MainWindowView")
@@ -61,7 +51,10 @@ namespace ZDebug.Terp.ViewModel
 
             this.gameScriptService = gameScriptService;
 
+            this.profilerService = profilerService;
+
             this.screenViewModel = screenViewModel;
+            this.profilerViewModel = profilerViewModel;
             this.gameInfoDialogViewModel = gameInfoDialogViewModel;
             this.gameScriptDialogViewModel = gameScriptDialogViewModel;
 
@@ -160,93 +153,13 @@ namespace ZDebug.Terp.ViewModel
             }
         }
 
-        public TimeSpan CompileTime
-        {
-            get
-            {
-                return compileTime;
-            }
-        }
-
-        public int RoutinesCompiled
-        {
-            get
-            {
-                return routinesCompiled;
-            }
-        }
-
-        public double ZCodeToILRatio
-        {
-            get
-            {
-                return zcodeToILRatio;
-            }
-        }
-
-        public double ZCodeToILRatioPercent
-        {
-            get
-            {
-                return zcodeToILRatio * 100;
-            }
-        }
-
-        public int RoutinesExecuted
-        {
-            get
-            {
-                return routinesExecuted;
-            }
-        }
-
-        public int InstructionsExecuted
-        {
-            get
-            {
-                return instructionsExecuted;
-            }
-        }
-
-        public int CalculatedVariableLoads
-        {
-            get
-            {
-                return calculatedVariableLoads;
-            }
-        }
-
-        public int CalculatedVariableStores
-        {
-            get
-            {
-                return calculatedVariableStores;
-            }
-        }
-
-        public int DirectCalls
-        {
-            get
-            {
-                return directCalls;
-            }
-        }
-
-        public int CalculatedCalls
-        {
-            get
-            {
-                return calculatedCalls;
-            }
-        }
-
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
-            //profiler = new ZMachineProfiler();
+            profilerService.Create();
             PropertyChanged("Profiling");
 
             e.Story.RegisterInterpreter(new Interpreter());
-            zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profiler);
+            zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profilerService.Profiler);
             zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);
@@ -265,9 +178,10 @@ namespace ZDebug.Terp.ViewModel
                 zmachineThread.Abort();
             }
 
+            profilerService.Destroy();
+
             zmachineThread = null;
             zmachine = null;
-            profiler = null;
 
             PropertyChanged("Title");
         }
@@ -279,7 +193,7 @@ namespace ZDebug.Terp.ViewModel
 
         private void Run()
         {
-            watch = Stopwatch.StartNew();
+            profilerService.Start();
             try
             {
                 zmachine.Run();
@@ -313,98 +227,14 @@ namespace ZDebug.Terp.ViewModel
                 UpdateProfilerStatistics();
             }
 
-            watch.Stop();
+            profilerService.Stop();
             updateTimer.Stop();
 
-            if (profiler != null)
-            {
-                profiler.Stop(watch.Elapsed);
-                PopulateProfilerData();
-            }
-        }
-
-        private void UpdateProfilerStatistics()
-        {
-            if (profiler == null)
-            {
-                return;
-            }
-
-            var compilationStatistics = profiler.CompilationStatistics.ToList();
-            if (compilationStatistics.Count > 0)
-            {
-                this.compileTime = new TimeSpan(compilationStatistics.Sum(s => s.CompileTime.Ticks));
-                this.routinesCompiled = profiler.RoutinesCompiled;
-                this.zcodeToILRatio = compilationStatistics.Select(s => (double)s.Size / (double)s.Routine.Length).Average();
-                this.routinesExecuted = profiler.RoutinesExecuted;
-                this.instructionsExecuted = profiler.InstructionsExecuted;
-                this.calculatedVariableLoads = compilationStatistics.Sum(s => s.CalculatedLoadVariableCount);
-                this.calculatedVariableStores = compilationStatistics.Sum(s => s.CalculatedStoreVariableCount);
-                this.directCalls = profiler.DirectCallCount;
-                this.calculatedCalls = profiler.CalculatedCallCount;
-
-                PropertyChanged("CompileTime");
-                PropertyChanged("RoutinesCompiled");
-                PropertyChanged("ZCodeToILRatio");
-                PropertyChanged("ZCodeToILRatioPercent");
-                PropertyChanged("RoutinesExecuted");
-                PropertyChanged("InstructionsExecuted");
-                PropertyChanged("CalculatedVariableLoads");
-                PropertyChanged("CalculatedVariableStores");
-                PropertyChanged("DirectCalls");
-                PropertyChanged("CalculatedCalls");
-            }
-        }
-
-        private void PopulateProfilerData()
-        {
-            if (profiler == null)
-            {
-                return;
-            }
-
-            Dispatch(() =>
-            {
-                //callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
-                //routineGrid.ItemsSource = profiler.Routines;
-
-                //var reader = new InstructionReader(0, Services.StoryService.Story.Memory);
-
-                //var instructions = profiler.InstructionTimings.Select(timing =>
-                //{
-                //    reader.Address = timing.Item1;
-                //    var i = reader.NextInstruction();
-                //    return new
-                //    {
-                //        Instruction = i,
-                //        Address = i.Address,
-                //        OpcodeName = i.Opcode.Name,
-                //        TimesExecuted = timing.Item2.Item1,
-                //        TotalTime = timing.Item2.Item2
-                //    };
-                //});
-
-                //instructionsGrid.ItemsSource = instructions.OrderByDescending(x => x.TotalTime);
-
-                //var opcodes = from i in instructions
-                //              group i by i.Instruction.Opcode.Name into g
-                //              select new
-                //              {
-                //                  Name = g.Key,
-                //                  TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
-                //                  Count = g.Sum(x => x.TimesExecuted)
-                //              };
-
-                //worstOpcodes.ItemsSource = opcodes.OrderByDescending(x => x.TotalTime);
-            });
-        }
-
-        public bool Profiling
-        {
-            get
-            {
-                return profiler != null;
-            }
+            //if (profiler != null)
+            //{
+            //    profiler.Stop(profilerService.Elapsed);
+            //    PopulateProfilerData();
+            //}
         }
 
         void ISoundEngine.HighBeep()
@@ -433,6 +263,148 @@ namespace ZDebug.Terp.ViewModel
                 dispatcher: this.View.Dispatcher);
 
             this.updateTimer.Stop();
+        }
+
+        private void UpdateProfilerStatistics()
+        {
+            profilerService.UpdateProfilerStatistics();
+
+            PropertyChanged("CompileTime");
+            PropertyChanged("RoutinesCompiled");
+            PropertyChanged("ZCodeToILRatio");
+            PropertyChanged("ZCodeToILRatioPercent");
+            PropertyChanged("RoutinesExecuted");
+            PropertyChanged("InstructionsExecuted");
+            PropertyChanged("CalculatedVariableLoads");
+            PropertyChanged("CalculatedVariableStores");
+            PropertyChanged("DirectCalls");
+            PropertyChanged("CalculatedCalls");
+        }
+
+        //private void PopulateProfilerData()
+        //{
+        //    Dispatch(() =>
+        //    {
+        //callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
+        //routineGrid.ItemsSource = profiler.Routines;
+
+        //var reader = new InstructionReader(0, Services.StoryService.Story.Memory);
+
+        //var instructions = profiler.InstructionTimings.Select(timing =>
+        //{
+        //    reader.Address = timing.Item1;
+        //    var i = reader.NextInstruction();
+        //    return new
+        //    {
+        //        Instruction = i,
+        //        Address = i.Address,
+        //        OpcodeName = i.Opcode.Name,
+        //        TimesExecuted = timing.Item2.Item1,
+        //        TotalTime = timing.Item2.Item2
+        //    };
+        //});
+
+        //instructionsGrid.ItemsSource = instructions.OrderByDescending(x => x.TotalTime);
+
+        //var opcodes = from i in instructions
+        //              group i by i.Instruction.Opcode.Name into g
+        //              select new
+        //              {
+        //                  Name = g.Key,
+        //                  TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
+        //                  Count = g.Sum(x => x.TimesExecuted)
+        //              };
+
+        //worstOpcodes.ItemsSource = opcodes.OrderByDescending(x => x.TotalTime);
+        //    });
+        //}
+
+        public bool Profiling
+        {
+            get
+            {
+                return profilerService.Profiling;
+            }
+        }
+
+        public TimeSpan CompileTime
+        {
+            get
+            {
+                return profilerService.CompileTime;
+            }
+        }
+
+        public int RoutinesCompiled
+        {
+            get
+            {
+                return profilerService.RoutinesCompiled;
+            }
+        }
+
+        public double ZCodeToILRatio
+        {
+            get
+            {
+                return profilerService.ZCodeToILRatio;
+            }
+        }
+
+        public double ZCodeToILRatioPercent
+        {
+            get
+            {
+                return profilerService.ZCodeToILRatio * 100;
+            }
+        }
+
+        public int RoutinesExecuted
+        {
+            get
+            {
+                return profilerService.RoutinesExecuted;
+            }
+        }
+
+        public int InstructionsExecuted
+        {
+            get
+            {
+                return profilerService.InstructionsExecuted;
+            }
+        }
+
+        public int CalculatedVariableLoads
+        {
+            get
+            {
+                return profilerService.CalculatedVariableLoads;
+            }
+        }
+
+        public int CalculatedVariableStores
+        {
+            get
+            {
+                return profilerService.CalculatedVariableStores;
+            }
+        }
+
+        public int DirectCalls
+        {
+            get
+            {
+                return profilerService.DirectCalls;
+            }
+        }
+
+        public int CalculatedCalls
+        {
+            get
+            {
+                return profilerService.CalculatedCalls;
+            }
         }
     }
 }
