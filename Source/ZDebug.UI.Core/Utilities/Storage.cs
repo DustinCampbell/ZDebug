@@ -34,7 +34,7 @@ namespace ZDebug.UI.Utilities
 
         private static IsolatedStorageFile GetStorageFile()
         {
-            return IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
+            return IsolatedStorageFile.GetUserStoreForDomain();
         }
 
         public static XmlTextReader OpenXmlFile(string fileName)

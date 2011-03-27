@@ -4,6 +4,7 @@
         xmlns:c="clr-namespace:ZDebug.UI.Controls;assembly=ZDebug.UI.Core"
         xmlns:vm="clr-namespace:ZDebug.UI.ViewModel;assembly=ZDebug.UI.Core"
         xmlns:local="clr-namespace:ZDebug.Terp"
+        Name="wndMain"
         Title="{Binding Title}"
         ResizeMode="CanResizeWithGrip"
         Height="800"

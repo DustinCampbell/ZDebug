@@ -85,6 +85,40 @@ namespace ZDebug.Terp.ViewModel
                 canExecute: AboutGameCanExecute);
         }
 
+        protected override void ViewCreated(Window view)
+        {
+            var screenContent = this.View.FindName<DocumentContent>("screenContent");
+            screenContent.Content = screenViewModel.CreateView();
+            this.screen = screenViewModel;
+
+            this.updateTimer = new DispatcherTimer(
+                interval: TimeSpan.FromMilliseconds(100),
+                priority: DispatcherPriority.Normal,
+                callback: delegate { UpdateProfilerStatistics(); },
+                dispatcher: this.View.Dispatcher);
+
+            this.updateTimer.Stop();
+
+            this.View.SourceInitialized += (s, e) =>
+            {
+                Storage.RestoreWindowLayout(this.View);
+            };
+
+            var dockManager = this.View.FindName<DockingManager>("dockManager");
+            dockManager.Loaded += (s, e) =>
+            {
+                Storage.SaveDockingLayout(dockManager, "original");
+                Storage.RestoreDockingLayout(dockManager);
+            };
+
+            this.View.Closing += (s, e) =>
+            {
+                storyService.CloseStory();
+                Storage.SaveDockingLayout(dockManager);
+                Storage.SaveWindowLayout(this.View);
+            };
+        }
+
         // commands...
         public ICommand OpenStoryCommand { get; private set; }
         public ICommand EditGameScriptCommand { get; private set; }
@@ -186,11 +220,6 @@ namespace ZDebug.Terp.ViewModel
             PropertyChanged("Title");
         }
 
-        private void View_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            storyService.CloseStory();
-        }
-
         private void Run()
         {
             profilerService.Start();
@@ -245,23 +274,6 @@ namespace ZDebug.Terp.ViewModel
         void ISoundEngine.LowBeep()
         {
             SystemSounds.Beep.Play();
-        }
-
-        protected override void ViewCreated(Window view)
-        {
-            this.View.Closing += View_Closing;
-
-            var screenContent = this.View.FindName<DocumentContent>("screenContent");
-            screenContent.Content = screenViewModel.CreateView();
-            this.screen = screenViewModel;
-
-            this.updateTimer = new DispatcherTimer(
-                interval: TimeSpan.FromMilliseconds(100),
-                priority: DispatcherPriority.Normal,
-                callback: delegate { UpdateProfilerStatistics(); },
-                dispatcher: this.View.Dispatcher);
-
-            this.updateTimer.Stop();
         }
 
         private void UpdateProfilerStatistics()
