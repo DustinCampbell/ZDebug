@@ -123,7 +123,7 @@ namespace ZDebug.Compiler
             return this.Story.ActualChecksum == Header.ReadChecksum(this.Memory);
         }
 
-        internal unsafe void PushFrame()
+        internal void PushFrame()
         {
             // argument count
             // local variable values (reversed)
@@ -147,6 +147,542 @@ namespace ZDebug.Compiler
 
             this.stackFrame = sp;
             this.sp = sp;
+        }
+
+        internal unsafe void PushFrame0()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 2;
+
+                *++sp = this.argumentCount;
+                *++sp = 0;
+            }
+
+            temp += 2;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame1()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 1;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = 1;
+            }
+
+            temp += 3;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame2()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 2;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 2;
+            }
+
+            temp += 4;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame3()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 3;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 3;
+            }
+
+            temp += 5;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame4()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 4;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 4;
+            }
+
+            temp += 6;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame5()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 5;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 5;
+            }
+
+            temp += 7;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame6()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 6;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 6;
+            }
+
+            temp += 8;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame7()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 7;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 7;
+            }
+
+            temp += 9;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame8()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 8;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 8;
+            }
+
+            temp += 10;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame9()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 9;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 9;
+            }
+
+            temp += 11;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame10()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 10;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 10;
+            }
+
+            temp += 12;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame11()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 11;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 11;
+            }
+
+            temp += 13;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame12()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 12;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 12;
+            }
+
+            temp += 14;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame13()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 13;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 13;
+            }
+
+            temp += 15;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame14()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 14;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 14;
+            }
+
+            temp += 16;
+
+            this.stackFrame = temp;
+            this.sp = temp;
+        }
+
+        internal unsafe void PushFrame15()
+        {
+            // argument count
+            // local variable values (reversed)
+            // local variable count
+
+            stackFrames[++sfp] = stackFrame;
+
+            var temp = this.sp;
+
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
+            {
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals + 15;
+
+                *++sp = this.argumentCount;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = *--lp;
+                *++sp = 15;
+            }
+
+            temp += 17;
+
+            this.stackFrame = temp;
+            this.sp = temp;
         }
 
         internal void PopFrame()

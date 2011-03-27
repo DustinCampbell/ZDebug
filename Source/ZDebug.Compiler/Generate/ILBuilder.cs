@@ -158,6 +158,11 @@ namespace ZDebug.Compiler.Generate
             }
         }
 
+        public void LoadThis()
+        {
+            LoadArg(0);
+        }
+
         public void Load(FieldInfo field, bool @volatile = false)
         {
             if (@volatile)
@@ -253,6 +258,11 @@ namespace ZDebug.Compiler.Generate
         public void CallVirt(MethodInfo method)
         {
             Emit(OpCodes.Callvirt, method);
+        }
+
+        public void NewObject(ConstructorInfo constructor)
+        {
+            Emit(OpCodes.Newobj, constructor);
         }
 
         public void Return()

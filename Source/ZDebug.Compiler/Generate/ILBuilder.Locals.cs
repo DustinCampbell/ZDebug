@@ -261,7 +261,11 @@ namespace ZDebug.Compiler.Generate
 
         private TWrapper AllocateLocal<T, TWrapper>(Func<ILBuilder, LocalBuilder, TWrapper> createWrapper, bool byref = false) where TWrapper : LocalWrapper
         {
-            var type = typeof(T);
+            return AllocateLocal<TWrapper>(typeof(T), createWrapper, byref);
+        }
+
+        private TWrapper AllocateLocal<TWrapper>(Type type, Func<ILBuilder, LocalBuilder, TWrapper> createWrapper, bool byref = false) where TWrapper : LocalWrapper
+        {
             if (byref)
             {
                 type = type.MakeByRefType();
@@ -298,6 +302,11 @@ namespace ZDebug.Compiler.Generate
         public ILocal NewLocal<T>()
         {
             return AllocateLocal<T, LocalWrapper>(CreateLocal);
+        }
+
+        public ILocal NewLocal(Type type)
+        {
+            return AllocateLocal<LocalWrapper>(type, CreateLocal);
         }
 
         public ILocal NewLocal<T>(CodeBuilder loadValue)

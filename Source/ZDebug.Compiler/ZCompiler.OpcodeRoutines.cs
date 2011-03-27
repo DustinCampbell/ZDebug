@@ -932,9 +932,6 @@ namespace ZDebug.Compiler
         private void op_get_prop()
         {
             using (var objNum = il.NewLocal<ushort>())
-            using (var propNum = il.NewLocal<ushort>())
-            using (var propAddress = il.NewLocal<ushort>())
-            using (var value = il.NewLocal<ushort>())
             using (var result = il.NewLocal<ushort>())
             {
                 var done = il.NewLabel();
@@ -944,83 +941,88 @@ namespace ZDebug.Compiler
                 ReadValidObjectNumber(0, invalidObjNum);
                 objNum.Store();
 
-                // Read propNum
-                LoadOperand(1);
-                propNum.Store();
+                using (var propNum = il.NewLocal<ushort>())
+                using (var propAddress = il.NewLocal<ushort>())
+                using (var value = il.NewLocal<ushort>())
+                {
+                    // Read propNum
+                    LoadOperand(1);
+                    propNum.Store();
 
-                int mask = machine.Version < 4 ? 0x1f : 0x3f;
+                    int mask = machine.Version < 4 ? 0x1f : 0x3f;
 
-                // Read first property address into propAddress
-                FirstProperty(objNum);
-                propAddress.Store();
+                    // Read first property address into propAddress
+                    FirstProperty(objNum);
+                    propAddress.Store();
 
-                var loopStart = il.NewLabel();
-                var loopDone = il.NewLabel();
+                    var loopStart = il.NewLabel();
+                    var loopDone = il.NewLabel();
 
-                loopStart.Mark();
+                    loopStart.Mark();
 
-                LoadByte(propAddress);
-                value.Store();
+                    LoadByte(propAddress);
+                    value.Store();
 
-                value.Load();
-                il.Math.And(mask);
-                il.Convert.ToUInt16();
-                propNum.Load();
-                loopDone.BranchIf(Condition.AtMost, @short: true);
+                    value.Load();
+                    il.Math.And(mask);
+                    il.Convert.ToUInt16();
+                    propNum.Load();
+                    loopDone.BranchIf(Condition.AtMost, @short: true);
 
-                propAddress.Load();
-                NextProperty();
-                propAddress.Store();
+                    propAddress.Load();
+                    NextProperty();
+                    propAddress.Store();
 
-                loopStart.Branch();
+                    loopStart.Branch();
 
-                loopDone.Mark();
+                    loopDone.Mark();
 
-                var propNotFound = il.NewLabel();
+                    var propNotFound = il.NewLabel();
 
-                value.Load();
-                il.Math.And(mask);
-                propNum.Load();
-                propNotFound.BranchIf(Condition.NotEqual);
+                    value.Load();
+                    il.Math.And(mask);
+                    propNum.Load();
+                    propNotFound.BranchIf(Condition.NotEqual);
 
-                propAddress.Load();
-                il.Math.Add(1);
-                il.Convert.ToUInt16();
-                propAddress.Store();
+                    propAddress.Load();
+                    il.Math.Add(1);
+                    il.Convert.ToUInt16();
+                    propAddress.Store();
 
-                var sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
+                    var sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
 
-                var secondBranch = il.NewLabel();
+                    var secondBranch = il.NewLabel();
 
-                value.Load();
-                il.Math.And(sizeMask);
-                secondBranch.BranchIf(Condition.True, @short: true);
+                    value.Load();
+                    il.Math.And(sizeMask);
+                    secondBranch.BranchIf(Condition.True, @short: true);
 
-                LoadByte(propAddress);
-                result.Store();
+                    LoadByte(propAddress);
+                    result.Store();
 
-                done.Branch();
+                    done.Branch();
 
-                secondBranch.Mark();
+                    secondBranch.Mark();
 
-                LoadWord(propAddress);
-                result.Store();
+                    LoadWord(propAddress);
+                    result.Store();
 
-                done.Branch();
+                    done.Branch();
 
-                propNotFound.Mark();
+                    propNotFound.Mark();
 
-                propNum.Load();
-                il.Math.Subtract(1);
-                il.Math.Multiply(2);
-                il.Math.Add(machine.ObjectTableAddress);
-                il.Convert.ToUInt16();
-                propAddress.Store();
+                    propNum.Load();
+                    il.Math.Subtract(1);
+                    il.Math.Multiply(2);
+                    il.Math.Add(machine.ObjectTableAddress);
+                    il.Convert.ToUInt16();
+                    propAddress.Store();
 
-                LoadWord(propAddress);
-                result.Store();
+                    LoadWord(propAddress);
+                    result.Store();
 
-                done.Branch();
+                    done.Branch();
+                }
 
                 invalidObjNum.Mark();
 
@@ -1036,9 +1038,6 @@ namespace ZDebug.Compiler
         private void op_get_prop_addr()
         {
             using (var objNum = il.NewLocal<ushort>())
-            using (var propNum = il.NewLocal<ushort>())
-            using (var propAddress = il.NewLocal<ushort>())
-            using (var value = il.NewLocal<ushort>())
             {
                 var done = il.NewLabel();
 
@@ -1047,67 +1046,72 @@ namespace ZDebug.Compiler
                 ReadValidObjectNumber(operandIndex: 0, failed: storeZero);
                 objNum.Store();
 
-                // Read propNum
-                LoadOperand(1);
-                propNum.Store();
-
-                int mask = machine.Version < 4 ? 0x1f : 0x3f;
-
-                // Read first property address into propAddress
-                FirstProperty(objNum);
-                propAddress.Store();
-
-                var loopStart = il.NewLabel();
-                var loopDone = il.NewLabel();
-
-                loopStart.Mark();
-
-                LoadByte(propAddress);
-                value.Store();
-
-                value.Load();
-                il.Math.And(mask);
-                il.Convert.ToUInt16();
-                propNum.Load();
-                loopDone.BranchIf(Condition.AtMost, @short: true);
-
-                propAddress.Load();
-                NextProperty();
-                propAddress.Store();
-
-                loopStart.Branch();
-
-                loopDone.Mark();
-
-                var storeAddress = il.NewLabel();
-
-                value.Load();
-                il.Math.And(mask);
-                propNum.Load();
-                storeZero.BranchIf(Condition.NotEqual, @short: true);
-
-                if (machine.Version > 3)
+                using (var propNum = il.NewLocal<ushort>())
+                using (var propAddress = il.NewLocal<ushort>())
+                using (var value = il.NewLocal<ushort>())
                 {
-                    value.Load();
-                    il.Math.And(0x80);
-                    storeAddress.BranchIf(Condition.False, @short: true);
+                    // Read propNum
+                    LoadOperand(1);
+                    propNum.Store();
 
-                    propAddress.Load();
-                    il.Math.Add(1);
-                    il.Convert.ToUInt16();
+                    int mask = machine.Version < 4 ? 0x1f : 0x3f;
+
+                    // Read first property address into propAddress
+                    FirstProperty(objNum);
                     propAddress.Store();
-                }
 
-                storeAddress.Mark();
+                    var loopStart = il.NewLabel();
+                    var loopDone = il.NewLabel();
 
-                Store(valueLoader: () =>
-                {
-                    propAddress.Load();
-                    il.Math.Add(1);
+                    loopStart.Mark();
+
+                    LoadByte(propAddress);
+                    value.Store();
+
+                    value.Load();
+                    il.Math.And(mask);
                     il.Convert.ToUInt16();
-                });
+                    propNum.Load();
+                    loopDone.BranchIf(Condition.AtMost, @short: true);
 
-                done.Branch(@short: true);
+                    propAddress.Load();
+                    NextProperty();
+                    propAddress.Store();
+
+                    loopStart.Branch();
+
+                    loopDone.Mark();
+
+                    var storeAddress = il.NewLabel();
+
+                    value.Load();
+                    il.Math.And(mask);
+                    propNum.Load();
+                    storeZero.BranchIf(Condition.NotEqual, @short: true);
+
+                    if (machine.Version > 3)
+                    {
+                        value.Load();
+                        il.Math.And(0x80);
+                        storeAddress.BranchIf(Condition.False, @short: true);
+
+                        propAddress.Load();
+                        il.Math.Add(1);
+                        il.Convert.ToUInt16();
+                        propAddress.Store();
+                    }
+
+                    storeAddress.Mark();
+
+                    Store(valueLoader: () =>
+                    {
+                        propAddress.Load();
+                        il.Math.Add(1);
+                        il.Convert.ToUInt16();
+                    });
+
+                    done.Branch(@short: true);
+                }
 
                 storeZero.Mark();
 
@@ -1229,40 +1233,41 @@ namespace ZDebug.Compiler
         private void op_put_prop()
         {
             using (var objNum = il.NewLocal<ushort>())
-            using (var propNum = il.NewLocal<ushort>())
-            using (var value = il.NewLocal<byte>())
-            using (var propAddress = il.NewLocal<ushort>())
             {
                 // Read objNum
                 var done = il.NewLabel();
                 ReadValidObjectNumber(0, done);
                 objNum.Store();
 
-                // Read propNum
-                LoadOperand(1);
-                propNum.Store();
+                using (var propNum = il.NewLocal<ushort>())
+                using (var value = il.NewLocal<byte>())
+                using (var propAddress = il.NewLocal<ushort>())
+                {
+                    // Read propNum
+                    LoadOperand(1);
+                    propNum.Store();
 
-                il.DebugWrite("propNum: {0}", propNum);
+                    il.DebugWrite("propNum: {0}", propNum);
 
-                int mask = machine.Version < 4 ? 0x1f : 0x3f;
+                    int mask = machine.Version < 4 ? 0x1f : 0x3f;
 
-                // Read first property address into propAddress
-                FirstProperty(objNum);
-                propAddress.Store();
+                    // Read first property address into propAddress
+                    FirstProperty(objNum);
+                    propAddress.Store();
 
-                var loopStart = il.NewLabel();
-                var loopDone = il.NewLabel();
+                    var loopStart = il.NewLabel();
+                    var loopDone = il.NewLabel();
 
-                il.DebugIndent();
-                loopStart.Mark();
+                    il.DebugIndent();
+                    loopStart.Mark();
 
-                // Read first property byte and store in value
-                LoadByte(propAddress);
-                value.Store();
+                    // Read first property byte and store in value
+                    LoadByte(propAddress);
+                    value.Store();
 
-                // if ((value & mask) <= propNum) break;
-                value.Load();
-                il.Math.And(mask);
+                    // if ((value & mask) <= propNum) break;
+                    value.Load();
+                    il.Math.And(mask);
 
 #if DEBUG
                 using (var temp = il.NewLocal<ushort>())
@@ -1273,71 +1278,72 @@ namespace ZDebug.Compiler
                 }
 #endif
 
-                propNum.Load();
-                loopDone.BranchIf(Condition.AtMost, @short: true);
+                    propNum.Load();
+                    loopDone.BranchIf(Condition.AtMost, @short: true);
 
-                // Read next property address into propAddress
-                propAddress.Load();
-                NextProperty();
-                propAddress.Store();
+                    // Read next property address into propAddress
+                    propAddress.Load();
+                    NextProperty();
+                    propAddress.Store();
 
-                // Branch to start of loop
-                loopStart.Branch();
+                    // Branch to start of loop
+                    loopStart.Branch();
 
-                loopDone.Mark();
-                il.DebugUnindent();
+                    loopDone.Mark();
+                    il.DebugUnindent();
 
-                // if ((value & mask) != propNum) throw;
-                var propNumFound = il.NewLabel();
-                value.Load();
-                il.Math.And(mask);
-                propNum.Load();
-                propNumFound.BranchIf(Condition.Equal, @short: true);
-                il.RuntimeError("Object {0} does not contain property {1}", objNum, propNum);
+                    // if ((value & mask) != propNum) throw;
+                    var propNumFound = il.NewLabel();
+                    value.Load();
+                    il.Math.And(mask);
+                    propNum.Load();
+                    propNumFound.BranchIf(Condition.Equal, @short: true);
+                    il.RuntimeError("Object {0} does not contain property {1}", objNum, propNum);
 
-                propNumFound.Mark();
+                    propNumFound.Mark();
 
-                il.DebugWrite("Found property {0} at address {1:x4}", propNum, propAddress);
+                    il.DebugWrite("Found property {0} at address {1:x4}", propNum, propAddress);
 
-                // propAddress++;
-                propAddress.Load();
-                il.Math.Add(1);
-                il.Convert.ToUInt16();
-                propAddress.Store();
+                    // propAddress++;
+                    propAddress.Load();
+                    il.Math.Add(1);
+                    il.Convert.ToUInt16();
+                    propAddress.Store();
 
-                var sizeIsWord = il.NewLabel();
+                    var sizeIsWord = il.NewLabel();
 
-                // if ((this.version <= 3 && (value & 0xe0) != 0) && (this.version >= 4) && (value & 0xc0) != 0)
-                int sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
-                value.Load();
-                il.Math.And(sizeMask);
-                sizeIsWord.BranchIf(Condition.True, @short: true);
+                    // if ((this.version <= 3 && (value & 0xe0) != 0) && (this.version >= 4) && (value & 0xc0) != 0)
+                    int sizeMask = machine.Version < 4 ? 0xe0 : 0xc0;
+                    value.Load();
+                    il.Math.And(sizeMask);
+                    sizeIsWord.BranchIf(Condition.True, @short: true);
 
-                // write byte
-                using (var temp = il.NewLocal<byte>())
-                {
-                    LoadOperand(2);
-                    il.Convert.ToUInt8();
-                    temp.Store();
+                    // write byte
+                    using (var temp = il.NewLocal<byte>())
+                    {
+                        LoadOperand(2);
+                        il.Convert.ToUInt8();
+                        temp.Store();
 
-                    StoreByte(propAddress, temp);
+                        StoreByte(propAddress, temp);
 
-                    il.DebugWrite("Wrote byte {0:x2} to {1:x4}", temp, propAddress);
+                        il.DebugWrite("Wrote byte {0:x2} to {1:x4}", temp, propAddress);
 
-                    done.Branch(@short: true);
-                }
+                        done.Branch(@short: true);
+                    }
 
-                // write word
-                sizeIsWord.Mark();
+                    // write word
+                    sizeIsWord.Mark();
 
-                using (var temp = il.NewLocal<ushort>())
-                {
-                    LoadOperand(2);
-                    temp.Store();
+                    using (var temp = il.NewLocal<ushort>())
+                    {
+                        LoadOperand(2);
+                        temp.Store();
 
-                    StoreWord(propAddress, temp);
+                        StoreWord(propAddress, temp);
 
-                    il.DebugWrite("Wrote word {0:x2} to {1:x4}", temp, propAddress);
+                        il.DebugWrite("Wrote word {0:x2} to {1:x4}", temp, propAddress);
+                    }
                 }
 
                 done.Mark();

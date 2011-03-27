@@ -45,5 +45,15 @@ namespace ZDebug.Core.Utilities
         {
             return new Type[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8) };
         }
+
+        public static Type Array<T>()
+        {
+            return typeof(T).MakeArrayType();
+        }
+
+        public static Type ByRef<T>() where T : struct
+        {
+            return typeof(T).MakeByRefType();
+        }
     }
 }
