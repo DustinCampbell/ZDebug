@@ -38,6 +38,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
+                <MenuItem Command="{Binding ExitCommand}" Header="E_xit"/>
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Command="{Binding EditGameScriptCommand}" Header="Edit Game _Script...">

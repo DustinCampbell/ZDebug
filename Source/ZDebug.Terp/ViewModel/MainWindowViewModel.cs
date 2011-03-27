@@ -91,6 +91,9 @@ namespace ZDebug.Terp.ViewModel
             screenContent.Content = screenViewModel.CreateView();
             this.screen = screenViewModel;
 
+            var profilerContent = this.View.FindName<DocumentContent>("profilerContent");
+            profilerContent.Content = profilerViewModel.CreateView();
+
             this.updateTimer = new DispatcherTimer(
                 interval: TimeSpan.FromMilliseconds(100),
                 priority: DispatcherPriority.Normal,
@@ -193,7 +196,7 @@ namespace ZDebug.Terp.ViewModel
             PropertyChanged("Profiling");
 
             e.Story.RegisterInterpreter(new Interpreter());
-            zmachine = new CompiledZMachine(e.Story, precompile: true, profiler: profilerService.Profiler);
+            zmachine = new CompiledZMachine(e.Story, profiler: profilerService.Profiler);
             zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);
@@ -256,14 +259,8 @@ namespace ZDebug.Terp.ViewModel
                 UpdateProfilerStatistics();
             }
 
-            profilerService.Stop();
             updateTimer.Stop();
-
-            //if (profiler != null)
-            //{
-            //    profiler.Stop(profilerService.Elapsed);
-            //    PopulateProfilerData();
-            //}
+            profilerService.Stop();
         }
 
         void ISoundEngine.HighBeep()
@@ -291,44 +288,6 @@ namespace ZDebug.Terp.ViewModel
             PropertyChanged("DirectCalls");
             PropertyChanged("CalculatedCalls");
         }
-
-        //private void PopulateProfilerData()
-        //{
-        //    Dispatch(() =>
-        //    {
-        //callTree.ItemsSource = new List<ICall>() { profiler.RootCall };
-        //routineGrid.ItemsSource = profiler.Routines;
-
-        //var reader = new InstructionReader(0, Services.StoryService.Story.Memory);
-
-        //var instructions = profiler.InstructionTimings.Select(timing =>
-        //{
-        //    reader.Address = timing.Item1;
-        //    var i = reader.NextInstruction();
-        //    return new
-        //    {
-        //        Instruction = i,
-        //        Address = i.Address,
-        //        OpcodeName = i.Opcode.Name,
-        //        TimesExecuted = timing.Item2.Item1,
-        //        TotalTime = timing.Item2.Item2
-        //    };
-        //});
-
-        //instructionsGrid.ItemsSource = instructions.OrderByDescending(x => x.TotalTime);
-
-        //var opcodes = from i in instructions
-        //              group i by i.Instruction.Opcode.Name into g
-        //              select new
-        //              {
-        //                  Name = g.Key,
-        //                  TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
-        //                  Count = g.Sum(x => x.TimesExecuted)
-        //              };
-
-        //worstOpcodes.ItemsSource = opcodes.OrderByDescending(x => x.TotalTime);
-        //    });
-        //}
 
         public bool Profiling
         {

@@ -28,6 +28,24 @@ namespace ZDebug.Terp.Services
         {
         }
 
+        private void OnStarting()
+        {
+            var handler = Starting;
+            if (handler != null)
+            {
+                handler(this, new ProfilerStartingEventArgs());
+            }
+        }
+
+        private void OnStopped()
+        {
+            var handler = Stopped;
+            if (handler != null)
+            {
+                handler(this, new ProfilerStoppedEventArgs());
+            }
+        }
+
         public void Create()
         {
             this.profiler = new ZMachineProfiler();
@@ -40,12 +58,14 @@ namespace ZDebug.Terp.Services
 
         public void Start()
         {
+            OnStarting();
             watch = Stopwatch.StartNew();
         }
 
         public void Stop()
         {
             watch.Stop();
+            OnStopped();
         }
 
         public void UpdateProfilerStatistics()
@@ -185,5 +205,8 @@ namespace ZDebug.Terp.Services
                 return calculatedCalls;
             }
         }
+
+        public event EventHandler<ProfilerStartingEventArgs> Starting;
+        public event EventHandler<ProfilerStoppedEventArgs> Stopped;
     }
 }

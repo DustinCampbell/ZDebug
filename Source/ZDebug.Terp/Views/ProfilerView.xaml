@@ -1,20 +1,15 @@
 ﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:p="clr-namespace:ZDebug.Terp.Profiling">
-    <Grid>
-        <TabControl>
-            <TabControl.Style>
-                <Style TargetType="TabControl">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=Profiling}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TabControl.Style>
+             xmlns:p="clr-namespace:ZDebug.Terp.Profiling"
+             xmlns:local="clr-namespace:ZDebug.Terp">
 
-            <TabItem Header="Overview">
+    <UserControl.Resources>
+        <local:TimeSpanToStringValueConverter x:Key="timeSpanToString"/>
+    </UserControl.Resources>
+    
+    <Grid>
+        <TabControl TabStripPlacement="Left">
+            <TabItem Header="Opcodes">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -23,10 +18,10 @@
 
                     <DockPanel Grid.Column="0">
                         <TextBlock DockPanel.Dock="Top" Text="Opcodes:"/>
-                        <DataGrid Name="worstOpcodes"
-                                          AutoGenerateColumns="False"
-                                          HorizontalGridLinesBrush="LightGray"
-                                          VerticalGridLinesBrush="LightGray">
+                        <DataGrid ItemsSource="{Binding Opcodes}"
+                                  AutoGenerateColumns="False"
+                                  HorizontalGridLinesBrush="LightGray"
+                                  VerticalGridLinesBrush="LightGray">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Name, Mode=OneWay}"/>
                                 <DataGridTextColumn Header="Total Time" IsReadOnly="True" Binding="{Binding TotalTime, Mode=OneWay, Converter={StaticResource timeSpanToString}}"/>
@@ -41,24 +36,27 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
+            
             <TabItem Header="Instructions">
-                <DataGrid Name="instructionsGrid"
-                                  AutoGenerateColumns="False"
-                                  HorizontalGridLinesBrush="LightGray"
-                                  VerticalGridLinesBrush="LightGray">
+                <DataGrid ItemsSource="{Binding Instructions}"
+                          AutoGenerateColumns="False"
+                          HorizontalGridLinesBrush="LightGray"
+                          VerticalGridLinesBrush="LightGray">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Address" IsReadOnly="True" Binding="{Binding Address, Mode=OneWay, StringFormat=\{0:x4\}}"/>
                         <DataGridTextColumn Header="Opcode" IsReadOnly="True" Binding="{Binding OpcodeName, Mode=OneWay}"/>
+                        <DataGridTextColumn Header="# Operands" IsReadOnly="True" Binding="{Binding OperandCount, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                         <DataGridTextColumn Header="X Executed" IsReadOnly="True" Binding="{Binding TimesExecuted, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
                         <DataGridTextColumn Header="Total Time" IsReadOnly="True" Binding="{Binding TotalTime, Mode=OneWay, Converter={StaticResource timeSpanToString}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
+            
             <TabItem Header="Routines">
-                <DataGrid Name="routineGrid"
-                                  AutoGenerateColumns="False"
-                                  HorizontalGridLinesBrush="LightGray"
-                                  VerticalGridLinesBrush="LightGray">
+                <DataGrid ItemsSource="{Binding Routines}"
+                          AutoGenerateColumns="False"
+                          HorizontalGridLinesBrush="LightGray"
+                          VerticalGridLinesBrush="LightGray">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Address" IsReadOnly="True" Binding="{Binding Address, Mode=OneWay, StringFormat=\{0:x4\}}"/>
                         <DataGridTextColumn Header="# Calls" IsReadOnly="True" Binding="{Binding Calls.Count, Mode=OneWay, StringFormat=\{0:#\,0\}}"/>
@@ -73,14 +71,15 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
+            
             <TabItem Header="Calls">
-                <TreeView Name="callTree"
-                                  VirtualizingStackPanel.IsVirtualizing="True"
-                                  VirtualizingStackPanel.VirtualizationMode="Recycling">
+                <TreeView ItemsSource="{Binding CallTreeRoot}"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling">
+
                     <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate
-                                    DataType="{x:Type p:ICall}"
-                                    ItemsSource="{Binding Children}">
+                        <HierarchicalDataTemplate DataType="{x:Type p:ICall}"
+                                                  ItemsSource="{Binding Children}">
                             <TextBlock>
                                         <Run Text="{Binding InclusivePercentage, Mode=OneWay, StringFormat=\{0:0.00\}%}"
                                              FontWeight="Bold"/>

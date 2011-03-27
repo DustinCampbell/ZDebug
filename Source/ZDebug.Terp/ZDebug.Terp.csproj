@@ -68,6 +68,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Services\ProfilerService.cs" />
+    <Compile Include="Services\ProfilerStartingEventArgs.cs" />
+    <Compile Include="Services\ProfilerStoppedEventArgs.cs" />
     <Compile Include="Services\StorageService.cs" />
     <Compile Include="TimeSpanToStringValueConverter.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
