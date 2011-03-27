@@ -344,6 +344,95 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void PushFrame(int localCount)
+        {
+            switch (localCount)
+            {
+                case 0:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame0", @public: false));
+                    break;
+
+                case 1:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame1", @public: false));
+                    break;
+
+                case 2:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame2", @public: false));
+                    break;
+
+                case 3:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame3", @public: false));
+                    break;
+
+                case 4:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame4", @public: false));
+                    break;
+
+                case 5:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame5", @public: false));
+                    break;
+
+                case 6:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame6", @public: false));
+                    break;
+
+                case 7:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame7", @public: false));
+                    break;
+
+                case 8:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame8", @public: false));
+                    break;
+
+                case 9:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame9", @public: false));
+                    break;
+
+                case 10:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame10", @public: false));
+                    break;
+
+                case 11:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame11", @public: false));
+                    break;
+
+                case 12:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame12", @public: false));
+                    break;
+
+                case 13:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame13", @public: false));
+                    break;
+
+                case 14:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame14", @public: false));
+                    break;
+
+                case 15:
+                    il.LoadThis();
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame15", @public: false));
+                    break;
+
+                default:
+                    throw new ZCompilerException("Unexpected: only 15 locals allowed.");
+            }
+        }
+
         private void DirectCall(Operand addressOp)
         {
             if (machine.Profiling)
@@ -389,99 +478,7 @@ namespace ZDebug.Compiler
                 }
 
                 // Push frame after loading operands in case any operands manipulate the stack.
-                if (localRefs == null)
-                {
-                    il.LoadThis();
-                    il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame0", @public: false));
-                }
-                else
-                {
-                    switch (localRefs.Length)
-                    {
-                        case 0:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame0", @public: false));
-                            break;
-
-                        case 1:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame1", @public: false));
-                            break;
-
-                        case 2:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame2", @public: false));
-                            break;
-
-                        case 3:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame3", @public: false));
-                            break;
-
-                        case 4:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame4", @public: false));
-                            break;
-
-                        case 5:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame5", @public: false));
-                            break;
-
-                        case 6:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame6", @public: false));
-                            break;
-
-                        case 7:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame7", @public: false));
-                            break;
-
-                        case 8:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame8", @public: false));
-                            break;
-
-                        case 9:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame9", @public: false));
-                            break;
-
-                        case 10:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame10", @public: false));
-                            break;
-
-                        case 11:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame11", @public: false));
-                            break;
-
-                        case 12:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame12", @public: false));
-                            break;
-
-                        case 13:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame13", @public: false));
-                            break;
-
-                        case 14:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame14", @public: false));
-                            break;
-
-                        case 15:
-                            il.LoadThis();
-                            il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame15", @public: false));
-                            break;
-
-                        default:
-                            throw new ZCompilerException("Unexpected: only 15 locals allowed.");
-                    }
-                }
+                PushFrame(localRefs != null ? localRefs.Length : 0);
 
                 var callName = "DirectCall" + argCount.ToString();
                 var callTypes = GetDirectCallTypes(argCount);
@@ -515,16 +512,26 @@ namespace ZDebug.Compiler
                     il.Call(profilerCall);
                 }
 
-                // load and throw away all SP operands...
                 var argCount = currentInstruction.OperandCount - 1;
+
+                // discard any SP operands...
+                int spOperands = 0;
                 for (int i = 1; i <= argCount; i++)
                 {
                     var op = GetOperand(i);
                     if (op.Kind == OperandKind.Variable && op.Value == 0)
                     {
-                        LoadOperand(i);
-                        il.Pop();
+                        spOperands++;
                     }
+                }
+
+                if (spOperands > 0)
+                {
+                    spRef.Load();
+                    spRef.Load();
+                    spRef.LoadIndirectValue();
+                    il.Math.Subtract(spOperands);
+                    spRef.StoreIndirectValue();
                 }
 
                 il.Load(0);

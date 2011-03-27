@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
@@ -41,6 +42,8 @@ namespace ZDebug.Terp.ViewModel
         private int calculatedVariableStores;
         private int directCalls;
         private int calculatedCalls;
+
+        private List<ICall> callTree;
 
         [ImportingConstructor]
         public MainWindowViewModel(

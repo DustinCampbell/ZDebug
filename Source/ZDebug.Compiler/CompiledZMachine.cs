@@ -32,6 +32,8 @@ namespace ZDebug.Compiler
         private readonly ushort[] arguments;
         private ushort argumentCount;
 
+        private int cacheMiss;
+
         private readonly ushort objectTableAddress;
         private readonly byte propertyDefaultsTableSize;
         private readonly ushort objectEntriesAddress;
@@ -685,27 +687,32 @@ namespace ZDebug.Compiler
             this.sp = temp;
         }
 
-        internal void PopFrame()
+        internal unsafe void PopFrame()
         {
             // local variable count
             // local variable values
             // argument count
 
-            var stack = this.stack;
-            var sp = this.stackFrame;
+            var temp = this.stackFrame;
 
-            var localCount = stack[sp--];
-            var locals = this.locals;
-            for (int i = 0; i < localCount; i++)
+            fixed (ushort* pStack = this.stack)
+            fixed (ushort* pLocals = this.locals)
             {
-                locals[i] = stack[sp--];
+                ushort* sp = pStack + temp;
+                ushort* lp = pLocals;
+
+                var localCount = *(sp--);
+                for (int i = 0; i < localCount; i++)
+                {
+                    *(lp++) = *(sp--);
+                }
+
+                this.argumentCount = *(sp--);
+                this.localCount = localCount;
+
+                this.stackFrame = stackFrames[sfp--];
+                this.sp = temp - localCount - 2;
             }
-
-            this.localCount = localCount;
-            this.argumentCount = stack[sp--];
-
-            this.stackFrame = stackFrames[sfp--];
-            this.sp = sp;
         }
 
         private ZRoutine GetRoutineByAddress(int address)
@@ -745,6 +752,7 @@ namespace ZDebug.Compiler
             ZRoutineCall routineCall;
             if (!addressToRoutineCallMap.TryGetValue(address, out routineCall))
             {
+                cacheMiss++;
                 var routine = GetRoutineByAddress(address);
                 routineCall = new ZRoutineCall(routine, machine: this);
                 addressToRoutineCallMap.Add(address, routineCall);
@@ -769,19 +777,35 @@ namespace ZDebug.Compiler
             var locals = routineCall.Routine.Locals;
             var localCount = (ushort)locals.Length;
 
-            for (int i = argCount; i < localCount; i++)
+            fixed (ushort* pLocals = this.locals)
             {
-                this.locals[i] = locals[i];
+                for (int i = argCount; i < localCount; i++)
+                {
+                    *(pLocals + i) = locals[i];
+                }
             }
 
             this.localCount = localCount;
         }
 
-        internal ushort DirectCall0(ZRoutineCall routineCall)
+        internal unsafe ushort DirectCall0(ZRoutineCall routineCall)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 0);
+            this.argumentCount = 0;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
+
+            fixed (ushort* pLocals = this.locals)
+            {
+                for (int i = 0; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
+            }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -793,13 +817,26 @@ namespace ZDebug.Compiler
             return DirectCall0(GetRoutineCall(address));
         }
 
-        internal ushort DirectCall1(ZRoutineCall routineCall, ushort arg0)
+        internal unsafe ushort DirectCall1(ZRoutineCall routineCall, ushort arg0)
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 1);
+            this.argumentCount = 1;
 
-            this.locals[0] = arg0;
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
+
+            fixed (ushort* pLocals = this.locals)
+            {
+                *pLocals = arg0;
+
+                for (int i = 1; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
+            }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -815,14 +852,23 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 2);
+            this.argumentCount = 2;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+
+                for (int i = 2; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -838,15 +884,24 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 3);
+            this.argumentCount = 3;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
-                *p++ = arg2;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+                *(pLocals + 2) = arg2;
+
+                for (int i = 3; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -862,16 +917,25 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 4);
+            this.argumentCount = 4;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
-                *p++ = arg2;
-                *p++ = arg3;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+                *(pLocals + 2) = arg2;
+                *(pLocals + 3) = arg3;
+
+                for (int i = 4; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -887,17 +951,26 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 5);
+            this.argumentCount = 5;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
-                *p++ = arg2;
-                *p++ = arg3;
-                *p++ = arg4;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+                *(pLocals + 2) = arg2;
+                *(pLocals + 3) = arg3;
+                *(pLocals + 4) = arg4;
+
+                for (int i = 5; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -913,18 +986,27 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 6);
+            this.argumentCount = 6;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
-                *p++ = arg2;
-                *p++ = arg3;
-                *p++ = arg4;
-                *p++ = arg5;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+                *(pLocals + 2) = arg2;
+                *(pLocals + 3) = arg3;
+                *(pLocals + 4) = arg4;
+                *(pLocals + 5) = arg5;
+
+                for (int i = 6; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
@@ -940,19 +1022,28 @@ namespace ZDebug.Compiler
         {
             Debug.Assert(routineCall.Routine.Address != 0);
 
-            SetupCall(routineCall, 7);
+            this.argumentCount = 7;
+
+            var locals = routineCall.Routine.Locals;
+            var localCount = (ushort)locals.Length;
 
             fixed (ushort* pLocals = this.locals)
             {
-                ushort* p = pLocals;
-                *p++ = arg0;
-                *p++ = arg1;
-                *p++ = arg2;
-                *p++ = arg3;
-                *p++ = arg4;
-                *p++ = arg5;
-                *p++ = arg6;
+                *pLocals = arg0;
+                *(pLocals + 1) = arg1;
+                *(pLocals + 2) = arg2;
+                *(pLocals + 3) = arg3;
+                *(pLocals + 4) = arg4;
+                *(pLocals + 5) = arg5;
+                *(pLocals + 6) = arg6;
+
+                for (int i = 7; i < localCount; i++)
+                {
+                    *(pLocals + i) = (this.Version < 5 ? locals[i] : (ushort)0);
+                }
             }
+
+            this.localCount = localCount;
 
             return routineCall.Invoke();
         }
