@@ -164,10 +164,8 @@ namespace ZDebug.Compiler
             var temp = this.sp;
 
             fixed (ushort* pStack = this.stack)
-            fixed (ushort* pLocals = this.locals)
             {
                 ushort* sp = pStack + temp;
-                ushort* lp = pLocals + 2;
 
                 *++sp = this.argumentCount;
                 *++sp = 0;
