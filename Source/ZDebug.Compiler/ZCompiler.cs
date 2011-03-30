@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 using ZDebug.Core.Utilities;
@@ -23,7 +22,7 @@ namespace ZDebug.Compiler
         private bool debugging;
 
         private ILBuilder il;
-        private Dictionary<int, ILabel> addressToLabelMap;
+        private IDictionary<int, ILabel> addressToLabelMap;
         private Instruction currentInstruction;
         private List<ZRoutineCall> calls;
 
@@ -32,6 +31,9 @@ namespace ZDebug.Compiler
         private ILocal outputStreams;
 
         private bool usesStack;
+        private bool usesMemory;
+        private bool usesScreen;
+        private bool usesOutputStreams;
 
         private IArrayLocal stack;
         private IRefLocal spRef;
@@ -42,23 +44,23 @@ namespace ZDebug.Compiler
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
 
-        private static readonly Type[] directCall0Types = Types.One<ZRoutineCall>();
-        private static readonly Type[] directCall1Types = Types.Two<ZRoutineCall, ushort>();
-        private static readonly Type[] directCall2Types = Types.Three<ZRoutineCall, ushort, ushort>();
-        private static readonly Type[] directCall3Types = Types.Four<ZRoutineCall, ushort, ushort, ushort>();
-        private static readonly Type[] directCall4Types = Types.Five<ZRoutineCall, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall5Types = Types.Six<ZRoutineCall, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall6Types = Types.Seven<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall7Types = Types.Eight<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall0Types = Types.Array<ZRoutineCall>();
+        private static readonly Type[] directCall1Types = Types.Array<ZRoutineCall, ushort>();
+        private static readonly Type[] directCall2Types = Types.Array<ZRoutineCall, ushort, ushort>();
+        private static readonly Type[] directCall3Types = Types.Array<ZRoutineCall, ushort, ushort, ushort>();
+        private static readonly Type[] directCall4Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall5Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall6Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] directCall7Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
 
-        private static readonly Type[] calculatedCall0Types = Types.One<int>();
-        private static readonly Type[] calculatedCall1Types = Types.Two<int, ushort>();
-        private static readonly Type[] calculatedCall2Types = Types.Three<int, ushort, ushort>();
-        private static readonly Type[] calculatedCall3Types = Types.Four<int, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall4Types = Types.Five<int, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall5Types = Types.Six<int, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall6Types = Types.Seven<int, ushort, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall7Types = Types.Eight<int, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall0Types = Types.Array<int>();
+        private static readonly Type[] calculatedCall1Types = Types.Array<int, ushort>();
+        private static readonly Type[] calculatedCall2Types = Types.Array<int, ushort, ushort>();
+        private static readonly Type[] calculatedCall3Types = Types.Array<int, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall4Types = Types.Array<int, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall5Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall6Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort, ushort>();
+        private static readonly Type[] calculatedCall7Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
 
         private ZCompiler(ZRoutine routine, CompiledZMachine machine, bool debugging = false)
         {
@@ -72,14 +74,14 @@ namespace ZDebug.Compiler
             return "ZRoutine_" + routine.Address.ToString("x4");
         }
 
-        public ZCompilerResult Compile()
+        private ZCompilerResult Compile()
         {
             var sw = Stopwatch.StartNew();
 
             var dm = new DynamicMethod(
                 name: GetName(routine),
                 returnType: typeof(ushort),
-                parameterTypes: Types.Two<CompiledZMachine, ZRoutineCall[]>(),
+                parameterTypes: Types.Array<CompiledZMachine, ZRoutineCall[]>(),
                 owner: typeof(CompiledZMachine),
                 skipVisibility: true);
 
@@ -90,58 +92,11 @@ namespace ZDebug.Compiler
 
             Profiler_EnterRoutine();
 
-            // First pass: gather branches and labels
-            this.addressToLabelMap = new Dictionary<int, ILabel>();
-            foreach (var i in routine.Instructions)
-            {
-                if (i.HasBranch && i.Branch.Kind == BranchKind.Address)
-                {
-                    var address = i.Address + i.Length + i.Branch.Offset - 2;
-                    if (!this.addressToLabelMap.ContainsKey(address))
-                    {
-                        this.addressToLabelMap.Add(address, il.NewLabel());
-                    }
-                }
-                else if (i.Opcode.IsJump)
-                {
-                    var address = i.Address + i.Length + (short)i.Operands[0].Value - 2;
-                    if (!this.addressToLabelMap.ContainsKey(address))
-                    {
-                        this.addressToLabelMap.Add(address, il.NewLabel());
-                    }
-                }
-            }
-
-            // Second pass: determine whether stack is used
-            foreach (var i in routine.Instructions)
-            {
-                if (i.UsesStack())
-                {
-                    this.usesStack = true;
-
-                    // stack...
-                    var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
-                    this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
-
-                    // sp...
-                    var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
-                    this.spRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(spField));
-
-                    break;
-                }
-            }
-
-            // Third pass: determine whether memory is used
-            foreach (var i in routine.Instructions)
-            {
-                if (i.UsesMemory())
-                {
-                    var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
-                    this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
-
-                    break;
-                }
-            }
+            this.addressToLabelMap = CollectLabels(this.routine, this.il);
+            this.usesStack = CreateStackAndSPVariablesIfNeeded(this.routine, this.il);
+            this.usesMemory = CreateMemoryVariableIfNeeded(this.routine, this.il);
+            this.usesScreen = CreateScreenVariableIfNeeded(this.routine, this.il);
+            this.usesOutputStreams = CreateOutputStreamsVariableIfNeeded(this.routine, this.il);
 
             var localCount = routine.Locals.Length;
             if (localCount > 0)
@@ -181,28 +136,6 @@ namespace ZDebug.Compiler
                 }
             }
 
-            // Fourth pass: determine whether screen is used
-            foreach (var i in routine.Instructions)
-            {
-                if (i.UsesScreen())
-                {
-                    var screenField = Reflection<ZMachine>.GetField("Screen", @public: false);
-                    this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
-                    break;
-                }
-            }
-
-            // Fifth pass: determine whether outputStreams is used
-            foreach (var i in routine.Instructions)
-            {
-                if (i.UsesOutputStreams())
-                {
-                    var outputStreamsField = Reflection<ZMachine>.GetField("OutputStreams", @public: false);
-                    this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
-                    break;
-                }
-            }
-
             // Sixth pass: emit IL for instructions
             foreach (var i in routine.Instructions)
             {
@@ -214,12 +147,7 @@ namespace ZDebug.Compiler
 
                 currentInstruction = i;
 
-                if (machine.Debugging)
-                {
-                    il.LoadThis();
-                    il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
-                }
-
+                Debugging_Tick();
                 Profiler_ExecutingInstruction();
                 il.DebugWrite(i.PrettyPrint(machine));
 
@@ -242,6 +170,15 @@ namespace ZDebug.Compiler
             return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
 
+        private void Debugging_Tick()
+        {
+            if (machine.Debugging)
+            {
+                il.LoadThis();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+            }
+        }
+
         private void Profiler_EnterRoutine()
         {
             if (machine.Profiling)
@@ -249,7 +186,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
 
-                var enterRoutine = Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.One<int>(), @public: false);
+                var enterRoutine = Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.Array<int>(), @public: false);
                 il.Call(enterRoutine);
             }
         }
@@ -261,7 +198,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(routine.Address);
 
-                var exitRoutine = Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.One<int>(), @public: false);
+                var exitRoutine = Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.Array<int>(), @public: false);
                 il.Call(exitRoutine);
             }
         }
@@ -273,7 +210,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0); // ZMachine
                 il.Load(currentInstruction.Address);
 
-                var executingInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.One<int>(), @public: false);
+                var executingInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.Array<int>(), @public: false);
                 il.Call(executingInstruction);
             }
         }
@@ -456,7 +393,7 @@ namespace ZDebug.Compiler
 
                 il.Load(false);
 
-                var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
                 il.Call(profilerCall);
             }
 
@@ -514,7 +451,7 @@ namespace ZDebug.Compiler
                     il.Load(0);
                     il.Load(true);
 
-                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
                     il.Call(profilerCall);
                 }
 
@@ -553,7 +490,7 @@ namespace ZDebug.Compiler
                     UnpackRoutineAddress();
                     il.Load(true);
 
-                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Two<int, bool>(), @public: false);
+                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
                     il.Call(profilerCall);
                 }
 

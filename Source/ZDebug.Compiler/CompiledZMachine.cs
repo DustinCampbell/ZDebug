@@ -65,6 +65,7 @@ namespace ZDebug.Compiler
         {
             this.profiler = profiler;
             this.precompile = precompile;
+            this.debugging = debugging;
 
             this.stack = new ushort[STACK_SIZE];
             this.sp = -1;

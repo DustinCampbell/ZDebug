@@ -20,17 +20,17 @@ namespace ZDebug.Compiler.Generate
 
         private readonly static MethodInfo arrayCopy = Reflection<Array>.GetMethod(
             "Copy",
-            Types.Three<Array, Array, int>(),
+            Types.Array<Array, Array, int>(),
             instance: false);
 
         private readonly static MethodInfo mathMin = typeof(Math).GetMethod(
             name: "Min",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: Types.Two<uint, uint>(),
+            types: Types.Array<uint, uint>(),
             modifiers: null);
 
-        private readonly static ConstructorInfo exceptionCtor = Reflection<ZMachineException>.GetConstructor(Types.One<string>());
+        private readonly static ConstructorInfo exceptionCtor = Reflection<ZMachineException>.GetConstructor(Types.Array<string>());
 
         public ILBuilder(ILGenerator il)
         {
@@ -344,7 +344,7 @@ namespace ZDebug.Compiler.Generate
 
         public void ThrowException<T>(string message) where T : Exception
         {
-            var ctor = Reflection<T>.GetConstructor(Types.One<string>());
+            var ctor = Reflection<T>.GetConstructor(Types.Array<string>());
 
             Load(message);
             Emit(OpCodes.Newobj, ctor);

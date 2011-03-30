@@ -11,7 +11,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             il.Load(ch);
 
-            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<char>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>());
             il.CallVirt(print);
         }
 
@@ -22,7 +22,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             ch.Load();
 
-            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<char>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>());
             il.CallVirt(print);
         }
 
@@ -40,7 +40,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             il.Load(text);
 
-            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<string>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>());
             il.CallVirt(print);
         }
 
@@ -49,7 +49,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             text.Load();
 
-            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.One<string>());
+            var print = Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>());
             il.CallVirt(print);
         }
 
@@ -71,7 +71,7 @@ namespace ZDebug.Compiler
                 screen.Load();
                 style.Load();
 
-                var setTextStyle = Reflection<IScreen>.GetMethod("SetTextStyle", Types.One<ZTextStyle>());
+                var setTextStyle = Reflection<IScreen>.GetMethod("SetTextStyle", Types.Array<ZTextStyle>());
                 il.CallVirt(setTextStyle);
             }
         }
@@ -93,7 +93,7 @@ namespace ZDebug.Compiler
                 screen.Load();
                 window.Load();
 
-                var clear = Reflection<IScreen>.GetMethod("Clear", Types.One<int>());
+                var clear = Reflection<IScreen>.GetMethod("Clear", Types.Array<int>());
                 il.CallVirt(clear);
 
                 done.Branch(@short: true);
@@ -106,7 +106,7 @@ namespace ZDebug.Compiler
                 il.Load(-1);
                 il.Compare.Equal();
 
-                var clearAll = Reflection<IScreen>.GetMethod("ClearAll", Types.One<bool>());
+                var clearAll = Reflection<IScreen>.GetMethod("ClearAll", Types.Array<bool>());
                 il.CallVirt(clearAll);
 
                 done.Mark();
@@ -123,7 +123,7 @@ namespace ZDebug.Compiler
                 lines.Load();
 
 
-                var split = Reflection<IScreen>.GetMethod("Split", Types.One<int>());
+                var split = Reflection<IScreen>.GetMethod("Split", Types.Array<int>());
                 il.CallVirt(split);
             }
         }
@@ -137,7 +137,7 @@ namespace ZDebug.Compiler
                 screen.Load();
                 window.Load();
 
-                var setWindow = Reflection<IScreen>.GetMethod("SetWindow", Types.One<int>());
+                var setWindow = Reflection<IScreen>.GetMethod("SetWindow", Types.Array<int>());
                 il.CallVirt(setWindow);
             }
         }
@@ -159,7 +159,7 @@ namespace ZDebug.Compiler
             screen.Load();
             foreground.Load();
 
-            var setForegroundColor = Reflection<IScreen>.GetMethod("SetForegroundColor", Types.One<ZColor>());
+            var setForegroundColor = Reflection<IScreen>.GetMethod("SetForegroundColor", Types.Array<ZColor>());
             il.Call(setForegroundColor);
 
             next.Mark();
@@ -171,7 +171,7 @@ namespace ZDebug.Compiler
             screen.Load();
             background.Load();
 
-            var setBackgroundColor = Reflection<IScreen>.GetMethod("SetBackgroundColor", Types.One<ZColor>());
+            var setBackgroundColor = Reflection<IScreen>.GetMethod("SetBackgroundColor", Types.Array<ZColor>());
             il.Call(setBackgroundColor);
 
             next.Mark();
@@ -185,7 +185,7 @@ namespace ZDebug.Compiler
             column.Load();
             il.Math.Subtract(1);
 
-            var setCursor = Reflection<IScreen>.GetMethod("SetCursor", Types.Two<int, int>());
+            var setCursor = Reflection<IScreen>.GetMethod("SetCursor", Types.Array<int, int>());
             il.Call(setCursor);
         }
 
@@ -226,7 +226,7 @@ namespace ZDebug.Compiler
             outputStreams.Load();
             address.Load();
 
-            var selectMemoryStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectMemoryStream", Types.One<int>());
+            var selectMemoryStream = Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectMemoryStream", Types.Array<int>());
             il.Call(selectMemoryStream);
         }
 
