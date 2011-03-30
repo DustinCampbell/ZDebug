@@ -378,27 +378,20 @@ namespace ZDebug.Compiler
 
         private void DirectCall(Operand addressOp)
         {
+            var argCount = currentInstruction.OperandCount - 1;
+
             if (machine.Profiling)
             {
-                il.LoadArg(0); // ZMachine
-
-                if (addressOp.Value == 0)
-                {
-                    il.Load(0);
-                }
-                else
-                {
-                    il.Load(machine.UnpackRoutineAddress(addressOp.Value));
-                }
-
+                // Call Profiler_Call(address, calculated)
+                il.LoadThis();
+                il.Load(addressOp.Value != 0 ? machine.UnpackRoutineAddress(addressOp.Value) : 0);
                 il.Load(false);
-
-                var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
-                il.Call(profilerCall);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
             }
 
             if (addressOp.Value == 0)
             {
+                DiscardStackOperands(1, argCount);
                 Return(0);
             }
             else
@@ -414,7 +407,6 @@ namespace ZDebug.Compiler
                 il.Load(index);
                 il.Emit(OpCodes.Ldelem_Ref);
 
-                var argCount = currentInstruction.OperandCount - 1;
                 for (int i = 0; i < argCount; i++)
                 {
                     LoadOperand(i + 1);

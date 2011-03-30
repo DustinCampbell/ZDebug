@@ -11,7 +11,7 @@ namespace ZDebug.Core.Execution
         public readonly ushort GlobalVariableTableAddress;
 
         protected readonly Story Story;
-        protected readonly byte[] Memory;
+        public readonly byte[] Memory;
         protected readonly ZText ZText;
 
         protected readonly OutputStreamCollection OutputStreams;
