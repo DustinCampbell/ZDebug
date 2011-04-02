@@ -5,36 +5,18 @@ namespace ZDebug.Core.Collections
 {
     public class IntegerMap<T>
     {
-        private const int DEFAULT_BUCKET_SIZE = 4;
-
         private struct Entry
         {
-            public readonly int Key;
-            public readonly T Value;
-
-            public Entry(int key, T value)
-            {
-                this.Key = key;
-                this.Value = value;
-            }
+            public int Key;
+            public T Value;
+            public int Next;
         }
 
-        private struct Bucket
-        {
-            public readonly Entry[] Entries;
-            public readonly int Size;
-
-            public Bucket(Entry[] entries, int size)
-            {
-                this.Entries = entries;
-                this.Size = size;
-            }
-        }
-
-        private Bucket[] buckets;
-        private int capacity;
-        private int size;
-        private int loadSize;
+        private Entry[] entries;
+        private int[] buckets;
+        private int freeList;
+        private int freeCount;
+        private int count;
 
         public IntegerMap()
         {
@@ -49,130 +31,130 @@ namespace ZDebug.Core.Collections
         private void Initialize(int capacity)
         {
             int prime = HashHelpers.GetPrime(capacity);
-            this.capacity = prime;
-            this.buckets = new Bucket[this.capacity];
-            this.loadSize = (int)(this.capacity * 0.7);
+            var buckets = new int[prime];
+            for (int i = 0; i < buckets.Length; i++)
+            {
+                buckets[i] = -1;
+            }
+            this.buckets = buckets;
+            this.entries = new Entry[prime];
+            this.freeList = -1;
         }
 
         private void Insert(int key, T value)
         {
-            int hash = key % buckets.Length;
+            int index = key % this.buckets.Length;
 
-            var bucket = buckets[hash];
-            var bucketSize = bucket.Size;
-            if (bucketSize == 0)
+            var entries = this.entries;
+
+            for (int i = this.buckets[index]; i >= 0; i = entries[i].Next)
             {
-                var entries = new Entry[DEFAULT_BUCKET_SIZE];
-                entries[0] = new Entry(key, value);
-                bucket = new Bucket(entries, 1);
-                buckets[hash] = bucket;
+                if (entries[i].Key == key)
+                {
+                    throw new ArgumentException("Cannot not add duplicate key.", "key");
+                }
+            }
+
+            int freeEntry;
+            if (this.freeCount > 0)
+            {
+                freeEntry = this.freeList;
+                this.freeList = entries[freeEntry].Next;
+                this.freeCount--;
             }
             else
             {
-                var entries = bucket.Entries;
-
-                for (int i = 0; i < bucketSize; i++)
+                if (this.count == this.entries.Length)
                 {
-                    if (entries[i].Key == key)
-                    {
-                        throw new ArgumentException("Attempted to add duplicate key: " + key);
-                    }
+                    this.Resize();
+                    entries = this.entries;
+                    index = key % this.buckets.Length;
                 }
 
-                if (entries.Length == bucketSize)
-                {
-                    var newEntries = new Entry[entries.Length * 2];
-                    Array.Copy(entries, 0, newEntries, 0, entries.Length);
-                    entries = newEntries;
-                }
-
-                entries[bucketSize] = new Entry(key, value);
-                var newBucket = new Bucket(entries, bucketSize + 1);
-                buckets[hash] = newBucket;
+                freeEntry = this.count;
+                this.count++;
             }
-            size++;
+
+            entries[freeEntry].Next = this.buckets[index];
+            entries[freeEntry].Key = key;
+            entries[freeEntry].Value = value;
+            this.buckets[index] = freeEntry;
         }
 
         private void Resize()
         {
-            var newMap = new IntegerMap<T>(buckets.Length * 2);
+            int prime = HashHelpers.GetPrime(this.count * 2);
 
-            for (int i = 0; i < buckets.Length; i++)
+            var newBuckets = new int[prime];
+            for (int i = 0; i < prime; i++)
             {
-                var bucket = buckets[i];
-                var bucketSize = bucket.Size;
-                if (bucketSize > 0)
-                {
-                    var entries = bucket.Entries;
-                    for (int j = 0; j < bucketSize; j++)
-                    {
-                        var entry = entries[j];
-                        newMap.Insert(entry.Key, entry.Value);
-                    }
-                }
+                newBuckets[i] = -1;
             }
 
-            this.buckets = newMap.buckets;
-            this.capacity = newMap.capacity;
-            this.size = newMap.size;
-            this.loadSize = newMap.loadSize;
+            var newEntries = new Entry[prime];
+            var oldCount = this.count;
+            Array.Copy(this.entries, 0, newEntries, 0, oldCount);
+            for (int i = 0; i < oldCount; i++)
+            {
+                var index = newEntries[i].Key % prime;
+                newEntries[i].Next = newBuckets[index];
+                newBuckets[index] = i;
+            }
+
+            this.buckets = newBuckets;
+            this.entries = newEntries;
         }
 
         public void Add(int key, T value)
         {
-            if (size == loadSize)
-            {
-                Resize();
-            }
-
             Insert(key, value);
         }
 
         public void Clear()
         {
-            this.buckets = new Bucket[this.capacity];
-            size = 0;
+            if (this.count > 0)
+            {
+                var buckets = this.buckets;
+                for (int i = 0; i < buckets.Length; i++)
+                {
+                    buckets[i] = -1;
+                }
+
+                Array.Clear(this.entries, 0, this.count);
+                this.freeList = -1;
+                this.count = 0;
+                this.freeCount = 0;
+            }
         }
 
         public bool Contains(int key)
         {
-            int hash = key % capacity;
+            return FindEntry(key) >= 0;
+        }
 
-            var bucket = buckets[hash];
-            var bucketSize = bucket.Size;
-            if (bucketSize > 0)
+        private int FindEntry(int key)
+        {
+            int index = key % this.buckets.Length;
+
+            var entries = this.entries;
+            for (int i = this.buckets[index]; i >= 0; i = entries[i].Next)
             {
-                var entries = bucket.Entries;
-                for (int i = 0; i < bucketSize; i++)
+                if (entries[i].Key == key)
                 {
-                    if (entries[i].Key == key)
-                    {
-                        return true;
-                    }
+                    return i;
                 }
             }
 
-            return false;
+            return -1;
         }
 
         public bool TryGetValue(int key, out T value)
         {
-            int hash = key % capacity;
-
-            var bucket = buckets[hash];
-            var bucketSize = bucket.Size;
-            if (bucketSize > 0)
+            int index = FindEntry(key);
+            if (index >= 0)
             {
-                var entries = bucket.Entries;
-                for (int i = 0; i < bucketSize; i++)
-                {
-                    var entry = entries[i];
-                    if (entry.Key == key)
-                    {
-                        value = entry.Value;
-                        return true;
-                    }
-                }
+                value = this.entries[index].Value;
+                return true;
             }
 
             value = default(T);
@@ -183,21 +165,10 @@ namespace ZDebug.Core.Collections
         {
             get
             {
-                int hash = key % capacity;
-
-                var bucket = buckets[hash];
-                if (bucket.Entries != null)
+                int index = FindEntry(key);
+                if (index >= 0)
                 {
-                    var entries = bucket.Entries;
-                    var bucketSize = bucket.Size;
-                    for (int i = 0; i < bucketSize; i++)
-                    {
-                        var entry = entries[i];
-                        if (entry.Key == key)
-                        {
-                            return entry.Value;
-                        }
-                    }
+                    return this.entries[index].Value;
                 }
 
                 throw new KeyNotFoundException();
@@ -206,7 +177,7 @@ namespace ZDebug.Core.Collections
 
         public int Count
         {
-            get { return size; }
+            get { return this.count; }
         }
     }
 }
