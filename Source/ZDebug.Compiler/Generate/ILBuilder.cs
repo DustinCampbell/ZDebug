@@ -245,7 +245,14 @@ namespace ZDebug.Compiler.Generate
                     Emit(OpCodes.Ldc_I4_M1);
                     break;
                 default:
-                    Emit(OpCodes.Ldc_I4, value);
+                    if (value >= -128 && value <= 127)
+                    {
+                        Emit(OpCodes.Ldc_I4_S, value);
+                    }
+                    else
+                    {
+                        Emit(OpCodes.Ldc_I4, value);
+                    }
                     break;
             }
         }

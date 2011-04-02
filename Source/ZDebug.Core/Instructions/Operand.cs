@@ -12,6 +12,23 @@ namespace ZDebug.Core.Instructions
             this.Value = value;
         }
 
+        public bool IsConstant
+        {
+            get
+            {
+                return Kind == OperandKind.LargeConstant
+                    || Kind == OperandKind.SmallConstant;
+            }
+        }
+
+        public bool IsVariable
+        {
+            get
+            {
+                return Kind == OperandKind.Variable;
+            }
+        }
+
         public override string ToString()
         {
             switch (Kind)

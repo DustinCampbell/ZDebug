@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using ZDebug.Compiler.Analysis.ControlFlow;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Execution;
@@ -88,32 +89,20 @@ namespace ZDebug.Compiler
 
             this.calls = new List<ZRoutineCall>();
 
-            Profiler_EnterRoutine();
+            var controlFlowGraph = ControlFlowGraph.Build(this.routine);
 
-            // First pass: gather branches and labels
-            this.addressToLabelMap = new Dictionary<int, ILabel>();
-            foreach (var i in routine.Instructions)
+            this.addressToLabelMap = new Dictionary<int, ILabel>(controlFlowGraph.CodeBlocks.Count);
+            var instructions = new List<Instruction>(controlFlowGraph.InstructionCount);
+            foreach (var codeBlock in controlFlowGraph.CodeBlocks)
             {
-                if (i.HasBranch && i.Branch.Kind == BranchKind.Address)
-                {
-                    var address = i.Address + i.Length + i.Branch.Offset - 2;
-                    if (!this.addressToLabelMap.ContainsKey(address))
-                    {
-                        this.addressToLabelMap.Add(address, il.NewLabel());
-                    }
-                }
-                else if (i.Opcode.IsJump)
-                {
-                    var address = i.Address + i.Length + (short)i.Operands[0].Value - 2;
-                    if (!this.addressToLabelMap.ContainsKey(address))
-                    {
-                        this.addressToLabelMap.Add(address, il.NewLabel());
-                    }
-                }
+                this.addressToLabelMap.Add(codeBlock.Address, il.NewLabel());
+                instructions.AddRange(codeBlock.Instructions);
             }
 
+            Profiler_EnterRoutine();
+
             // Second pass: determine whether stack is used
-            foreach (var i in routine.Instructions)
+            foreach (var i in instructions)
             {
                 if (i.UsesStack())
                 {
@@ -132,7 +121,7 @@ namespace ZDebug.Compiler
             }
 
             // Third pass: determine whether memory is used
-            foreach (var i in routine.Instructions)
+            foreach (var i in instructions)
             {
                 if (i.UsesMemory())
                 {
@@ -152,7 +141,7 @@ namespace ZDebug.Compiler
                 // Determine whether we need the 'locals' variable or not.
                 // We should only need this if there is an instruction with
                 // a by-ref first operand that's a variable.
-                foreach (var i in routine.Instructions)
+                foreach (var i in instructions)
                 {
                     if (i.Opcode.IsFirstOpByRef && i.Operands[0].Kind == OperandKind.Variable)
                     {
@@ -182,7 +171,7 @@ namespace ZDebug.Compiler
             }
 
             // Fourth pass: determine whether screen is used
-            foreach (var i in routine.Instructions)
+            foreach (var i in instructions)
             {
                 if (i.UsesScreen())
                 {
@@ -193,7 +182,7 @@ namespace ZDebug.Compiler
             }
 
             // Fifth pass: determine whether outputStreams is used
-            foreach (var i in routine.Instructions)
+            foreach (var i in instructions)
             {
                 if (i.UsesOutputStreams())
                 {
@@ -204,7 +193,7 @@ namespace ZDebug.Compiler
             }
 
             // Sixth pass: emit IL for instructions
-            foreach (var i in routine.Instructions)
+            foreach (var i in instructions)
             {
                 ILabel label;
                 if (this.addressToLabelMap.TryGetValue(i.Address, out label))

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using ZDebug.Core.Instructions;
 
@@ -6,6 +7,28 @@ namespace ZDebug.Compiler
 {
     internal static class InstructionExtensions
     {
+        public static bool HasJumpAddress(this Instruction instruction)
+        {
+            return (instruction.HasBranch && instruction.Branch.Kind == BranchKind.Address)
+                || (instruction.Opcode.IsJump);
+        }
+
+        public static int GetJumpAddress(this Instruction instruction)
+        {
+            if (instruction.HasBranch && instruction.Branch.Kind == BranchKind.Address)
+            {
+                return instruction.Address + instruction.Length + instruction.Branch.Offset - 2;
+            }
+            else if (instruction.Opcode.IsJump)
+            {
+                return instruction.Address + instruction.Length + (short)instruction.Operands[0].Value - 2;
+            }
+            else
+            {
+                throw new ArgumentException("Instruction does not have a jump address", "instruction");
+            }
+        }
+
         private static bool Is(this Opcode op, OpcodeKind kind, int number)
         {
             return op.Kind == kind && op.Number == number;

@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\ControlFlow\Block.cs" />
+    <Compile Include="Analysis\ControlFlow\CodeBlock.cs" />
+    <Compile Include="Analysis\ControlFlow\ControlFlowGraph.cs" />
+    <Compile Include="Analysis\InstructionLinkedList.cs" />
     <Compile Include="Generate\CodeBuilders.cs" />
     <Compile Include="Generate\Condition.cs" />
     <Compile Include="Generate\IArrayLocal.cs" />
@@ -86,6 +90,7 @@
   <ItemGroup>
     <Compile Include="Generate\ILBuilder.Debug.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

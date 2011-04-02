@@ -61,7 +61,6 @@
     <Compile Include="Execution\StackFrame.cs" />
     <Compile Include="Execution\ZMachine.cs" />
     <Compile Include="Extensions\StackExtensions.cs" />
-    <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Execution\IOutputStream.cs" />
     <Compile Include="Execution\IScreen.cs" />
     <Compile Include="Execution\IMessageLog.cs" />
@@ -86,6 +85,7 @@
     <Compile Include="Instructions\Branch.cs" />
     <Compile Include="Instructions\BranchKind.cs" />
     <Compile Include="Instructions\Instruction.cs" />
+    <Compile Include="Instructions\InstructionCache.cs" />
     <Compile Include="Instructions\InstructionReader.cs" />
     <Compile Include="Instructions\InstructionReaderException.cs" />
     <Compile Include="Instructions\Opcode.cs" />

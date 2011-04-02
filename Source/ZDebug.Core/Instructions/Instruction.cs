@@ -65,5 +65,10 @@ namespace ZDebug.Core.Instructions
                 this.HasZText = false;
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0:x4}: {1}", Address, Opcode.Name);
+        }
     }
 }
