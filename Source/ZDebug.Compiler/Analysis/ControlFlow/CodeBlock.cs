@@ -32,7 +32,10 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
         {
             get
             {
-                return this.instructions;
+                foreach (var instruction in this.instructions)
+                {
+                    yield return instruction;
+                }
             }
         }
 

@@ -7,6 +7,7 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
     {
         private readonly bool isEntry;
         private readonly bool isExit;
+        private readonly List<Block> jumpSources;
         private readonly List<Block> jumpTargets;
 
         public Block(bool isEntry = false, bool isExit = false)
@@ -15,22 +16,29 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
 
             this.isEntry = isEntry;
             this.isExit = isExit;
+            this.jumpSources = new List<Block>();
             this.jumpTargets = new List<Block>();
         }
 
         public void AddJumpTarget(Block block)
         {
             this.jumpTargets.Add(block);
+            block.jumpSources.Add(this);
         }
 
-        public IEnumerable<Block> JumpTargets
+        public List<Block> JumpSources
         {
             get
             {
-                foreach (var jumpTarget in this.jumpTargets)
-                {
-                    yield return jumpTarget;
-                }
+                return this.jumpSources;
+            }
+        }
+
+        public List<Block> JumpTargets
+        {
+            get
+            {
+                return this.jumpTargets;
             }
         }
 

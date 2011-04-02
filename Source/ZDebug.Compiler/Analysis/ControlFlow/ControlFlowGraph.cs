@@ -170,11 +170,28 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
             }
         }
 
-        public List<CodeBlock> CodeBlocks
+        public IEnumerable<CodeBlock> CodeBlocks
         {
             get
             {
-                return this.codeBlocks;
+                foreach (var codeBlock in this.codeBlocks)
+                {
+                    yield return codeBlock;
+                }
+            }
+        }
+
+        public IEnumerable<Instruction> Instructions
+        {
+            get
+            {
+                foreach (var codeBlock in this.codeBlocks)
+                {
+                    foreach (var instruction in codeBlock.Instructions)
+                    {
+                        yield return instruction;
+                    }
+                }
             }
         }
 

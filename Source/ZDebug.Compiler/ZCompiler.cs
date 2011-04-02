@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Analysis.ControlFlow;
 using ZDebug.Compiler.Generate;
@@ -24,6 +25,7 @@ namespace ZDebug.Compiler
         private bool debugging;
 
         private ILBuilder il;
+        private ControlFlowGraph controlFlowGraph;
         private Dictionary<int, ILabel> addressToLabelMap;
         private Instruction currentInstruction;
         private List<ZRoutineCall> calls;
@@ -92,59 +94,57 @@ namespace ZDebug.Compiler
 
             this.calls = new List<ZRoutineCall>();
 
-            var controlFlowGraph = ControlFlowGraph.Build(this.routine);
-
-            this.addressToLabelMap = new Dictionary<int, ILabel>(controlFlowGraph.CodeBlocks.Count);
-            var instructions = new List<Instruction>(controlFlowGraph.InstructionCount);
-            foreach (var codeBlock in controlFlowGraph.CodeBlocks)
-            {
-                this.addressToLabelMap.Add(codeBlock.Address, il.NewLabel());
-                instructions.AddRange(codeBlock.Instructions);
-            }
-
             Profiler_EnterRoutine();
 
+            this.controlFlowGraph = ControlFlowGraph.Build(this.routine);
+            this.addressToLabelMap = new Dictionary<int, ILabel>(this.controlFlowGraph.CodeBlocks.Count());
+
             // Determine whether stack, memory, screen and outputStreams are used.
-            foreach (var i in instructions)
+            foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
-                if (!this.usesStack && i.UsesStack())
+                this.addressToLabelMap.Add(codeBlock.Address, il.NewLabel());
+
+                foreach (var i in codeBlock.Instructions)
                 {
-                    this.usesStack = true;
+                    if (!this.usesStack && i.UsesStack())
+                    {
+                        this.usesStack = true;
 
-                    // stack...
-                    var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
-                    this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
+                        // stack...
+                        var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
+                        this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
 
-                    // sp...
-                    var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
-                    this.spRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(spField));
-                }
+                        // sp...
+                        var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
+                        this.spRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(spField));
+                    }
 
-                if (!this.usesMemory && i.UsesMemory())
-                {
-                    this.usesMemory = true;
+                    if (!this.usesMemory && i.UsesMemory())
+                    {
+                        this.usesMemory = true;
 
-                    // memory...
-                    var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
-                    this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
-                }
+                        // memory...
+                        var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
+                        this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
+                    }
 
-                if (!this.usesScreen && i.UsesScreen())
-                {
-                    this.usesScreen = true;
+                    if (!this.usesScreen && i.UsesScreen())
+                    {
+                        this.usesScreen = true;
 
-                    // screen...
-                    var screenField = Reflection<ZMachine>.GetField("Screen", @public: false);
-                    this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
-                }
+                        // screen...
+                        var screenField = Reflection<ZMachine>.GetField("Screen", @public: false);
+                        this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
+                    }
 
-                if (!this.usesOutputStreams && i.UsesOutputStreams())
-                {
-                    this.usesOutputStreams = true;
+                    if (!this.usesOutputStreams && i.UsesOutputStreams())
+                    {
+                        this.usesOutputStreams = true;
 
-                    // outputStreams...
-                    var outputStreamsField = Reflection<ZMachine>.GetField("OutputStreams", @public: false);
-                    this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
+                        // outputStreams...
+                        var outputStreamsField = Reflection<ZMachine>.GetField("OutputStreams", @public: false);
+                        this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
+                    }
                 }
             }
 
@@ -158,7 +158,7 @@ namespace ZDebug.Compiler
                 // Determine whether we need the 'locals' variable or not.
                 // We should only need this if there is an instruction with
                 // a by-ref first operand that's a variable.
-                foreach (var i in instructions)
+                foreach (var i in this.controlFlowGraph.Instructions)
                 {
                     if (i.Opcode.IsFirstOpByRef && i.Operands[0].Kind == OperandKind.Variable)
                     {
@@ -188,26 +188,29 @@ namespace ZDebug.Compiler
             }
 
             // Emit IL
-            foreach (var i in instructions)
+            foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
-                ILabel label;
-                if (this.addressToLabelMap.TryGetValue(i.Address, out label))
+                foreach (var instruction in codeBlock.Instructions)
                 {
-                    label.Mark();
+                    ILabel label;
+                    if (this.addressToLabelMap.TryGetValue(instruction.Address, out label))
+                    {
+                        label.Mark();
+                    }
+
+                    currentInstruction = instruction;
+
+                    if (machine.Debugging)
+                    {
+                        il.LoadThis();
+                        il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+                    }
+
+                    Profiler_ExecutingInstruction();
+                    il.DebugWrite(instruction.PrettyPrint(machine));
+
+                    Assemble();
                 }
-
-                currentInstruction = i;
-
-                if (machine.Debugging)
-                {
-                    il.LoadThis();
-                    il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
-                }
-
-                Profiler_ExecutingInstruction();
-                il.DebugWrite(i.PrettyPrint(machine));
-
-                Assemble();
             }
 
             var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);

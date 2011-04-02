@@ -46,7 +46,36 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to load local that has already been released.");
                 }
 
-                builder.Emit(OpCodes.Ldloc, local);
+                switch (local.LocalIndex)
+                {
+                    case 0:
+                        builder.Emit(OpCodes.Ldloc_0);
+                        break;
+
+                    case 1:
+                        builder.Emit(OpCodes.Ldloc_1);
+                        break;
+
+                    case 2:
+                        builder.Emit(OpCodes.Ldloc_2);
+                        break;
+
+                    case 3:
+                        builder.Emit(OpCodes.Ldloc_3);
+                        break;
+
+                    default:
+                        if (local.LocalIndex >= 4 && local.LocalIndex <= 255)
+                        {
+                            builder.Emit(OpCodes.Ldloc_S, local);
+                        }
+                        else
+                        {
+                            builder.Emit(OpCodes.Ldloc, local);
+                        }
+
+                        break;
+                }
             }
 
             public void LoadAddress()
@@ -56,7 +85,14 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to load local that has already been released.");
                 }
 
-                builder.Emit(OpCodes.Ldloca_S, local);
+                if (local.LocalIndex >= 0 && local.LocalIndex <= 255)
+                {
+                    builder.Emit(OpCodes.Ldloca_S, local);
+                }
+                else
+                {
+                    builder.Emit(OpCodes.Ldloca, local);
+                }
             }
 
             public void LoadAndBox()
@@ -76,7 +112,36 @@ namespace ZDebug.Compiler.Generate
                     throw new ZCompilerException("Attempted to store local that has already been released.");
                 }
 
-                builder.Emit(OpCodes.Stloc, local);
+                switch (local.LocalIndex)
+                {
+                    case 0:
+                        builder.Emit(OpCodes.Stloc_0);
+                        break;
+
+                    case 1:
+                        builder.Emit(OpCodes.Stloc_1);
+                        break;
+
+                    case 2:
+                        builder.Emit(OpCodes.Stloc_2);
+                        break;
+
+                    case 3:
+                        builder.Emit(OpCodes.Stloc_3);
+                        break;
+
+                    default:
+                        if (local.LocalIndex >= 4 && local.LocalIndex <= 255)
+                        {
+                            builder.Emit(OpCodes.Stloc_S, local);
+                        }
+                        else
+                        {
+                            builder.Emit(OpCodes.Stloc, local);
+                        }
+
+                        break;
+                }
             }
 
             public int Index
