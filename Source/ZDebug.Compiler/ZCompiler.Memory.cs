@@ -723,11 +723,6 @@ namespace ZDebug.Compiler
             StoreVariable(variableIndex, () => value.Load(), indirect);
         }
 
-        private void StoreVariable(Variable variable, ILocal value, bool indirect = false)
-        {
-            StoreVariable(variable, () => value.Load(), indirect);
-        }
-
         private void StoreVariable(byte variableIndex, CodeBuilder valueLoader, bool indirect = false)
         {
             if (variableIndex == 0)
@@ -751,19 +746,12 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void StoreVariable(Variable variable, CodeBuilder valueLoader, bool indirect = false)
+        private void StoreVariable(Variable variable, CodeBuilder valueLoader)
         {
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
-                    if (indirect)
-                    {
-                        SetStackTop(valueLoader);
-                    }
-                    else
-                    {
-                        PushStack(valueLoader);
-                    }
+                    PushStack(valueLoader);
                     break;
 
                 case VariableKind.Local:

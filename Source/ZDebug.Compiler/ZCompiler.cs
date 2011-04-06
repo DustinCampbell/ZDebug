@@ -651,14 +651,14 @@ namespace ZDebug.Compiler
             noJump.Mark();
         }
 
-        private void Store(CodeBuilder valueLoader, bool indirect = false)
+        private void Store(CodeBuilder valueLoader)
         {
             if (!this.current.Value.HasStoreVariable)
             {
                 throw new ZCompilerException("Expected instruction to have a store variable.");
             }
 
-            StoreVariable(this.current.Value.StoreVariable, valueLoader, indirect);
+            StoreVariable(this.current.Value.StoreVariable, valueLoader);
         }
 
         private void Assemble(Opcode opcode)
