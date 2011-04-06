@@ -229,6 +229,14 @@ namespace ZDebug.Compiler
             return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
 
+        private int OperandCount
+        {
+            get
+            {
+                return this.currentInstruction.OperandCount;
+            }
+        }
+
         private void Profiler_EnterRoutine()
         {
             if (machine.Profiling)
@@ -464,7 +472,7 @@ namespace ZDebug.Compiler
                 il.Load(index);
                 il.Emit(OpCodes.Ldelem_Ref);
 
-                var argCount = currentInstruction.OperandCount - 1;
+                var argCount = OperandCount - 1;
                 for (int i = 0; i < argCount; i++)
                 {
                     LoadOperand(i + 1);
@@ -505,7 +513,7 @@ namespace ZDebug.Compiler
                     il.Call(profilerCall);
                 }
 
-                var argCount = currentInstruction.OperandCount - 1;
+                var argCount = OperandCount - 1;
 
                 // discard any SP operands...
                 int spOperands = 0;

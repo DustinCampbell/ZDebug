@@ -418,7 +418,7 @@ namespace ZDebug.Compiler
         private void op_je()
         {
             // We can take a faster path if there are only two operands to compare.
-            if (currentInstruction.OperandCount == 2)
+            if (OperandCount == 2)
             {
                 LoadOperand(0);
                 LoadOperand(1);
@@ -435,7 +435,7 @@ namespace ZDebug.Compiler
                     var success = il.NewLabel();
                     var done = il.NewLabel();
 
-                    for (int j = 1; j < currentInstruction.OperandCount; j++)
+                    for (int j = 1; j < OperandCount; j++)
                     {
                         LoadOperand(j);
                         x.Load();
@@ -443,7 +443,7 @@ namespace ZDebug.Compiler
                         il.Compare.Equal();
 
                         // no need to write a branch for the last test
-                        if (j < currentInstruction.OperandCount - 1)
+                        if (j < OperandCount - 1)
                         {
                             success.BranchIf(Condition.True, @short: true);
                         }
@@ -798,7 +798,7 @@ namespace ZDebug.Compiler
                 LoadOperand(1);
                 LoadOperand(2);
 
-                if (currentInstruction.OperandCount > 3)
+                if (OperandCount > 3)
                 {
                     LoadOperand(3);
                 }
@@ -1644,7 +1644,7 @@ namespace ZDebug.Compiler
 
         private void op_read_char()
         {
-            if (currentInstruction.OperandCount > 0)
+            if (OperandCount > 0)
             {
                 var inputStreamOp = GetOperand(0);
                 if (inputStreamOp.Kind == OperandKind.Variable)
@@ -1679,7 +1679,7 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             LoadOperand(0);
 
-            if (currentInstruction.OperandCount > 1)
+            if (OperandCount > 1)
             {
                 LoadOperand(1);
             }
@@ -1688,7 +1688,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            if (currentInstruction.OperandCount > 2)
+            if (OperandCount > 2)
             {
                 il.RuntimeError("Timed input not supported");
             }
@@ -1719,7 +1719,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
 
-            if (currentInstruction.OperandCount > 2)
+            if (OperandCount > 2)
             {
                 il.RuntimeError("Timed input not supported");
             }
@@ -1900,7 +1900,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
 
-            if (currentInstruction.OperandCount > 2)
+            if (OperandCount > 2)
             {
                 LoadOperand(2);
             }
@@ -1909,7 +1909,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            if (currentInstruction.OperandCount > 3)
+            if (OperandCount > 3)
             {
                 LoadOperand(3);
 

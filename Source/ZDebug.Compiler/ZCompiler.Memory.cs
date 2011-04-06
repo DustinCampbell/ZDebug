@@ -778,13 +778,13 @@ namespace ZDebug.Compiler
 
         private Operand GetOperand(int operandIndex)
         {
-            if (operandIndex < 0 || operandIndex >= currentInstruction.OperandCount)
+            if (operandIndex < 0 || operandIndex >= OperandCount)
             {
                 throw new ZCompilerException(
                     string.Format(
                         "Attempted to read operand {0}, but only 0 through {1} are valid.",
                         operandIndex,
-                        currentInstruction.OperandCount - 1));
+                        OperandCount - 1));
             }
 
             return currentInstruction.Operands[operandIndex];
