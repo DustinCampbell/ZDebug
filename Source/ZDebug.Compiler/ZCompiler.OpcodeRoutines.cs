@@ -497,7 +497,7 @@ namespace ZDebug.Compiler
 
         private void op_jump()
         {
-            var address = currentInstruction.Address + currentInstruction.Length + (short)(currentInstruction.Operands[0].Value) - 2;
+            var address = this.current.Value.Address + this.current.Value.Length + (short)(this.current.Value.Operands[0].Value) - 2;
             var jump = addressToLabelMap[address];
             jump.Branch();
         }
@@ -1547,7 +1547,7 @@ namespace ZDebug.Compiler
 
         private void op_print()
         {
-            var text = machine.ConvertZText(currentInstruction.ZText);
+            var text = machine.ConvertZText(this.current.Value.ZText);
             PrintText(text);
         }
 
@@ -1607,7 +1607,7 @@ namespace ZDebug.Compiler
 
         private void op_print_ret()
         {
-            var text = machine.ConvertZText(currentInstruction.ZText);
+            var text = machine.ConvertZText(this.current.Value.ZText);
             PrintText(text);
             Return(1);
         }

@@ -787,7 +787,7 @@ namespace ZDebug.Compiler
                         OperandCount - 1));
             }
 
-            return currentInstruction.Operands[operandIndex];
+            return this.current.Value.Operands[operandIndex];
         }
 
         /// <summary>

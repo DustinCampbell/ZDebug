@@ -27,8 +27,9 @@ namespace ZDebug.Compiler
         private ILBuilder il;
         private ControlFlowGraph controlFlowGraph;
         private Dictionary<int, ILabel> addressToLabelMap;
-        private Instruction currentInstruction;
         private List<ZRoutineCall> calls;
+
+        private LinkedListNode<Instruction> current;
 
         private IArrayLocal memory;
         private ILocal screen;
@@ -190,15 +191,17 @@ namespace ZDebug.Compiler
             // Emit IL
             foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
-                foreach (var instruction in codeBlock.Instructions)
+                var instructions = new LinkedList<Instruction>(codeBlock.Instructions);
+                var current = instructions.First;
+                while (current != null)
                 {
+                    this.current = current;
+
                     ILabel label;
-                    if (this.addressToLabelMap.TryGetValue(instruction.Address, out label))
+                    if (this.addressToLabelMap.TryGetValue(current.Value.Address, out label))
                     {
                         label.Mark();
                     }
-
-                    currentInstruction = instruction;
 
                     if (machine.Debugging)
                     {
@@ -207,9 +210,11 @@ namespace ZDebug.Compiler
                     }
 
                     Profiler_ExecutingInstruction();
-                    il.DebugWrite(instruction.PrettyPrint(machine));
+                    il.DebugWrite(current.Value.PrettyPrint(machine));
 
-                    Assemble();
+                    Assemble(current.Value.Opcode);
+
+                    current = current.Next;
                 }
             }
 
@@ -233,7 +238,7 @@ namespace ZDebug.Compiler
         {
             get
             {
-                return this.currentInstruction.OperandCount;
+                return this.current.Value.OperandCount;
             }
         }
 
@@ -266,7 +271,7 @@ namespace ZDebug.Compiler
             if (machine.Profiling)
             {
                 il.LoadArg(0); // ZMachine
-                il.Load(currentInstruction.Address);
+                il.Load(this.current.Value.Address);
 
                 var executingInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.One<int>(), @public: false);
                 il.Call(executingInstruction);
@@ -310,7 +315,7 @@ namespace ZDebug.Compiler
 
         private void NotImplemented()
         {
-            il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", currentInstruction.Address, currentInstruction.Opcode.Name));
+            il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", this.current.Value.Address, this.current.Value.Opcode.Name));
         }
 
         private static Type[] GetDirectCallTypes(int argumentCount)
@@ -610,7 +615,7 @@ namespace ZDebug.Compiler
 
         private void Branch()
         {
-            if (!currentInstruction.HasBranch)
+            if (!this.current.Value.HasBranch)
             {
                 throw new ZCompilerException("Expected instruction to have a branch.");
             }
@@ -620,10 +625,10 @@ namespace ZDebug.Compiler
 
             var noJump = il.NewLabel();
 
-            il.Load(currentInstruction.Branch.Condition);
+            il.Load(this.current.Value.Branch.Condition);
             noJump.BranchIf(Condition.NotEqual, @short: true);
 
-            switch (currentInstruction.Branch.Kind)
+            switch (this.current.Value.Branch.Kind)
             {
                 case BranchKind.RFalse:
                     il.DebugWrite("  > branching rfalse...");
@@ -636,7 +641,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // BranchKind.Address
-                    var address = currentInstruction.Address + currentInstruction.Length + currentInstruction.Branch.Offset - 2;
+                    var address = this.current.Value.Address + this.current.Value.Length + this.current.Value.Branch.Offset - 2;
                     var jump = addressToLabelMap[address];
                     il.DebugWrite(string.Format("  > branching to {0:x4}...", address));
                     jump.Branch();
@@ -648,12 +653,12 @@ namespace ZDebug.Compiler
 
         private void Store(CodeBuilder valueLoader, bool indirect = false)
         {
-            if (!currentInstruction.HasStoreVariable)
+            if (!this.current.Value.HasStoreVariable)
             {
                 throw new ZCompilerException("Expected instruction to have a store variable.");
             }
 
-            StoreVariable(currentInstruction.StoreVariable, valueLoader, indirect);
+            StoreVariable(this.current.Value.StoreVariable, valueLoader, indirect);
         }
 
         //private void PushFrame()
@@ -738,12 +743,12 @@ namespace ZDebug.Compiler
         //    il.DebugUnindent();
         //}
 
-        private void Assemble()
+        private void Assemble(Opcode opcode)
         {
-            switch (currentInstruction.Opcode.Kind)
+            switch (opcode.Kind)
             {
                 case OpcodeKind.TwoOp:
-                    switch (currentInstruction.Opcode.Number)
+                    switch (opcode.Number)
                     {
                         case 0x01:
                             op_je();
@@ -850,7 +855,7 @@ namespace ZDebug.Compiler
 
                     break;
                 case OpcodeKind.OneOp:
-                    switch (currentInstruction.Opcode.Number)
+                    switch (opcode.Number)
                     {
                         case 0x00:
                             op_jz();
@@ -914,7 +919,7 @@ namespace ZDebug.Compiler
 
                     break;
                 case OpcodeKind.ZeroOp:
-                    switch (currentInstruction.Opcode.Number)
+                    switch (opcode.Number)
                     {
                         case 0x00:
                             op_rtrue();
@@ -984,7 +989,7 @@ namespace ZDebug.Compiler
 
                     break;
                 case OpcodeKind.VarOp:
-                    switch (currentInstruction.Opcode.Number)
+                    switch (opcode.Number)
                     {
                         case 0x00:
                             op_call_s();
@@ -1187,7 +1192,7 @@ namespace ZDebug.Compiler
 
                     break;
                 case OpcodeKind.Ext:
-                    switch (currentInstruction.Opcode.Number)
+                    switch (opcode.Number)
                     {
                         case 0x00:
                             if (machine.Version >= 5)
@@ -1246,9 +1251,9 @@ namespace ZDebug.Compiler
             throw new ZCompilerException(
                 string.Format(
                     "Unsupported opcode: {0} ({1} {2:x2})",
-                    currentInstruction.Opcode.Name,
-                    currentInstruction.Opcode.Kind,
-                    currentInstruction.Opcode.Number));
+                    opcode.Name,
+                    opcode.Kind,
+                    opcode.Number));
         }
 
         public static ZCompilerResult Compile(ZRoutine routine, CompiledZMachine machine)
