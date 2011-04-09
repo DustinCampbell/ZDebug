@@ -29,6 +29,33 @@ namespace ZDebug.Core.Instructions
             }
         }
 
+        public bool IsStackVariable
+        {
+            get
+            {
+                return Kind == OperandKind.Variable
+                    && Value == 0;
+            }
+        }
+
+        public bool IsLocalVariable
+        {
+            get
+            {
+                return Kind == OperandKind.Variable
+                    && Value >= 1 && Value <= 15;
+            }
+        }
+
+        public bool IsGlobalVariable
+        {
+            get
+            {
+                return Kind == OperandKind.Variable
+                    && Value >= 16;
+            }
+        }
+
         public override string ToString()
         {
             switch (Kind)

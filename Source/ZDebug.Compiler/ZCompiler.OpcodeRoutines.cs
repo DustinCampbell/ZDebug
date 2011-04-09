@@ -16,8 +16,7 @@ namespace ZDebug.Compiler
             var op1 = GetOperand(0);
             var op2 = GetOperand(1);
 
-            if (op1.Kind != OperandKind.Variable && op1.Value != 0 &&
-                op2.Kind != OperandKind.Variable && op2.Value != 0)
+            if (!op1.IsStackVariable && !op2.IsStackVariable)
             {
                 Store(() =>
                 {
@@ -415,50 +414,64 @@ namespace ZDebug.Compiler
         // Jump routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        private void op_je_2operands()
+        {
+            LoadOperand(0);
+            LoadOperand(1);
+            il.Compare.Equal();
+            Branch();
+        }
+
+        private void op_je_3or4operands()
+        {
+            using (var x = il.NewLocal<ushort>())
+            {
+                LoadOperand(0);
+                x.Store();
+
+                var success = il.NewLabel();
+                var done = il.NewLabel();
+
+                for (int j = 1; j < OperandCount; j++)
+                {
+                    LoadOperand(j);
+                    x.Load();
+
+                    il.Compare.Equal();
+
+                    // no need to write a branch for the last test
+                    if (j < OperandCount - 1)
+                    {
+                        success.BranchIf(Condition.True, @short: true);
+                    }
+                    else
+                    {
+                        done.Branch(@short: true);
+                    }
+                }
+
+                success.Mark();
+                il.Load(1);
+
+                done.Mark();
+                Branch();
+            }
+        }
+
         private void op_je()
         {
             // We can take a faster path if there are only two operands to compare.
             if (OperandCount == 2)
             {
-                LoadOperand(0);
-                LoadOperand(1);
-                il.Compare.Equal();
-                Branch();
+                op_je_2operands();
+            }
+            else if (OperandCount == 3 || OperandCount == 4)
+            {
+                op_je_3or4operands();
             }
             else
             {
-                using (var x = il.NewLocal<ushort>())
-                {
-                    LoadOperand(0);
-                    x.Store();
-
-                    var success = il.NewLabel();
-                    var done = il.NewLabel();
-
-                    for (int j = 1; j < OperandCount; j++)
-                    {
-                        LoadOperand(j);
-                        x.Load();
-
-                        il.Compare.Equal();
-
-                        // no need to write a branch for the last test
-                        if (j < OperandCount - 1)
-                        {
-                            success.BranchIf(Condition.True, @short: true);
-                        }
-                        else
-                        {
-                            done.Branch(@short: true);
-                        }
-                    }
-
-                    success.Mark();
-                    il.Load(1);
-
-                    done.Mark();
-                    Branch();
-                }
+                throw new ZCompilerException("'je' opcode only supports 2-4 operands.");
             }
         }
 
@@ -1340,12 +1353,12 @@ namespace ZDebug.Compiler
                     il.Math.And(mask);
 
 #if DEBUG
-                using (var temp = il.NewLocal<ushort>())
-                {
-                    temp.Store();
-                    il.DebugWrite("property number at address: {0} {1:x4}", temp, propAddress);
-                    temp.Load();
-                }
+                    using (var temp = il.NewLocal<ushort>())
+                    {
+                        temp.Store();
+                        il.DebugWrite("property number at address: {0} {1:x4}", temp, propAddress);
+                        temp.Load();
+                    }
 #endif
 
                     propNum.Load();
