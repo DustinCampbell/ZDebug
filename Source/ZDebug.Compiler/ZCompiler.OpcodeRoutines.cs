@@ -222,39 +222,49 @@ namespace ZDebug.Compiler
         // Increment/decrement routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        private void op_dec_small_constant(byte opValue)
+        {
+            using (var value = il.NewLocal<short>())
+            {
+                var varIndex = opValue;
+
+                LoadVariable(varIndex, indirect: true);
+                il.Convert.ToInt16();
+                il.Math.Subtract(1);
+                value.Store();
+
+                StoreVariable(varIndex, value, indirect: true);
+            }
+        }
+
+        private void op_dec_variable(byte opValue)
+        {
+            using (var varIndex = il.NewLocal<byte>())
+            using (var value = il.NewLocal<short>())
+            {
+                LoadVariable(opValue);
+                varIndex.Store();
+
+                CalculatedLoadVariable(varIndex, indirect: true);
+                il.Convert.ToInt16();
+                il.Math.Subtract(1);
+                value.Store();
+
+                CalculatedStoreVariable(varIndex, value, indirect: true);
+            }
+        }
+
         private void op_dec()
         {
             var varIndexOp = GetOperand(0);
 
             if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                using (var value = il.NewLocal<short>())
-                {
-                    var varIndex = (byte)varIndexOp.Value;
-
-                    LoadVariable(varIndex, indirect: true);
-                    il.Convert.ToInt16();
-                    il.Math.Subtract(1);
-                    value.Store();
-
-                    StoreVariable(varIndex, value, indirect: true);
-                }
+                op_dec_small_constant((byte)varIndexOp.Value);
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
             {
-                using (var varIndex = il.NewLocal<byte>())
-                using (var value = il.NewLocal<short>())
-                {
-                    LoadVariable((byte)varIndexOp.Value);
-                    varIndex.Store();
-
-                    CalculatedLoadVariable(varIndex, indirect: true);
-                    il.Convert.ToInt16();
-                    il.Math.Subtract(1);
-                    value.Store();
-
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
-                }
+                op_dec_variable((byte)varIndexOp.Value);
             }
             else
             {
@@ -585,34 +595,44 @@ namespace ZDebug.Compiler
         // Load/Store routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        private void op_load_small_constant(byte opValue)
+        {
+            using (var result = il.NewLocal<short>())
+            {
+                var varIndex = opValue;
+
+                LoadVariable(varIndex, indirect: true);
+                result.Store();
+
+                Store(() => result.Load());
+            }
+        }
+
+        private void op_load_variable(byte opValue)
+        {
+            using (var varIndex = il.NewLocal<byte>())
+            using (var result = il.NewLocal<ushort>())
+            {
+                LoadVariable(opValue);
+                varIndex.Store();
+
+                CalculatedLoadVariable(varIndex, indirect: true);
+                result.Store();
+                Store(() => result.Load());
+            }
+        }
+
         private void op_load()
         {
             var varIndexOp = GetOperand(0);
 
             if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                using (var result = il.NewLocal<short>())
-                {
-                    var varIndex = (byte)varIndexOp.Value;
-
-                    LoadVariable(varIndex, indirect: true);
-                    result.Store();
-
-                    Store(() => result.Load());
-                }
+                op_load_small_constant((byte)varIndexOp.Value);
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
             {
-                using (var varIndex = il.NewLocal<byte>())
-                using (var result = il.NewLocal<ushort>())
-                {
-                    LoadVariable((byte)varIndexOp.Value);
-                    varIndex.Store();
-
-                    CalculatedLoadVariable(varIndex, indirect: true);
-                    result.Store();
-                    Store(() => result.Load());
-                }
+                op_load_variable((byte)varIndexOp.Value);
             }
             else
             {

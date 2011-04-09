@@ -1,0 +1,119 @@
+help
+i
+x jerkin
+x dagger
+x parchment
+x journal
+turn journal to rigel
+turn journal to hatsya
+turn journal to betelgeuse
+turn journal to thabit
+turn journal to bellatrix
+turn journal to mintaka
+turn journal to alnitak
+turn journal to alnilam
+turn journal to saiph
+turn journal to meissa
+x turret
+x archway
+n
+n
+n
+z
+z
+z
+z
+z
+z
+look
+x spear
+take it
+fashion staff
+s
+s
+s
+e
+x feather
+x rubble
+detect trap
+know nature feather
+take feather
+write anything on parchment
+x scroll
+memorise scroll
+w
+n
+x skeleton
+x pack
+x tree
+x house
+detect trap
+know nature pack
+aerial shield
+take pack
+take pack
+open it
+aerial shield
+take all from pack
+x scroll
+x vial
+aerial shield
+z
+z
+z
+score
+x diary
+s
+e
+memorise scroll
+mend rubble
+x ball
+take ball
+push ball w
+look
+push ball w
+x scroll
+take it
+x table
+x crumbs
+mend crumbs
+x wafer
+take it
+u
+detect trap
+x chest
+open chest
+detect trap
+take chest
+take all from chest
+x green
+x ochre
+x crimson
+x arrowslit
+d
+take arrow
+memorise scroll
+eat wafer
+push ball e
+n
+n
+x door
+x tombstones
+mend tombstones
+i
+x brick
+know nature brick
+make sanctuary
+fashion staff
+x sanctuary
+enter it
+rest
+out
+s
+ne
+detect trap
+x loom
+x scroll
+take scroll
+memorise scroll
+x loom

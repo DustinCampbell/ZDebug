@@ -1,0 +1,570 @@
+﻿
+
+
+
+It used to be said that there are two kinds of magic-user: those who have been to Tolti-Aph, and charlatans. It used to be generally understood that the attempt to prove oneself in the unforgiving society of Tolti-Aph was a bid for rapid level advancement or else romantic, thin-young-mage-in-midnight-black-robes death. The closer you get to the wilderness island vaguely marked "Tholtaff" on the agate globe in your great-great-grandfather's study, the better the alternative sounds: settling down in some coastal village, perhaps, a little weathermongering, some polymancy, and helping out with the nets after a bad storm. Retire at maybe level 3, with most of your experience points gained from observing rare fish-based poisons carry off those villagers careless about gutting. Publish an awesomely tedious monograph on the correct usage of the "untangle rigging" spell. You know, the good life.
+
+
+The Reliques of Tolti-Aph
+A W&W Scenario by Graham Nelson
+Release 1 / Serial number 060430 / Inform 7 build 3K27 (I6/v6.30 lib 6/10N) 
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> help
+(This game is being run according to the rules of a simplified role-playing game which we will call Woodpulp & Wyverns, or W&W. The protagonist is a magic-user, whose main ability is to cast spells. We are not in search of riches but of experience: by collecting experience points, the protagonist may progress upwards in "level": the SCORE command shows this. An INVENTORY (or I) lists the spells known as well as the items carried.
+
+One's strength, STR, is drained both by casting spells and by being wounded, and - especially early on - it is important to husband this carefully: but the means of restoration can also be found. It will probably take several games to work out the best tactics of play. Tolti-Aph is not a safe place, so expect to be killed every now and again (i.e. with terrifying frequency - E.S.).
+
+W&W play differs from conventional interactive fiction in that there is a great deal of randomised behaviour. Notations like 4d6+2 express the (virtual) dice rolls to be made: this one would involve rolling 4 six-sided dice, then adding 2 to the result. Combat is an especially unpredictable business, but note that one can often run away from a fight which is going badly.
+
+It is possible to get yourself into some insanely hard fights, or to run risks of appalling strength loss, where you might get lucky, but will die nine times out of ten. This is almost always a sign that you've missed something. The designer intends that a sufficiently ingenious player of IF can win through with even the worst luck. Still, with life and death hanging on the roll of a die, the UNDO command has been withdrawn. SAVE is allowed, but an important early puzzle is to work out how to do it.
+
+Lastly, this is one of the worked examples whose source text is included in full in the documentation for Inform 7, a system to create interactive fiction. About the first quarter lays out general rules for W&W play, and can be borrowed to write new W&W scenarios.)
+
+> i
+You are carrying:
+  a leather jerkin (damage -1) (being worn)
+  a dagger (1d3 attack)
+  a blank parchment
+  a new-looking journal
+
+You have the following spells committed to memory:
+  detect trap (defensive): cost 1 strength
+  know nature (arcana): cost 1 strength
+  fashion staff (arcana): cost 2 strength, requires wood
+  memorise (arcana): cost 3 strength
+  exorcise undead (defensive): cost 7 strength, requires metal
+
+> x jerkin
+You see nothing special about the leather jerkin.
+> x dagger
+The dagger is a weapon with a 1d3 attack.
+
+> x parchment
+Just plain parchment paper, of no particular value or rarity. One of the tools of the magic-user's trade, though admittedly your mother also likes to use it for lining cake tins.
+
+> x journal
+Magic-users are trained to keep a journal, lest their discoveries be forgotten, or possibly just to give them a vehicle for their self-importance which doesn't involve world subjugation. Yours is divided into entries named after stars in the constellation of Orion, so clearly there's no self-importance there.
+
+(Try TURN JOURNAL TO RIGEL for a sample of the sort of twaddle you wrote in your distant student days, which finished, oh, three or four weeks ago now.)
+
+> turn journal to rigel
+1st Leopard 342. First day at the Collegium! Big cold dormitory and HUGE books but yummy custard and Migstipple, in Class IVa, says he can do "know nature" but he's a big liar and my grandfather can do "exorcise undead" which is loads better.
+
+> turn journal to hatsya
+2nd Tortoise 343. Odds exam in two days. Spent the entire afternoon making charts and trying to memorize. The older kids say there will be essay questions: when is a 1d10 weapon better than 2d3+1? When is it worse? Which would you wield against a gnome? Etc. Swear my head will explode. Wish everything used the same base, at least. What would be so wrong with it all being d20?
+
+> turn journal to betelgeuse
+13th Tortoise 346. Old Scrofulax at his worst today - double Memory, went on for what seemed like forever. Keeps losing segments of apple in his beard. But it wasn't useless, for once. For the first time we got scrolls to practice on, only scrolls with "encourage watercress" inscribed on them but you have to start somewhere, like Scrofulax says, and anyway you wouldn't want to live in a world where watercress goes unencouraged, would you? So I did my very first "memorise". Didn't quite work, but for a while I could have encouraged some grass, I suppose. Like always, they made us do it twenty times over. And then they made us walk under this big talisman thing that wiped our minds empty again! How are we ever going to learn? "Memorise" is supposed to give you the permanent ability to cast the spell written on the scroll, but huh, we got it for only an hour and a half.
+
+> turn journal to thabit
+42nd Piglet 346. Combat exercises, out in the rain. When they tell you in class that only defensive and offensive spells can be cast during combat, you look superior and think "until me, anyway". Turns out they're not kidding, it's harder to spell-cast when you're distracted by some cave troll. Not that we practice on real cave trolls. "Very well, Mr Migstipple," said Babbington wearily, "but at least swing that club as if you have some idea what a blunt instrument is, would you?" Tchah.
+
+> turn journal to bellatrix
+6th Camel 347. They took away our wooden amulets today. Funny, when you're a little squit, you see the big kids walking around with nothing on their wrists and you can't wait, but it feels - wrong. Turns out they weren't just wood, but magic-imbued wood, and they were doing all the spells, not us. Or anyway they provided all the strength. I never realised, but when you cast a spell, it costs you a bit of strength, and that's why they're all so obsessed with teaching us to measure our STR all the time. So they made us cast a "detect trap" on our own, and Migstipple had to sit down and his face was dead white. Mood over dinner pretty subdued. This isn't going to be quite as easy as we all thought.
+
+> turn journal to mintaka
+38th Swallowtail 347. Total exhaustion. Endless exercises with focuses. It seems that what counts isn't the focus itself, like it looks in all the paintings - the wizard holding up the silver lamp, and all that - but the material it's made of. And you need the right material or the spell won't work. Except, some spells don't need a focus at all! Or something. So tired I couldn't even hear what Babbington was saying at the end. When are they giving us our amulets back? When?
+
+> turn journal to alnitak
+14th Turtle 347. Don't know why I bother with this journal in the summer vac, but I guess it's just a habit now. Great-great-grandfather's place up in the mountains is not as ruined and desolate as I'd hoped, and it looks as if people tidy up so much that there's no chance of finding a few scrolls he left behind. The study's kind of interesting, though. No secret passages yet. Spun the globe a while, thinking it might do something. Doesn't, though. Reading a dusty old book called Reliques of Tolti-Aph, but I don't believe a word of it.
+
+> turn journal to alnilam
+2nd Leopard 348. Big day, worth a great big new star in the old journal, oh yes. My first really big spell. Can't remember why I chose "exorcise undead" for my optional subject this year, except it sounded pretty eldritch. And today the first real casting. Shock of my life when the blunt old sword I'd picked up for a focus vanished right out of my hands! Migstipple gave me a vial of strength potion to get me back on my feet, and yeah, it turned out the zombie squirrel had been struck back down to the underworld which was way cool, but what happened to the sword? Thought I'd dropped it, which would have been just too lame. Babbington didn't even laugh, for once, was pretty decent about it. Turns out that a really big spell drains the focus right out of existence - and this was a really big spell. Still worried about my acne though.
+
+> turn journal to saiph
+29th Mallard 348. If this wretched forest goes on any longer, I'll turn into a tree myself. I mean, don't the gods ever think, right, I'd like some variety now, let's put a glacier down here and maybe a few sandy beaches?
+
+> turn journal to meissa
+31st Mallard 348. Nearly there, according to the sketch I made from the old globe. Seems the first I see of Tolti-Aph ought to be the Longwall, and that must be gigantic if the engravings in Reliques are anything to go by.
+
+> x turret
+You see nothing special about the old wall turret.
+> x archway
+You can't see any such thing.
+> n
+
+Fallen Tree
+The overgrown ground, sloping gradually downwards to the north, is interrupted here by the fallen trunk of a giant of a tree. The trunk seems to have partially demolished an old town-house to northeast.
+
+Propped against the trunk in a parody of a sitting man, a skeleton - no, a woman's, to judge from the pelvis - shines white in the sunlight. The empty eye-sockets look up at the sky with a curious sort of expectancy.
+
+On the skeleton's lap is a leather pack.
+
+> n
+
+Broken Lane
+This must once have been a north-south thoroughfare, but now it is as cracked as a fishmonger's face. Even the old paving has given out, and its place is taken by stolen tombstones.
+
+Set into the slab-sided western cutting of the lane is a flame-blackened door, no more than four feet high.
+
+> n
+
+Gravel Track
+Even the makeshift paving gives out here, and the lane degenerates into a gravel track, rutted by carts and stamped all over with oddly inhuman prints of bare feet.
+
+Vish, a goblin lookout armed with a spear, hisses in rage at the very sight of you desecrating his realm.
+
+You attack Vish, stabbing the dagger, making an attack roll (1d20) of 15, +1 for your level - hit (11 to 19), doing 1d3 of damage: 1d3: 1 point, wounding Vish to a strength of 4.
+Vish attacks you, lunging with the spear, making an attack roll (1d20) of 2 - critical miss (2 or less): Vish drops the spear!
+
+Combat> z
+You attack Vish, stabbing the dagger, making an attack roll (1d20) of 1, +1 for your level - critical miss (2 or less): 
+you dropped the dagger!
+Vish attacks you, pummeling its green fists, making an attack roll (1d20) of 4 - miss (3 to 10): no damage done!
+
+Combat> z
+You attack Vish, with bare hands, making an attack roll (1d20) of 17, +1 for your level - hit (11 to 19), doing 1d2 of damage: 1d2: 1 point, wounding Vish to a strength of 3.
+Vish attacks you, pummeling its green fists, making an attack roll (1d20) of 8 - miss (3 to 10): no damage done!
+
+Combat> z
+You attack Vish, with bare hands, making an attack roll (1d20) of 11, +1 for your level - hit (11 to 19), doing 1d2 of damage: 1d2: 1 point, wounding Vish to a strength of 2.
+Vish attacks you, pummeling its green fists, making an attack roll (1d20) of 3 - miss (3 to 10): no damage done!
+
+Combat> z
+You attack Vish, with bare hands, making an attack roll (1d20) of 17, +1 for your level - hit (11 to 19), doing 1d2 of damage: 1d2: 1 point, wounding Vish to a strength of 1.
+Vish attacks you, pummeling its green fists, making an attack roll (1d20) of 17 - hit (11 to 19), doing 1d4 of damage: 1d4: 1 point, reducing your strength to 13.
+
+Combat> z
+You attack Vish, with bare hands, making an attack roll (1d20) of 7, +1 for your level - miss (3 to 10): no damage done!
+Vish attacks you, pummeling its green fists, making an attack roll (1d20) of 10 - miss (3 to 10): no damage done!
+
+Combat> z
+You attack Vish, with bare hands, making an attack roll (1d20) of 12, +1 for your level - hit (11 to 19), doing 1d2 of damage: 1d2: 1 point - a fatal blow!
+
+[Your score has just gone up by five points.]
+
+> look
+Gravel Track
+Even the makeshift paving gives out here, and the lane degenerates into a gravel track, rutted by carts and stamped all over with oddly inhuman prints of bare feet.
+
+You can see a dagger and a spear here.
+> x spear
+The spear is a weapon with a 1d6 attack.
+
+> take it
+Taken.
+> fashion staff
+As you intone the words of the fashion staff spell, the spear releases woodpulp, growing scorch-hot in your hands as the wood is transformed into a magical hybrid, imbuing it with strength.
+
+[Your score has just gone up by four points.]
+
+> s
+
+Broken Lane
+This must once have been a north-south thoroughfare, but now it is as cracked as a fishmonger's face. Even the old paving has given out, and its place is taken by stolen tombstones.
+
+Set into the slab-sided western cutting of the lane is a flame-blackened door, no more than four feet high.
+
+> s
+
+Fallen Tree
+The overgrown ground, sloping gradually downwards to the north, is interrupted here by the fallen trunk of a giant of a tree. The trunk seems to have partially demolished an old town-house to northeast.
+
+Propped against the trunk in a parody of a sitting man, a skeleton - no, a woman's, to judge from the pelvis - shines white in the sunlight. The empty eye-sockets look up at the sky with a curious sort of expectancy.
+
+On the skeleton's lap is a leather pack.
+
+> s
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> e
+It is a long, steep climb up the ragged eastern side of the Longwall breach, and costs you 1 strength point.
+
+Stone Mound
+The remains of the Longwall rise steeply up eastward of the curious ruined platform, and also lose their shape, becoming little more than a great stone mound. Here at the top, it looks as if the stonework has been shattered by lightning and not just slow old time, but that seems an unreal idea when the canopies of the forest stretch out in every direction against a clear autumnal-blue sky.
+
+A barbed metallic feather, from a bird which must have been scaly and very large - also, disconcertingly, metallic - lies in the loose rubble.
+
+> x feather
+The feather comes to a metal tip which is - there's no other other word for it - a sort of nib.
+
+> x rubble
+You see nothing special about the loose rubble.
+> detect trap
+As you intone the words of the detect trap spell, your fingers release diffuse blue light, but it radiates away with a sense of calm normality.
+
+[Your score has just gone up by two points.]
+
+> know nature feather
+As you intone the words of the know nature spell, your fingers release probing rays at the barbed feather, which make a curious sort of examination and then trace the sigil of metal in mid-air.
+
+[Your score has just gone up by two points.]
+
+> take feather
+Taken. As the feather pulls clear, it occurs to you that the rubble it was sitting in is not any random cairn, but is all of the same kind of stone, and has smooth as well as roughened faces. It's thoroughly broken up now, whatever it was.
+
+> write anything on parchment
+The metal feather, with a will of its own, ignores the motion of your wrist and writes its own desires onto the parchment, which is transformed into a deeply scored scroll.
+
+[Your score has just gone up by seven points.]
+
+> x scroll
+Careful to take only a glance, you see that the deeply scored scroll is inscribed with the runes of the aerial shield spell.
+
+> memorise scroll
+As you intone the words of the memorise spell, your fingers release a glowing symbol at the deeply scored scroll, which crumbles into dust, filling your mind with thoughts of the aerial shield spell.
+
+[Your score has just gone up by six points.]
+
+> w
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> n
+
+Fallen Tree
+The overgrown ground, sloping gradually downwards to the north, is interrupted here by the fallen trunk of a giant of a tree. The trunk seems to have partially demolished an old town-house to northeast.
+
+Propped against the trunk in a parody of a sitting man, a skeleton - no, a woman's, to judge from the pelvis - shines white in the sunlight. The empty eye-sockets look up at the sky with a curious sort of expectancy.
+
+On the skeleton's lap is a leather pack.
+
+> x skeleton
+You see nothing special about the skeleton.
+> x pack
+It does seem... curious that the pack should be untouched, unlooted, when all else is gone, and even the skeleton's clothes have been taken.
+
+> x tree
+You see nothing special about the trunk of a giant fallen tree.
+> x house
+You see nothing special about the partially demolished house.
+> detect trap
+As you intone the words of the detect trap spell, your fingers release diffuse blue light, and it swirls around you for a time before finally settling upon the leather pack. You give a grim smile.
+
+[Your score has just gone up by two points.]
+
+> know nature pack
+As you intone the words of the know nature spell, your fingers release probing rays at the leather pack, which make a curious sort of examination and then trace the sigil of flesh in mid-air.
+
+[Your score has just gone up by two points.]
+
+> aerial shield
+As you intone the words of the aerial shield spell, your fingers release green smoke, and forms an almost invisible saucer-like shield over your head, which moves with you, which will last for three turns.
+
+[Your score has just gone up by six points.]
+
+> take pack
+As your thieving fingers touch the dead woman's pack, a screaming noise almost throws you backward, and worse is to come: a harpy swoops down from the sky!
+The guardian harpy attacks!
+
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 15 - hit (11 to 19), doing 2d6 of damage: 2d6: 3,2=5 points, soaked up by the aerial shield spell.
+
+Combat> take pack
+Taken.
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 7, +1 for your level - miss (3 to 10): no damage done!
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 10 - miss (3 to 10): no damage done!
+
+Combat> open it
+You open the leather pack, revealing the immaculate scroll, the sea-blue vial and a cursive diary.
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 15, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 1 point, wounding the guardian harpy to a strength of 14.
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 16 - hit (11 to 19), doing 2d6 of damage: 2d6: 3,1=4 points, soaked up by the aerial shield spell.
+
+(The aerial shield spell wears off.)
+
+Combat> aerial shield
+As you intone the words of the aerial shield spell, your fingers release green smoke, and forms an almost invisible saucer-like shield over your head, which moves with you, which will last for three turns.
+
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 5, +1 for your level - miss (3 to 10): no damage done!
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 5 - miss (3 to 10): no damage done!
+
+[Your score has just gone up by six points.]
+
+Combat> take all from pack
+immaculate scroll: Removed.sea-blue vial: Removed.cursive diary: Removed.immaculate scroll: But it isn't there now.sea-blue vial: But it isn't there now.cursive diary: But it isn't there now.
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 16, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 3 points, wounding the guardian harpy to a strength of 11.
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 2 - critical miss (2 or less): the guardian harpy roars with impotent rage!
+
+Combat> x scroll
+Careful to take only a glance, you see that the immaculate scroll is inscribed with the runes of the mend spell.
+
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 8, +1 for your level - miss (3 to 10): no damage done!
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 15 - hit (11 to 19), doing 2d6 of damage: 2d6: 4,4=8 points, soaked up by the aerial shield spell.
+
+Combat> x vial
+The sea-blue vial is a 1d4+2 strength potion.
+
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 18, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 4 points, wounding the guardian harpy to a strength of 6.
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 9 - miss (3 to 10): no damage done!
+
+(The aerial shield spell wears off.)
+
+Combat> aerial shield
+As you intone the words of the aerial shield spell, your fingers release green smoke, and forms an almost invisible saucer-like shield over your head, which moves with you, which will last for three turns.
+
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 17, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 4 points, wounding the guardian harpy to a strength of 2.
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 3 - miss (3 to 10): no damage done!
+
+Combat> z
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 11, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 1 point, wounding the guardian harpy to a strength of 1.
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 12 - hit (11 to 19), doing 2d6 of damage: 2d6: 3,3=6 points, soaked up by the aerial shield spell.
+
+Combat> z
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 2, +1 for your level - miss (3 to 10): no damage done!
+The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 15 - hit (11 to 19), doing 2d6 of damage: 2d6: 2,3=5 points, soaked up by the aerial shield spell.
+
+Combat> z
+You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 13, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 1 point - a fatal blow!
+
+You progress to level 2!
+
+(The aerial shield spell wears off.)
+
+[Your score has just gone up by fifteen points.]
+
+> score
+You are a level 2 magic-user, with 57 experience points. You need 43 more points to progress to the next level.
+
+> x diary
+A diary written in a cursive hand, not taught in guild-schools these many centuries. The final entry makes you sigh:
+
+No strength... so cruel to get so close...
+
+say your prayers little one,
+begone bleak days of drowning time -
+you loose-roaming clouds be with me -
+
+She was clearly in a mystical state at the end. Strength collapse can do that to a magic-user.
+
+> s
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> e
+It is a long, steep climb up the ragged eastern side of the Longwall breach, and costs you 1 strength point.
+
+Stone Mound
+The remains of the Longwall rise steeply up eastward of the curious ruined platform, and also lose their shape, becoming little more than a great stone mound. Here at the top, it looks as if the stonework has been shattered by lightning and not just slow old time, but that seems an unreal idea when the canopies of the forest stretch out in every direction against a clear autumnal-blue sky.
+
+> memorise scroll
+As you intone the words of the memorise spell, your fingers release a glowing symbol at the immaculate scroll, which crumbles into dust, filling your mind with thoughts of the mend spell.
+
+[Your score has just gone up by six points.]
+
+> mend rubble
+As you intone the words of the mend spell, the leather pack releases ghostly fingers at the loose rubble, shaping it back into the ornamental stone ball which must once have stood atop the Longwall.
+
+[Your score has just gone up by four points.]
+
+> x ball
+You see nothing special about the ornamental stone ball.
+> take ball
+It's almost as big as you, and made of stone.
+
+> push ball w
+Wheeeeee!
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> look
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+You can see an ornamental stone ball here.
+> push ball w
+The rolling of the stone ball through the doorway triggers off an old trap, of rusty blades swung across by a counterweight! A crude, one-time device, which makes a surprisingly nasty noise, but does no actual damage.
+
+Turret Roundhouse
+This broad round chamber forms the central well of the turret. Little light enters by the dark doorway from the east, but the crude steps upward presumably lead to a lookout.
+
+An old trestle table is scattered with a few crumbs, suggesting that somebody has lived here quite recently.
+
+Propped against one wall, almost as if it was meant for you to find it, is a battered scroll.
+
+> x scroll
+Careful to take only a glance, you see that the battered scroll is inscribed with the runes of the make sanctuary spell.
+
+> take it
+Taken.
+> x table
+You see nothing special about the trestle table.
+> x crumbs
+You see nothing special about the food crumbs.
+> mend crumbs
+As you intone the words of the mend spell, the leather pack releases ghostly fingers at the food crumbs, and as you watch the fingers reshape the crumbs back into the wafer of elven bread from which they were once crumbled.
+
+[Your score has just gone up by eleven points.]
+
+> x wafer
+The wafer of elven bread is a 3d6 strength potion.
+
+> take it
+Taken.
+> u
+
+Turret Alcove
+The rough steps - probably not the original construction - end at a blank-walled alcove, bare except for a medicine chest.
+
+A little light shows through a broad arrowslit in the northwestern wall of the turret, which is where the steps have wound around to.
+
+> detect trap
+As you intone the words of the detect trap spell, your fingers release diffuse blue light, but it radiates away with a sense of calm normality.
+
+> x chest
+You can't see inside, since the medicine chest is closed.
+> open chest
+You open the medicine chest, revealing the green vial, the ochre vial and the crimson vial.
+> detect trap
+As you intone the words of the detect trap spell, your fingers release diffuse blue light, and it swirls around you for a time before finally settling upon the ochre vial. You give a grim smile.
+
+> take chest
+Taken.
+> take all from chest
+green vial: Removed.ochre vial: Removed.crimson vial: Removed.ochre vial: But it isn't there now.crimson vial: But it isn't there now.
+> x green
+The green vial is a 1d6+2 strength potion.
+
+> x ochre
+The ochre vial is a 1d6+2 strength potion.
+
+> x crimson
+The crimson vial is a 1d6+2 strength potion.
+
+> x arrowslit
+As you look curiously out of the arrowslit, there is a wheep! sound. Instinctively, you dodge. You need to make a saving roll of 11 or better on 1d20 to sidestep the arrow: 10, +2 for your level - succeeded.
+The arrow whings past you and rattles against the far wall of the Turret.
+
+> d
+
+Turret Roundhouse
+This broad round chamber forms the central well of the turret. Little light enters by the dark doorway from the east, but the crude steps upward presumably lead to a lookout.
+
+An old trestle table is wiped clean.
+
+You can also see an arrow and an ornamental stone ball here.
+> take arrow
+Taken.
+> memorise scroll
+As you intone the words of the memorise spell, your fingers release a glowing symbol at the battered scroll, which crumbles into dust, filling your mind with thoughts of the make sanctuary spell.
+
+> eat wafer
+You swallow the wafer of elven bread, gaining 3d6: 4,3,1=8 strength points.
+
+> push ball e
+
+Longwall Street
+Almost overgrown in the deep forest, collapsed and at once standing, the cyclopean east-west Longwall of the fallen city sinks here to a mostly flat, lichened stone clearing: it must once have been a customs post. To the west, an old wall turret like a broken chess piece still seems enterable by a dark doorway, whereas the eastern side of the wall's gap is only a shapeless ramp of masonry. Northwards, to what was once the interior, stubborn, wiry trees grapple with ancient pavings.
+
+> n
+
+Fallen Tree
+The overgrown ground, sloping gradually downwards to the north, is interrupted here by the fallen trunk of a giant of a tree. The trunk seems to have partially demolished an old town-house to northeast.
+
+Propped against the trunk in a parody of a sitting man, a skeleton - no, a woman's, to judge from the pelvis - shines white in the sunlight. The empty eye-sockets look up at the sky with a curious sort of expectancy.
+
+> n
+
+Broken Lane
+This must once have been a north-south thoroughfare, but now it is as cracked as a fishmonger's face. Even the old paving has given out, and its place is taken by stolen tombstones.
+
+Set into the slab-sided western cutting of the lane is a flame-blackened door, no more than four feet high.
+
+> x door
+You see nothing special about the flame-blackened door.
+> x tombstones
+These tombstones have clearly been dug up, carted here and thrown carelessly down into something that somebody very careless might, charitably, call a roadway. Frankly, they are a mess, broken up like so much biscuit.
+
+> mend tombstones
+As you intone the words of the mend spell, the leather pack releases ghostly fingers at the stolen tombstones, which make a half-hearted attempt to set all right, but the task is way beyond so basic a spell.
+
+> i
+You are carrying:
+  that broken half-brick you absent-mindedly picked up when trying to mend the roadway
+  an arrow
+  the crimson vial
+  the ochre vial
+  the green vial
+  the medicine chest (open but empty)
+  a cursive diary
+  the sea-blue vial
+  a leather pack (open but empty)
+  a barbed feather
+  a spear (magic-imbued) (1d6 attack)
+  a leather jerkin (damage -1) (being worn)
+  a new-looking journal
+
+You have the following spells committed to memory:
+  detect trap (defensive): cost 1 strength
+  know nature (arcana): cost 1 strength
+  fashion staff (arcana): cost 2 strength, requires wood
+  mend (healing): cost 2 strength, requires flesh
+  memorise (arcana): cost 3 strength
+  aerial shield (defensive): cost 3 strength
+  exorcise undead (defensive): cost 7 strength, requires metal
+  make sanctuary (arcana): cost 8 strength, requires clay
+
+> x brick
+You see nothing special about the broken half-brick.
+> know nature brick
+As you intone the words of the know nature spell, your fingers release probing rays at the broken half-brick, which make a curious sort of examination and then trace the sigil of clay in mid-air.
+
+> make sanctuary
+As you intone the words of the make sanctuary spell, the broken half-brick vanishes as it releases rainbow walls, which - sketchily at first, but with growing confidence of purpose - come together into the ghostly rainbow outlines of a sanctuary before you.
+
+[Your score has just gone up by sixteen points.]
+
+> fashion staff
+As you intone the words of the fashion staff spell, the medicine chest releases woodpulp, growing scorch-hot in your hands as the wood is transformed into a magical hybrid, imbuing it with strength.
+
+[Your score has just gone up by four points.]
+
+> x sanctuary
+You see nothing special about the rainbow outlines of your sanctuary.
+> enter it
+Sanctum Sanctorum
+Here in the calm, still centre of the turning world, you find Sanctuary. It is a place to rest, to meditate. Through the hazy rainbow walls, you can vaguely see the Broken Lane, but it is as unreal as a dream.
+
+> rest
+You rest, soaking up the healing goodness of the sanctuary.
+
+> out
+You blink as your eyes adjust to the harshness of reality - the unforgiving vividness of existence.
+
+Broken Lane
+This must once have been a north-south thoroughfare, but now it is as cracked as a fishmonger's face. Even the old paving has given out, and its place is taken by stolen tombstones.
+
+Set into the slab-sided western cutting of the lane is a flame-blackened door, no more than four feet high.
+
+Before you are the rainbow outlines of your sanctuary, which you alone can see, never mind enter.
+
+> s
+
+Fallen Tree
+The overgrown ground, sloping gradually downwards to the north, is interrupted here by the fallen trunk of a giant of a tree. The trunk seems to have partially demolished an old town-house to northeast.
+
+Propped against the trunk in a parody of a sitting man, a skeleton - no, a woman's, to judge from the pelvis - shines white in the sunlight. The empty eye-sockets look up at the sky with a curious sort of expectancy.
+
+> ne
+
+Fullers' Town-House
+This may well be the most habitable room left in Tolti-Aph, though the craftsmen who built it - to judge by the frescos, fullers of cloth - were in no wise rich. And since then, even what little they could afford in the way of windows have been bricked solid.
+
+On one wall hangs a painting of a clay pipe, smoking tobacco.
+
+The centrepiece of the room is the cloth loom on which the wispy strands of wool were once washed, combed and woven into cloth.
+On the cloth loom is a stretched scroll.
+> detect trap
+As you intone the words of the detect trap spell, your fingers release diffuse blue light, and it swirls around you for a time before finally settling upon the ochre vial and the cloth loom. You give a grim smile.
+
+> x loom
+Painted around the base of the loom is the score, it seems, for a song, in the traditional tablature notation.
+
+> x scroll
+Careful to take only a glance, you see that the stretched scroll is inscribed with the runes of the circumvent lock spell.
+
+> take scroll
+Taken.
+> memorise scroll
+Under the terms of the recent Sorcery Millennium Property Act, all magic-users are now hypnotised to make it impossible for them to learn certain spells connected with the breaking or circumvention of locks or other devices intended to protect property. Like all magic-users, you resent the implication that you are some kind of kleptomaniac, and regard this as an outrageous infringement of your personal liberty. Especially since these are the same people who go on and on about the right to bear "apocalyptic fireball" wands! Tsk.
+
+> x loom
+Painted around the base of the loom is the score, it seems, for a song, in the traditional tablature notation.
+
+> 
