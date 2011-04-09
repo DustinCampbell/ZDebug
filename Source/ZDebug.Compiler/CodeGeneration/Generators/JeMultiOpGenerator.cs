@@ -7,20 +7,22 @@ namespace ZDebug.Compiler.CodeGeneration
     internal class JeMultiOpGenerator : OpcodeGenerator
     {
         private readonly ReadOnlyArray<Operand> ops;
+        private readonly Branch branch;
 
-        public JeMultiOpGenerator(ReadOnlyArray<Operand> ops)
+        public JeMultiOpGenerator(ReadOnlyArray<Operand> ops, Branch branch)
             : base(OpcodeGeneratorKind.JeMultiOp)
         {
             this.ops = ops;
+            this.branch = branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            // OPIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
+            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
             using (var x = il.NewLocal<ushort>())
             {
-                compiler.LoadOperand(ops[0]);
+                compiler.EmitOperandLoad(ops[0]);
                 x.Store();
 
                 var success = il.NewLabel();
@@ -28,7 +30,7 @@ namespace ZDebug.Compiler.CodeGeneration
 
                 for (int j = 1; j < ops.Length; j++)
                 {
-                    compiler.LoadOperand(ops[j]);
+                    compiler.EmitOperandLoad(ops[j]);
                     x.Load();
 
                     il.Compare.Equal();
@@ -48,7 +50,7 @@ namespace ZDebug.Compiler.CodeGeneration
                 il.Load(1);
 
                 done.Mark();
-                compiler.Branch();
+                compiler.EmitBranch(branch);
             }
         }
     }

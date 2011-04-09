@@ -3,6 +3,11 @@
     internal enum OpcodeGeneratorKind
     {
         Je2Op,
-        JeMultiOp
+        JeMultiOp,
+        Jin,
+        Jg,
+        Jl,
+        Jump,
+        Jz,
     }
 }

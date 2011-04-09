@@ -3,27 +3,25 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration
 {
-    internal class Je2OpGenerator : OpcodeGenerator
+    internal class JzGenerator : OpcodeGenerator
     {
-        private readonly Operand op1;
-        private readonly Operand op2;
+        private readonly Operand op;
         private readonly Branch branch;
 
-        public Je2OpGenerator(Operand op1, Operand op2, Branch branch)
-            : base(OpcodeGeneratorKind.Je2Op)
+        public JzGenerator(Operand op, Branch branch)
+            : base(OpcodeGeneratorKind.Jz)
         {
-            this.op1 = op1;
-            this.op2 = op2;
+            this.op = op;
             this.branch = branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
+            // OPTIMIZE: Can we do better by using brfalse instead of loading 0 and doing ceq?
 
-            compiler.EmitOperandLoad(op1);
-            compiler.EmitOperandLoad(op2);
-
+            compiler.EmitOperandLoad(op);
+            il.Load(0);
             il.Compare.Equal();
 
             compiler.EmitBranch(branch);

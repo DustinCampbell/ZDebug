@@ -3,14 +3,14 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration
 {
-    internal class Je2OpGenerator : OpcodeGenerator
+    internal class JgGenerator : OpcodeGenerator
     {
         private readonly Operand op1;
         private readonly Operand op2;
         private readonly Branch branch;
 
-        public Je2OpGenerator(Operand op1, Operand op2, Branch branch)
-            : base(OpcodeGeneratorKind.Je2Op)
+        public JgGenerator(Operand op1, Operand op2, Branch branch)
+            : base(OpcodeGeneratorKind.Jg)
         {
             this.op1 = op1;
             this.op2 = op2;
@@ -22,10 +22,12 @@ namespace ZDebug.Compiler.CodeGeneration
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
             compiler.EmitOperandLoad(op1);
+            il.Convert.ToInt16();
+
             compiler.EmitOperandLoad(op2);
+            il.Convert.ToInt16();
 
-            il.Compare.Equal();
-
+            il.Compare.GreaterThan();
             compiler.EmitBranch(branch);
         }
     }
