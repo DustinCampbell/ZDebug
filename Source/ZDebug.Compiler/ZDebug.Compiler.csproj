@@ -50,6 +50,8 @@
     <Compile Include="CodeGeneration\Generators\ArtShiftGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\BinaryOpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\AndGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\CallNGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\CallSGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\DecChkGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\IncChkGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\UnaryOpWithBranchGenerator.cs" />

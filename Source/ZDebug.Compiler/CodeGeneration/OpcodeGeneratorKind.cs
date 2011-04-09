@@ -5,6 +5,8 @@
         Add,
         And,
         ArtShift,
+        CallN,
+        CallS,
         Dec,
         DecChk,
         Div,

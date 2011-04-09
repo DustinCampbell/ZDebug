@@ -31,6 +31,11 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitReturn();
 
         /// <summary>
+        /// Emits code to call a routine.
+        /// </summary>
+        void EmitCall();
+
+        /// <summary>
         /// Emits code to pop the Z-machine stack.
         /// </summary>
         void EmitPopStack();
