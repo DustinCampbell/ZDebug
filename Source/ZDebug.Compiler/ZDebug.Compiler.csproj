@@ -52,8 +52,16 @@
     <Compile Include="CodeGeneration\Generators\AndGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CallNGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CallSGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\StoreWGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\StoreBGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\StoreMemoryGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\LoadWGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\LoadBGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\LoadMemoryGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\StoreGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\DecChkGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\IncChkGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\LoadGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\UnaryOpWithBranchGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\DecGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\IncGenerator.cs" />
@@ -76,7 +84,6 @@
     <Compile Include="CodeGeneration\Generators\SubGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\UnaryOpGenerator.cs" />
     <Compile Include="CodeGeneration\ICompiler.cs" />
-    <Compile Include="CodeGeneration\Generators\Je2OpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\JeMultiOpGenerator.cs" />
     <Compile Include="CodeGeneration\OpcodeGenerator.cs" />
     <Compile Include="CodeGeneration\OpcodeGeneratorKind.cs" />

@@ -656,8 +656,7 @@ namespace ZDebug.Compiler
             var offsetOp = GetOperand(1);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.Kind != OperandKind.Variable &&
-                offsetOp.Kind != OperandKind.Variable)
+            if (addressOp.IsConstant && offsetOp.IsConstant)
             {
                 Store(valueLoader: () =>
                 {
@@ -688,8 +687,7 @@ namespace ZDebug.Compiler
             var offsetOp = GetOperand(1);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.Kind != OperandKind.Variable &&
-                offsetOp.Kind != OperandKind.Variable)
+            if (addressOp.IsConstant && offsetOp.IsConstant)
             {
                 Store(valueLoader: () =>
                 {
@@ -721,7 +719,7 @@ namespace ZDebug.Compiler
 
             if (varIndexOp.Kind == OperandKind.SmallConstant)
             {
-                using (var value = il.NewLocal<short>())
+                using (var value = il.NewLocal<ushort>())
                 {
                     var varIndex = (byte)varIndexOp.Value;
 
@@ -757,8 +755,7 @@ namespace ZDebug.Compiler
             var offsetOp = GetOperand(1);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.Kind != OperandKind.Variable &&
-                offsetOp.Kind != OperandKind.Variable)
+            if (addressOp.IsConstant && offsetOp.IsConstant)
             {
                 StoreByte(
                     address: addressOp.Value + offsetOp.Value,
@@ -793,8 +790,7 @@ namespace ZDebug.Compiler
             var offsetOp = GetOperand(1);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.Kind != OperandKind.Variable &&
-                offsetOp.Kind != OperandKind.Variable)
+            if (addressOp.IsConstant && offsetOp.IsConstant)
             {
                 StoreWord(
                     address: addressOp.Value + (offsetOp.Value * 2),

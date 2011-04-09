@@ -3,12 +3,13 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
-    internal abstract class UnaryOpGenerator : OpcodeGenerator
+    internal class LoadGenerator : OpcodeGenerator
     {
         private readonly Operand op;
+        private readonly Variable store;
 
-        public UnaryOpGenerator(OpcodeGeneratorKind kind, Operand op)
-            : base(kind)
+        public LoadGenerator(Operand op, Variable store)
+            : base(OpcodeGeneratorKind.Load)
         {
             if (op.Kind == OperandKind.LargeConstant)
             {
@@ -21,48 +22,26 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             }
 
             this.op = op;
-        }
-
-        protected abstract void Operation(ILBuilder il);
-
-        protected virtual void PostOperation(ILocal result, ILBuilder il, ICompiler compiler)
-        {
+            this.store = store;
         }
 
         private void GenerateWithCalculatedVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
         {
             using (var calculatedVariableIndex = il.NewLocal<byte>())
-            using (var result = il.NewLocal<short>())
             {
                 compiler.EmitLocalVariableLoad(variableIndex);
                 calculatedVariableIndex.Store();
 
                 compiler.EmitLocalVariableLoad(calculatedVariableIndex, indirect: true);
-                il.Convert.ToInt16();
 
-                Operation(il);
-                result.Store();
-
-                compiler.EmitLocalVariableStore(calculatedVariableIndex, result, indirect: true);
-
-                PostOperation(result, il, compiler);
+                compiler.EmitStore(store);
             }
         }
 
         private void GenerateWithVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
         {
-            using (var result = il.NewLocal<short>())
-            {
-                compiler.EmitLocalVariableLoad(variableIndex, indirect: true);
-                il.Convert.ToInt16();
-
-                Operation(il);
-                result.Store();
-
-                compiler.EmitLocalVariableStore(variableIndex, result, indirect: true);
-
-                PostOperation(result, il, compiler);
-            }
+            compiler.EmitLocalVariableLoad(variableIndex, indirect: true);
+            compiler.EmitStore(store);
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
@@ -76,5 +55,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 GenerateWithVariable((byte)op.Value, il, compiler);
             }
         }
+
     }
 }

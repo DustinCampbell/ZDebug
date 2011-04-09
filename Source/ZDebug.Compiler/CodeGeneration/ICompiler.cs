@@ -36,6 +36,46 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitCall();
 
         /// <summary>
+        /// Emits code to load a byte from Z-machine memory at the given address.
+        /// </summary>
+        void EmitLoadMemoryByte(int address);
+
+        /// <summary>
+        /// Emits code to load a byte from Z-machine memory at the address stored in the given IL local.
+        /// </summary>
+        void EmitLoadMemoryByte(ILocal address);
+
+        /// <summary>
+        /// Emits code to load a word from Z-machine memory at the given address.
+        /// </summary>
+        void EmitLoadMemoryWord(int address);
+
+        /// <summary>
+        /// Emits code to load a word from Z-machine memory at the address stored in the given IL local.
+        /// </summary>
+        void EmitLoadMemoryWord(ILocal address);
+
+        /// <summary>
+        /// Emits code to store an IL local as a byte in Z-machine memory at the given address.
+        /// </summary>
+        void EmitStoreMemoryByte(int address, ILocal value);
+
+        /// <summary>
+        /// Emits code to store an IL local as a byte in Z-machine memory at the address stored in the given IL local.
+        /// </summary>
+        void EmitStoreMemoryByte(ILocal address, ILocal value);
+
+        /// <summary>
+        /// Emits code to store an IL local as a word in Z-machine memory at the given address.
+        /// </summary>
+        void EmitStoreMemoryWord(int address, ILocal value);
+
+        /// <summary>
+        /// Emits code to store an IL local as a word in Z-machine memory at the address stored in the given IL local.
+        /// </summary>
+        void EmitStoreMemoryWord(ILocal address, ILocal value);
+
+        /// <summary>
         /// Emits code to pop the Z-machine stack.
         /// </summary>
         void EmitPopStack();

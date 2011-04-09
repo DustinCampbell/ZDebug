@@ -4,19 +4,31 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration
 {
-    internal class JeMultiOpGenerator : OpcodeGenerator
+    internal class JeGenerator : OpcodeGenerator
     {
         private readonly ReadOnlyArray<Operand> ops;
         private readonly Branch branch;
 
-        public JeMultiOpGenerator(ReadOnlyArray<Operand> ops, Branch branch)
-            : base(OpcodeGeneratorKind.JeMultiOp)
+        public JeGenerator(ReadOnlyArray<Operand> ops, Branch branch)
+            : base(OpcodeGeneratorKind.Je)
         {
             this.ops = ops;
             this.branch = branch;
         }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
+        private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)
+        {
+            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
+
+            compiler.EmitOperandLoad(ops[0]);
+            compiler.EmitOperandLoad(ops[1]);
+
+            il.Compare.Equal();
+
+            compiler.EmitBranch(branch);
+        }
+
+        private void GeneratorForMoreThanTwoOperands(ILBuilder il, ICompiler compiler)
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
@@ -51,6 +63,19 @@ namespace ZDebug.Compiler.CodeGeneration
 
                 done.Mark();
                 compiler.EmitBranch(branch);
+            }
+
+        }
+
+        public override void Generate(ILBuilder il, ICompiler compiler)
+        {
+            if (ops.Length == 2)
+            {
+                GenerateForTwoOperands(il, compiler);
+            }
+            else if (ops.Length == 3 || ops.Length == 4)
+            {
+                GeneratorForMoreThanTwoOperands(il, compiler);
             }
         }
     }
