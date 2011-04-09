@@ -72,6 +72,23 @@
     <Compile Include="CodeGeneration\Generators\JeMultiOpGenerator.cs" />
     <Compile Include="CodeGeneration\OpcodeGenerator.cs" />
     <Compile Include="CodeGeneration\OpcodeGeneratorKind.cs" />
+    <Compile Include="CodeGenerators\Generator.cs" />
+    <Compile Include="CodeGenerators\GeneratorKind.cs" />
+    <Compile Include="CodeGenerators\Generators.LocalVariables.Load.cs" />
+    <Compile Include="CodeGenerators\Generators.LocalVariables.Store.cs" />
+    <Compile Include="CodeGenerators\Generators.Memory.LoadByte.cs" />
+    <Compile Include="CodeGenerators\Generators.Memory.LoadWord.cs" />
+    <Compile Include="CodeGenerators\Generators.Memory.StoreByte.cs" />
+    <Compile Include="CodeGenerators\Generators.Memory.StoreWord.cs" />
+    <Compile Include="CodeGenerators\Generators.Primitives.LoadInteger.cs" />
+    <Compile Include="CodeGenerators\Generators.Primitives.DecrementRefLocal.cs" />
+    <Compile Include="CodeGenerators\Generators.Primitives.IncrementRefLocal.cs" />
+    <Compile Include="CodeGenerators\Generators.Primitives.LoadLocal.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.Peek.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.FullTest.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.Pop.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.Push.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.SetTop.cs" />
     <Compile Include="Generate\CodeBuilders.cs" />
     <Compile Include="Generate\Condition.cs" />
     <Compile Include="Generate\IArrayLocal.cs" />
@@ -85,6 +102,7 @@
     <Compile Include="Generate\ILBuilder.MathFunctions.cs" />
     <Compile Include="Generate\ILocal.cs" />
     <Compile Include="Generate\IRefLocal.cs" />
+    <Compile Include="CodeGenerators\Generators.Stack.EmptyTest.cs" />
     <Compile Include="InstructionExtensions.cs" />
     <Compile Include="Profiling\IZMachineProfiler.cs" />
     <Compile Include="Profiling\RoutineCompilationStatistics.cs" />
@@ -116,7 +134,6 @@
   <ItemGroup>
     <Compile Include="Generate\ILBuilder.Debug.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
