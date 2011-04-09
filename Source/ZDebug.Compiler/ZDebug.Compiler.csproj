@@ -51,6 +51,10 @@
     <Compile Include="CodeGeneration\Generators\JlGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\JumpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\JzGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\RetGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\RetPoppedGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\RfalseGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\RtrueGenerator.cs" />
     <Compile Include="CodeGeneration\ICompiler.cs" />
     <Compile Include="CodeGeneration\Generators\Je2OpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\JeMultiOpGenerator.cs" />

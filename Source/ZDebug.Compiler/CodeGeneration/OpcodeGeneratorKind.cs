@@ -9,5 +9,9 @@
         Jl,
         Jump,
         Jz,
+        Ret,
+        RetPopped,
+        Rfalse,
+        Rtrue,
     }
 }

@@ -21,6 +21,16 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitBranch(Branch branch);
 
         /// <summary>
+        /// Emits code to return from the current routine.
+        /// </summary>
+        void EmitReturn();
+
+        /// <summary>
+        /// Emits code to pop the Z-machine stack.
+        /// </summary>
+        void EmitPopStack();
+
+        /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
         void EmitObjectParentLoad(Operand operand);
