@@ -3,16 +3,16 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
-    internal class AndGenerator : BinaryOpGenerator
+    internal class IncGenerator : UnaryOpGenerator
     {
-        public AndGenerator(Operand op1, Operand op2, Variable store)
-            : base(OpcodeGeneratorKind.And, op1, op2, store, signed: false)
+        public IncGenerator(Operand op)
+            : base(OpcodeGeneratorKind.Inc, op)
         {
         }
 
         protected override void Operation(ILBuilder il)
         {
-            il.Math.And();
+            il.Math.Add(1);
         }
     }
 }

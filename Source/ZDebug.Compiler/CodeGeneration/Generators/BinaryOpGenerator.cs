@@ -3,14 +3,14 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration
 {
-    internal abstract class BinaryOperatorGenerator : OpcodeGenerator
+    internal abstract class BinaryOpGenerator : OpcodeGenerator
     {
         private readonly Operand op1;
         private readonly Operand op2;
         private readonly Variable store;
         private readonly bool signed;
 
-        public BinaryOperatorGenerator(OpcodeGeneratorKind kind, Operand op1, Operand op2, Variable store, bool signed)
+        public BinaryOpGenerator(OpcodeGeneratorKind kind, Operand op1, Operand op2, Variable store, bool signed)
             : base(kind)
         {
             this.op1 = op1;
@@ -19,7 +19,7 @@ namespace ZDebug.Compiler.CodeGeneration
             this.signed = signed;
         }
 
-        protected abstract void Operation(ILBuilder il, ICompiler compiler);
+        protected abstract void Operation(ILBuilder il);
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
@@ -39,7 +39,7 @@ namespace ZDebug.Compiler.CodeGeneration
                 il.Convert.ToInt16();
             }
 
-            Operation(il, compiler);
+            Operation(il);
             il.Convert.ToUInt16();
 
             compiler.EmitStore(store);

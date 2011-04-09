@@ -36,6 +36,26 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitPopStack();
 
         /// <summary>
+        /// Emits code to load the Z-machine local variable at the given index.
+        /// </summary>
+        void EmitLocalVariableLoad(byte variableIndex, bool indirect = false);
+
+        /// <summary>
+        /// Emits code to load the Z-machine local variable at the index stored in the given IL local.
+        /// </summary>
+        void EmitLocalVariableLoad(ILocal variableIndex, bool indirect = false);
+
+        /// <summary>
+        /// Emits code to store an IL local to the Z-machine local variable at the given index.
+        /// </summary>
+        void EmitLocalVariableStore(byte variableIndex, ILocal value, bool indirect = false);
+
+        /// <summary>
+        /// Emits code to store an IL local to the Z-machine local variable at the index stored in the given IL local.
+        /// </summary>
+        void EmitLocalVariableStore(ILocal variableIndex, ILocal value, bool indirect = false);
+
+        /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
         void EmitObjectParentLoad(Operand operand);

@@ -48,8 +48,13 @@
     <Compile Include="Analysis\InstructionLinkedList.cs" />
     <Compile Include="CodeGeneration\Generators\AddGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\ArtShiftGenerator.cs" />
-    <Compile Include="CodeGeneration\Generators\BinaryOperatorGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\BinaryOpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\AndGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\DecChkGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\IncChkGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\UnaryOpWithBranchGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\DecGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\IncGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\TestGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\NotGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\LogShiftGenerator.cs" />
@@ -67,6 +72,7 @@
     <Compile Include="CodeGeneration\Generators\RfalseGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\RtrueGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\SubGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\UnaryOpGenerator.cs" />
     <Compile Include="CodeGeneration\ICompiler.cs" />
     <Compile Include="CodeGeneration\Generators\Je2OpGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\JeMultiOpGenerator.cs" />
