@@ -21,6 +21,11 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitBranch(Branch branch);
 
         /// <summary>
+        /// Emits code to store the top of the evaluation stack in the specified variable.
+        /// </summary>
+        void EmitStore(Variable variable);
+
+        /// <summary>
         /// Emits code to return from the current routine.
         /// </summary>
         void EmitReturn();

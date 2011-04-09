@@ -11,6 +11,54 @@ namespace ZDebug.Compiler
         // Arithmetic routines
         ///////////////////////////////////////////////////////////////////////////////////////////
 
+        private void binary_operator_no_stack_ops(CodeBuilder operation, bool signed = false)
+        {
+            Store(() =>
+            {
+                LoadOperand(0);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                LoadOperand(1);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                operation();
+                if (signed)
+                {
+                    il.Convert.ToUInt16();
+                }
+            });
+        }
+
+        private void binary_operator_with_stack_ops(CodeBuilder operation, bool signed = false)
+        {
+            using (var result = il.NewLocal<ushort>())
+            {
+                LoadOperand(0);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                LoadOperand(1);
+                if (signed)
+                {
+                    il.Convert.ToInt16();
+                }
+
+                operation();
+                il.Convert.ToUInt16();
+
+                result.Store();
+                Store(() => result.Load());
+            }
+        }
+
         private void BinaryOp(CodeBuilder operation, bool signed = false)
         {
             var op1 = GetOperand(0);
@@ -18,49 +66,11 @@ namespace ZDebug.Compiler
 
             if (!op1.IsStackVariable && !op2.IsStackVariable)
             {
-                Store(() =>
-                {
-                    LoadOperand(0);
-                    if (signed)
-                    {
-                        il.Convert.ToInt16();
-                    }
-
-                    LoadOperand(1);
-                    if (signed)
-                    {
-                        il.Convert.ToInt16();
-                    }
-
-                    operation();
-                    if (signed)
-                    {
-                        il.Convert.ToUInt16();
-                    }
-                });
+                binary_operator_no_stack_ops(operation, signed);
             }
             else
             {
-                using (var result = il.NewLocal<ushort>())
-                {
-                    LoadOperand(0);
-                    if (signed)
-                    {
-                        il.Convert.ToInt16();
-                    }
-
-                    LoadOperand(1);
-                    if (signed)
-                    {
-                        il.Convert.ToInt16();
-                    }
-
-                    operation();
-                    il.Convert.ToUInt16();
-
-                    result.Store();
-                    Store(() => result.Load());
-                }
+                binary_operator_with_stack_ops(operation, signed);
             }
         }
 
