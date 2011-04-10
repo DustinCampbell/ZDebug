@@ -27,6 +27,8 @@
         Mul,
         Not,
         Or,
+        Pull,
+        Push,
         Ret,
         RetPopped,
         Rfalse,
