@@ -6,10 +6,13 @@
         public readonly bool Condition;
         public readonly short Offset;
 
-        public Branch(bool condition, short offset)
+        private readonly int endAddress;
+
+        public Branch(bool condition, short offset, int endAddress)
         {
             this.Condition = condition;
             this.Offset = offset;
+            this.endAddress = endAddress;
 
             if (offset == 0)
             {
@@ -22,6 +25,14 @@
             else
             {
                 this.Kind = BranchKind.Address;
+            }
+        }
+
+        public int TargetAddress
+        {
+            get
+            {
+                return endAddress + Offset - 2;
             }
         }
     }

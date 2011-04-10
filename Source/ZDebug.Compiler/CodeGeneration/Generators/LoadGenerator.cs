@@ -29,10 +29,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var calculatedVariableIndex = il.NewLocal<byte>())
             {
-                compiler.EmitLocalVariableLoad(variableIndex);
+                compiler.EmitLoadVariable(variableIndex);
                 calculatedVariableIndex.Store();
 
-                compiler.EmitLocalVariableLoad(calculatedVariableIndex, indirect: true);
+                compiler.EmitLoadVariable(calculatedVariableIndex, indirect: true);
 
                 compiler.EmitStore(store);
             }
@@ -40,7 +40,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         private void GenerateWithVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLocalVariableLoad(variableIndex, indirect: true);
+            compiler.EmitLoadVariable(variableIndex, indirect: true);
             compiler.EmitStore(store);
         }
 

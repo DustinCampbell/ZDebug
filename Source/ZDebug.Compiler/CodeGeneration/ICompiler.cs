@@ -78,31 +78,36 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to pop the Z-machine stack.
         /// </summary>
-        void EmitPopStack();
+        void EmitPopStack(bool indirect = false);
 
         /// <summary>
-        /// Emits code to load the Z-machine local variable at the given index.
+        /// Emits code to push an IL local onto the Z-machine stack.
         /// </summary>
-        void EmitLocalVariableLoad(byte variableIndex, bool indirect = false);
+        void EmitPushStack(ILocal value, bool indirect = false);
 
         /// <summary>
-        /// Emits code to load the Z-machine local variable at the index stored in the given IL local.
+        /// Emits code to load the Z-machine variable at the given index.
         /// </summary>
-        void EmitLocalVariableLoad(ILocal variableIndex, bool indirect = false);
+        void EmitLoadVariable(byte variableIndex, bool indirect = false);
 
         /// <summary>
-        /// Emits code to store an IL local to the Z-machine local variable at the given index.
+        /// Emits code to load the Z-machine variable at the index stored in the given IL local.
         /// </summary>
-        void EmitLocalVariableStore(byte variableIndex, ILocal value, bool indirect = false);
+        void EmitLoadVariable(ILocal variableIndex, bool indirect = false);
 
         /// <summary>
-        /// Emits code to store an IL local to the Z-machine local variable at the index stored in the given IL local.
+        /// Emits code to store an IL local to the Z-machine variable at the given index.
         /// </summary>
-        void EmitLocalVariableStore(ILocal variableIndex, ILocal value, bool indirect = false);
+        void EmitStoreVariable(byte variableIndex, ILocal value, bool indirect = false);
+
+        /// <summary>
+        /// Emits code to store an IL local to the Z-machine variable at the index stored in the given IL local.
+        /// </summary>
+        void EmitStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false);
 
         /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
-        void EmitObjectParentLoad(Operand operand);
+        void EmitLoadObjectParent(Operand operand);
     }
 }

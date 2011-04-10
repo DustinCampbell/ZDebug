@@ -107,7 +107,7 @@ namespace ZDebug.Core.Instructions
                 offset = (short)tmp;
             }
 
-            return new Branch(condition, offset);
+            return new Branch(condition, offset, address);
         }
 
         private ushort[] ReadZWords(ref int address)

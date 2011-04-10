@@ -641,7 +641,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // BranchKind.Address
-                    var address = this.current.Value.Address + this.current.Value.Length + this.current.Value.Branch.Offset - 2;
+                    var address = this.current.Value.Branch.TargetAddress;
                     var jump = addressToLabelMap[address];
                     il.DebugWrite(string.Format("  > branching to {0:x4}...", address));
                     jump.Branch();

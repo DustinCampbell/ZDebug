@@ -30,13 +30,13 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var calculatedVariableIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<ushort>())
             {
-                compiler.EmitLocalVariableLoad(variableIndex);
+                compiler.EmitLoadVariable(variableIndex);
                 calculatedVariableIndex.Store();
 
                 compiler.EmitOperandLoad(op2);
                 value.Store();
 
-                compiler.EmitLocalVariableStore(calculatedVariableIndex, value, indirect: true);
+                compiler.EmitStoreVariable(calculatedVariableIndex, value, indirect: true);
 
             }
         }
@@ -48,7 +48,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 compiler.EmitOperandLoad(op2);
                 value.Store();
 
-                compiler.EmitLocalVariableStore(variableIndex, value, indirect: true);
+                compiler.EmitStoreVariable(variableIndex, value, indirect: true);
             }
         }
 

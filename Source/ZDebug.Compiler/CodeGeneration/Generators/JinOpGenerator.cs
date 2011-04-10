@@ -21,7 +21,7 @@ namespace ZDebug.Compiler.CodeGeneration
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
-            compiler.EmitObjectParentLoad(op1);
+            compiler.EmitLoadObjectParent(op1);
             compiler.EmitOperandLoad(op2);
 
             il.Compare.Equal();
