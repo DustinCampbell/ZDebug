@@ -1,5 +1,4 @@
-﻿using System;
-using ZDebug.Compiler.CodeGeneration;
+﻿using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
@@ -19,7 +18,7 @@ namespace ZDebug.Compiler
             throw new ZCompilerException(string.Format("Could not find label for address, {0:x4}", address));
         }
 
-        public void EmitOperandLoad(Operand operand)
+        public void EmitLoadOperand(Operand operand)
         {
             switch (operand.Kind)
             {
@@ -63,15 +62,6 @@ namespace ZDebug.Compiler
             }
 
             noJump.Mark();
-        }
-
-        public void EmitStore(Variable variable)
-        {
-            using (var value = il.NewLocal<ushort>())
-            {
-                value.Store();
-                EmitStoreVariable(variable.ToByte(), value);
-            }
         }
 
         public void EmitReturn()
@@ -413,6 +403,24 @@ namespace ZDebug.Compiler
             }
         }
 
+        public void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false)
+        {
+            switch (variable.Kind)
+            {
+                case VariableKind.Stack:
+                    EmitPushStack(value, indirect);
+                    break;
+
+                case VariableKind.Local:
+                    EmitStoreLocalVariable(variable.Index, value);
+                    break;
+
+                case VariableKind.Global:
+                    EmitStoreGlobalVariable(variable.Index, value);
+                    break;
+            }
+        }
+
         public void EmitStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
         {
             var tryLocal = il.NewLabel();
@@ -482,9 +490,27 @@ namespace ZDebug.Compiler
             done.Mark();
         }
 
+        private void EmitLoadObjectParent(int objNum)
+        {
+            var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectParentOffset);
+
+            ReadObjectNumber(address);
+        }
+
         public void EmitLoadObjectParent(Operand operand)
         {
-            throw new NotImplementedException();
+            switch (operand.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectParent(operand.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    EmitLoadOperand(operand);
+                    ReadObjectParent();
+                    break;
+            }
         }
     }
 }

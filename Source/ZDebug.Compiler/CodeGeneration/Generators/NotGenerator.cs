@@ -19,12 +19,16 @@ namespace ZDebug.Compiler.CodeGeneration
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
-            compiler.EmitOperandLoad(op);
+            compiler.EmitLoadOperand(op);
 
             il.Math.Not();
             il.Convert.ToUInt16();
 
-            compiler.EmitStore(store);
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                compiler.EmitStoreVariable(store, result);
+            }
         }
     }
 }

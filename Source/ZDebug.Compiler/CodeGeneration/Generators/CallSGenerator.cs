@@ -17,7 +17,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             compiler.EmitCall();
 
-            compiler.EmitStore(store);
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                compiler.EmitStoreVariable(store, result);
+            }
         }
     }
 }

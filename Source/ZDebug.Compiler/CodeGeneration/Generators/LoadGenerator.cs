@@ -34,14 +34,23 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 compiler.EmitLoadVariable(calculatedVariableIndex, indirect: true);
 
-                compiler.EmitStore(store);
+                using (var result = il.NewLocal<ushort>())
+                {
+                    result.Store();
+                    compiler.EmitStoreVariable(store, result);
+                }
             }
         }
 
         private void GenerateWithVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
         {
             compiler.EmitLoadVariable(variableIndex, indirect: true);
-            compiler.EmitStore(store);
+
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                compiler.EmitStoreVariable(store, result);
+            }
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

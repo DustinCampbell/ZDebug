@@ -23,21 +23,30 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private void GenerateWithAddress(int address, ILBuilder il, ICompiler compiler)
         {
             LoadMemory(address, compiler);
-            compiler.EmitStore(store);
+
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                compiler.EmitStoreVariable(store, result);
+            }
         }
 
         private void GenerateWithCalculatedAddress(ILBuilder il, ICompiler compiler)
         {
             using (var address = il.NewLocal<int>())
             {
-                compiler.EmitOperandLoad(op1);
-                compiler.EmitOperandLoad(op2);
+                compiler.EmitLoadOperand(op1);
+                compiler.EmitLoadOperand(op2);
                 il.Math.Add();
                 address.Store();
 
                 LoadMemory(address, compiler);
 
-                compiler.EmitStore(store);
+                using (var result = il.NewLocal<ushort>())
+                {
+                    result.Store();
+                    compiler.EmitStoreVariable(store, result);
+                }
             }
         }
 

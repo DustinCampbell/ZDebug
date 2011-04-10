@@ -24,7 +24,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var value = il.NewLocal<byte>())
             {
-                compiler.EmitOperandLoad(op3);
+                compiler.EmitLoadOperand(op3);
                 il.Convert.ToUInt8();
                 value.Store();
 
@@ -37,12 +37,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var address = il.NewLocal<int>())
             using (var value = il.NewLocal<byte>())
             {
-                compiler.EmitOperandLoad(op1);
-                compiler.EmitOperandLoad(op2);
+                compiler.EmitLoadOperand(op1);
+                compiler.EmitLoadOperand(op2);
                 il.Math.Add();
                 address.Store();
 
-                compiler.EmitOperandLoad(op3);
+                compiler.EmitLoadOperand(op3);
                 il.Convert.ToUInt8();
                 value.Store();
 

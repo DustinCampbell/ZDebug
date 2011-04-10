@@ -20,7 +20,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         protected override void PostOperation(ILocal result, ILBuilder il, ICompiler compiler)
         {
             result.Load();
-            compiler.EmitOperandLoad(op2);
+            compiler.EmitLoadOperand(op2);
             il.Convert.ToInt16();
 
             Compare(il);

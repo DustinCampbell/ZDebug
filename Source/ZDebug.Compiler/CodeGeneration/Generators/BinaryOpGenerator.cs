@@ -27,13 +27,13 @@ namespace ZDebug.Compiler.CodeGeneration
             // OPTIMIZE: If the storing to SP and the next instruction uses SP in its first operand, we don't need
             // the call to EmitStore().
 
-            compiler.EmitOperandLoad(op1);
+            compiler.EmitLoadOperand(op1);
             if (signed)
             {
                 il.Convert.ToInt16();
             }
 
-            compiler.EmitOperandLoad(op2);
+            compiler.EmitLoadOperand(op2);
             if (signed)
             {
                 il.Convert.ToInt16();
@@ -42,7 +42,11 @@ namespace ZDebug.Compiler.CodeGeneration
             Operation(il);
             il.Convert.ToUInt16();
 
-            compiler.EmitStore(store);
+            using (var result = il.NewLocal<ushort>())
+            {
+                result.Store();
+                compiler.EmitStoreVariable(store, result);
+            }
         }
     }
 }

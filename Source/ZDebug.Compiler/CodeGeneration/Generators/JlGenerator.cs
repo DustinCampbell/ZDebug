@@ -21,10 +21,10 @@ namespace ZDebug.Compiler.CodeGeneration
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
-            compiler.EmitOperandLoad(op1);
+            compiler.EmitLoadOperand(op1);
             il.Convert.ToInt16();
 
-            compiler.EmitOperandLoad(op2);
+            compiler.EmitLoadOperand(op2);
             il.Convert.ToInt16();
 
             il.Compare.LessThan();

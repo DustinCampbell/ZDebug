@@ -20,8 +20,8 @@ namespace ZDebug.Compiler.CodeGeneration
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
-            compiler.EmitOperandLoad(ops[0]);
-            compiler.EmitOperandLoad(ops[1]);
+            compiler.EmitLoadOperand(ops[0]);
+            compiler.EmitLoadOperand(ops[1]);
 
             il.Compare.Equal();
 
@@ -34,7 +34,7 @@ namespace ZDebug.Compiler.CodeGeneration
 
             using (var x = il.NewLocal<ushort>())
             {
-                compiler.EmitOperandLoad(ops[0]);
+                compiler.EmitLoadOperand(ops[0]);
                 x.Store();
 
                 var success = il.NewLabel();
@@ -42,7 +42,7 @@ namespace ZDebug.Compiler.CodeGeneration
 
                 for (int j = 1; j < ops.Length; j++)
                 {
-                    compiler.EmitOperandLoad(ops[j]);
+                    compiler.EmitLoadOperand(ops[j]);
                     x.Load();
 
                     il.Compare.Equal();

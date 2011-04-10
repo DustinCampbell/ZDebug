@@ -20,7 +20,7 @@ namespace ZDebug.Compiler.CodeGeneration
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
             // OPTIMIZE: Can we do better by using brfalse instead of loading 0 and doing ceq?
 
-            compiler.EmitOperandLoad(op);
+            compiler.EmitLoadOperand(op);
             il.Load(0);
             il.Compare.Equal();
 

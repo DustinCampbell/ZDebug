@@ -24,10 +24,10 @@ namespace ZDebug.Compiler.CodeGeneration
             using (var number = il.NewLocal<short>())
             using (var places = il.NewLocal<int>())
             {
-                compiler.EmitOperandLoad(op1);
+                compiler.EmitLoadOperand(op1);
                 number.Store();
 
-                compiler.EmitOperandLoad(op2);
+                compiler.EmitLoadOperand(op2);
                 il.Convert.ToInt16();
                 places.Store();
 
@@ -56,7 +56,11 @@ namespace ZDebug.Compiler.CodeGeneration
 
                 done.Mark();
 
-                compiler.EmitStore(store);
+                using (var result = il.NewLocal<ushort>())
+                {
+                    result.Store();
+                    compiler.EmitStoreVariable(store, result);
+                }
             }
         }
     }

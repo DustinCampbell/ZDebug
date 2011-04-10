@@ -23,10 +23,10 @@ namespace ZDebug.Compiler.CodeGeneration
 
             using (var flags = il.NewLocal<ushort>())
             {
-                compiler.EmitOperandLoad(op2);
+                compiler.EmitLoadOperand(op2);
                 flags.Store();
 
-                compiler.EmitOperandLoad(op1);
+                compiler.EmitLoadOperand(op1);
                 flags.Load();
                 il.Math.And();
 

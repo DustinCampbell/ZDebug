@@ -13,17 +13,12 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to loads an operand onto the evaluation stack.
         /// </summary>
-        void EmitOperandLoad(Operand operand);
+        void EmitLoadOperand(Operand operand);
 
         /// <summary>
         /// Emits code to execute the given branch using the value on top of the evaluation stack.
         /// </summary>
         void EmitBranch(Branch branch);
-
-        /// <summary>
-        /// Emits code to store the top of the evaluation stack in the specified variable.
-        /// </summary>
-        void EmitStore(Variable variable);
 
         /// <summary>
         /// Emits code to return from the current routine.
@@ -99,6 +94,11 @@ namespace ZDebug.Compiler.CodeGeneration
         /// Emits code to store an IL local to the Z-machine variable at the given index.
         /// </summary>
         void EmitStoreVariable(byte variableIndex, ILocal value, bool indirect = false);
+
+        /// <summary>
+        /// Emits code to store an IL local to the specified Z-machine variable.
+        /// </summary>
+        void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false);
 
         /// <summary>
         /// Emits code to store an IL local to the Z-machine variable at the index stored in the given IL local.
