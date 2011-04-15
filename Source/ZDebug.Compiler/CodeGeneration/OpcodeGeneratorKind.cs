@@ -39,5 +39,6 @@
         StoreB,
         StoreW,
         Test,
+        Unknown,
     }
 }

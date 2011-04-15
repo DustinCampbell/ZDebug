@@ -1,7 +1,7 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration
+namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class NotGenerator : OpcodeGenerator
     {

@@ -1,6 +1,6 @@
 ﻿using ZDebug.Compiler.Generate;
 
-namespace ZDebug.Compiler.CodeGeneration
+namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class RetPoppedGenerator : OpcodeGenerator
     {
