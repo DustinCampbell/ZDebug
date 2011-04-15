@@ -3,7 +3,7 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
-    internal class CallSGenerator : OpcodeGenerator
+    internal class CallSGenerator : CallGenerator
     {
         private readonly Variable store;
 
@@ -13,10 +13,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.store = instruction.StoreVariable;
         }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
+        protected override void PostCall(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitCall();
-
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();

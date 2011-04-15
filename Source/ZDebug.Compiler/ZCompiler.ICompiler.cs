@@ -1,5 +1,6 @@
 ﻿using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
+using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
@@ -74,16 +75,25 @@ namespace ZDebug.Compiler
             il.Return();
         }
 
-        public void EmitCall()
+        private void DirectCall(Operand address, ReadOnlyArray<Operand> args)
         {
-            var addressOp = GetOperand(0);
-            if (addressOp.Kind != OperandKind.Variable)
+
+        }
+
+        private void CalculatedCall(Operand address, ReadOnlyArray<Operand> args)
+        {
+
+        }
+
+        public void EmitCall(Operand address, ReadOnlyArray<Operand> args)
+        {
+            if (address.Kind != OperandKind.Variable)
             {
-                DirectCall(addressOp);
+                DirectCall(address, args);
             }
             else
             {
-                CalculatedCall(addressOp);
+                CalculatedCall(address, args);
             }
         }
 

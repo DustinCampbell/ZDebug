@@ -1,4 +1,5 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration
@@ -28,7 +29,7 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to call a routine.
         /// </summary>
-        void EmitCall();
+        void EmitCall(Operand address, ReadOnlyArray<Operand> args);
 
         /// <summary>
         /// Emits code to load a byte from Z-machine memory at the given address.

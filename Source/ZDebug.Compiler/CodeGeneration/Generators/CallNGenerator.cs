@@ -3,17 +3,15 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
-    internal class CallNGenerator : OpcodeGenerator
+    internal class CallNGenerator : CallGenerator
     {
         public CallNGenerator(Instruction instruction)
             : base(instruction)
         {
         }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
+        protected override void PostCall(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitCall();
-
             // discard result
             il.Pop();
         }
