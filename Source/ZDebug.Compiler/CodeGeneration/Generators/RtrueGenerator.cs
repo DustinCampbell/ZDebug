@@ -1,11 +1,12 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class RtrueGenerator : OpcodeGenerator
     {
-        public RtrueGenerator()
-            : base(OpcodeGeneratorKind.Rtrue)
+        public RtrueGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

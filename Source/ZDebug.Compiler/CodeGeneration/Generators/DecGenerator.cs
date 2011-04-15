@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class DecGenerator : UnaryOpGenerator
     {
-        public DecGenerator(Operand op)
-            : base(OpcodeGeneratorKind.Dec, op)
+        public DecGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

@@ -91,7 +91,6 @@
     <Compile Include="CodeGeneration\ICompiler.cs" />
     <Compile Include="CodeGeneration\Generators\JeOpGenerator.cs" />
     <Compile Include="CodeGeneration\OpcodeGenerator.cs" />
-    <Compile Include="CodeGeneration\OpcodeGeneratorKind.cs" />
     <Compile Include="Generate\CodeBuilders.cs" />
     <Compile Include="Generate\Condition.cs" />
     <Compile Include="Generate\IArrayLocal.cs" />

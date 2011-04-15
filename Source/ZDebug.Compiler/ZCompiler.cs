@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Analysis.ControlFlow;
+using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Execution;
@@ -191,6 +192,19 @@ namespace ZDebug.Compiler
             // Emit IL
             foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
+                //var generators = codeBlock.Instructions.Select(i => OpcodeGenerator.GetGenerator(i, machine.Version));
+
+                //foreach (var generator in generators)
+                //{
+                //    ILabel label;
+                //    if (this.addressToLabelMap.TryGetValue(generator.Instruction.Address, out label))
+                //    {
+                //        label.Mark();
+                //    }
+
+                //    generator.Generate(il, this);
+                //}
+
                 var instructions = new LinkedList<Instruction>(codeBlock.Instructions);
                 var current = instructions.First;
                 while (current != null)

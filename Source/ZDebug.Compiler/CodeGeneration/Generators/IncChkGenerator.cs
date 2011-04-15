@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class IncChkGenerator : UnaryOpWithBranchGenerator
     {
-        public IncChkGenerator(Operand op1, Operand op2, Branch branch)
-            : base(OpcodeGeneratorKind.IncChk, op1, op2, branch)
+        public IncChkGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

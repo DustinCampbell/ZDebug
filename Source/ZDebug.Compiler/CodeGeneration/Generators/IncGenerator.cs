@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class IncGenerator : UnaryOpGenerator
     {
-        public IncGenerator(Operand op)
-            : base(OpcodeGeneratorKind.Inc, op)
+        public IncGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

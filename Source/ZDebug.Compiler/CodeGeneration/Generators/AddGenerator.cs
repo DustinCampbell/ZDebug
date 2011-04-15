@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class AddGenerator : BinaryOpGenerator
     {
-        public AddGenerator(Operand op1, Operand op2, Variable store)
-            : base(OpcodeGeneratorKind.Add, op1, op2, store, signed: true)
+        public AddGenerator(Instruction instruction)
+            : base(instruction, signed: true)
         {
         }
 

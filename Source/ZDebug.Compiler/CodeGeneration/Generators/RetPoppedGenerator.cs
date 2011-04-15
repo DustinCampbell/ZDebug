@@ -1,11 +1,12 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class RetPoppedGenerator : OpcodeGenerator
     {
-        public RetPoppedGenerator()
-            : base(OpcodeGeneratorKind.RetPopped)
+        public RetPoppedGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

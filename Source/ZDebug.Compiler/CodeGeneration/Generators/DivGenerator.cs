@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class DivGenerator : BinaryOpGenerator
     {
-        public DivGenerator(Operand op1, Operand op2, Variable store)
-            : base(OpcodeGeneratorKind.Div, op1, op2, store, signed: true)
+        public DivGenerator(Instruction instruction)
+            : base(instruction, signed: true)
         {
         }
 

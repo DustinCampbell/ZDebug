@@ -7,10 +7,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
     {
         private readonly Operand op;
 
-        public RetGenerator(Operand op)
-            : base(OpcodeGeneratorKind.Ret)
+        public RetGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op = op;
+            this.op = instruction.Operands[0];
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

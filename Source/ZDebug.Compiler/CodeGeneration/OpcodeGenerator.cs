@@ -7,21 +7,18 @@ namespace ZDebug.Compiler.CodeGeneration
 {
     internal abstract class OpcodeGenerator
     {
-        public readonly OpcodeGeneratorKind Kind;
+        public readonly Instruction Instruction;
 
-        protected OpcodeGenerator(OpcodeGeneratorKind kind)
+        protected OpcodeGenerator(Instruction instruction)
         {
-            this.Kind = kind;
+            this.Instruction = instruction;
         }
 
         public abstract void Generate(ILBuilder il, ICompiler compiler);
 
-
         public static OpcodeGenerator GetGenerator(Instruction instruction, byte version)
         {
             var opcode = instruction.Opcode;
-            var opCount = instruction.OperandCount;
-            var ops = instruction.Operands;
 
             switch (opcode.Kind)
             {
@@ -29,23 +26,23 @@ namespace ZDebug.Compiler.CodeGeneration
                     switch (opcode.Number)
                     {
                         case 0x01:
-                            return new JeGenerator(ops, instruction.Branch);
+                            return new JeGenerator(instruction);
                         case 0x02:
-                            return new JlGenerator(ops[0], ops[1], instruction.Branch);
+                            return new JlGenerator(instruction);
                         case 0x03:
-                            return new JgGenerator(ops[0], ops[1], instruction.Branch);
+                            return new JgGenerator(instruction);
                         case 0x04:
-                            return new DecChkGenerator(ops[0], ops[1], instruction.Branch);
+                            return new DecChkGenerator(instruction);
                         case 0x05:
-                            return new IncChkGenerator(ops[0], ops[1], instruction.Branch);
+                            return new IncChkGenerator(instruction);
                         case 0x06:
-                            return new JinGenerator(ops[0], ops[1], instruction.Branch);
+                            return new JinGenerator(instruction);
                         case 0x07:
-                            return new TestGenerator(ops[0], ops[1], instruction.Branch);
+                            return new TestGenerator(instruction);
                         case 0x08:
-                            return new OrGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new OrGenerator(instruction);
                         case 0x09:
-                            return new AndGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new AndGenerator(instruction);
                         //case 0x0a:
                         //    op_test_attr();
                         //    return;
@@ -56,14 +53,14 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_clear_attr();
                         //    return;
                         case 0x0d:
-                            return new StoreGenerator(ops[0], ops[1]);
+                            return new StoreGenerator(instruction);
                         //case 0x0e:
                         //    op_insert_obj();
                         //    return;
                         case 0x0f:
-                            return new LoadWGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new LoadWGenerator(instruction);
                         case 0x10:
-                            return new LoadBGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new LoadBGenerator(instruction);
                         //case 0x11:
                         //    op_get_prop();
                         //    return;
@@ -74,25 +71,25 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_get_next_prop();
                         //    return;
                         case 0x14:
-                            return new AddGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new AddGenerator(instruction);
                         case 0x15:
-                            return new SubGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new SubGenerator(instruction);
                         case 0x16:
-                            return new MulGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new MulGenerator(instruction);
                         case 0x17:
-                            return new DivGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new DivGenerator(instruction);
                         case 0x18:
-                            return new ModGenerator(ops[0], ops[1], instruction.StoreVariable);
+                            return new ModGenerator(instruction);
                         case 0x19:
                             if (version >= 4)
                             {
-                                return new CallSGenerator(instruction.StoreVariable);
+                                return new CallSGenerator(instruction);
                             }
                             break;
                         case 0x1a:
                             if (version >= 5)
                             {
-                                return new CallNGenerator();
+                                return new CallNGenerator(instruction);
                             }
                             break;
                         //case 0x1b:
@@ -113,7 +110,7 @@ namespace ZDebug.Compiler.CodeGeneration
                     switch (opcode.Number)
                     {
                         case 0x00:
-                            return new JzGenerator(ops[0], instruction.Branch);
+                            return new JzGenerator(instruction);
                         //case 0x01:
                         //    op_get_sibling();
                         //    return;
@@ -127,16 +124,16 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_get_prop_len();
                         //    return;
                         case 0x05:
-                            return new IncGenerator(ops[0]);
+                            return new IncGenerator(instruction);
                         case 0x06:
-                            return new DecGenerator(ops[0]);
+                            return new DecGenerator(instruction);
                         //case 0x07:
                         //    op_print_addr();
                         //    return;
                         case 0x08:
                             if (version >= 4)
                             {
-                                return new CallSGenerator(instruction.StoreVariable);
+                                return new CallSGenerator(instruction);
                             }
                             break;
                         //case 0x09:
@@ -146,18 +143,18 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_print_obj();
                         //    return;
                         case 0x0b:
-                            return new RetGenerator(ops[0]);
+                            return new RetGenerator(instruction);
                         case 0x0c:
-                            return new JumpGenerator(instruction.Address + instruction.Length, ops[0]);
+                            return new JumpGenerator(instruction);
                         //case 0x0d:
                         //    op_print_paddr();
                         //    return;
                         case 0x0e:
-                            return new LoadGenerator(ops[0], instruction.StoreVariable);
+                            return new LoadGenerator(instruction);
                         case 0x0f:
                             if (version >= 5)
                             {
-                                return new CallNGenerator();
+                                return new CallNGenerator(instruction);
                             }
                             break;
                     }
@@ -166,9 +163,9 @@ namespace ZDebug.Compiler.CodeGeneration
                     switch (opcode.Number)
                     {
                         case 0x00:
-                            return new RtrueGenerator();
+                            return new RtrueGenerator(instruction);
                         case 0x01:
-                            return new RfalseGenerator();
+                            return new RfalseGenerator(instruction);
                         //case 0x02:
                         //    op_print();
                         //    return;
@@ -193,7 +190,7 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_restart();
                         //    return;
                         case 0x08:
-                            return new RetPoppedGenerator();
+                            return new RetPoppedGenerator(instruction);
                         //case 0x0a:
                         //    op_quit();
                         //    return;
@@ -227,11 +224,11 @@ namespace ZDebug.Compiler.CodeGeneration
                     switch (opcode.Number)
                     {
                         case 0x00:
-                            return new CallSGenerator(instruction.StoreVariable);
+                            return new CallSGenerator(instruction);
                         case 0x01:
-                            return new StoreWGenerator(ops[0], ops[1], ops[2]);
+                            return new StoreWGenerator(instruction);
                         case 0x02:
-                            return new StoreBGenerator(ops[0], ops[1], ops[2]);
+                            return new StoreBGenerator(instruction);
                         //case 0x03:
                         //    op_put_prop();
                         //    return;
@@ -262,11 +259,11 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    op_random();
                         //    return;
                         case 0x08:
-                            return new PushGenerator(ops[0]);
+                            return new PushGenerator(instruction);
                         case 0x09:
                             if (version != 6)
                             {
-                                return new PullGenerator(ops[0]);
+                                return new PullGenerator(instruction);
                             }
                             break;
                         //case 0x0a:
@@ -324,7 +321,7 @@ namespace ZDebug.Compiler.CodeGeneration
                         case 0x0c:
                             if (version >= 4)
                             {
-                                return new CallSGenerator(instruction.StoreVariable);
+                                return new CallSGenerator(instruction);
                             }
                             break;
                         //case 0x0f:
@@ -349,25 +346,25 @@ namespace ZDebug.Compiler.CodeGeneration
                         case 0x17:
                             if (version >= 4)
                             {
-                                return new ScanTableGenerator(ops[0], ops[1], ops[2], (opCount > 3 ? ops[3] : (Operand?)null), instruction.StoreVariable, instruction.Branch);
+                                return new ScanTableGenerator(instruction);
                             }
                             break;
                         case 0x18:
                             if (version >= 5)
                             {
-                                return new NotGenerator(ops[0], instruction.StoreVariable);
+                                return new NotGenerator(instruction);
                             }
                             break;
                         case 0x19:
                             if (version >= 5)
                             {
-                                return new CallNGenerator();
+                                return new CallNGenerator(instruction);
                             }
                             break;
                         case 0x1a:
                             if (version >= 5)
                             {
-                                return new CallNGenerator();
+                                return new CallNGenerator(instruction);
                             }
                             break;
                         //case 0x1b:
@@ -380,7 +377,7 @@ namespace ZDebug.Compiler.CodeGeneration
                         case 0x1d:
                             if (version >= 5)
                             {
-                                return new CopyTableGenerator(ops[0], ops[2], ops[3]);
+                                return new CopyTableGenerator(instruction);
                             }
                             break;
                         //case 0x1f:
@@ -412,13 +409,13 @@ namespace ZDebug.Compiler.CodeGeneration
                         case 0x02:
                             if (version >= 5)
                             {
-                                return new LogShiftGenerator(ops[0], ops[1], instruction.StoreVariable);
+                                return new LogShiftGenerator(instruction);
                             }
                             break;
                         case 0x03:
                             if (version >= 5)
                             {
-                                return new ArtShiftGenerator(ops[0], ops[1], instruction.StoreVariable);
+                                return new ArtShiftGenerator(instruction);
                             }
                             break;
                         //case 0x09:
@@ -439,8 +436,10 @@ namespace ZDebug.Compiler.CodeGeneration
                     break;
             }
 
-            Debug.WriteLine(string.Format("Generating unknown opcode: {0} ({1} {2:x2})", opcode.Name, opcode.Kind, opcode.Number));
-            return new UnknownOpcodeGenerator(instruction.Address, opcode);
+            Debug.WriteLine(
+                string.Format("Generating unknown opcode: {0} ({1} {2:x2})", opcode.Name, opcode.Kind, opcode.Number));
+
+            return new UnknownOpcodeGenerator(instruction);
         }
     }
 }

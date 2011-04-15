@@ -8,9 +8,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Operand op1;
         private readonly Operand op2;
 
-        public StoreGenerator(Operand op1, Operand op2)
-            : base(OpcodeGeneratorKind.Store)
+        public StoreGenerator(Instruction instruction)
+            : base(instruction)
         {
+            this.op1 = instruction.Operands[0];
+            this.op2 = instruction.Operands[1];
+
             if (op1.Kind == OperandKind.LargeConstant)
             {
                 throw new ZCompilerException("Expected variable or small constant operand.");
@@ -20,9 +23,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 throw new ZCompilerException("Expected operand value from 0-255.");
             }
-
-            this.op1 = op1;
-            this.op2 = op2;
         }
 
         private void GenerateWithCalculatedVariable(byte variableIndex, ILBuilder il, ICompiler compiler)

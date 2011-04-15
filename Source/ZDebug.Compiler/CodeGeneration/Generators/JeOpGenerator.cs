@@ -9,11 +9,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly ReadOnlyArray<Operand> ops;
         private readonly Branch branch;
 
-        public JeGenerator(ReadOnlyArray<Operand> ops, Branch branch)
-            : base(OpcodeGeneratorKind.Je)
+        public JeGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.ops = ops;
-            this.branch = branch;
+            this.ops = instruction.Operands;
+            this.branch = instruction.Branch;
         }
 
         private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)

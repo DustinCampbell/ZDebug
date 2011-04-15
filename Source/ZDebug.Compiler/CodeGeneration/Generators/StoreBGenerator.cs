@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class StoreBGenerator : StoreMemoryGenerator
     {
-        public StoreBGenerator(Operand op1, Operand op2, Operand op3)
-            : base(OpcodeGeneratorKind.StoreB, op1, op2, op3)
+        public StoreBGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

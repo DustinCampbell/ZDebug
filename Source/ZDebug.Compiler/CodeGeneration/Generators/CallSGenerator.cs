@@ -7,10 +7,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
     {
         private readonly Variable store;
 
-        public CallSGenerator(Variable store)
-            : base(OpcodeGeneratorKind.CallS)
+        public CallSGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.store = store;
+            this.store = instruction.StoreVariable;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

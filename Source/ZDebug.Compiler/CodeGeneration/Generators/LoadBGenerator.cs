@@ -5,8 +5,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class LoadBGenerator : LoadMemoryGenerator
     {
-        public LoadBGenerator(Operand op1, Operand op2, Variable store)
-            : base(OpcodeGeneratorKind.LoadB, op1, op2, store)
+        public LoadBGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
         protected override void LoadMemory(int address, ICompiler compiler)

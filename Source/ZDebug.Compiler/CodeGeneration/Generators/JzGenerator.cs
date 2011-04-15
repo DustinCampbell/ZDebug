@@ -8,11 +8,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Operand op;
         private readonly Branch branch;
 
-        public JzGenerator(Operand op, Branch branch)
-            : base(OpcodeGeneratorKind.Jz)
+        public JzGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op = op;
-            this.branch = branch;
+            this.op = instruction.Operands[0];
+            this.branch = instruction.Branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

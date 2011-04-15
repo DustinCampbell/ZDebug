@@ -7,9 +7,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
     {
         private readonly Operand op;
 
-        public UnaryOpGenerator(OpcodeGeneratorKind kind, Operand op)
-            : base(kind)
+        public UnaryOpGenerator(Instruction instruction)
+            : base(instruction)
         {
+            this.op = instruction.Operands[0];
+
             if (op.Kind == OperandKind.LargeConstant)
             {
                 throw new ZCompilerException("Expected variable or small constant operand.");
@@ -19,8 +21,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 throw new ZCompilerException("Expected operand value from 0-255.");
             }
-
-            this.op = op;
         }
 
         protected abstract void Operation(ILBuilder il);

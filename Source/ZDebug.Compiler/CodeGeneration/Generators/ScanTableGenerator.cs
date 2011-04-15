@@ -13,14 +13,14 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Variable store;
         private readonly Branch branch;
 
-        public ScanTableGenerator(Operand op1, Operand op2, Operand op3, Operand? op4, Variable store, Branch branch)
-            : base(OpcodeGeneratorKind.ScanTable)
+        public ScanTableGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op1 = op1;
-            this.op2 = op2;
-            this.op3 = op3;
-            this.op4 = op4;
-            this.store = store;
+            this.op1 = instruction.Operands[0];
+            this.op2 = instruction.Operands[1];
+            this.op3 = instruction.Operands[2];
+            this.op4 = (instruction.OperandCount > 3 ? instruction.Operands[3] : (Operand?)null);
+            this.store = instruction.StoreVariable;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

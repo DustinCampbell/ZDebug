@@ -9,12 +9,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Operand op2;
         private readonly Branch branch;
 
-        public JinGenerator(Operand op1, Operand op2, Branch branch)
-            : base(OpcodeGeneratorKind.Jin)
+        public JinGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op1 = op1;
-            this.op2 = op2;
-            this.branch = branch;
+            this.op1 = instruction.Operands[0];
+            this.op2 = instruction.Operands[1];
+            this.branch = instruction.Branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

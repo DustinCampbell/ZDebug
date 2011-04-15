@@ -10,12 +10,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Variable store;
         private readonly bool signed;
 
-        public BinaryOpGenerator(OpcodeGeneratorKind kind, Operand op1, Operand op2, Variable store, bool signed)
-            : base(kind)
+        public BinaryOpGenerator(Instruction instruction, bool signed)
+            : base(instruction)
         {
-            this.op1 = op1;
-            this.op2 = op2;
-            this.store = store;
+            this.op1 = instruction.Operands[0];
+            this.op2 = instruction.Operands[1];
+            this.store = instruction.StoreVariable;
             this.signed = signed;
         }
 

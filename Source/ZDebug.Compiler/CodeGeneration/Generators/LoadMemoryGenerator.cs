@@ -9,12 +9,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private Operand op2;
         private Variable store;
 
-        public LoadMemoryGenerator(OpcodeGeneratorKind kind, Operand op1, Operand op2, Variable store)
-            : base(kind)
+        public LoadMemoryGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op1 = op1;
-            this.op2 = op2;
-            this.store = store;
+            this.op1 = instruction.Operands[0];
+            this.op2 = instruction.Operands[1];
+            this.store = instruction.StoreVariable;
         }
 
         protected abstract void LoadMemory(int address, ICompiler compiler);

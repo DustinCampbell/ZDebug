@@ -8,11 +8,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Operand op;
         private readonly Variable store;
 
-        public NotGenerator(Operand op, Variable store)
-            : base(OpcodeGeneratorKind.Not)
+        public NotGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op = op;
-            this.store = store;
+            this.op = instruction.Operands[0];
+            this.store = instruction.StoreVariable;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)

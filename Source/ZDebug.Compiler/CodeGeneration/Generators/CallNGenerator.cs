@@ -1,11 +1,12 @@
 ﻿using ZDebug.Compiler.Generate;
+using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class CallNGenerator : OpcodeGenerator
     {
-        public CallNGenerator()
-            : base(OpcodeGeneratorKind.CallN)
+        public CallNGenerator(Instruction instruction)
+            : base(instruction)
         {
         }
 

@@ -8,11 +8,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private readonly Operand op2;
         private readonly Branch branch;
 
-        public UnaryOpWithBranchGenerator(OpcodeGeneratorKind kind, Operand op1, Operand op2, Branch branch)
-            : base(kind, op1)
+        public UnaryOpWithBranchGenerator(Instruction instruction)
+            : base(instruction)
         {
-            this.op2 = op2;
-            this.branch = branch;
+            this.op2 = instruction.Operands[1];
+            this.branch = instruction.Branch;
         }
 
         protected abstract void Compare(ILBuilder il);
