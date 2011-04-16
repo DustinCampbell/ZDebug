@@ -213,7 +213,7 @@ namespace ZDebug.Terp.ViewModel
             PropertyChanged("Profiling");
 
             e.Story.RegisterInterpreter(new Interpreter());
-            zmachine = new CompiledZMachine(e.Story, profiler: profilerService.Profiler);
+            zmachine = new CompiledZMachine(e.Story, debugging: true, profiler: profilerService.Profiler);
             zmachine.SetRandomSeed(42);
 
             zmachine.RegisterScreen(screen);

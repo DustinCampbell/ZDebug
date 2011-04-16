@@ -23,14 +23,14 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke0()
+        public ushort Invoke0(ushort[] stack, int sp)
         {
             Compile();
 
             var locals = Machine.GetLocalArray(Routine);
             try
             {
-                return compilationResult.Code(compilationResult.Calls, locals, 0);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 0);
             }
             finally
             {
@@ -38,7 +38,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke1(ushort arg0)
+        public ushort Invoke1(ushort arg0, ushort[] stack, int sp)
         {
             Compile();
 
@@ -47,7 +47,7 @@ namespace ZDebug.Compiler
             {
                 locals[0] = arg0;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 1);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 1);
             }
             finally
             {
@@ -55,7 +55,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke2(ushort arg0, ushort arg1)
+        public ushort Invoke2(ushort arg0, ushort arg1, ushort[] stack, int sp)
         {
             Compile();
 
@@ -65,7 +65,7 @@ namespace ZDebug.Compiler
                 locals[0] = arg0;
                 locals[1] = arg1;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 2);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 2);
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke3(ushort arg0, ushort arg1, ushort arg2)
+        public ushort Invoke3(ushort arg0, ushort arg1, ushort arg2, ushort[] stack, int sp)
         {
             Compile();
 
@@ -84,7 +84,7 @@ namespace ZDebug.Compiler
                 locals[1] = arg1;
                 locals[2] = arg2;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 3);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 3);
             }
             finally
             {
@@ -92,7 +92,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke4(ushort arg0, ushort arg1, ushort arg2, ushort arg3)
+        public ushort Invoke4(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort[] stack, int sp)
         {
             Compile();
 
@@ -104,7 +104,7 @@ namespace ZDebug.Compiler
                 locals[2] = arg2;
                 locals[3] = arg3;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 4);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 4);
             }
             finally
             {
@@ -112,7 +112,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke5(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4)
+        public ushort Invoke5(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort[] stack, int sp)
         {
             Compile();
 
@@ -125,7 +125,7 @@ namespace ZDebug.Compiler
                 locals[3] = arg3;
                 locals[4] = arg4;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 5);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 5);
             }
             finally
             {
@@ -133,7 +133,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke6(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5)
+        public ushort Invoke6(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort[] stack, int sp)
         {
             Compile();
 
@@ -147,7 +147,7 @@ namespace ZDebug.Compiler
                 locals[4] = arg4;
                 locals[5] = arg5;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 6);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 6);
             }
             finally
             {
@@ -155,7 +155,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public ushort Invoke7(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6)
+        public ushort Invoke7(ushort arg0, ushort arg1, ushort arg2, ushort arg3, ushort arg4, ushort arg5, ushort arg6, ushort[] stack, int sp)
         {
             Compile();
 
@@ -170,7 +170,7 @@ namespace ZDebug.Compiler
                 locals[5] = arg5;
                 locals[6] = arg6;
 
-                return compilationResult.Code(compilationResult.Calls, locals, 7);
+                return compilationResult.Code(locals, stack, sp, compilationResult.Calls, 7);
             }
             finally
             {

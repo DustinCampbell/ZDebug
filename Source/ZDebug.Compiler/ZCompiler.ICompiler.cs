@@ -68,7 +68,7 @@ namespace ZDebug.Compiler
 
         public void EmitReturn()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             il.Call(Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false));
 
             il.Return();
@@ -205,21 +205,16 @@ namespace ZDebug.Compiler
 
         public void EmitPopStack(bool indirect = false)
         {
-            stack.LoadElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                });
+            il.Arguments.LoadStack();
+            il.Arguments.LoadSP();
+            il.Emit(OpCodes.Ldelem_U2);
 
             if (!indirect)
             {
                 // decrement sp
-                spRef.Load();
-                spRef.Load();
-                spRef.LoadIndirectValue();
+                il.Arguments.LoadSP();
                 il.Math.Subtract(1);
-                spRef.StoreIndirectValue();
+                il.Arguments.StoreSP();
             }
         }
 
@@ -228,23 +223,15 @@ namespace ZDebug.Compiler
             if (!indirect)
             {
                 // increment sp
-                spRef.Load();
-                spRef.Load();
-                spRef.LoadIndirectValue();
+                il.Arguments.LoadSP();
                 il.Math.Add(1);
-                spRef.StoreIndirectValue();
+                il.Arguments.StoreSP();
             }
 
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                },
-                valueLoader: () =>
-                {
-                    value.Load();
-                });
+            il.Arguments.LoadStack();
+            il.Arguments.LoadSP();
+            value.Load();
+            il.Emit(OpCodes.Stelem_I2);
         }
 
         private void EmitLoadLocalVariable(byte variableIndex)

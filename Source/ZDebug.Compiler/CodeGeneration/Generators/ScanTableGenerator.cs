@@ -26,7 +26,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             compiler.EmitLoadOperand(op1);
             compiler.EmitLoadOperand(op2);
             compiler.EmitLoadOperand(op3);

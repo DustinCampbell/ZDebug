@@ -269,132 +269,6 @@ namespace ZDebug.Compiler
                 valueLoader: () => il.Load(value));
         }
 
-        private void CheckStackEmpty()
-        {
-            if (debugging)
-            {
-                spRef.Load();
-                spRef.LoadIndirectValue();
-                il.Load(-1);
-                il.Compare.Equal();
-
-                var ok = il.NewLabel();
-                ok.BranchIf(Condition.False, @short: true);
-                il.RuntimeError("Stack is empty.");
-
-                ok.Mark();
-            }
-        }
-
-        private void CheckStackFull()
-        {
-            if (debugging)
-            {
-                spRef.Load();
-                spRef.LoadIndirectValue();
-                il.Load(CompiledZMachine.STACK_SIZE - 1);
-                il.Compare.Equal();
-
-                var ok = il.NewLabel();
-                ok.BranchIf(Condition.False, @short: true);
-                il.RuntimeError("Stack is full.");
-
-                ok.Mark();
-            }
-        }
-
-        private void PopStack()
-        {
-            CheckStackEmpty();
-
-            stack.LoadElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                });
-
-            // decrement sp
-            spRef.Load();
-            spRef.Load();
-            spRef.LoadIndirectValue();
-            il.Math.Subtract(1);
-            spRef.StoreIndirectValue();
-        }
-
-        private void PeekStack()
-        {
-            CheckStackEmpty();
-
-            stack.LoadElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                });
-        }
-
-        private void PushStack(ILocal value)
-        {
-            PushStack(() => value.Load());
-        }
-
-        private void PushStack(CodeBuilder valueLoader)
-        {
-            CheckStackFull();
-
-            // increment sp
-            spRef.Load();
-            spRef.Load();
-            spRef.LoadIndirectValue();
-            il.Math.Add(1);
-            spRef.StoreIndirectValue();
-
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                },
-                valueLoader: valueLoader);
-        }
-
-        private void PushStack()
-        {
-            using (var value = il.NewLocal<ushort>())
-            {
-                value.Store();
-                PushStack(value);
-            }
-        }
-
-        private void SetStackTop(ILocal value)
-        {
-            SetStackTop(() => value.Load());
-        }
-
-        private void SetStackTop(CodeBuilder valueLoader)
-        {
-            CheckStackEmpty();
-
-            stack.StoreElement(
-                indexLoader: () =>
-                {
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
-                },
-                valueLoader: valueLoader);
-        }
-
-        private void SetStackTop()
-        {
-            using (var value = il.NewLocal<ushort>())
-            {
-                value.Store();
-                SetStackTop(value);
-            }
-        }
-
         /// <summary>
         /// Loads a value from the locals array onto the evaluation stack.
         /// </summary>
@@ -437,8 +311,10 @@ namespace ZDebug.Compiler
 
         private void StoreLocalVariable(int index, ILocal value)
         {
-            StoreLocalVariable(index,
-                valueLoader: () => value.Load());
+            il.Arguments.LoadLocals();
+            il.Load(index);
+            value.Load();
+            il.Emit(OpCodes.Stelem_I2);
         }
 
         private void StoreLocalVariable(ILocal index, ILocal value)
@@ -544,15 +420,7 @@ namespace ZDebug.Compiler
             // stack
             if (usesStack)
             {
-                if (indirect)
-                {
-                    PeekStack();
-                }
-                else
-                {
-                    PopStack();
-                }
-
+                EmitPopStack(indirect);
                 done.Branch(@short: true);
             }
             else
@@ -606,14 +474,7 @@ namespace ZDebug.Compiler
         {
             if (variableIndex == 0)
             {
-                if (indirect)
-                {
-                    PeekStack();
-                }
-                else
-                {
-                    PopStack();
-                }
+                EmitPopStack(indirect);
             }
             else if (variableIndex < 16)
             {
@@ -630,14 +491,7 @@ namespace ZDebug.Compiler
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
-                    if (indirect)
-                    {
-                        PeekStack();
-                    }
-                    else
-                    {
-                        PopStack();
-                    }
+                    EmitPopStack(indirect);
                     break;
 
                 case VariableKind.Local:
@@ -665,15 +519,7 @@ namespace ZDebug.Compiler
             // stack
             if (usesStack)
             {
-                if (indirect)
-                {
-                    SetStackTop(value);
-                }
-                else
-                {
-                    PushStack(value);
-                }
-
+                EmitPushStack(value, indirect);
                 done.Branch(@short: true);
             }
             else
@@ -725,29 +571,17 @@ namespace ZDebug.Compiler
 
         private void StoreVariable(byte variableIndex, ILocal value, bool indirect = false)
         {
-            StoreVariable(variableIndex, () => value.Load(), indirect);
-        }
-
-        private void StoreVariable(byte variableIndex, CodeBuilder valueLoader, bool indirect = false)
-        {
             if (variableIndex == 0)
             {
-                if (indirect)
-                {
-                    SetStackTop(valueLoader);
-                }
-                else
-                {
-                    PushStack(valueLoader);
-                }
+                EmitPushStack(value, indirect);
             }
             else if (variableIndex < 16)
             {
-                StoreLocalVariable(variableIndex - 1, valueLoader);
+                StoreLocalVariable(variableIndex - 1, value);
             }
             else
             {
-                StoreGlobalVariable(variableIndex - 16, valueLoader);
+                StoreGlobalVariable(variableIndex - 16, value);
             }
         }
 
@@ -756,7 +590,14 @@ namespace ZDebug.Compiler
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
-                    PushStack(valueLoader);
+                    using (var value = il.NewLocal<ushort>())
+                    {
+                        valueLoader();
+                        value.Store();
+
+                        EmitPushStack(value);
+                    }
+
                     break;
 
                 case VariableKind.Local:

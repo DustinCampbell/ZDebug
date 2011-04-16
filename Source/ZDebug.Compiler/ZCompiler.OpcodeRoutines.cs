@@ -587,7 +587,7 @@ namespace ZDebug.Compiler
 
         private void op_ret_popped()
         {
-            PopStack();
+            EmitPopStack();
             Return();
         }
 
@@ -823,7 +823,7 @@ namespace ZDebug.Compiler
 
         private void op_copy_table()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             LoadOperand(0);
             LoadOperand(1);
             LoadOperand(2);
@@ -834,7 +834,7 @@ namespace ZDebug.Compiler
         {
             using (var result = il.NewLocal<ushort>())
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 LoadOperand(0);
                 LoadOperand(1);
                 LoadOperand(2);
@@ -875,7 +875,7 @@ namespace ZDebug.Compiler
                 {
                     var varIndex = (byte)varIndexOp.Value;
 
-                    PopStack();
+                    EmitPopStack();
                     value.Store();
 
                     StoreVariable(varIndex, value, indirect: true);
@@ -889,7 +889,7 @@ namespace ZDebug.Compiler
                     LoadByRefVariableOperand();
                     varIndex.Store();
 
-                    PopStack();
+                    EmitPopStack();
 
                     value.Store();
                     CalculatedStoreVariable(varIndex, value, indirect: true);
@@ -903,8 +903,13 @@ namespace ZDebug.Compiler
 
         private void op_push()
         {
-            LoadOperand(0);
-            PushStack();
+            using (var value = il.NewLocal<ushort>())
+            {
+                LoadOperand(0);
+                value.Store();
+
+                EmitPushStack(value);
+            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1594,7 +1599,7 @@ namespace ZDebug.Compiler
 
         private void op_print_addr()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             LoadOperand(0);
 
             il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
@@ -1615,10 +1620,11 @@ namespace ZDebug.Compiler
                 il.Convert.ToInt16();
                 number.Store();
 
+                il.DebugWrite("Printing number: {0}", number);
+
                 number.LoadAddress();
 
-                var toString = Reflection<short>.GetMethod("ToString", Types.None);
-                il.Call(toString);
+                il.Call(Reflection<short>.GetMethod("ToString", Types.None));
 
                 PrintText();
             }
@@ -1626,7 +1632,7 @@ namespace ZDebug.Compiler
 
         private void op_print_obj()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             ReadObjectShortNameFromOperand(0);
 
             il.Call(Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.Array<ushort[]>(), @public: false));
@@ -1635,7 +1641,7 @@ namespace ZDebug.Compiler
 
         private void op_print_paddr()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             var op = GetOperand(0);
             LoadUnpackedStringAddress(op);
 
@@ -1702,7 +1708,7 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("ReadChar", Types.None, @public: false));
 
                 result.Store();
@@ -1712,7 +1718,7 @@ namespace ZDebug.Compiler
 
         private void op_aread()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             LoadOperand(0);
 
             if (OperandCount > 1)
@@ -1740,7 +1746,7 @@ namespace ZDebug.Compiler
 
         private void op_sread1()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             LoadOperand(0);
             LoadOperand(1);
 
@@ -1749,7 +1755,7 @@ namespace ZDebug.Compiler
 
         private void op_sread4()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             LoadOperand(0);
             LoadOperand(1);
 
@@ -1824,7 +1830,7 @@ namespace ZDebug.Compiler
 
         private void op_verify()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
             il.Call(Reflection<CompiledZMachine>.GetMethod("Verify", @public: false));
 
             Branch();
@@ -1852,7 +1858,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
                 seed.BranchIf(Condition.AtMost, @short: true);
 
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 range.Load();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false));
 
@@ -1860,7 +1866,7 @@ namespace ZDebug.Compiler
 
                 seed.Mark();
 
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 range.Load();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false));
 
@@ -1921,7 +1927,7 @@ namespace ZDebug.Compiler
 
         private void op_tokenize()
         {
-            il.Arguments.LoadThis();
+            il.Arguments.LoadMachine();
 
             LoadOperand(0);
             LoadOperand(1);

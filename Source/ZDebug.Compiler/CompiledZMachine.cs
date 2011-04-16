@@ -19,14 +19,6 @@ namespace ZDebug.Compiler
         private readonly bool precompile;
         private readonly bool debugging;
 
-        // routine state
-        private readonly ushort[] stack;
-        private int sp;
-
-        private int stackFrame;
-        private readonly int[] stackFrames;
-        private int sfp;
-
         private int cacheMiss;
 
         private readonly ushort objectTableAddress;
@@ -62,13 +54,6 @@ namespace ZDebug.Compiler
             this.profiler = profiler;
             this.precompile = precompile;
             this.debugging = debugging;
-
-            this.stack = new ushort[STACK_SIZE];
-            this.sp = -1;
-
-            this.stackFrame = -1;
-            this.stackFrames = new int[STACK_SIZE];
-            this.sfp = -1;
 
             this.objectTableAddress = this.Memory.ReadWord(0x0a);
             this.propertyDefaultsTableSize = (byte)(this.Version < 4 ? 31 : 63);
@@ -113,18 +98,6 @@ namespace ZDebug.Compiler
             }
 
             return mainAddress;
-        }
-
-        internal void PushFrame()
-        {
-            this.stackFrames[++this.sfp] = this.stackFrame;
-            this.stackFrame = this.sp;
-        }
-
-        internal void PopFrame()
-        {
-            this.sp = this.stackFrame;
-            this.stackFrame = this.stackFrames[this.sfp--];
         }
 
         internal ushort[] GetLocalArray(ZRoutine routine)
@@ -578,7 +551,10 @@ namespace ZDebug.Compiler
             stopping = false;
             var routineCall = GetRoutineCall(GetMainRoutineAddress());
 
-            routineCall.Invoke0();
+            var stack = new ushort[STACK_SIZE];
+            var sp = -1;
+
+            routineCall.Invoke0(stack, sp);
         }
 
         internal void Tick()

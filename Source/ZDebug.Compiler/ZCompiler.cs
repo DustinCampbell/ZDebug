@@ -40,9 +40,6 @@ namespace ZDebug.Compiler
         private bool usesScreen;
         private bool usesOutputStreams;
 
-        private IArrayLocal stack;
-        private IRefLocal spRef;
-
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
 
@@ -58,7 +55,7 @@ namespace ZDebug.Compiler
             return new DynamicMethod(
                 name: string.Format("{0:x4}_{1}_locals", routine.Address, routine.Locals.Length),
                 returnType: typeof(ushort),
-                parameterTypes: Types.Array<CompiledZMachine, ZRoutineCall[], ushort[], int>(),
+                parameterTypes: Types.Array<CompiledZMachine, ushort[], ushort[], int, ZRoutineCall[], int>(),
                 owner: typeof(CompiledZMachine),
                 skipVisibility: true);
         }
@@ -87,14 +84,6 @@ namespace ZDebug.Compiler
                     if (!this.usesStack && i.UsesStack())
                     {
                         this.usesStack = true;
-
-                        // stack...
-                        var stackField = Reflection<CompiledZMachine>.GetField("stack", @public: false);
-                        this.stack = il.NewArrayLocal<ushort>(il.GenerateLoadInstanceField(stackField));
-
-                        // sp...
-                        var spField = Reflection<CompiledZMachine>.GetField("sp", @public: false);
-                        this.spRef = il.NewRefLocal<int>(il.GenerateLoadInstanceFieldAddress(spField));
                     }
 
                     if (!this.usesMemory && i.UsesMemory())
@@ -156,7 +145,7 @@ namespace ZDebug.Compiler
 
                     if (machine.Debugging)
                     {
-                        il.Arguments.LoadThis();
+                        il.Arguments.LoadMachine();
                         il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
                     }
 
@@ -197,7 +186,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Load(routine.Address);
                 il.Call(Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.Array<int>(), @public: false));
             }
@@ -207,7 +196,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Load(routine.Address);
                 il.Call(Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.Array<int>(), @public: false));
             }
@@ -217,7 +206,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Load(this.current.Value.Address);
                 il.Call(Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.Array<int>(), @public: false));
             }
@@ -227,7 +216,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false));
             }
         }
@@ -236,7 +225,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("Quit", Types.None, @public: false));
 
                 Profiler_ExecutedInstruction();
@@ -247,7 +236,7 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("Interrupt", Types.None, @public: false));
             }
         }
@@ -257,11 +246,30 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", this.current.Value.Address, this.current.Value.Opcode.Name));
         }
 
+        private static string GetInvokeName(int argCount)
+        {
+            return "Invoke" + argCount.ToString();
+        }
+
+        private static Type[] GetInvokeParameterTypes(int argCount)
+        {
+            var types = new Type[argCount + 2];
+            for (int i = 0; i < argCount; i++)
+            {
+                types[i] = typeof(ushort);
+            }
+
+            types[argCount] = typeof(ushort[]);
+            types[argCount + 1] = typeof(int);
+
+            return types;
+        }
+
         private void DirectCall(Operand addressOp)
         {
             if (machine.Profiling)
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 if (addressOp.Value == 0)
                 {
                     il.Load(0);
@@ -297,18 +305,14 @@ namespace ZDebug.Compiler
                     LoadOperand(i);
                 }
 
-                // Push frame after loading operands in case any operands manipulate the stack.
-                il.Arguments.LoadThis();
-                il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame", @public: false));
+                // The stack and stack pointer are the last arguments passed in
+                // case any operands manipulate them.
+                il.Arguments.LoadStack();
+                il.Arguments.LoadSP();
 
-                var callName = "Invoke" + argCount.ToString();
-                var callTypes = new Type[argCount];
-                for (int i = 0; i < argCount; i++)
-                {
-                    callTypes[i] = typeof(ushort);
-                }
-
-                il.Call(Reflection<ZRoutineCall>.GetMethod(callName, callTypes));
+                var invokeName = GetInvokeName(argCount);
+                var invokeParameterTypes = GetInvokeParameterTypes(argCount);
+                il.Call(Reflection<ZRoutineCall>.GetMethod(invokeName, invokeParameterTypes));
             }
         }
 
@@ -327,7 +331,7 @@ namespace ZDebug.Compiler
 
                 if (machine.Profiling)
                 {
-                    il.Arguments.LoadThis();
+                    il.Arguments.LoadMachine();
                     il.Load(0);
                     il.Load(true);
 
@@ -350,11 +354,9 @@ namespace ZDebug.Compiler
 
                 if (spOperands > 0)
                 {
-                    spRef.Load();
-                    spRef.Load();
-                    spRef.LoadIndirectValue();
+                    il.Arguments.LoadSP();
                     il.Math.Subtract(spOperands);
-                    spRef.StoreIndirectValue();
+                    il.Arguments.StoreSP();
                 }
 
                 il.Load(0);
@@ -365,7 +367,7 @@ namespace ZDebug.Compiler
 
                 if (machine.Profiling)
                 {
-                    il.Arguments.LoadThis();
+                    il.Arguments.LoadMachine();
                     address.Load();
                     UnpackRoutineAddress();
                     il.Load(true);
@@ -373,7 +375,7 @@ namespace ZDebug.Compiler
                     il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
                 }
 
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 address.Load();
                 UnpackRoutineAddress();
 
@@ -384,18 +386,14 @@ namespace ZDebug.Compiler
                     LoadOperand(i);
                 }
 
-                // Push frame after loading operands in case any operands manipulate the stack.
-                il.Arguments.LoadThis();
-                il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame", @public: false));
+                // The stack and stack pointer are the last arguments passed in
+                // case any operands manipulate them.
+                il.Arguments.LoadStack();
+                il.Arguments.LoadSP();
 
-                var callName = "Invoke" + argCount.ToString();
-                var callTypes = new Type[argCount];
-                for (int i = 0; i < argCount; i++)
-                {
-                    callTypes[i] = typeof(ushort);
-                }
-
-                il.Call(Reflection<ZRoutineCall>.GetMethod(callName, callTypes));
+                var invokeName = GetInvokeName(argCount);
+                var invokeParameterTypes = GetInvokeParameterTypes(argCount);
+                il.Call(Reflection<ZRoutineCall>.GetMethod(invokeName, invokeParameterTypes));
 
                 done.Mark();
             }
@@ -417,9 +415,6 @@ namespace ZDebug.Compiler
         private void Return(int? value = null)
         {
             Profiler_ExitRoutine();
-
-            il.Arguments.LoadThis();
-            il.Call(Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false));
 
             if (value != null)
             {

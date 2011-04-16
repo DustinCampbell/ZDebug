@@ -21,7 +21,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.Load(field);
             };
         }
@@ -30,7 +30,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.Arguments.LoadThis();
+                il.Arguments.LoadMachine();
                 il.LoadAddress(field);
             };
         }
