@@ -14,7 +14,9 @@ namespace ZDebug.Compiler
         /// This delegate should not rely upon the state of the stack when invoked.</param>
         private void LoadByte(CodeBuilder addressLoader)
         {
-            memory.LoadElement(addressLoader);
+            il.Arguments.LoadMemory();
+            addressLoader();
+            il.Emit(OpCodes.Ldelem_U1);
         }
 
         /// <summary>
@@ -58,11 +60,11 @@ namespace ZDebug.Compiler
         private void LoadWord(CodeBuilder addressLoader, CodeBuilder addressPlusOneLoader)
         {
             // shift memory[address] left 8 bits
-            memory.LoadElement(addressLoader);
+            LoadByte(addressLoader);
             il.Math.Shl(8);
 
             // read memory[address + 1]
-            memory.LoadElement(addressPlusOneLoader);
+            LoadByte(addressPlusOneLoader);
 
             // or bytes together
             il.Math.Or();
@@ -114,7 +116,10 @@ namespace ZDebug.Compiler
         /// This delegate should not rely upon the state of the stack when invoked.</param>
         private void StoreByte(CodeBuilder addressLoader, CodeBuilder valueLoader)
         {
-            memory.StoreElement(addressLoader, valueLoader);
+            il.Arguments.LoadMemory();
+            addressLoader();
+            valueLoader();
+            il.Emit(OpCodes.Stelem_I1);
         }
 
         /// <summary>
@@ -189,7 +194,7 @@ namespace ZDebug.Compiler
         private void StoreWord(CodeBuilder addressLoader, CodeBuilder addressPlusOneLoader, CodeBuilder valueLoader)
         {
             // memory[address] = (byte)(value >> 8);
-            memory.StoreElement(
+            StoreByte(
                 addressLoader,
                 () =>
                 {
@@ -199,7 +204,7 @@ namespace ZDebug.Compiler
                 });
 
             // memory[address + 1] = (byte)(value & 0xff);
-            memory.StoreElement(
+            StoreByte(
                 addressPlusOneLoader,
                 () =>
                 {
@@ -269,142 +274,6 @@ namespace ZDebug.Compiler
                 valueLoader: () => il.Load(value));
         }
 
-        /// <summary>
-        /// Loads a value from the locals array onto the evaluation stack.
-        /// </summary>
-        private void LoadLocalVariable(int index)
-        {
-            il.Arguments.LoadLocals();
-            il.Load(index);
-            il.Emit(OpCodes.Ldelem_U2);
-        }
-
-        /// <summary>
-        /// Loads a value from the locals array onto the evaluation stack.
-        /// </summary>
-        private void LoadLocalVariable(ILocal index)
-        {
-            il.Arguments.LoadLocals();
-            index.Load();
-            il.Emit(OpCodes.Ldelem_U2);
-        }
-
-        /// <summary>
-        /// Loads a value from the locals array onto the evaluation stack using the index on the evaluation stack.
-        /// </summary>
-        private void LoadLocalVariable()
-        {
-            using (var index = il.NewLocal<int>())
-            {
-                index.Store();
-                LoadLocalVariable(index);
-            }
-        }
-
-        private void StoreLocalVariable(int index, CodeBuilder valueLoader)
-        {
-            il.Arguments.LoadLocals();
-            il.Load(index);
-            valueLoader();
-            il.Emit(OpCodes.Stelem_I2);
-        }
-
-        private void StoreLocalVariable(int index, ILocal value)
-        {
-            il.Arguments.LoadLocals();
-            il.Load(index);
-            value.Load();
-            il.Emit(OpCodes.Stelem_I2);
-        }
-
-        private void StoreLocalVariable(ILocal index, ILocal value)
-        {
-            il.Arguments.LoadLocals();
-            index.Load();
-            value.Load();
-            il.Emit(OpCodes.Stelem_I2);
-        }
-
-        private void StoreLocalVariable(ILocal value)
-        {
-            using (var index = il.NewLocal<int>())
-            {
-                index.Store();
-                StoreLocalVariable(index, value);
-            }
-        }
-
-        private int CalculateGlobalVariableAddress(int index)
-        {
-            return machine.GlobalVariableTableAddress + (index * 2);
-        }
-
-        /// <summary>
-        /// Calulates the address of a global variable and loads it on the evaluation stack.
-        /// </summary>
-        private void LoadGlobalVariableAddress(ILocal index = null)
-        {
-            if (index != null)
-            {
-                index.Load();
-            }
-
-            il.Math.Multiply(2);
-            il.Math.Add(machine.GlobalVariableTableAddress);
-        }
-
-        private void LoadGlobalVariable(int index)
-        {
-            var address = CalculateGlobalVariableAddress(index);
-            LoadWord(address);
-        }
-
-        private void LoadGlobalVariable(ILocal index)
-        {
-            LoadGlobalVariableAddress(index);
-            LoadWord();
-        }
-
-        private void LoadGlobalVariable()
-        {
-            LoadGlobalVariableAddress();
-            LoadWord();
-        }
-
-        private void StoreGlobalVariable(int index, ILocal value)
-        {
-            var address = CalculateGlobalVariableAddress(index);
-            StoreWord(address, value);
-        }
-
-        private void StoreGlobalVariable(int index, CodeBuilder valueLoader)
-        {
-            var address = CalculateGlobalVariableAddress(index);
-            StoreWord(address, valueLoader);
-        }
-
-        private void StoreGlobalVariable(ILocal index, ILocal value)
-        {
-            LoadGlobalVariableAddress(index);
-
-            using (var address = il.NewLocal<int>())
-            {
-                address.Store();
-                StoreWord(address, value);
-            }
-        }
-
-        private void StoreGlobalVariable(ILocal value)
-        {
-            LoadGlobalVariableAddress();
-
-            using (var address = il.NewLocal<int>())
-            {
-                address.Store();
-                StoreWord(address, value);
-            }
-        }
-
         private void CalculatedLoadVariable(ILocal variableIndex, bool indirect = false)
         {
             il.DebugIndent();
@@ -440,7 +309,12 @@ namespace ZDebug.Compiler
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
-                LoadLocalVariable();
+
+                using (var localVariableIndex = il.NewLocal<byte>())
+                {
+                    localVariableIndex.Store();
+                    EmitLoadLocalVariable(localVariableIndex);
+                }
 
                 done.Branch(@short: true);
             }
@@ -452,11 +326,16 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            if (memory != null)
+            if (usesMemory)
             {
                 variableIndex.Load();
                 il.Math.Subtract(16);
-                LoadGlobalVariable();
+
+                using (var globalVariableIndex = il.NewLocal<byte>())
+                {
+                    globalVariableIndex.Store();
+                    EmitLoadGlobalVariable(globalVariableIndex);
+                }
             }
             else
             {
@@ -478,11 +357,11 @@ namespace ZDebug.Compiler
             }
             else if (variableIndex < 16)
             {
-                LoadLocalVariable(variableIndex - 1);
+                EmitLoadLocalVariable((byte)(variableIndex - 1));
             }
             else
             {
-                LoadGlobalVariable(variableIndex - 16);
+                EmitLoadGlobalVariable((byte)(variableIndex - 16));
             }
         }
 
@@ -495,11 +374,11 @@ namespace ZDebug.Compiler
                     break;
 
                 case VariableKind.Local:
-                    LoadLocalVariable(variable.Index);
+                    EmitLoadLocalVariable(variable.Index);
                     break;
 
                 default: // VariableKind.Global
-                    LoadGlobalVariable(variable.Index);
+                    EmitLoadGlobalVariable(variable.Index);
                     break;
             }
         }
@@ -539,7 +418,12 @@ namespace ZDebug.Compiler
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
-                StoreLocalVariable(value);
+
+                using (var localVariableIndex = il.NewLocal<byte>())
+                {
+                    localVariableIndex.Store();
+                    EmitStoreLocalVariable(localVariableIndex, value);
+                }
 
                 done.Branch(@short: true);
             }
@@ -551,11 +435,16 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            if (memory != null)
+            if (usesMemory)
             {
                 variableIndex.Load();
                 il.Math.Subtract(16);
-                StoreGlobalVariable(value);
+
+                using (var globalVariableIndex = il.NewLocal<byte>())
+                {
+                    globalVariableIndex.Store();
+                    EmitStoreGlobalVariable(globalVariableIndex, value);
+                }
             }
             else
             {
@@ -577,36 +466,35 @@ namespace ZDebug.Compiler
             }
             else if (variableIndex < 16)
             {
-                StoreLocalVariable(variableIndex - 1, value);
+                EmitStoreLocalVariable((byte)(variableIndex - 1), value);
             }
             else
             {
-                StoreGlobalVariable(variableIndex - 16, value);
+                EmitStoreGlobalVariable((byte)(variableIndex - 16), value);
             }
         }
 
         private void StoreVariable(Variable variable, CodeBuilder valueLoader)
         {
-            switch (variable.Kind)
+            using (var value = il.NewLocal<ushort>())
             {
-                case VariableKind.Stack:
-                    using (var value = il.NewLocal<ushort>())
-                    {
-                        valueLoader();
-                        value.Store();
+                valueLoader();
+                value.Store();
 
+                switch (variable.Kind)
+                {
+                    case VariableKind.Stack:
                         EmitPushStack(value);
-                    }
+                        break;
 
-                    break;
+                    case VariableKind.Local:
+                        EmitStoreLocalVariable(variable.Index, value);
+                        break;
 
-                case VariableKind.Local:
-                    StoreLocalVariable(variable.Index, valueLoader);
-                    break;
-
-                default: // VariableKind.Global
-                    StoreGlobalVariable(variable.Index, valueLoader);
-                    break;
+                    default: // VariableKind.Global
+                        EmitStoreGlobalVariable(variable.Index, value);
+                        break;
+                }
             }
         }
 

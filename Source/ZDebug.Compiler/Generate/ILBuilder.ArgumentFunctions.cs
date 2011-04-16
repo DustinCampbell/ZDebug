@@ -16,34 +16,39 @@ namespace ZDebug.Compiler.Generate
                 builder.Emit(OpCodes.Ldarg_0);
             }
 
-            public void LoadLocals()
+            public void LoadMemory()
             {
                 builder.Emit(OpCodes.Ldarg_1);
             }
 
-            public void LoadStack()
+            public void LoadLocals()
             {
                 builder.Emit(OpCodes.Ldarg_2);
             }
 
-            public void LoadSP()
+            public void LoadStack()
             {
                 builder.Emit(OpCodes.Ldarg_3);
             }
 
-            public void StoreSP()
-            {
-                builder.Emit(OpCodes.Starg_S, 3);
-            }
-
-            public void LoadCalls()
+            public void LoadSP()
             {
                 builder.Emit(OpCodes.Ldarg_S, 4);
             }
 
-            public void LoadArgCount()
+            public void StoreSP()
+            {
+                builder.Emit(OpCodes.Starg_S, 4);
+            }
+
+            public void LoadCalls()
             {
                 builder.Emit(OpCodes.Ldarg_S, 5);
+            }
+
+            public void LoadArgCount()
+            {
+                builder.Emit(OpCodes.Ldarg_S, 6);
             }
         }
     }

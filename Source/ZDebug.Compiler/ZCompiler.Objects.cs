@@ -557,8 +557,8 @@ namespace ZDebug.Compiler
 
         private void ObjectHasAttribute(ILocal objNum, ILocal attribute)
         {
-            memory.LoadElement(
-                indexLoader: () =>
+            LoadByte(
+                addressLoader: () =>
                 {
                     CalculateObjectAddress(objNum);
                     attribute.Load();
@@ -618,7 +618,7 @@ namespace ZDebug.Compiler
                 bitMask.Store();
 
                 // load byte value
-                memory.LoadElement(il.GenerateLoad(address));
+                LoadByte(il.GenerateLoad(address));
                 byteValue.Store();
 
                 // calculate
@@ -638,8 +638,8 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt8();
 
                 byteValue.Store();
-                memory.StoreElement(
-                    indexLoader: () => address.Load(),
+                StoreByte(
+                    addressLoader: () => address.Load(),
                     valueLoader: () => byteValue.Load());
             }
         }

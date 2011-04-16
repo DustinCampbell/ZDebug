@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
@@ -31,7 +30,6 @@ namespace ZDebug.Compiler
 
         private LinkedListNode<Instruction> current;
 
-        private IArrayLocal memory;
         private ILocal screen;
         private ILocal outputStreams;
 
@@ -55,7 +53,7 @@ namespace ZDebug.Compiler
             return new DynamicMethod(
                 name: string.Format("{0:x4}_{1}_locals", routine.Address, routine.Locals.Length),
                 returnType: typeof(ushort),
-                parameterTypes: Types.Array<CompiledZMachine, ushort[], ushort[], int, ZRoutineCall[], int>(),
+                parameterTypes: Types.Array<CompiledZMachine, byte[], ushort[], ushort[], int, ZRoutineCall[], int>(),
                 owner: typeof(CompiledZMachine),
                 skipVisibility: true);
         }
@@ -89,10 +87,6 @@ namespace ZDebug.Compiler
                     if (!this.usesMemory && i.UsesMemory())
                     {
                         this.usesMemory = true;
-
-                        // memory...
-                        var memoryField = Reflection<ZMachine>.GetField("Memory", @public: false);
-                        this.memory = il.NewArrayLocal<byte>(il.GenerateLoadInstanceField(memoryField));
                     }
 
                     if (!this.usesScreen && i.UsesScreen())
@@ -246,25 +240,6 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", this.current.Value.Address, this.current.Value.Opcode.Name));
         }
 
-        private static string GetInvokeName(int argCount)
-        {
-            return "Invoke" + argCount.ToString();
-        }
-
-        private static Type[] GetInvokeParameterTypes(int argCount)
-        {
-            var types = new Type[argCount + 2];
-            for (int i = 0; i < argCount; i++)
-            {
-                types[i] = typeof(ushort);
-            }
-
-            types[argCount] = typeof(ushort[]);
-            types[argCount + 1] = typeof(int);
-
-            return types;
-        }
-
         private void DirectCall(Operand addressOp)
         {
             if (machine.Profiling)
@@ -305,14 +280,13 @@ namespace ZDebug.Compiler
                     LoadOperand(i);
                 }
 
-                // The stack and stack pointer are the last arguments passed in
+                // The memory, stack and stack pointer are the last arguments passed in
                 // case any operands manipulate them.
+                il.Arguments.LoadMemory();
                 il.Arguments.LoadStack();
                 il.Arguments.LoadSP();
 
-                var invokeName = GetInvokeName(argCount);
-                var invokeParameterTypes = GetInvokeParameterTypes(argCount);
-                il.Call(Reflection<ZRoutineCall>.GetMethod(invokeName, invokeParameterTypes));
+                il.Call(ZRoutineCall.GetInvokeMethod(argCount));
             }
         }
 
@@ -388,12 +362,11 @@ namespace ZDebug.Compiler
 
                 // The stack and stack pointer are the last arguments passed in
                 // case any operands manipulate them.
+                il.Arguments.LoadMemory();
                 il.Arguments.LoadStack();
                 il.Arguments.LoadSP();
 
-                var invokeName = GetInvokeName(argCount);
-                var invokeParameterTypes = GetInvokeParameterTypes(argCount);
-                il.Call(Reflection<ZRoutineCall>.GetMethod(invokeName, invokeParameterTypes));
+                il.Call(ZRoutineCall.GetInvokeMethod(argCount));
 
                 done.Mark();
             }

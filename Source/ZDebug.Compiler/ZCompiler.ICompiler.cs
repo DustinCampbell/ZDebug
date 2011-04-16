@@ -98,7 +98,9 @@ namespace ZDebug.Compiler
 
         private void EmitLoadMemoryByte(CodeBuilder loadAddress)
         {
-            memory.LoadElement(loadAddress);
+            il.Arguments.LoadMemory();
+            loadAddress();
+            il.Emit(OpCodes.Ldelem_U1);
         }
 
         public void EmitLoadMemoryByte(int address)
@@ -116,11 +118,11 @@ namespace ZDebug.Compiler
         private void EmitLoadMemoryWord(CodeBuilder loadAddress)
         {
             // shift memory[address] left 8 bits
-            memory.LoadElement(loadAddress);
+            EmitLoadMemoryByte(loadAddress);
             il.Math.Shl(8);
 
             // read memory[address + 1]
-            memory.LoadElement(() =>
+            EmitLoadMemoryByte(() =>
             {
                 loadAddress();
                 il.Math.Add(1);
@@ -145,7 +147,10 @@ namespace ZDebug.Compiler
 
         private void EmitStoreMemoryByte(CodeBuilder loadAddress, CodeBuilder loadValue)
         {
-            memory.StoreElement(loadAddress, loadValue);
+            il.Arguments.LoadMemory();
+            loadAddress();
+            loadValue();
+            il.Emit(OpCodes.Stelem_I1);
         }
 
         public void EmitStoreMemoryByte(int address, ILocal value)
@@ -165,7 +170,7 @@ namespace ZDebug.Compiler
         private void EmitStoreMemoryWord(CodeBuilder loadAddress, CodeBuilder loadValue)
         {
             // memory[address] = (byte)(value >> 8);
-            memory.StoreElement(
+            EmitStoreMemoryByte(
                 loadAddress,
                 () =>
                 {
@@ -175,7 +180,7 @@ namespace ZDebug.Compiler
                 });
 
             // memory[address + 1] = (byte)(value & 0xff);
-            memory.StoreElement(
+            EmitStoreMemoryByte(
                 () =>
                 {
                     loadAddress();
@@ -368,7 +373,7 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            if (memory != null)
+            if (usesMemory)
             {
                 using (var adjustedVariableIndex = il.NewLocal<byte>())
                 {
@@ -471,7 +476,7 @@ namespace ZDebug.Compiler
             // global
             tryGlobal.Mark();
 
-            if (memory != null)
+            if (usesMemory)
             {
                 using (var adjustedVariableIndex = il.NewLocal<byte>())
                 {

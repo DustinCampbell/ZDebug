@@ -554,7 +554,7 @@ namespace ZDebug.Compiler
             var stack = new ushort[STACK_SIZE];
             var sp = -1;
 
-            routineCall.Invoke0(stack, sp);
+            routineCall.Invoke0(this.Memory, stack, sp);
         }
 
         internal void Tick()
