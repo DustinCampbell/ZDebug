@@ -661,7 +661,7 @@ namespace ZDebug.Compiler
                 Store(valueLoader: () =>
                 {
                     var address = addressOp.Value + offsetOp.Value;
-                    LoadByte(address);
+                    EmitLoadMemoryByte(address);
                 });
             }
             else
@@ -675,7 +675,7 @@ namespace ZDebug.Compiler
 
                     Store(valueLoader: () =>
                     {
-                        LoadByte(address);
+                        EmitLoadMemoryByte(address);
                     });
                 }
             }
@@ -692,7 +692,7 @@ namespace ZDebug.Compiler
                 Store(valueLoader: () =>
                 {
                     var address = addressOp.Value + (offsetOp.Value * 2);
-                    LoadWord(address);
+                    EmitLoadMemoryWord(address);
                 });
             }
             else
@@ -707,7 +707,7 @@ namespace ZDebug.Compiler
 
                     Store(valueLoader: () =>
                     {
-                        LoadWord(address);
+                        EmitLoadMemoryWord(address);
                     });
                 }
             }
@@ -758,9 +758,9 @@ namespace ZDebug.Compiler
             // Are the address and offset operands constants? If so, we can fold them at compile time.
             if (addressOp.IsConstant && offsetOp.IsConstant && !valueOp.IsStackVariable)
             {
-                StoreByte(
-                    address: addressOp.Value + offsetOp.Value,
-                    valueLoader: () =>
+                EmitStoreMemoryByte(
+                    loadAddress: () => il.Load(addressOp.Value + offsetOp.Value),
+                    loadValue: () =>
                     {
                         LoadOperand(2);
                         il.Convert.ToUInt8();
@@ -780,7 +780,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToUInt8();
                     value.Store();
 
-                    StoreByte(address, value);
+                    EmitStoreMemoryByte(address, value);
                 }
             }
         }
@@ -794,9 +794,9 @@ namespace ZDebug.Compiler
             // Are the address and offset operands constants? If so, we can fold them at compile time.
             if (addressOp.IsConstant && offsetOp.IsConstant && !valueOp.IsStackVariable)
             {
-                StoreWord(
-                    address: addressOp.Value + (offsetOp.Value * 2),
-                    valueLoader: () => LoadOperand(2));
+                EmitStoreMemoryWord(
+                    loadAddress: () => il.Load(addressOp.Value + (offsetOp.Value * 2)),
+                    loadValue: () => LoadOperand(2));
             }
             else
             {
@@ -812,7 +812,7 @@ namespace ZDebug.Compiler
                     LoadOperand(2);
                     value.Store();
 
-                    StoreWord(address, value);
+                    EmitStoreMemoryWord(address, value);
                 }
             }
         }
@@ -987,7 +987,7 @@ namespace ZDebug.Compiler
                 // start of the loop
                 loopStart.Mark();
 
-                LoadByte(propAddress);
+                EmitLoadMemoryByte(propAddress);
                 value.Store();
 
                 propAddress.Load();
@@ -1014,7 +1014,7 @@ namespace ZDebug.Compiler
                 // At this point, we're done - store the value
                 storePropNum.Mark();
 
-                LoadByte(propAddress);
+                EmitLoadMemoryByte(propAddress);
                 il.Load(mask);
                 il.Math.And();
                 il.Convert.ToUInt16();
@@ -1076,7 +1076,7 @@ namespace ZDebug.Compiler
 
                     loopStart.Mark();
 
-                    LoadByte(propAddress);
+                    EmitLoadMemoryByte(propAddress);
                     value.Store();
 
                     value.Load();
@@ -1113,14 +1113,14 @@ namespace ZDebug.Compiler
                     il.Math.And(sizeMask);
                     secondBranch.BranchIf(Condition.True, @short: true);
 
-                    LoadByte(propAddress);
+                    EmitLoadMemoryByte(propAddress);
                     result.Store();
 
                     done.Branch();
 
                     secondBranch.Mark();
 
-                    LoadWord(propAddress);
+                    EmitLoadMemoryWord(propAddress);
                     result.Store();
 
                     done.Branch();
@@ -1134,7 +1134,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToUInt16();
                     propAddress.Store();
 
-                    LoadWord(propAddress);
+                    EmitLoadMemoryWord(propAddress);
                     result.Store();
 
                     done.Branch();
@@ -1181,7 +1181,7 @@ namespace ZDebug.Compiler
 
                     loopStart.Mark();
 
-                    LoadByte(propAddress);
+                    EmitLoadMemoryByte(propAddress);
                     value.Store();
 
                     value.Load();
@@ -1262,7 +1262,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt16();
                 dataAddress.Store();
 
-                LoadByte(dataAddress);
+                EmitLoadMemoryByte(dataAddress);
                 value.Store();
 
                 var checkForZero = il.NewLabel();
@@ -1378,7 +1378,7 @@ namespace ZDebug.Compiler
                     loopStart.Mark();
 
                     // Read first property byte and store in value
-                    LoadByte(propAddress);
+                    EmitLoadMemoryByte(propAddress);
                     value.Store();
 
                     // if ((value & mask) <= propNum) break;
@@ -1441,7 +1441,7 @@ namespace ZDebug.Compiler
                         il.Convert.ToUInt8();
                         temp.Store();
 
-                        StoreByte(propAddress, temp);
+                        EmitStoreMemoryByte(propAddress, temp);
 
                         il.DebugWrite("Wrote byte {0:x2} to {1:x4}", temp, propAddress);
 
@@ -1456,7 +1456,7 @@ namespace ZDebug.Compiler
                         LoadOperand(2);
                         temp.Store();
 
-                        StoreWord(propAddress, temp);
+                        EmitStoreMemoryWord(propAddress, temp);
 
                         il.DebugWrite("Wrote word {0:x2} to {1:x4}", temp, propAddress);
                     }

@@ -35,23 +35,28 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                LoadByte(address);
+                EmitLoadMemoryByte(address);
             }
             else
             {
-                LoadWord(address);
+                EmitLoadMemoryWord(address);
             }
         }
 
         private void ReadObjectNumber()
         {
-            if (machine.Version < 4)
+            using (var address = il.NewLocal<ushort>())
             {
-                LoadByte();
-            }
-            else
-            {
-                LoadWord();
+                address.Store();
+
+                if (machine.Version < 4)
+                {
+                    EmitLoadMemoryByte(address);
+                }
+                else
+                {
+                    EmitLoadMemoryWord(address);
+                }
             }
         }
 
@@ -59,11 +64,15 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                StoreByte(address, value);
+                EmitStoreMemoryByte(
+                    loadAddress: () => il.Load(address),
+                    loadValue: () => il.Load(value));
             }
             else
             {
-                StoreWord(address, value);
+                EmitStoreMemoryWord(
+                    loadAddress: () => il.Load(address),
+                    loadValue: () => il.Load(value));
             }
         }
 
@@ -71,11 +80,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                StoreByte(address, value);
+                EmitStoreMemoryByte(address, value);
             }
             else
             {
-                StoreWord(address, value);
+                EmitStoreMemoryWord(address, value);
             }
         }
 
@@ -83,11 +92,11 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                StoreByte(address, value);
+                EmitStoreMemoryByte(address, value);
             }
             else
             {
-                StoreWord(address, value);
+                EmitStoreMemoryWord(address, value);
             }
         }
 
@@ -95,11 +104,15 @@ namespace ZDebug.Compiler
         {
             if (machine.Version < 4)
             {
-                StoreByte(address, value);
+                EmitStoreMemoryByte(
+                    loadAddress: () => address.Load(),
+                    loadValue: () => il.Load(value));
             }
             else
             {
-                StoreWord(address, value);
+                EmitStoreMemoryWord(
+                    loadAddress: () => address.Load(),
+                    loadValue: () => il.Load(value));
             }
         }
 
@@ -452,7 +465,7 @@ namespace ZDebug.Compiler
         {
             var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectPropertyTableAddressOffset);
 
-            LoadWord(address);
+            EmitLoadMemoryWord(address);
         }
 
         /// <summary>
@@ -467,7 +480,12 @@ namespace ZDebug.Compiler
             // Add property table address offset to the address on the evaluation stack.
             il.Math.Add(machine.ObjectPropertyTableAddressOffset);
 
-            LoadWord();
+            using (var address = il.NewLocal<ushort>())
+            {
+                address.Store();
+
+                EmitLoadMemoryWord(address);
+            }
         }
 
         private void ReadObjectPropertyTableAddressFromOperand(int operandIndex)
@@ -502,7 +520,7 @@ namespace ZDebug.Compiler
             {
                 address.Store();
 
-                LoadByte(address);
+                EmitLoadMemoryByte(address);
                 length.Store();
                 zwords.Create(length);
 
@@ -520,7 +538,7 @@ namespace ZDebug.Compiler
                 length.Load();
                 loopDone.BranchIf(Condition.AtLeast);
 
-                LoadWord(address);
+                EmitLoadMemoryWord(address);
                 value.Store();
 
                 zwords.StoreElement(
@@ -557,8 +575,8 @@ namespace ZDebug.Compiler
 
         private void ObjectHasAttribute(ILocal objNum, ILocal attribute)
         {
-            LoadByte(
-                addressLoader: () =>
+            EmitLoadMemoryByte(
+                loadAddress: () =>
                 {
                     CalculateObjectAddress(objNum);
                     attribute.Load();
@@ -618,7 +636,7 @@ namespace ZDebug.Compiler
                 bitMask.Store();
 
                 // load byte value
-                LoadByte(il.GenerateLoad(address));
+                EmitLoadMemoryByte(address);
                 byteValue.Store();
 
                 // calculate
@@ -638,9 +656,7 @@ namespace ZDebug.Compiler
                 il.Convert.ToUInt8();
 
                 byteValue.Store();
-                StoreByte(
-                    addressLoader: () => address.Load(),
-                    valueLoader: () => byteValue.Load());
+                EmitStoreMemoryByte(address, byteValue);
             }
         }
 
@@ -654,7 +670,7 @@ namespace ZDebug.Compiler
             {
                 propAddress.Store();
 
-                LoadByte(propAddress); // name-length
+                EmitLoadMemoryByte(propAddress); // name-length
                 il.Convert.ToUInt16();
                 il.Math.Multiply(2);
                 propAddress.Load();
@@ -687,7 +703,7 @@ namespace ZDebug.Compiler
                 propAddress.Store();
 
                 // read size byte
-                LoadByte(propAddress);
+                EmitLoadMemoryByte(propAddress);
                 size.Store();
 
                 // increment propAddress
@@ -725,7 +741,7 @@ namespace ZDebug.Compiler
                     secondSizeByte.Mark();
 
                     // read second size byte
-                    LoadByte(propAddress);
+                    EmitLoadMemoryByte(propAddress);
                     size.Store();
 
                     // size &= 0x3f
