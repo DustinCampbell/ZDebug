@@ -224,7 +224,7 @@ namespace ZDebug.Compiler
                 flags.Load();
 
                 il.Compare.Equal();
-                Branch();
+                EmitBranch(current.Value.Branch);
             }
         }
 
@@ -304,7 +304,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToInt16();
 
                     il.Compare.LessThan();
-                    Branch();
+                    EmitBranch(current.Value.Branch);
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -327,7 +327,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToInt16();
 
                     il.Compare.LessThan();
-                    Branch();
+                    EmitBranch(current.Value.Branch);
                 }
             }
             else
@@ -398,7 +398,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToInt16();
 
                     il.Compare.GreaterThan();
-                    Branch();
+                    EmitBranch(current.Value.Branch);
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -421,7 +421,7 @@ namespace ZDebug.Compiler
                     il.Convert.ToInt16();
 
                     il.Compare.GreaterThan();
-                    Branch();
+                    EmitBranch(current.Value.Branch);
                 }
             }
             else
@@ -439,7 +439,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
             il.Compare.Equal();
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_je_3or4operands()
@@ -474,7 +474,7 @@ namespace ZDebug.Compiler
                 il.Load(1);
 
                 done.Mark();
-                Branch();
+                EmitBranch(current.Value.Branch);
             }
         }
 
@@ -504,7 +504,7 @@ namespace ZDebug.Compiler
             il.Convert.ToInt16();
 
             il.Compare.GreaterThan();
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_jin()
@@ -513,7 +513,7 @@ namespace ZDebug.Compiler
             LoadOperand(1);
 
             il.Compare.Equal();
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_jl()
@@ -525,7 +525,7 @@ namespace ZDebug.Compiler
             il.Convert.ToInt16();
 
             il.Compare.LessThan();
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_jump()
@@ -541,7 +541,7 @@ namespace ZDebug.Compiler
             il.Load(0);
             il.Compare.Equal();
 
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -552,7 +552,7 @@ namespace ZDebug.Compiler
         {
             il.DebugIndent();
 
-            Call();
+            EmitCall(current.Value.Operands[0], current.Value.Operands.Skip(1));
 
             // discard result...
             il.Pop();
@@ -566,7 +566,7 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                Call();
+                EmitCall(current.Value.Operands[0], current.Value.Operands.Skip(1));
 
                 result.Store();
                 Store(() => result.Load());
@@ -582,23 +582,25 @@ namespace ZDebug.Compiler
         private void op_ret()
         {
             LoadOperand(0);
-            Return();
+            EmitReturn();
         }
 
         private void op_ret_popped()
         {
             EmitPopStack();
-            Return();
+            EmitReturn();
         }
 
         private void op_rfalse()
         {
-            Return(0);
+            il.Load(0);
+            EmitReturn();
         }
 
         private void op_rtrue()
         {
-            Return(1);
+            il.Load(1);
+            EmitReturn();
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -857,7 +859,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
                 il.Compare.NotEqual();
 
-                Branch();
+                EmitBranch(current.Value.Branch);
             }
         }
 
@@ -886,7 +888,7 @@ namespace ZDebug.Compiler
                 using (var varIndex = il.NewLocal<byte>())
                 using (var value = il.NewLocal<ushort>())
                 {
-                    LoadByRefVariableOperand();
+                    LoadOperand(0);
                     varIndex.Store();
 
                     EmitPopStack();
@@ -948,7 +950,7 @@ namespace ZDebug.Compiler
                 result.Load();
                 il.Load(0);
                 il.Compare.GreaterThan();
-                Branch();
+                EmitBranch(current.Value.Branch);
             }
         }
 
@@ -1342,7 +1344,7 @@ namespace ZDebug.Compiler
                 result.Load();
                 il.Load(0);
                 il.Compare.GreaterThan();
-                Branch();
+                EmitBranch(current.Value.Branch);
             }
         }
 
@@ -1512,14 +1514,14 @@ namespace ZDebug.Compiler
                 attribute.Store();
 
                 ObjectHasAttribute(objNum, attribute);
-                Branch();
+                EmitBranch(current.Value.Branch);
 
                 var done = il.NewLabel();
                 done.Branch(@short: true);
 
                 invalidObjNum.Mark();
                 il.Load(false);
-                Branch();
+                EmitBranch(current.Value.Branch);
 
                 done.Mark();
             }
@@ -1653,7 +1655,8 @@ namespace ZDebug.Compiler
         {
             var text = machine.ConvertZText(this.current.Value.ZText);
             PrintText(text);
-            Return(1);
+            il.Load(1);
+            EmitReturn();
         }
 
         private void op_set_color()
@@ -1819,13 +1822,13 @@ namespace ZDebug.Compiler
             il.Arguments.LoadArgCount();
 
             il.Compare.AtMost();
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_piracy()
         {
             il.Load(1);
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_verify()
@@ -1833,7 +1836,7 @@ namespace ZDebug.Compiler
             il.Arguments.LoadMachine();
             il.Call(Reflection<CompiledZMachine>.GetMethod("Verify", @public: false));
 
-            Branch();
+            EmitBranch(current.Value.Branch);
         }
 
         private void op_quit()

@@ -168,14 +168,6 @@ namespace ZDebug.Compiler
             return new ZCompilerResult(this.routine, calls.ToArray(), code, statistics);
         }
 
-        private int OperandCount
-        {
-            get
-            {
-                return this.current.Value.OperandCount;
-            }
-        }
-
         private void Profiler_EnterRoutine()
         {
             if (machine.Profiling)
@@ -240,201 +232,46 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", this.current.Value.Address, this.current.Value.Opcode.Name));
         }
 
-        private void DirectCall(Operand addressOp)
+        private Operand GetOperand(int operandIndex)
         {
-            if (machine.Profiling)
+            if (operandIndex < 0 || operandIndex >= OperandCount)
             {
-                il.Arguments.LoadMachine();
-                if (addressOp.Value == 0)
-                {
-                    il.Load(0);
-                }
-                else
-                {
-                    il.Load(machine.UnpackRoutineAddress(addressOp.Value));
-                }
-
-                il.Load(false);
-                il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
+                throw new ZCompilerException(
+                    string.Format(
+                        "Attempted to read operand {0}, but only 0 through {1} are valid.",
+                        operandIndex,
+                        OperandCount - 1));
             }
 
-            if (addressOp.Value == 0)
-            {
-                Return(0);
-            }
-            else
-            {
-                var address = machine.UnpackRoutineAddress(addressOp.Value);
-                var routineCall = machine.GetRoutineCall(address);
-                var index = calls.Count;
-                calls.Add(routineCall);
-
-                // load routine call
-                il.Arguments.LoadCalls();
-                il.Load(index);
-                il.Emit(OpCodes.Ldelem_Ref);
-
-                var argCount = OperandCount - 1;
-                for (int i = 1; i <= argCount; i++)
-                {
-                    LoadOperand(i);
-                }
-
-                // The memory, stack and stack pointer are the last arguments passed in
-                // case any operands manipulate them.
-                il.Arguments.LoadMemory();
-                il.Arguments.LoadStack();
-                il.Arguments.LoadSP();
-
-                il.Call(ZRoutineCall.GetInvokeMethod(argCount));
-            }
+            return this.current.Value.Operands[operandIndex];
         }
 
-        private void CalculatedCall(Operand addressOp)
+        /// <summary>
+        /// Loads the specified operand onto the evaluation stack.
+        /// </summary>
+        private void LoadOperand(int operandIndex)
         {
-            using (var address = il.NewLocal<int>())
+            var op = GetOperand(operandIndex);
+
+            switch (op.Kind)
             {
-                EmitLoadVariable((byte)addressOp.Value);
-                address.Store();
-
-                // is this address 0?
-                var nonZeroCall = il.NewLabel();
-                var done = il.NewLabel();
-                address.Load();
-                nonZeroCall.BranchIf(Condition.True);
-
-                if (machine.Profiling)
-                {
-                    il.Arguments.LoadMachine();
-                    il.Load(0);
-                    il.Load(true);
-
-                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
-                    il.Call(profilerCall);
-                }
-
-                var argCount = OperandCount - 1;
-
-                // discard any SP operands...
-                int spOperands = 0;
-                for (int i = 1; i <= argCount; i++)
-                {
-                    var op = GetOperand(i);
-                    if (op.Kind == OperandKind.Variable && op.Value == 0)
-                    {
-                        spOperands++;
-                    }
-                }
-
-                if (spOperands > 0)
-                {
-                    il.Arguments.LoadSP();
-                    il.Math.Subtract(spOperands);
-                    il.Arguments.StoreSP();
-                }
-
-                il.Load(0);
-
-                done.Branch();
-
-                nonZeroCall.Mark();
-
-                if (machine.Profiling)
-                {
-                    il.Arguments.LoadMachine();
-                    address.Load();
-                    UnpackRoutineAddress();
-                    il.Load(true);
-
-                    il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
-                }
-
-                il.Arguments.LoadMachine();
-                address.Load();
-                UnpackRoutineAddress();
-
-                il.Call(Reflection<CompiledZMachine>.GetMethod("GetRoutineCall", Types.Array<int>(), @public: false));
-
-                for (int i = 1; i <= argCount; i++)
-                {
-                    LoadOperand(i);
-                }
-
-                // The stack and stack pointer are the last arguments passed in
-                // case any operands manipulate them.
-                il.Arguments.LoadMemory();
-                il.Arguments.LoadStack();
-                il.Arguments.LoadSP();
-
-                il.Call(ZRoutineCall.GetInvokeMethod(argCount));
-
-                done.Mark();
-            }
-        }
-
-        private void Call()
-        {
-            var addressOp = GetOperand(0);
-            if (addressOp.Kind != OperandKind.Variable)
-            {
-                DirectCall(addressOp);
-            }
-            else
-            {
-                CalculatedCall(addressOp);
-            }
-        }
-
-        private void Return(int? value = null)
-        {
-            Profiler_ExitRoutine();
-
-            if (value != null)
-            {
-                il.Return(value.Value);
-            }
-            else
-            {
-                il.Return();
-            }
-        }
-
-        private void Branch()
-        {
-            if (!this.current.Value.HasBranch)
-            {
-                throw new ZCompilerException("Expected instruction to have a branch.");
-            }
-
-            // It is expected that the value on the top of the evaluation stack
-            // is the boolean value to compare branch.Condition with.
-
-            var noJump = il.NewLabel();
-
-            il.Load(this.current.Value.Branch.Condition);
-            noJump.BranchIf(Condition.NotEqual, @short: true);
-
-            switch (this.current.Value.Branch.Kind)
-            {
-                case BranchKind.RFalse:
-                    il.DebugWrite("  > branching rfalse...");
-                    Return(0);
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Load(op.Value);
                     break;
 
-                case BranchKind.RTrue:
-                    il.DebugWrite("  > branching rtrue...");
-                    Return(1);
-                    break;
-
-                default: // BranchKind.Address
-                    var address = this.current.Value.Branch.TargetAddress;
-                    var jump = addressToLabelMap[address];
-                    il.DebugWrite(string.Format("  > branching to {0:x4}...", address));
-                    jump.Branch();
+                default: // OperandKind.Variable
+                    EmitLoadVariable((byte)op.Value);
                     break;
             }
+        }
 
-            noJump.Mark();
+        private int OperandCount
+        {
+            get
+            {
+                return this.current.Value.OperandCount;
+            }
         }
 
         private void Store(CodeBuilder valueLoader)

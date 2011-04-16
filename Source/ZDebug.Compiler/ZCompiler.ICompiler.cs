@@ -9,6 +9,81 @@ namespace ZDebug.Compiler
 {
     internal partial class ZCompiler : ICompiler
     {
+        /// <summary>
+        /// Unpacks the byte address on the evaluation stack as a routine address.
+        /// </summary>
+        private void UnpackRoutineAddress()
+        {
+            byte version = machine.Version;
+            if (version < 4)
+            {
+                il.Math.Multiply(2);
+            }
+            else if (version < 8)
+            {
+                il.Math.Multiply(4);
+            }
+            else // 8
+            {
+                il.Math.Multiply(8);
+            }
+
+            if (version >= 6 && version <= 7)
+            {
+                il.Math.Add(machine.RoutinesOffset * 8);
+            }
+        }
+
+        private void LoadUnpackedRoutineAddress(Operand op)
+        {
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Load(machine.UnpackRoutineAddress(op.Value));
+                    break;
+
+                default: // OperandKind.Variable
+                    EmitLoadVariable((byte)op.Value);
+                    UnpackRoutineAddress();
+                    break;
+            }
+        }
+
+        private void LoadUnpackedStringAddress(Operand op)
+        {
+            switch (op.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Load(machine.UnpackStringAddress(op.Value));
+                    break;
+
+                default: // OperandKind.Variable
+                    EmitLoadVariable((byte)op.Value);
+
+                    byte version = machine.Version;
+                    if (version < 4)
+                    {
+                        il.Math.Multiply(2);
+                    }
+                    else if (version < 8)
+                    {
+                        il.Math.Multiply(4);
+                    }
+                    else // 8
+                    {
+                        il.Math.Multiply(8);
+                    }
+
+                    if (version >= 6 && version <= 7)
+                    {
+                        il.Math.Add(machine.StringsOffset * 8);
+                    }
+                    break;
+            }
+        }
+
         public ILabel GetLabel(int address)
         {
             ILabel result;
@@ -48,17 +123,21 @@ namespace ZDebug.Compiler
             switch (branch.Kind)
             {
                 case BranchKind.RFalse:
+                    il.DebugWrite("  > branching rfalse...");
                     il.Load(0);
-                    Return();
+                    EmitReturn();
                     break;
 
                 case BranchKind.RTrue:
+                    il.DebugWrite("  > branching rtrue...");
                     il.Load(1);
-                    Return();
+                    EmitReturn();
                     break;
 
                 default: // BranchKind.Address
-                    var jump = GetLabel(branch.TargetAddress);
+                    var address = branch.TargetAddress;
+                    var jump = addressToLabelMap[address];
+                    il.DebugWrite(string.Format("  > branching to {0:x4}...", address));
                     jump.Branch();
                     break;
             }
@@ -68,31 +147,149 @@ namespace ZDebug.Compiler
 
         public void EmitReturn()
         {
-            il.Arguments.LoadMachine();
-            il.Call(Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false));
+            Profiler_ExitRoutine();
 
             il.Return();
         }
 
-        private void DirectCall(Operand address, ReadOnlyArray<Operand> args)
+        private void EmitDirectCall(Operand addressOp, ReadOnlyArray<Operand> args)
         {
+            if (machine.Profiling)
+            {
+                il.Arguments.LoadMachine();
+                if (addressOp.Value == 0)
+                {
+                    il.Load(0);
+                }
+                else
+                {
+                    il.Load(machine.UnpackRoutineAddress(addressOp.Value));
+                }
 
+                il.Load(false);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
+            }
+
+            if (addressOp.Value == 0)
+            {
+                il.Load(0);
+                EmitReturn();
+            }
+            else
+            {
+                var address = machine.UnpackRoutineAddress(addressOp.Value);
+                var routineCall = machine.GetRoutineCall(address);
+                var index = calls.Count;
+                calls.Add(routineCall);
+
+                // load routine call
+                il.Arguments.LoadCalls();
+                il.Load(index);
+                il.Emit(OpCodes.Ldelem_Ref);
+
+                foreach (var arg in args)
+                {
+                    EmitLoadOperand(arg);
+                }
+
+                // The memory, stack and stack pointer are the last arguments passed in
+                // case any operands manipulate them.
+                il.Arguments.LoadMemory();
+                il.Arguments.LoadStack();
+                il.Arguments.LoadSP();
+
+                il.Call(ZRoutineCall.GetInvokeMethod(args.Length));
+            }
         }
 
-        private void CalculatedCall(Operand address, ReadOnlyArray<Operand> args)
+        private void EmitCalculatedCall(Operand addressOp, ReadOnlyArray<Operand> args)
         {
+            using (var address = il.NewLocal<int>())
+            {
+                EmitLoadVariable((byte)addressOp.Value);
+                address.Store();
 
+                // is this address 0?
+                var nonZeroCall = il.NewLabel();
+                var done = il.NewLabel();
+                address.Load();
+                nonZeroCall.BranchIf(Condition.True);
+
+                if (machine.Profiling)
+                {
+                    il.Arguments.LoadMachine();
+                    il.Load(0);
+                    il.Load(true);
+
+                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
+                    il.Call(profilerCall);
+                }
+
+                // discard any SP operands...
+                int spOperands = 0;
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].IsStackVariable)
+                    {
+                        spOperands++;
+                    }
+                }
+
+                if (spOperands > 0)
+                {
+                    il.Arguments.LoadSP();
+                    il.Math.Subtract(spOperands);
+                    il.Arguments.StoreSP();
+                }
+
+                il.Load(0);
+
+                done.Branch();
+
+                nonZeroCall.Mark();
+
+                if (machine.Profiling)
+                {
+                    il.Arguments.LoadMachine();
+                    address.Load();
+                    UnpackRoutineAddress();
+                    il.Load(true);
+
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
+                }
+
+                il.Arguments.LoadMachine();
+                address.Load();
+                UnpackRoutineAddress();
+
+                il.Call(Reflection<CompiledZMachine>.GetMethod("GetRoutineCall", Types.Array<int>(), @public: false));
+
+                foreach (var arg in args)
+                {
+                    EmitLoadOperand(arg);
+                }
+
+                // The stack and stack pointer are the last arguments passed in
+                // case any operands manipulate them.
+                il.Arguments.LoadMemory();
+                il.Arguments.LoadStack();
+                il.Arguments.LoadSP();
+
+                il.Call(ZRoutineCall.GetInvokeMethod(args.Length));
+
+                done.Mark();
+            }
         }
 
         public void EmitCall(Operand address, ReadOnlyArray<Operand> args)
         {
             if (address.Kind != OperandKind.Variable)
             {
-                DirectCall(address, args);
+                EmitDirectCall(address, args);
             }
             else
             {
-                CalculatedCall(address, args);
+                EmitCalculatedCall(address, args);
             }
         }
 
