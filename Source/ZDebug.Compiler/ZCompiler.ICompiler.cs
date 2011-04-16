@@ -30,7 +30,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    LoadVariable((byte)operand.Value);
+                    EmitLoadVariable((byte)operand.Value);
                     break;
             }
         }
@@ -325,6 +325,8 @@ namespace ZDebug.Compiler
 
         public void EmitLoadVariable(ILocal variableIndex, bool indirect = false)
         {
+            il.DebugIndent();
+
             var tryLocal = il.NewLabel();
             var tryGlobal = il.NewLabel();
             var done = il.NewLabel();
@@ -354,13 +356,13 @@ namespace ZDebug.Compiler
 
             if (routine.Locals.Length > 0)
             {
-                using (var adjustedVariableIndex = il.NewLocal<byte>())
-                {
-                    variableIndex.Load();
-                    il.Math.Subtract(1);
-                    adjustedVariableIndex.Store();
+                variableIndex.Load();
+                il.Math.Subtract(1);
 
-                    EmitLoadLocalVariable(adjustedVariableIndex);
+                using (var localVariableIndex = il.NewLocal<byte>())
+                {
+                    localVariableIndex.Store();
+                    EmitLoadLocalVariable(localVariableIndex);
                 }
 
                 done.Branch(@short: true);
@@ -375,13 +377,13 @@ namespace ZDebug.Compiler
 
             if (usesMemory)
             {
-                using (var adjustedVariableIndex = il.NewLocal<byte>())
-                {
-                    variableIndex.Load();
-                    il.Math.Subtract(16);
-                    adjustedVariableIndex.Store();
+                variableIndex.Load();
+                il.Math.Subtract(16);
 
-                    EmitLoadGlobalVariable(adjustedVariableIndex);
+                using (var globalVariableIndex = il.NewLocal<byte>())
+                {
+                    globalVariableIndex.Store();
+                    EmitLoadGlobalVariable(globalVariableIndex);
                 }
             }
             else
@@ -390,6 +392,10 @@ namespace ZDebug.Compiler
             }
 
             done.Mark();
+
+            il.DebugUnindent();
+
+            calculatedLoadVariableCount++;
         }
 
         public void EmitStoreVariable(byte variableIndex, ILocal value, bool indirect = false)
@@ -428,6 +434,8 @@ namespace ZDebug.Compiler
 
         public void EmitStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
         {
+            il.DebugIndent();
+
             var tryLocal = il.NewLabel();
             var tryGlobal = il.NewLabel();
             var done = il.NewLabel();
@@ -457,13 +465,13 @@ namespace ZDebug.Compiler
 
             if (routine.Locals.Length > 0)
             {
-                using (var adjustedVariableIndex = il.NewLocal<byte>())
-                {
-                    variableIndex.Load();
-                    il.Math.Subtract(1);
-                    adjustedVariableIndex.Store();
+                variableIndex.Load();
+                il.Math.Subtract(1);
 
-                    EmitStoreLocalVariable(adjustedVariableIndex, value);
+                using (var localVariableIndex = il.NewLocal<byte>())
+                {
+                    localVariableIndex.Store();
+                    EmitStoreLocalVariable(localVariableIndex, value);
                 }
 
                 done.Branch(@short: true);
@@ -478,13 +486,13 @@ namespace ZDebug.Compiler
 
             if (usesMemory)
             {
-                using (var adjustedVariableIndex = il.NewLocal<byte>())
-                {
-                    variableIndex.Load();
-                    il.Math.Subtract(16);
-                    adjustedVariableIndex.Store();
+                variableIndex.Load();
+                il.Math.Subtract(16);
 
-                    EmitStoreGlobalVariable(adjustedVariableIndex, value);
+                using (var globalVariableIndex = il.NewLocal<byte>())
+                {
+                    globalVariableIndex.Store();
+                    EmitStoreGlobalVariable(globalVariableIndex, value);
                 }
             }
             else
@@ -493,8 +501,11 @@ namespace ZDebug.Compiler
             }
 
             done.Mark();
-        }
 
+            il.DebugUnindent();
+
+            calculatedStoreVariableCount++;
+        }
         private void EmitLoadObjectParent(int objNum)
         {
             var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectParentOffset);

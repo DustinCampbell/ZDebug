@@ -482,7 +482,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    LoadVariable((byte)op.Value);
+                    EmitLoadVariable((byte)op.Value);
                     ReadObjectPropertyTableAddress();
                     break;
             }

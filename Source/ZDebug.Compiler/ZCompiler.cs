@@ -294,7 +294,7 @@ namespace ZDebug.Compiler
         {
             using (var address = il.NewLocal<int>())
             {
-                LoadVariable((byte)addressOp.Value);
+                EmitLoadVariable((byte)addressOp.Value);
                 address.Store();
 
                 // is this address 0?
@@ -444,7 +444,13 @@ namespace ZDebug.Compiler
                 throw new ZCompilerException("Expected instruction to have a store variable.");
             }
 
-            StoreVariable(this.current.Value.StoreVariable, valueLoader);
+            using (var value = il.NewLocal<ushort>())
+            {
+                valueLoader();
+                value.Store();
+
+                EmitStoreVariable(this.current.Value.StoreVariable, value);
+            }
         }
 
         private void Assemble(Opcode opcode)

@@ -274,230 +274,6 @@ namespace ZDebug.Compiler
                 valueLoader: () => il.Load(value));
         }
 
-        private void CalculatedLoadVariable(ILocal variableIndex, bool indirect = false)
-        {
-            il.DebugIndent();
-
-            var tryLocal = il.NewLabel();
-            var tryGlobal = il.NewLabel();
-            var done = il.NewLabel();
-
-            // branch if this is not the stack (variableIndex > 0)
-            variableIndex.Load();
-            tryLocal.BranchIf(Condition.True, @short: true);
-
-            // stack
-            if (usesStack)
-            {
-                EmitPopStack(indirect);
-                done.Branch(@short: true);
-            }
-            else
-            {
-                il.RuntimeError("Unexpected stack access.");
-            }
-
-            // local
-            tryLocal.Mark();
-
-            // branch if this is not a local (variableIndex >= 16)
-            variableIndex.Load();
-            il.Load(16);
-            tryGlobal.BranchIf(Condition.AtLeast, @short: true);
-
-            if (routine.Locals.Length > 0)
-            {
-                variableIndex.Load();
-                il.Math.Subtract(1);
-
-                using (var localVariableIndex = il.NewLocal<byte>())
-                {
-                    localVariableIndex.Store();
-                    EmitLoadLocalVariable(localVariableIndex);
-                }
-
-                done.Branch(@short: true);
-            }
-            else
-            {
-                il.RuntimeError("Unexpected read from local variable {0}.", variableIndex);
-            }
-
-            // global
-            tryGlobal.Mark();
-
-            if (usesMemory)
-            {
-                variableIndex.Load();
-                il.Math.Subtract(16);
-
-                using (var globalVariableIndex = il.NewLocal<byte>())
-                {
-                    globalVariableIndex.Store();
-                    EmitLoadGlobalVariable(globalVariableIndex);
-                }
-            }
-            else
-            {
-                il.RuntimeError("Unexpected global variable access.");
-            }
-
-            done.Mark();
-
-            il.DebugUnindent();
-
-            calculatedLoadVariableCount++;
-        }
-
-        private void LoadVariable(byte variableIndex, bool indirect = false)
-        {
-            if (variableIndex == 0)
-            {
-                EmitPopStack(indirect);
-            }
-            else if (variableIndex < 16)
-            {
-                EmitLoadLocalVariable((byte)(variableIndex - 1));
-            }
-            else
-            {
-                EmitLoadGlobalVariable((byte)(variableIndex - 16));
-            }
-        }
-
-        private void LoadVariable(Variable variable, bool indirect = false)
-        {
-            switch (variable.Kind)
-            {
-                case VariableKind.Stack:
-                    EmitPopStack(indirect);
-                    break;
-
-                case VariableKind.Local:
-                    EmitLoadLocalVariable(variable.Index);
-                    break;
-
-                default: // VariableKind.Global
-                    EmitLoadGlobalVariable(variable.Index);
-                    break;
-            }
-        }
-
-        private void CalculatedStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false)
-        {
-            il.DebugIndent();
-
-            var tryLocal = il.NewLabel();
-            var tryGlobal = il.NewLabel();
-            var done = il.NewLabel();
-
-            // branch if this is not the stack (variableIndex > 0)
-            variableIndex.Load();
-            tryLocal.BranchIf(Condition.True, @short: true);
-
-            // stack
-            if (usesStack)
-            {
-                EmitPushStack(value, indirect);
-                done.Branch(@short: true);
-            }
-            else
-            {
-                il.RuntimeError("Unexpected stack access.");
-            }
-
-            // local
-            tryLocal.Mark();
-
-            // branch if this is not a local (variableIndex >= 16)
-            variableIndex.Load();
-            il.Load(16);
-            tryGlobal.BranchIf(Condition.AtLeast, @short: true);
-
-            if (routine.Locals.Length > 0)
-            {
-                variableIndex.Load();
-                il.Math.Subtract(1);
-
-                using (var localVariableIndex = il.NewLocal<byte>())
-                {
-                    localVariableIndex.Store();
-                    EmitStoreLocalVariable(localVariableIndex, value);
-                }
-
-                done.Branch(@short: true);
-            }
-            else
-            {
-                il.RuntimeError("Unexpected write to local variable {0}.", variableIndex);
-            }
-
-            // global
-            tryGlobal.Mark();
-
-            if (usesMemory)
-            {
-                variableIndex.Load();
-                il.Math.Subtract(16);
-
-                using (var globalVariableIndex = il.NewLocal<byte>())
-                {
-                    globalVariableIndex.Store();
-                    EmitStoreGlobalVariable(globalVariableIndex, value);
-                }
-            }
-            else
-            {
-                il.RuntimeError("Unexpected global variable access.");
-            }
-
-            done.Mark();
-
-            il.DebugUnindent();
-
-            calculatedStoreVariableCount++;
-        }
-
-        private void StoreVariable(byte variableIndex, ILocal value, bool indirect = false)
-        {
-            if (variableIndex == 0)
-            {
-                EmitPushStack(value, indirect);
-            }
-            else if (variableIndex < 16)
-            {
-                EmitStoreLocalVariable((byte)(variableIndex - 1), value);
-            }
-            else
-            {
-                EmitStoreGlobalVariable((byte)(variableIndex - 16), value);
-            }
-        }
-
-        private void StoreVariable(Variable variable, CodeBuilder valueLoader)
-        {
-            using (var value = il.NewLocal<ushort>())
-            {
-                valueLoader();
-                value.Store();
-
-                switch (variable.Kind)
-                {
-                    case VariableKind.Stack:
-                        EmitPushStack(value);
-                        break;
-
-                    case VariableKind.Local:
-                        EmitStoreLocalVariable(variable.Index, value);
-                        break;
-
-                    default: // VariableKind.Global
-                        EmitStoreGlobalVariable(variable.Index, value);
-                        break;
-                }
-            }
-        }
-
         private Operand GetOperand(int operandIndex)
         {
             if (operandIndex < 0 || operandIndex >= OperandCount)
@@ -527,7 +303,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    LoadVariable((byte)op.Value);
+                    EmitLoadVariable((byte)op.Value);
                     break;
             }
         }
@@ -546,7 +322,7 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    LoadVariable((byte)op.Value);
+                    EmitLoadVariable((byte)op.Value);
 
                     break;
 
@@ -590,7 +366,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    LoadVariable((byte)op.Value);
+                    EmitLoadVariable((byte)op.Value);
                     UnpackRoutineAddress();
                     break;
             }
@@ -606,7 +382,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    LoadVariable((byte)op.Value);
+                    EmitLoadVariable((byte)op.Value);
 
                     byte version = machine.Version;
                     if (version < 4)

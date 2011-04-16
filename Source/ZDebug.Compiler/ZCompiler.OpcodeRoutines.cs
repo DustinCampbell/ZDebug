@@ -238,12 +238,12 @@ namespace ZDebug.Compiler
             {
                 var varIndex = opValue;
 
-                LoadVariable(varIndex, indirect: true);
+                EmitLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                StoreVariable(varIndex, value, indirect: true);
+                EmitStoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -252,15 +252,15 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var value = il.NewLocal<short>())
             {
-                LoadVariable(opValue);
+                EmitLoadVariable(opValue);
                 varIndex.Store();
 
-                CalculatedLoadVariable(varIndex, indirect: true);
+                EmitLoadVariable(varIndex, indirect: true);
                 il.Convert.ToInt16();
                 il.Math.Subtract(1);
                 value.Store();
 
-                CalculatedStoreVariable(varIndex, value, indirect: true);
+                EmitStoreVariable(varIndex, value, indirect: true);
             }
         }
 
@@ -292,12 +292,12 @@ namespace ZDebug.Compiler
                 {
                     var varIndex = (byte)varIndexOp.Value;
 
-                    LoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Subtract(1);
                     value.Store();
 
-                    StoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
 
                     value.Load();
                     LoadOperand(1);
@@ -312,15 +312,15 @@ namespace ZDebug.Compiler
                 using (var varIndex = il.NewLocal<byte>())
                 using (var value = il.NewLocal<short>())
                 {
-                    LoadVariable((byte)varIndexOp.Value);
+                    EmitLoadVariable((byte)varIndexOp.Value);
                     varIndex.Store();
 
-                    CalculatedLoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Subtract(1);
                     value.Store();
 
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
 
                     value.Load();
                     LoadOperand(1);
@@ -346,12 +346,12 @@ namespace ZDebug.Compiler
                 {
                     var varIndex = (byte)varIndexOp.Value;
 
-                    LoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Add(1);
                     value.Store();
 
-                    StoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -359,15 +359,15 @@ namespace ZDebug.Compiler
                 using (var varIndex = il.NewLocal<byte>())
                 using (var value = il.NewLocal<short>())
                 {
-                    LoadVariable((byte)varIndexOp.Value);
+                    EmitLoadVariable((byte)varIndexOp.Value);
                     varIndex.Store();
 
-                    CalculatedLoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Add(1);
                     value.Store();
 
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else
@@ -386,12 +386,12 @@ namespace ZDebug.Compiler
                 {
                     var varIndex = (byte)varIndexOp.Value;
 
-                    LoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Add(1);
                     value.Store();
 
-                    StoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
 
                     value.Load();
                     LoadOperand(1);
@@ -406,15 +406,15 @@ namespace ZDebug.Compiler
                 using (var varIndex = il.NewLocal<byte>())
                 using (var value = il.NewLocal<short>())
                 {
-                    LoadVariable((byte)varIndexOp.Value);
+                    EmitLoadVariable((byte)varIndexOp.Value);
                     varIndex.Store();
 
-                    CalculatedLoadVariable(varIndex, indirect: true);
+                    EmitLoadVariable(varIndex, indirect: true);
                     il.Convert.ToInt16();
                     il.Math.Add(1);
                     value.Store();
 
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
 
                     value.Load();
                     LoadOperand(1);
@@ -611,7 +611,7 @@ namespace ZDebug.Compiler
             {
                 var varIndex = opValue;
 
-                LoadVariable(varIndex, indirect: true);
+                EmitLoadVariable(varIndex, indirect: true);
                 result.Store();
 
                 Store(() => result.Load());
@@ -623,10 +623,10 @@ namespace ZDebug.Compiler
             using (var varIndex = il.NewLocal<byte>())
             using (var result = il.NewLocal<ushort>())
             {
-                LoadVariable(opValue);
+                EmitLoadVariable(opValue);
                 varIndex.Store();
 
-                CalculatedLoadVariable(varIndex, indirect: true);
+                EmitLoadVariable(varIndex, indirect: true);
                 result.Store();
                 Store(() => result.Load());
             }
@@ -726,7 +726,7 @@ namespace ZDebug.Compiler
                     LoadOperand(1);
                     value.Store();
 
-                    StoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -734,13 +734,13 @@ namespace ZDebug.Compiler
                 using (var varIndex = il.NewLocal<byte>())
                 using (var value = il.NewLocal<ushort>())
                 {
-                    LoadVariable((byte)varIndexOp.Value);
+                    EmitLoadVariable((byte)varIndexOp.Value);
                     varIndex.Store();
 
                     LoadOperand(1);
                     value.Store();
 
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else
@@ -878,7 +878,7 @@ namespace ZDebug.Compiler
                     EmitPopStack();
                     value.Store();
 
-                    StoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else if (varIndexOp.Kind == OperandKind.Variable)
@@ -892,7 +892,7 @@ namespace ZDebug.Compiler
                     EmitPopStack();
 
                     value.Store();
-                    CalculatedStoreVariable(varIndex, value, indirect: true);
+                    EmitStoreVariable(varIndex, value, indirect: true);
                 }
             }
             else
