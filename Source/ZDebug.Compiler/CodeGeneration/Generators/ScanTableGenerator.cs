@@ -21,11 +21,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.op3 = instruction.Operands[2];
             this.op4 = (instruction.OperandCount > 3 ? instruction.Operands[3] : (Operand?)null);
             this.store = instruction.StoreVariable;
+            this.branch = instruction.Branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            il.LoadThis();
+            il.Arguments.LoadThis();
             compiler.EmitLoadOperand(op1);
             compiler.EmitLoadOperand(op2);
             compiler.EmitLoadOperand(op3);

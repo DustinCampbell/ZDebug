@@ -17,19 +17,11 @@ namespace ZDebug.Compiler.Generate
             };
         }
 
-        public static CodeBuilder GenerateLoadArg(this ILBuilder il, int index)
-        {
-            return () =>
-            {
-                il.LoadArg(index);
-            };
-        }
-
         public static CodeBuilder GenerateLoadInstanceField(this ILBuilder il, FieldInfo field)
         {
             return () =>
             {
-                il.LoadArg(0);
+                il.Arguments.LoadThis();
                 il.Load(field);
             };
         }
@@ -38,7 +30,7 @@ namespace ZDebug.Compiler.Generate
         {
             return () =>
             {
-                il.LoadArg(0);
+                il.Arguments.LoadThis();
                 il.LoadAddress(field);
             };
         }

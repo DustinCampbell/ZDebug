@@ -68,10 +68,8 @@ namespace ZDebug.Compiler
 
         public void EmitReturn()
         {
-            var popFrame = Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false);
-
-            il.LoadThis();
-            il.Call(popFrame);
+            il.Arguments.LoadThis();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false));
 
             il.Return();
         }
@@ -251,24 +249,21 @@ namespace ZDebug.Compiler
 
         private void EmitLoadLocalVariable(byte variableIndex)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             il.Load(variableIndex);
             il.Emit(OpCodes.Ldelem_U2);
         }
 
         private void EmitLoadLocalVariable(ILocal variableIndex)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             variableIndex.Load();
             il.Emit(OpCodes.Ldelem_U2);
         }
 
         private void EmitStoreLocalVariable(byte variableIndex, ILocal value)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             il.Load(variableIndex);
             value.Load();
             il.Emit(OpCodes.Stelem_I2);
@@ -276,8 +271,7 @@ namespace ZDebug.Compiler
 
         private void EmitStoreLocalVariable(ILocal variableIndex, ILocal value)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             variableIndex.Load();
             value.Load();
             il.Emit(OpCodes.Stelem_I2);

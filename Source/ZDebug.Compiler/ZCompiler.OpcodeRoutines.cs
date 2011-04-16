@@ -823,7 +823,7 @@ namespace ZDebug.Compiler
 
         private void op_copy_table()
         {
-            il.LoadThis();
+            il.Arguments.LoadThis();
             LoadOperand(0);
             LoadOperand(1);
             LoadOperand(2);
@@ -834,7 +834,7 @@ namespace ZDebug.Compiler
         {
             using (var result = il.NewLocal<ushort>())
             {
-                il.LoadThis();
+                il.Arguments.LoadThis();
                 LoadOperand(0);
                 LoadOperand(1);
                 LoadOperand(2);
@@ -1594,11 +1594,10 @@ namespace ZDebug.Compiler
 
         private void op_print_addr()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             LoadOperand(0);
 
-            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false);
-            il.Call(readZText);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
             PrintText();
         }
 
@@ -1627,22 +1626,20 @@ namespace ZDebug.Compiler
 
         private void op_print_obj()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             ReadObjectShortNameFromOperand(0);
 
-            var convertZText = Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.Array<ushort[]>(), @public: false);
-            il.Call(convertZText);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.Array<ushort[]>(), @public: false));
             PrintText();
         }
 
         private void op_print_paddr()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             var op = GetOperand(0);
             LoadUnpackedStringAddress(op);
 
-            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false);
-            il.Call(readZText);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
             PrintText();
         }
 
@@ -1705,10 +1702,8 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                il.LoadArg(0);
-
-                var read = Reflection<CompiledZMachine>.GetMethod("ReadChar", Types.None, @public: false);
-                il.Call(read);
+                il.Arguments.LoadThis();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("ReadChar", Types.None, @public: false));
 
                 result.Store();
                 Store(() => result.Load());
@@ -1717,7 +1712,7 @@ namespace ZDebug.Compiler
 
         private void op_aread()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             LoadOperand(0);
 
             if (OperandCount > 1)
@@ -1736,8 +1731,7 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                var read = Reflection<CompiledZMachine>.GetMethod("Read_Z5", Types.Array<ushort, ushort>(), @public: false);
-                il.Call(read);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Read_Z5", Types.Array<ushort, ushort>(), @public: false));
 
                 result.Store();
                 Store(() => result.Load());
@@ -1746,17 +1740,16 @@ namespace ZDebug.Compiler
 
         private void op_sread1()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             LoadOperand(0);
             LoadOperand(1);
 
-            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z3", Types.Array<ushort, ushort>(), @public: false);
-            il.Call(read);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("Read_Z3", Types.Array<ushort, ushort>(), @public: false));
         }
 
         private void op_sread4()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
             LoadOperand(0);
             LoadOperand(1);
 
@@ -1765,8 +1758,7 @@ namespace ZDebug.Compiler
                 il.RuntimeError("Timed input not supported");
             }
 
-            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z4", Types.Array<ushort, ushort>(), @public: false);
-            il.Call(read);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("Read_Z4", Types.Array<ushort, ushort>(), @public: false));
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1818,9 +1810,7 @@ namespace ZDebug.Compiler
         private void op_check_arg_count()
         {
             LoadOperand(0);
-
-            // argument count is in foruth argument.
-            il.LoadArg(3);
+            il.Arguments.LoadArgCount();
 
             il.Compare.AtMost();
             Branch();
@@ -1834,10 +1824,8 @@ namespace ZDebug.Compiler
 
         private void op_verify()
         {
-            var verify = Reflection<CompiledZMachine>.GetMethod("Verify", @public: false);
-
-            il.LoadArg(0);
-            il.Call(verify);
+            il.Arguments.LoadThis();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("Verify", @public: false));
 
             Branch();
         }
@@ -1864,20 +1852,18 @@ namespace ZDebug.Compiler
                 il.Load(0);
                 seed.BranchIf(Condition.AtMost, @short: true);
 
-                il.LoadArg(0);
+                il.Arguments.LoadThis();
                 range.Load();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false));
 
-                var nextRandom = Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false);
-                il.Call(nextRandom);
                 done.Branch(@short: true);
 
                 seed.Mark();
 
-                il.LoadArg(0);
+                il.Arguments.LoadThis();
                 range.Load();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false));
 
-                var seedRandom = Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false);
-                il.Call(seedRandom);
                 il.Load(0);
 
                 done.Mark();
@@ -1935,7 +1921,7 @@ namespace ZDebug.Compiler
 
         private void op_tokenize()
         {
-            il.LoadArg(0);
+            il.Arguments.LoadThis();
 
             LoadOperand(0);
             LoadOperand(1);
@@ -1963,8 +1949,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            var tokenize = Reflection<CompiledZMachine>.GetMethod("Tokenize", Types.Array<ushort, ushort, ushort, bool>(), @public: false);
-            il.Call(tokenize);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("Tokenize", Types.Array<ushort, ushort, ushort, bool>(), @public: false));
         }
     }
 }

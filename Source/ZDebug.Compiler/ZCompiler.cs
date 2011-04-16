@@ -46,24 +46,6 @@ namespace ZDebug.Compiler
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
 
-        private static readonly Type[] directCall0Types = Types.Array<ZRoutineCall>();
-        private static readonly Type[] directCall1Types = Types.Array<ZRoutineCall, ushort>();
-        private static readonly Type[] directCall2Types = Types.Array<ZRoutineCall, ushort, ushort>();
-        private static readonly Type[] directCall3Types = Types.Array<ZRoutineCall, ushort, ushort, ushort>();
-        private static readonly Type[] directCall4Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall5Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall6Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] directCall7Types = Types.Array<ZRoutineCall, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
-
-        private static readonly Type[] calculatedCall0Types = Types.Array<int>();
-        private static readonly Type[] calculatedCall1Types = Types.Array<int, ushort>();
-        private static readonly Type[] calculatedCall2Types = Types.Array<int, ushort, ushort>();
-        private static readonly Type[] calculatedCall3Types = Types.Array<int, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall4Types = Types.Array<int, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall5Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall6Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort, ushort>();
-        private static readonly Type[] calculatedCall7Types = Types.Array<int, ushort, ushort, ushort, ushort, ushort, ushort, ushort>();
-
         private ZCompiler(ZRoutine routine, CompiledZMachine machine, bool debugging = false)
         {
             this.routine = routine;
@@ -174,7 +156,7 @@ namespace ZDebug.Compiler
 
                     if (machine.Debugging)
                     {
-                        il.LoadThis();
+                        il.Arguments.LoadThis();
                         il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
                     }
 
@@ -215,11 +197,9 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0); // ZMachine
+                il.Arguments.LoadThis();
                 il.Load(routine.Address);
-
-                var enterRoutine = Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.Array<int>(), @public: false);
-                il.Call(enterRoutine);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("EnterRoutine", Types.Array<int>(), @public: false));
             }
         }
 
@@ -227,11 +207,9 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0); // ZMachine
+                il.Arguments.LoadThis();
                 il.Load(routine.Address);
-
-                var exitRoutine = Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.Array<int>(), @public: false);
-                il.Call(exitRoutine);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("ExitRoutine", Types.Array<int>(), @public: false));
             }
         }
 
@@ -239,11 +217,9 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0); // ZMachine
+                il.Arguments.LoadThis();
                 il.Load(this.current.Value.Address);
-
-                var executingInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.Array<int>(), @public: false);
-                il.Call(executingInstruction);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.Array<int>(), @public: false));
             }
         }
 
@@ -251,10 +227,8 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0);
-
-                var executedInstruction = Reflection<CompiledZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false);
-                il.Call(executedInstruction);
+                il.Arguments.LoadThis();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("ExecutedInstruction", Types.None, @public: false));
             }
         }
 
@@ -262,10 +236,8 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0);
-
-                var quit = Reflection<CompiledZMachine>.GetMethod("Quit", Types.None, @public: false);
-                il.Call(quit);
+                il.Arguments.LoadThis();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Quit", Types.None, @public: false));
 
                 Profiler_ExecutedInstruction();
             }
@@ -275,10 +247,8 @@ namespace ZDebug.Compiler
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0);
-
-                var interrupt = Reflection<CompiledZMachine>.GetMethod("Interrupt", Types.None, @public: false);
-                il.Call(interrupt);
+                il.Arguments.LoadThis();
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Interrupt", Types.None, @public: false));
             }
         }
 
@@ -287,44 +257,11 @@ namespace ZDebug.Compiler
             il.RuntimeError(string.Format("{0:x4}: Opcode '{1}' not implemented.", this.current.Value.Address, this.current.Value.Opcode.Name));
         }
 
-        private static Type[] GetDirectCallTypes(int argumentCount)
-        {
-            switch (argumentCount)
-            {
-                case 0: return directCall0Types;
-                case 1: return directCall1Types;
-                case 2: return directCall2Types;
-                case 3: return directCall3Types;
-                case 4: return directCall4Types;
-                case 5: return directCall5Types;
-                case 6: return directCall6Types;
-                case 7: return directCall7Types;
-                default: throw new ZCompilerException("Only calls of 0 to 7 arguments are supported.");
-            }
-        }
-
-        private static Type[] GetCalculatedCallTypes(int argumentCount)
-        {
-            switch (argumentCount)
-            {
-                case 0: return calculatedCall0Types;
-                case 1: return calculatedCall1Types;
-                case 2: return calculatedCall2Types;
-                case 3: return calculatedCall3Types;
-                case 4: return calculatedCall4Types;
-                case 5: return calculatedCall5Types;
-                case 6: return calculatedCall6Types;
-                case 7: return calculatedCall7Types;
-                default: throw new ZCompilerException("Only calls of 0 to 7 arguments are supported.");
-            }
-        }
-
         private void DirectCall(Operand addressOp)
         {
             if (machine.Profiling)
             {
-                il.LoadArg(0); // ZMachine
-
+                il.Arguments.LoadThis();
                 if (addressOp.Value == 0)
                 {
                     il.Load(0);
@@ -335,9 +272,7 @@ namespace ZDebug.Compiler
                 }
 
                 il.Load(false);
-
-                var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
-                il.Call(profilerCall);
+                il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
             }
 
             if (addressOp.Value == 0)
@@ -351,7 +286,8 @@ namespace ZDebug.Compiler
                 var index = calls.Count;
                 calls.Add(routineCall);
 
-                il.LoadArg(1);
+                // load routine call
+                il.Arguments.LoadCalls();
                 il.Load(index);
                 il.Emit(OpCodes.Ldelem_Ref);
 
@@ -362,7 +298,7 @@ namespace ZDebug.Compiler
                 }
 
                 // Push frame after loading operands in case any operands manipulate the stack.
-                il.LoadThis();
+                il.Arguments.LoadThis();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame", @public: false));
 
                 var callName = "Invoke" + argCount.ToString();
@@ -391,7 +327,7 @@ namespace ZDebug.Compiler
 
                 if (machine.Profiling)
                 {
-                    il.LoadArg(0); // ZMachine
+                    il.Arguments.LoadThis();
                     il.Load(0);
                     il.Load(true);
 
@@ -429,16 +365,15 @@ namespace ZDebug.Compiler
 
                 if (machine.Profiling)
                 {
-                    il.LoadArg(0); // ZMachine
+                    il.Arguments.LoadThis();
                     address.Load();
                     UnpackRoutineAddress();
                     il.Load(true);
 
-                    var profilerCall = Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false);
-                    il.Call(profilerCall);
+                    il.Call(Reflection<CompiledZMachine>.GetMethod("Profiler_Call", Types.Array<int, bool>(), @public: false));
                 }
 
-                il.LoadThis();
+                il.Arguments.LoadThis();
                 address.Load();
                 UnpackRoutineAddress();
 
@@ -450,7 +385,7 @@ namespace ZDebug.Compiler
                 }
 
                 // Push frame after loading operands in case any operands manipulate the stack.
-                il.LoadThis();
+                il.Arguments.LoadThis();
                 il.Call(Reflection<CompiledZMachine>.GetMethod("PushFrame", @public: false));
 
                 var callName = "Invoke" + argCount.ToString();
@@ -483,10 +418,8 @@ namespace ZDebug.Compiler
         {
             Profiler_ExitRoutine();
 
-            il.LoadArg(0);
-
-            var popFrame = Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false);
-            il.Call(popFrame);
+            il.Arguments.LoadThis();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("PopFrame", @public: false));
 
             if (value != null)
             {

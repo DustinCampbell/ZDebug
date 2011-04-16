@@ -96,6 +96,7 @@
     <Compile Include="Generate\Condition.cs" />
     <Compile Include="Generate\IArrayLocal.cs" />
     <Compile Include="Generate\ILabel.cs" />
+    <Compile Include="Generate\ILBuilder.ArgumentFunctions.cs" />
     <Compile Include="Generate\ILBuilder.CompareFunctions.cs" />
     <Compile Include="Generate\ILBuilder.cs" />
     <Compile Include="Generate\ILBuilder.FormatString.cs" />

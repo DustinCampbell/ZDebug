@@ -8,7 +8,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
     {
         private readonly Operand address;
         private readonly ReadOnlyArray<Operand> args;
-        private readonly Variable store;
 
         public CallGenerator(Instruction instruction)
             : base(instruction)

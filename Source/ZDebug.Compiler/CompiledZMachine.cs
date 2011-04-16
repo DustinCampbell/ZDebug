@@ -27,12 +27,6 @@ namespace ZDebug.Compiler
         private readonly int[] stackFrames;
         private int sfp;
 
-        private readonly ushort[] locals;
-        private ushort localCount;
-
-        private readonly ushort[] arguments;
-        private ushort argumentCount;
-
         private int cacheMiss;
 
         private readonly ushort objectTableAddress;
@@ -67,6 +61,7 @@ namespace ZDebug.Compiler
         {
             this.profiler = profiler;
             this.precompile = precompile;
+            this.debugging = debugging;
 
             this.stack = new ushort[STACK_SIZE];
             this.sp = -1;
@@ -74,12 +69,6 @@ namespace ZDebug.Compiler
             this.stackFrame = -1;
             this.stackFrames = new int[STACK_SIZE];
             this.sfp = -1;
-
-            this.locals = new ushort[15];
-            this.localCount = 0;
-
-            this.arguments = new ushort[7];
-            this.argumentCount = 0;
 
             this.objectTableAddress = this.Memory.ReadWord(0x0a);
             this.propertyDefaultsTableSize = (byte)(this.Version < 4 ? 31 : 63);

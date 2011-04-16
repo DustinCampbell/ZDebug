@@ -400,8 +400,7 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(int index)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             il.Load(index);
             il.Emit(OpCodes.Ldelem_U2);
         }
@@ -411,8 +410,7 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(ILocal index)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             index.Load();
             il.Emit(OpCodes.Ldelem_U2);
         }
@@ -431,8 +429,7 @@ namespace ZDebug.Compiler
 
         private void StoreLocalVariable(int index, CodeBuilder valueLoader)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             il.Load(index);
             valueLoader();
             il.Emit(OpCodes.Stelem_I2);
@@ -446,8 +443,7 @@ namespace ZDebug.Compiler
 
         private void StoreLocalVariable(ILocal index, ILocal value)
         {
-            // locals are passed as the third argument
-            il.LoadArg(2);
+            il.Arguments.LoadLocals();
             index.Load();
             value.Load();
             il.Emit(OpCodes.Stelem_I2);

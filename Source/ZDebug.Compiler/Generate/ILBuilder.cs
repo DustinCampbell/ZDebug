@@ -11,6 +11,7 @@ namespace ZDebug.Compiler.Generate
         private readonly ILGenerator il;
         private readonly Dictionary<Type, Stack<ILocal>> locals = new Dictionary<Type, Stack<ILocal>>();
 
+        private readonly ArgumentFunctions arguments;
         private readonly CompareFunctions compare;
         private readonly ConvertFunctions convert;
         private readonly MathFunctions math;
@@ -35,9 +36,11 @@ namespace ZDebug.Compiler.Generate
         public ILBuilder(ILGenerator il)
         {
             this.il = il;
-            compare = new CompareFunctions(this);
-            convert = new ConvertFunctions(this);
-            math = new MathFunctions(this);
+
+            this.arguments = new ArgumentFunctions(this);
+            this.compare = new CompareFunctions(this);
+            this.convert = new ConvertFunctions(this);
+            this.math = new MathFunctions(this);
         }
 
         public int OpcodeCount
@@ -53,6 +56,11 @@ namespace ZDebug.Compiler.Generate
         public int Size
         {
             get { return il.ILOffset; }
+        }
+
+        public ArgumentFunctions Arguments
+        {
+            get { return arguments; }
         }
 
         public CompareFunctions Compare
@@ -139,36 +147,6 @@ namespace ZDebug.Compiler.Generate
         public void Pop()
         {
             Emit(OpCodes.Pop);
-        }
-
-        public void LoadArg(int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    Emit(OpCodes.Ldarg_0);
-                    break;
-
-                case 1:
-                    Emit(OpCodes.Ldarg_1);
-                    break;
-
-                case 2:
-                    Emit(OpCodes.Ldarg_2);
-                    break;
-
-                case 3:
-                    Emit(OpCodes.Ldarg_3);
-                    break;
-
-                default:
-                    throw new ZCompilerException("Unexpected argument index: " + index);
-            }
-        }
-
-        public void LoadThis()
-        {
-            LoadArg(0);
         }
 
         public void Load(FieldInfo field, bool @volatile = false)
