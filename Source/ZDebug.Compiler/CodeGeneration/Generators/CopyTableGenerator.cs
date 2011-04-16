@@ -24,7 +24,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             compiler.EmitLoadOperand(op1);
             compiler.EmitLoadOperand(op2);
             compiler.EmitLoadOperand(op3);
-            il.Call(Reflection<CompiledZMachine>.GetMethod("op_copy_table", Types.Three<ushort, ushort, ushort>(), @public: false));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("op_copy_table", Types.Array<ushort, ushort, ushort>(), @public: false));
         }
     }
 }

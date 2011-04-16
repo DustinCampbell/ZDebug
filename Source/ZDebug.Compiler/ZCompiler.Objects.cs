@@ -3,7 +3,7 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
-    public partial class ZCompiler
+    internal partial class ZCompiler
     {
         /// <summary>
         /// Calculates the address of an object given its 1-based object number.

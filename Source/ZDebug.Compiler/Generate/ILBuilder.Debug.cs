@@ -24,7 +24,7 @@ namespace ZDebug.Compiler.Generate
             name: "WriteLine",
             bindingAttr: BindingFlags.Public | BindingFlags.Static,
             binder: null,
-            types: Types.One<string>(),
+            types: Types.Array<string>(),
             modifiers: null);
 
         [Conditional("LOG")]

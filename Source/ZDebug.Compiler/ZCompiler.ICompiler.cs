@@ -1,4 +1,5 @@
-﻿using ZDebug.Compiler.CodeGeneration;
+﻿using System.Reflection.Emit;
+using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
@@ -6,7 +7,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
-    public partial class ZCompiler : ICompiler
+    internal partial class ZCompiler : ICompiler
     {
         public ILabel GetLabel(int address)
         {
@@ -250,28 +251,36 @@ namespace ZDebug.Compiler
 
         private void EmitLoadLocalVariable(byte variableIndex)
         {
-            localRefs[variableIndex].Load();
-            localRefs[variableIndex].LoadIndirectValue();
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            il.Load(variableIndex);
+            il.Emit(OpCodes.Ldelem_U2);
         }
 
         private void EmitLoadLocalVariable(ILocal variableIndex)
         {
-            locals.LoadElement(
-                indexLoader: () => variableIndex.Load());
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            variableIndex.Load();
+            il.Emit(OpCodes.Ldelem_U2);
         }
 
         private void EmitStoreLocalVariable(byte variableIndex, ILocal value)
         {
-            localRefs[variableIndex].Load();
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            il.Load(variableIndex);
             value.Load();
-            localRefs[variableIndex].StoreIndirectValue();
+            il.Emit(OpCodes.Stelem_I2);
         }
 
         private void EmitStoreLocalVariable(ILocal variableIndex, ILocal value)
         {
-            locals.StoreElement(
-                indexLoader: () => variableIndex.Load(),
-                valueLoader: () => value.Load());
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            variableIndex.Load();
+            value.Load();
+            il.Emit(OpCodes.Stelem_I2);
         }
 
         private void EmitLoadGlobalVariable(byte variableIndex)
@@ -357,7 +366,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (localRefs != null)
+            if (routine.Locals.Length > 0)
             {
                 using (var adjustedVariableIndex = il.NewLocal<byte>())
                 {
@@ -460,7 +469,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (localRefs != null)
+            if (routine.Locals.Length > 0)
             {
                 using (var adjustedVariableIndex = il.NewLocal<byte>())
                 {

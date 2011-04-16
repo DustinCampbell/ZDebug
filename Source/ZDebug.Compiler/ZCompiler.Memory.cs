@@ -1,9 +1,10 @@
-﻿using ZDebug.Compiler.Generate;
+﻿using System.Reflection.Emit;
+using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
-    public partial class ZCompiler
+    internal partial class ZCompiler
     {
         /// <summary>
         /// Loads a byte from memory at the address retrieved by the <paramref name="addressLoader"/>
@@ -399,8 +400,10 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(int index)
         {
-            localRefs[index].Load();
-            localRefs[index].LoadIndirectValue();
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            il.Load(index);
+            il.Emit(OpCodes.Ldelem_U2);
         }
 
         /// <summary>
@@ -408,8 +411,10 @@ namespace ZDebug.Compiler
         /// </summary>
         private void LoadLocalVariable(ILocal index)
         {
-            locals.LoadElement(
-                indexLoader: () => index.Load());
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            index.Load();
+            il.Emit(OpCodes.Ldelem_U2);
         }
 
         /// <summary>
@@ -424,24 +429,28 @@ namespace ZDebug.Compiler
             }
         }
 
+        private void StoreLocalVariable(int index, CodeBuilder valueLoader)
+        {
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            il.Load(index);
+            valueLoader();
+            il.Emit(OpCodes.Stelem_I2);
+        }
+
         private void StoreLocalVariable(int index, ILocal value)
         {
             StoreLocalVariable(index,
                 valueLoader: () => value.Load());
         }
 
-        private void StoreLocalVariable(int index, CodeBuilder valueLoader)
-        {
-            localRefs[index].Load();
-            valueLoader();
-            localRefs[index].StoreIndirectValue();
-        }
-
         private void StoreLocalVariable(ILocal index, ILocal value)
         {
-            locals.StoreElement(
-                indexLoader: () => index.Load(),
-                valueLoader: () => value.Load());
+            // locals are passed as the third argument
+            il.LoadArg(2);
+            index.Load();
+            value.Load();
+            il.Emit(OpCodes.Stelem_I2);
         }
 
         private void StoreLocalVariable(ILocal value)
@@ -563,7 +572,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (localRefs != null)
+            if (routine.Locals.Length > 0)
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);
@@ -684,7 +693,7 @@ namespace ZDebug.Compiler
             il.Load(16);
             tryGlobal.BranchIf(Condition.AtLeast, @short: true);
 
-            if (localRefs != null)
+            if (routine.Locals.Length > 0)
             {
                 variableIndex.Load();
                 il.Math.Subtract(1);

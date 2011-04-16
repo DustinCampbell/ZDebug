@@ -4,14 +4,15 @@ using ZDebug.Core.Routines;
 
 namespace ZDebug.Compiler
 {
-    public sealed class ZCompilerResult
+    internal sealed class ZCompilerResult
     {
         public readonly ZRoutine Routine;
-        public readonly ZRoutineCall[] Calls;
-        public readonly ZRoutineCode Code;
         public readonly RoutineCompilationStatistics Statistics;
 
-        public ZCompilerResult(ZRoutine routine, ZRoutineCall[] calls, ZRoutineCode code, RoutineCompilationStatistics statistics)
+        internal readonly ZRoutineCode Code;
+        internal readonly ZRoutineCall[] Calls;
+
+        internal ZCompilerResult(ZRoutine routine, ZRoutineCall[] calls, ZRoutineCode code, RoutineCompilationStatistics statistics)
         {
             if (routine == null)
             {

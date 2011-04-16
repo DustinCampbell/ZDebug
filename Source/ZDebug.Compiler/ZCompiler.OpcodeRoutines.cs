@@ -5,7 +5,7 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
-    public partial class ZCompiler
+    internal partial class ZCompiler
     {
         ///////////////////////////////////////////////////////////////////////////////////////////
         // Arithmetic routines
@@ -753,9 +753,10 @@ namespace ZDebug.Compiler
         {
             var addressOp = GetOperand(0);
             var offsetOp = GetOperand(1);
+            var valueOp = GetOperand(2);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.IsConstant && offsetOp.IsConstant)
+            if (addressOp.IsConstant && offsetOp.IsConstant && !valueOp.IsStackVariable)
             {
                 StoreByte(
                     address: addressOp.Value + offsetOp.Value,
@@ -788,9 +789,10 @@ namespace ZDebug.Compiler
         {
             var addressOp = GetOperand(0);
             var offsetOp = GetOperand(1);
+            var valueOp = GetOperand(2);
 
             // Are the address and offset operands constants? If so, we can fold them at compile time.
-            if (addressOp.IsConstant && offsetOp.IsConstant)
+            if (addressOp.IsConstant && offsetOp.IsConstant && !valueOp.IsStackVariable)
             {
                 StoreWord(
                     address: addressOp.Value + (offsetOp.Value * 2),
@@ -825,7 +827,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
             LoadOperand(2);
-            il.Call(Reflection<CompiledZMachine>.GetMethod("op_copy_table", Types.Three<ushort, ushort, ushort>(), @public: false));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("op_copy_table", Types.Array<ushort, ushort, ushort>(), @public: false));
         }
 
         private void op_scan_table()
@@ -846,7 +848,7 @@ namespace ZDebug.Compiler
                     il.Load(0x82);
                 }
 
-                il.Call(Reflection<CompiledZMachine>.GetMethod("op_scan_table", Types.Four<ushort, ushort, ushort, ushort>(), @public: false));
+                il.Call(Reflection<CompiledZMachine>.GetMethod("op_scan_table", Types.Array<ushort, ushort, ushort, ushort>(), @public: false));
 
                 result.Store();
                 Store(() => result.Load());
@@ -1595,7 +1597,7 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             LoadOperand(0);
 
-            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false);
             il.Call(readZText);
             PrintText();
         }
@@ -1628,7 +1630,7 @@ namespace ZDebug.Compiler
             il.LoadArg(0);
             ReadObjectShortNameFromOperand(0);
 
-            var convertZText = Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.One<ushort[]>(), @public: false);
+            var convertZText = Reflection<CompiledZMachine>.GetMethod("ConvertZText", Types.Array<ushort[]>(), @public: false);
             il.Call(convertZText);
             PrintText();
         }
@@ -1639,7 +1641,7 @@ namespace ZDebug.Compiler
             var op = GetOperand(0);
             LoadUnpackedStringAddress(op);
 
-            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.One<int>(), @public: false);
+            var readZText = Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false);
             il.Call(readZText);
             PrintText();
         }
@@ -1734,7 +1736,7 @@ namespace ZDebug.Compiler
 
             using (var result = il.NewLocal<ushort>())
             {
-                var read = Reflection<CompiledZMachine>.GetMethod("Read_Z5", Types.Two<ushort, ushort>(), @public: false);
+                var read = Reflection<CompiledZMachine>.GetMethod("Read_Z5", Types.Array<ushort, ushort>(), @public: false);
                 il.Call(read);
 
                 result.Store();
@@ -1748,7 +1750,7 @@ namespace ZDebug.Compiler
             LoadOperand(0);
             LoadOperand(1);
 
-            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z3", Types.Two<ushort, ushort>(), @public: false);
+            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z3", Types.Array<ushort, ushort>(), @public: false);
             il.Call(read);
         }
 
@@ -1763,7 +1765,7 @@ namespace ZDebug.Compiler
                 il.RuntimeError("Timed input not supported");
             }
 
-            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z4", Types.Two<ushort, ushort>(), @public: false);
+            var read = Reflection<CompiledZMachine>.GetMethod("Read_Z4", Types.Array<ushort, ushort>(), @public: false);
             il.Call(read);
         }
 
@@ -1817,9 +1819,8 @@ namespace ZDebug.Compiler
         {
             LoadOperand(0);
 
-            il.LoadArg(0);
-            var argumentCountField = Reflection<CompiledZMachine>.GetField("argumentCount", @public: false);
-            il.Load(argumentCountField);
+            // argument count is in foruth argument.
+            il.LoadArg(3);
 
             il.Compare.AtMost();
             Branch();
@@ -1866,7 +1867,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0);
                 range.Load();
 
-                var nextRandom = Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.One<short>(), @public: false);
+                var nextRandom = Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false);
                 il.Call(nextRandom);
                 done.Branch(@short: true);
 
@@ -1875,7 +1876,7 @@ namespace ZDebug.Compiler
                 il.LoadArg(0);
                 range.Load();
 
-                var seedRandom = Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.One<short>(), @public: false);
+                var seedRandom = Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false);
                 il.Call(seedRandom);
                 il.Load(0);
 
@@ -1962,7 +1963,7 @@ namespace ZDebug.Compiler
                 il.Load(0);
             }
 
-            var tokenize = Reflection<CompiledZMachine>.GetMethod("Tokenize", Types.Four<ushort, ushort, ushort, bool>(), @public: false);
+            var tokenize = Reflection<CompiledZMachine>.GetMethod("Tokenize", Types.Array<ushort, ushort, ushort, bool>(), @public: false);
             il.Call(tokenize);
         }
     }

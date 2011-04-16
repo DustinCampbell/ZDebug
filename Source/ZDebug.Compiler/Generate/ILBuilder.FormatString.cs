@@ -8,7 +8,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Two<string, object>(),
+                Types.Array<string, object>(),
                 instance: false);
 
             Load(format);
@@ -21,7 +21,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Two<string, object>(),
+                Types.Array<string, object>(),
                 instance: false);
 
             Load(format);
@@ -35,7 +35,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Three<string, object, object>(),
+                Types.Array<string, object, object>(),
                 instance: false);
 
             Load(format);
@@ -49,7 +49,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Three<string, object, object>(),
+                Types.Array<string, object, object>(),
                 instance: false);
 
             Load(format);
@@ -65,7 +65,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Four<string, object, object, object>(),
+                Types.Array<string, object, object, object>(),
                 instance: false);
 
             Load(format);
@@ -80,7 +80,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Four<string, object, object, object>(),
+                Types.Array<string, object, object, object>(),
                 instance: false);
 
             Load(format);
@@ -98,7 +98,7 @@ namespace ZDebug.Compiler.Generate
         {
             var stringFormat = Reflection<string>.GetMethod(
                 "Format",
-                Types.Two<string, object[]>(),
+                Types.Array<string, object[]>(),
                 instance: false);
 
             var locArgs = NewArrayLocal<object>(args.Length);

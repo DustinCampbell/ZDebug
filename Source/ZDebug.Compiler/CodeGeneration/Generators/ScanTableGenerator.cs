@@ -39,7 +39,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Load(0x82);
             }
 
-            il.Call(Reflection<CompiledZMachine>.GetMethod("op_scan_table", Types.Four<ushort, ushort, ushort, ushort>(), @public: false));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("op_scan_table", Types.Array<ushort, ushort, ushort, ushort>(), @public: false));
 
             using (var result = il.NewLocal<ushort>())
             {
