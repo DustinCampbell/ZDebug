@@ -31,10 +31,10 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new JlGenerator(instruction);
                         case 0x03:
                             return new JgGenerator(instruction);
-                        case 0x04:
-                            return new DecChkGenerator(instruction);
-                        case 0x05:
-                            return new IncChkGenerator(instruction);
+                        //case 0x04:
+                        //    return new DecChkGenerator(instruction);
+                        //case 0x05:
+                        //    return new IncChkGenerator(instruction);
                         case 0x06:
                             return new JinGenerator(instruction);
                         case 0x07:
@@ -125,8 +125,8 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    return;
                         case 0x05:
                             return new IncGenerator(instruction);
-                        case 0x06:
-                            return new DecGenerator(instruction);
+                        //case 0x06:
+                        //    return new DecGenerator(instruction);
                         //case 0x07:
                         //    op_print_addr();
                         //    return;
@@ -146,11 +146,10 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new RetGenerator(instruction);
                         case 0x0c:
                             return new JumpGenerator(instruction);
-                        //case 0x0d:
-                        //    op_print_paddr();
-                        //    return;
-                        case 0x0e:
-                            return new LoadGenerator(instruction);
+                        case 0x0d:
+                            return new PrintPAddrGenerator(instruction);
+                        //case 0x0e:
+                        //    return new LoadGenerator(instruction);
                         case 0x0f:
                             if (version >= 5)
                             {
@@ -166,9 +165,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new RtrueGenerator(instruction);
                         case 0x01:
                             return new RfalseGenerator(instruction);
-                        //case 0x02:
-                        //    op_print();
-                        //    return;
+                        case 0x02:
+                            return new PrintGenerator(instruction);
                         //case 0x03:
                         //    op_print_ret();
                         //    return;
@@ -252,9 +250,8 @@ namespace ZDebug.Compiler.CodeGeneration
                         //case 0x05:
                         //    op_print_char();
                         //    return;
-                        //case 0x06:
-                        //    op_print_num();
-                        //    return;
+                        case 0x06:
+                            return new PrintNumGenerator(instruction);
                         //case 0x07:
                         //    op_random();
                         //    return;

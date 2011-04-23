@@ -107,8 +107,28 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitStoreVariable(ILocal variableIndex, ILocal value, bool indirect = false);
 
         /// <summary>
+        /// Emits code to load the unpacked string address in the specified operand onto the evaluation stack.
+        /// </summary>
+        void EmitLoadUnpackedStringAddress(Operand operand);
+
+        /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
         void EmitLoadObjectParent(Operand operand);
+
+        /// <summary>
+        /// Emits code to print the specified Z-Words to the screen.
+        /// </summary>
+        void EmitPrintZWords(ushort[] zwords);
+
+        /// <summary>
+        /// Emits code to print the text on the evaluation stack to the screen.
+        /// </summary>
+        void EmitPrintText();
+
+        /// <summary>
+        /// Returns the Z-Machine version.
+        /// </summary>
+        byte Version { get; }
     }
 }

@@ -50,40 +50,6 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void LoadUnpackedStringAddress(Operand op)
-        {
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    il.Load(machine.UnpackStringAddress(op.Value));
-                    break;
-
-                default: // OperandKind.Variable
-                    EmitLoadVariable((byte)op.Value);
-
-                    byte version = machine.Version;
-                    if (version < 4)
-                    {
-                        il.Math.Multiply(2);
-                    }
-                    else if (version < 8)
-                    {
-                        il.Math.Multiply(4);
-                    }
-                    else // 8
-                    {
-                        il.Math.Multiply(8);
-                    }
-
-                    if (version >= 6 && version <= 7)
-                    {
-                        il.Math.Add(machine.StringsOffset * 8);
-                    }
-                    break;
-            }
-        }
-
         public ILabel GetLabel(int address)
         {
             ILabel result;
@@ -283,6 +249,8 @@ namespace ZDebug.Compiler
 
         public void EmitCall(Operand address, ReadOnlyArray<Operand> args)
         {
+            il.DebugIndent();
+
             if (address.Kind != OperandKind.Variable)
             {
                 EmitDirectCall(address, args);
@@ -291,6 +259,8 @@ namespace ZDebug.Compiler
             {
                 EmitCalculatedCall(address, args);
             }
+
+            il.DebugUnindent();
         }
 
         private void EmitLoadMemoryByte(CodeBuilder loadAddress)
@@ -703,6 +673,41 @@ namespace ZDebug.Compiler
 
             calculatedStoreVariableCount++;
         }
+
+        public void EmitLoadUnpackedStringAddress(Operand operand)
+        {
+            switch (operand.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    il.Load(machine.UnpackStringAddress(operand.Value));
+                    break;
+
+                default: // OperandKind.Variable
+                    EmitLoadVariable((byte)operand.Value);
+
+                    byte version = machine.Version;
+                    if (version < 4)
+                    {
+                        il.Math.Multiply(2);
+                    }
+                    else if (version < 8)
+                    {
+                        il.Math.Multiply(4);
+                    }
+                    else // 8
+                    {
+                        il.Math.Multiply(8);
+                    }
+
+                    if (version >= 6 && version <= 7)
+                    {
+                        il.Math.Add(machine.StringsOffset * 8);
+                    }
+                    break;
+            }
+        }
+
         private void EmitLoadObjectParent(int objNum)
         {
             var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectParentOffset);
@@ -724,6 +729,22 @@ namespace ZDebug.Compiler
                     ReadObjectParent();
                     break;
             }
+        }
+
+        public void EmitPrintZWords(ushort[] zwords)
+        {
+            var text = machine.ConvertZText(zwords);
+            PrintText(text);
+        }
+
+        public void EmitPrintText()
+        {
+            PrintText();
+        }
+
+        public byte Version
+        {
+            get { return machine.Version; }
         }
     }
 }

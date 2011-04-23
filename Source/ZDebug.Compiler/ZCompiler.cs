@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using ZDebug.Compiler.Analysis.ControlFlow;
+using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Execution;
@@ -112,44 +113,46 @@ namespace ZDebug.Compiler
             // Emit IL
             foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
-                //var generators = codeBlock.Instructions.Select(i => OpcodeGenerator.GetGenerator(i, machine.Version));
+                var generators = codeBlock.Instructions.Select(i => OpcodeGenerator.GetGenerator(i, machine.Version));
 
-                //foreach (var generator in generators)
-                //{
-                //    ILabel label;
-                //    if (this.addressToLabelMap.TryGetValue(generator.Instruction.Address, out label))
-                //    {
-                //        label.Mark();
-                //    }
-
-                //    generator.Generate(il, this);
-                //}
-
-                var instructions = new LinkedList<Instruction>(codeBlock.Instructions);
-                var current = instructions.First;
-                while (current != null)
+                foreach (var generator in generators)
                 {
-                    this.current = current;
-
                     ILabel label;
-                    if (this.addressToLabelMap.TryGetValue(current.Value.Address, out label))
+                    if (this.addressToLabelMap.TryGetValue(generator.Instruction.Address, out label))
                     {
                         label.Mark();
                     }
 
-                    if (machine.Debugging)
-                    {
-                        il.Arguments.LoadMachine();
-                        il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
-                    }
+                    il.DebugWrite(generator.Instruction.PrettyPrint(machine));
 
-                    Profiler_ExecutingInstruction();
-                    il.DebugWrite(current.Value.PrettyPrint(machine));
-
-                    Assemble(current.Value.Opcode);
-
-                    current = current.Next;
+                    generator.Generate(il, this);
                 }
+
+                //var instructions = new LinkedList<Instruction>(codeBlock.Instructions);
+                //var current = instructions.First;
+                //while (current != null)
+                //{
+                //    this.current = current;
+
+                //    ILabel label;
+                //    if (this.addressToLabelMap.TryGetValue(current.Value.Address, out label))
+                //    {
+                //        label.Mark();
+                //    }
+
+                //    if (machine.Debugging)
+                //    {
+                //        il.Arguments.LoadMachine();
+                //        il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+                //    }
+
+                //    Profiler_ExecutingInstruction();
+                //    il.DebugWrite(current.Value.PrettyPrint(machine));
+
+                //    Assemble(current.Value.Opcode);
+
+                //    current = current.Next;
+                //}
             }
 
             var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);

@@ -84,6 +84,18 @@ namespace ZDebug.Compiler.Generate
             opcodeCount++;
         }
 
+        internal void Emit(OpCode opcode, byte value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
+        internal void Emit(OpCode opcode, sbyte value)
+        {
+            il.Emit(opcode, value);
+            opcodeCount++;
+        }
+
         internal void Emit(OpCode opcode, int value)
         {
             il.Emit(opcode, value);
@@ -233,7 +245,7 @@ namespace ZDebug.Compiler.Generate
                 default:
                     if (value >= -128 && value <= 127)
                     {
-                        Emit(OpCodes.Ldc_I4_S, value);
+                        Emit(OpCodes.Ldc_I4_S, (sbyte)value);
                     }
                     else
                     {

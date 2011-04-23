@@ -54,6 +54,9 @@
     <Compile Include="CodeGeneration\Generators\CallNGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CallSGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CopyTableGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\PrintGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\PrintNumGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\PrintPAddrGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\PullGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\PushGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\ScanTableGenerator.cs" />

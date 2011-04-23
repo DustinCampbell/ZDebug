@@ -1645,7 +1645,7 @@ namespace ZDebug.Compiler
         {
             il.Arguments.LoadMachine();
             var op = GetOperand(0);
-            LoadUnpackedStringAddress(op);
+            EmitLoadUnpackedStringAddress(op);
 
             il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
             PrintText();

@@ -33,22 +33,22 @@ namespace ZDebug.Compiler.Generate
 
             public void LoadSP()
             {
-                builder.Emit(OpCodes.Ldarg_S, 4);
+                builder.Emit(OpCodes.Ldarg_S, (byte)4);
             }
 
             public void StoreSP()
             {
-                builder.Emit(OpCodes.Starg_S, 4);
+                builder.Emit(OpCodes.Starg_S, (byte)4);
             }
 
             public void LoadCalls()
             {
-                builder.Emit(OpCodes.Ldarg_S, 5);
+                builder.Emit(OpCodes.Ldarg_S, (byte)5);
             }
 
             public void LoadArgCount()
             {
-                builder.Emit(OpCodes.Ldarg_S, 6);
+                builder.Emit(OpCodes.Ldarg_S, (byte)6);
             }
         }
     }
