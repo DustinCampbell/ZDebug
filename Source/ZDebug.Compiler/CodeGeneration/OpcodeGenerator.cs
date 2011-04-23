@@ -210,23 +210,22 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new StoreBGenerator(instruction);
                         case 0x03:
                             return new PutPropGenerator(instruction);
-                        //case 0x04:
-                        //    if (version < 4)
-                        //    {
-                        //        op_sread1();
-                        //        return;
-                        //    }
-                        //    if (version == 4)
-                        //    {
-                        //        op_sread4();
-                        //        return;
-                        //    }
-                        //    if (version > 4)
-                        //    {
-                        //        op_aread();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x04:
+                            if (version < 4)
+                            {
+                                return new SRead1Generator(instruction);
+                            }
+                            //if (version == 4)
+                            //{
+                            //    op_sread4();
+                            //    return;
+                            //}
+                            //if (version > 4)
+                            //{
+                            //    op_aread();
+                            //    return;
+                            //}
+                            break;
                         case 0x05:
                             return new PrintCharGenerator(instruction);
                         case 0x06:

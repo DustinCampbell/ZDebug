@@ -81,6 +81,7 @@
     <Compile Include="CodeGeneration\Generators\RemoveObjGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\ScanTableGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\SetAttrGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SRead1Generator.cs" />
     <Compile Include="CodeGeneration\Generators\StoreWGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\StoreBGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\StoreMemoryGenerator.cs" />
