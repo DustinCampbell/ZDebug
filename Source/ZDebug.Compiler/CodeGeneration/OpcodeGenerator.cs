@@ -125,8 +125,8 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    return;
                         case 0x05:
                             return new IncGenerator(instruction);
-                        //case 0x06:
-                        //    return new DecGenerator(instruction);
+                        case 0x06:
+                            return new DecGenerator(instruction);
                         //case 0x07:
                         //    op_print_addr();
                         //    return;
@@ -148,8 +148,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new JumpGenerator(instruction);
                         case 0x0d:
                             return new PrintPAddrGenerator(instruction);
-                        //case 0x0e:
-                        //    return new LoadGenerator(instruction);
+                        case 0x0e:
+                            return new LoadGenerator(instruction);
                         case 0x0f:
                             if (version >= 5)
                             {
@@ -377,13 +377,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new CopyTableGenerator(instruction);
                             }
                             break;
-                        //case 0x1f:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_check_arg_count();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x1f:
+                            if (version >= 5)
+                            {
+                                return new CheckArgCountGenerator(instruction);
+                            }
+                            break;
                     }
                     break;
                 case OpcodeKind.Ext:

@@ -9,6 +9,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             : base(instruction)
         {
         }
+
         protected override void LoadMemory(int address, ICompiler compiler)
         {
             compiler.EmitLoadMemoryByte(address);

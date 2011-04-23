@@ -53,6 +53,7 @@
     <Compile Include="CodeGeneration\Generators\CallGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CallNGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CallSGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\CheckArgCountGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CopyTableGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\PrintGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\PrintNumGenerator.cs" />

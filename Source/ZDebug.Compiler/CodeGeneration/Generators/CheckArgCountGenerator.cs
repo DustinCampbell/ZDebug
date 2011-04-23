@@ -3,25 +3,25 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
-    internal class PushGenerator : OpcodeGenerator
+    internal class CheckArgCountGenerator : OpcodeGenerator
     {
         private readonly Operand op;
+        private readonly Branch branch;
 
-        public PushGenerator(Instruction instruction)
+        public CheckArgCountGenerator(Instruction instruction)
             : base(instruction)
         {
             this.op = instruction.Operands[0];
+            this.branch = instruction.Branch;
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
             compiler.EmitLoadOperand(op);
+            il.Arguments.LoadArgCount();
 
-            using (var value = il.NewLocal<ushort>())
-            {
-                value.Store();
-                compiler.EmitPushStack(value);
-            }
+            il.Compare.AtMost();
+            compiler.EmitBranch(branch);
         }
     }
 }
