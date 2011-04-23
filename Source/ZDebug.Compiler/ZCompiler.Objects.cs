@@ -116,24 +116,6 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void ReadValidObjectNumber(int operandIndex, ILabel failed)
-        {
-            LoadOperand(operandIndex);
-
-            // Check to see if object number is 0.
-            var objNumOk = il.NewLabel();
-            il.Duplicate();
-            objNumOk.BranchIf(Condition.True, @short: true);
-
-            // TODO: Emit warning messsage to log. For now, just pop the number off the stack.
-            il.Pop();
-
-            // Jump to failure branch
-            failed.Branch();
-
-            objNumOk.Mark();
-        }
-
         /// <summary>
         /// Reads the number of an object's parent, given its 1-based object number.
         /// </summary>
@@ -157,24 +139,6 @@ namespace ZDebug.Compiler
             il.Math.Add(machine.ObjectParentOffset);
 
             ReadObjectNumber();
-        }
-
-        private void ReadObjectParentFromOperand(int operandIndex)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    ReadObjectParent(op.Value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    ReadObjectParent();
-                    break;
-            }
         }
 
         /// <summary>
@@ -221,27 +185,6 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteObjectParentFromOperand(int operandIndex, ILocal value)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    WriteObjectParent(op.Value, value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    using (var objNum = il.NewLocal<ushort>())
-                    {
-                        WriteObjectParent(objNum, value);
-                    }
-                    break;
-            }
-        }
-
         /// <summary>
         /// Reads the number of an object's sibling, given its 1-based object number.
         /// </summary>
@@ -265,24 +208,6 @@ namespace ZDebug.Compiler
             il.Math.Add(machine.ObjectSiblingOffset);
 
             ReadObjectNumber();
-        }
-
-        private void ReadObjectSiblingFromOperand(int operandIndex)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    ReadObjectSibling(op.Value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    ReadObjectSibling();
-                    break;
-            }
         }
 
         /// <summary>
@@ -329,27 +254,6 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteObjectSiblingFromOperand(int operandIndex, ILocal value)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    WriteObjectSibling(op.Value, value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    using (var objNum = il.NewLocal<ushort>())
-                    {
-                        WriteObjectSibling(objNum, value);
-                    }
-                    break;
-            }
-        }
-
         /// <summary>
         /// Reads the number of an object's child, given its 1-based object number.
         /// </summary>
@@ -373,24 +277,6 @@ namespace ZDebug.Compiler
             il.Math.Add(machine.ObjectChildOffset);
 
             ReadObjectNumber();
-        }
-
-        private void ReadObjectChildFromOperand(int operandIndex)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    ReadObjectChild(op.Value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    ReadObjectChild();
-                    break;
-            }
         }
 
         /// <summary>
@@ -437,27 +323,6 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void WriteObjectChildFromOperand(int operandIndex, ILocal value)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    WriteObjectChild(op.Value, value);
-                    break;
-
-                case OperandKind.Variable:
-                    LoadOperand(operandIndex);
-                    using (var objNum = il.NewLocal<ushort>())
-                    {
-                        WriteObjectChild(objNum, value);
-                    }
-                    break;
-            }
-        }
-
         /// <summary>
         /// Reads the address of an object's property table, given its 1-based object number.
         /// </summary>
@@ -485,24 +350,6 @@ namespace ZDebug.Compiler
                 address.Store();
 
                 EmitLoadMemoryWord(address);
-            }
-        }
-
-        private void ReadObjectPropertyTableAddressFromOperand(int operandIndex)
-        {
-            var op = GetOperand(operandIndex);
-
-            switch (op.Kind)
-            {
-                case OperandKind.LargeConstant:
-                case OperandKind.SmallConstant:
-                    ReadObjectPropertyTableAddress(op.Value);
-                    break;
-
-                default: // OperandKind.Variable
-                    EmitLoadVariable((byte)op.Value);
-                    ReadObjectPropertyTableAddress();
-                    break;
             }
         }
 
@@ -564,12 +411,6 @@ namespace ZDebug.Compiler
         private void ReadObjectShortName(ILocal objNum)
         {
             ReadObjectPropertyTableAddress(objNum);
-            ReadObjectShortName();
-        }
-
-        private void ReadObjectShortNameFromOperand(int operandIndex)
-        {
-            ReadObjectPropertyTableAddressFromOperand(operandIndex);
             ReadObjectShortName();
         }
 

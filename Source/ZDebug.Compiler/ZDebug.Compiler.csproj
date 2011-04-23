@@ -156,7 +156,6 @@
     <Compile Include="ZCompiler.cs" />
     <Compile Include="ZCompiler.ICompiler.cs" />
     <Compile Include="ZCompiler.Objects.cs" />
-    <Compile Include="ZCompiler.OpcodeRoutines.cs" />
     <Compile Include="ZCompiler.Screen.cs" />
     <Compile Include="ZCompilerException.cs" />
     <Compile Include="ZCompilerResult.cs" />
