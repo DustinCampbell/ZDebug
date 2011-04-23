@@ -708,11 +708,22 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void EmitLoadObjectParent(int objNum)
+        public void EmitLoadValidObject(Operand operand, ILabel invalidObject)
         {
-            var address = (ushort)(CalculateObjectAddress(objNum) + machine.ObjectParentOffset);
+            EmitLoadOperand(operand);
 
-            ReadObjectNumber(address);
+            // Check to see if object number is 0.
+            var objNumOk = il.NewLabel();
+            il.Duplicate();
+            objNumOk.BranchIf(Condition.True, @short: true);
+
+            // TODO: Emit warning messsage to log. For now, just pop the number off the stack.
+            il.Pop();
+
+            // Jump to failure branch
+            invalidObject.Branch();
+
+            objNumOk.Mark();
         }
 
         public void EmitLoadObjectParent(Operand operand)
@@ -729,6 +740,77 @@ namespace ZDebug.Compiler
                     ReadObjectParent();
                     break;
             }
+        }
+
+        public void EmitLoadObjectSibling(Operand operand)
+        {
+            switch (operand.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectSibling(operand.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    EmitLoadOperand(operand);
+                    ReadObjectSibling();
+                    break;
+            }
+        }
+
+        public void EmitLoadObjectChild(Operand operand)
+        {
+            switch (operand.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectChild(operand.Value);
+                    break;
+
+                case OperandKind.Variable:
+                    EmitLoadOperand(operand);
+                    ReadObjectChild();
+                    break;
+            }
+        }
+
+        public void EmitObjectHasAttribute(ILocal objectNumber, ILocal attributeNumber)
+        {
+            ObjectHasAttribute(objectNumber, attributeNumber);
+        }
+
+        public void EmitObjectChangeAttribute(ILocal objectNumber, ILocal attributeNumber, bool value)
+        {
+            ObjectSetAttribute(objectNumber, attributeNumber, value);
+        }
+
+        public void EmitLoadFirstPropertyAddress(ILocal objectNumber)
+        {
+            FirstProperty(objectNumber);
+        }
+
+        public void EmitLoadNextPropertyAddress()
+        {
+            NextProperty();
+        }
+
+        public void EmitLoadDefaultPropertyAddress(ILocal propertyNumber)
+        {
+            propertyNumber.Load();
+            il.Math.Subtract(1);
+            il.Math.Multiply(2);
+            il.Math.Add(machine.ObjectTableAddress);
+            il.Convert.ToUInt16();
+        }
+
+        public void EmitObjectRemoveFromParent(ILocal objectNumber)
+        {
+            RemoveObjectFromParent(objectNumber);
+        }
+
+        public void EmitObjectMoveToDestination(ILocal objectNumber, ILocal destinationNumber)
+        {
+            MoveObjectToDestination(objectNumber, destinationNumber);
         }
 
         public void EmitPrintZWords(ushort[] zwords)

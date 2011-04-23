@@ -43,33 +43,26 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new OrGenerator(instruction);
                         case 0x09:
                             return new AndGenerator(instruction);
-                        //case 0x0a:
-                        //    op_test_attr();
-                        //    return;
-                        //case 0x0b:
-                        //    op_set_attr();
-                        //    return;
-                        //case 0x0c:
-                        //    op_clear_attr();
-                        //    return;
+                        case 0x0a:
+                            return new TestAttrGenerator(instruction);
+                        case 0x0b:
+                            return new SetAttrGenerator(instruction);
+                        case 0x0c:
+                            return new ClearAttrGenerator(instruction);
                         case 0x0d:
                             return new StoreGenerator(instruction);
-                        //case 0x0e:
-                        //    op_insert_obj();
-                        //    return;
+                        case 0x0e:
+                            return new InsertObjGenerator(instruction);
                         case 0x0f:
                             return new LoadWGenerator(instruction);
                         case 0x10:
                             return new LoadBGenerator(instruction);
-                        //case 0x11:
-                        //    op_get_prop();
-                        //    return;
-                        //case 0x12:
-                        //    op_get_prop_addr();
-                        //    return;
-                        //case 0x13:
-                        //    op_get_next_prop();
-                        //    return;
+                        case 0x11:
+                            return new GetPropGenerator(instruction);
+                        case 0x12:
+                            return new GetPropAddrGenerator(instruction);
+                        case 0x13:
+                            return new GetNextPropGenerator(instruction);
                         case 0x14:
                             return new AddGenerator(instruction);
                         case 0x15:
@@ -111,18 +104,14 @@ namespace ZDebug.Compiler.CodeGeneration
                     {
                         case 0x00:
                             return new JzGenerator(instruction);
-                        //case 0x01:
-                        //    op_get_sibling();
-                        //    return;
-                        //case 0x02:
-                        //    op_get_child();
-                        //    return;
-                        //case 0x03:
-                        //    op_get_parent();
-                        //    return;
-                        //case 0x04:
-                        //    op_get_prop_len();
-                        //    return;
+                        case 0x01:
+                            return new GetSiblingGenerator(instruction);
+                        case 0x02:
+                            return new GetChildGenerator(instruction);
+                        case 0x03:
+                            return new GetParentGenerator(instruction);
+                        case 0x04:
+                            return new GetPropLenGenerator(instruction);
                         case 0x05:
                             return new IncGenerator(instruction);
                         case 0x06:
@@ -136,9 +125,8 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new CallSGenerator(instruction);
                             }
                             break;
-                        //case 0x09:
-                        //    op_remove_obj();
-                        //    return;
+                        case 0x09:
+                            return new RemoveObjGenerator(instruction);
                         //case 0x0a:
                         //    op_print_obj();
                         //    return;
@@ -227,9 +215,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new StoreWGenerator(instruction);
                         case 0x02:
                             return new StoreBGenerator(instruction);
-                        //case 0x03:
-                        //    op_put_prop();
-                        //    return;
+                        case 0x03:
+                            return new PutPropGenerator(instruction);
                         //case 0x04:
                         //    if (version < 4)
                         //    {

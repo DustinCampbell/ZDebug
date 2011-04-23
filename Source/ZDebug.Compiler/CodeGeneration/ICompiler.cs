@@ -112,9 +112,60 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitLoadUnpackedStringAddress(Operand operand);
 
         /// <summary>
+        /// Emits code to load the object number from the specified operand value and branch to the given label
+        /// if it's invalid.
+        /// </summary>
+        void EmitLoadValidObject(Operand operand, ILabel invalidObject);
+
+        /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
         void EmitLoadObjectParent(Operand operand);
+
+        /// <summary>
+        /// Emits code to load the object sibling of the specified operand value onto the evaluation stack.
+        /// </summary>
+        void EmitLoadObjectSibling(Operand operand);
+
+        /// <summary>
+        /// Emits code to load the object child of the specified operand value onto the evaluation stack.
+        /// </summary>
+        void EmitLoadObjectChild(Operand operand);
+
+        /// <summary>
+        /// Emits code to test whether the specified object has the given attribute.
+        /// </summary>
+        void EmitObjectHasAttribute(ILocal objectNumber, ILocal attributeNumber);
+
+        /// <summary>
+        /// Emits code to set or clear the given attribute on the specified object.
+        /// </summary>
+        void EmitObjectChangeAttribute(ILocal objectNumber, ILocal attributeNumber, bool value);
+
+        /// <summary>
+        /// Emits code to load the first property address of the specified object onto the evaluation stack.
+        /// </summary>
+        void EmitLoadFirstPropertyAddress(ILocal objectNumber);
+
+        /// <summary>
+        /// Emits code to load the next property address onto the evaluation stack.
+        /// </summary>
+        void EmitLoadNextPropertyAddress();
+
+        /// <summary>
+        /// Emits code to load the address of the specified property default onto the evaluation stack.
+        /// </summary>
+        void EmitLoadDefaultPropertyAddress(ILocal propertyNumber);
+
+        /// <summary>
+        /// Emits code to remove the specified object from its parent.
+        /// </summary>
+        void EmitObjectRemoveFromParent(ILocal objectNumber);
+
+        /// <summary>
+        /// Emits code to move the specified object to the given destination.
+        /// </summary>
+        void EmitObjectMoveToDestination(ILocal objectNumber, ILocal destinationNumber);
 
         /// <summary>
         /// Emits code to print the specified Z-Words to the screen.
