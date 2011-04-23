@@ -123,36 +123,17 @@ namespace ZDebug.Compiler
                         label.Mark();
                     }
 
+                    if (machine.Debugging)
+                    {
+                        il.Arguments.LoadMachine();
+                        il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
+                    }
+
+                    Profiler_ExecutingInstruction(generator.Instruction);
                     il.DebugWrite(generator.Instruction.PrettyPrint(machine));
 
                     generator.Generate(il, this);
                 }
-
-                //var instructions = new LinkedList<Instruction>(codeBlock.Instructions);
-                //var current = instructions.First;
-                //while (current != null)
-                //{
-                //    this.current = current;
-
-                //    ILabel label;
-                //    if (this.addressToLabelMap.TryGetValue(current.Value.Address, out label))
-                //    {
-                //        label.Mark();
-                //    }
-
-                //    if (machine.Debugging)
-                //    {
-                //        il.Arguments.LoadMachine();
-                //        il.Call(Reflection<CompiledZMachine>.GetMethod("Tick", @public: false));
-                //    }
-
-                //    Profiler_ExecutingInstruction();
-                //    il.DebugWrite(current.Value.PrettyPrint(machine));
-
-                //    Assemble(current.Value.Opcode);
-
-                //    current = current.Next;
-                //}
             }
 
             var code = (ZRoutineCode)dm.CreateDelegate(typeof(ZRoutineCode), machine);
@@ -191,12 +172,12 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void Profiler_ExecutingInstruction()
+        private void Profiler_ExecutingInstruction(Instruction instruction)
         {
             if (machine.Profiling)
             {
                 il.Arguments.LoadMachine();
-                il.Load(this.current.Value.Address);
+                il.Load(instruction.Address);
                 il.Call(Reflection<CompiledZMachine>.GetMethod("ExecutingInstruction", Types.Array<int>(), @public: false));
             }
         }

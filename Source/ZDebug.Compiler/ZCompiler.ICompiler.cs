@@ -726,6 +726,28 @@ namespace ZDebug.Compiler
             objNumOk.Mark();
         }
 
+        private void EmitLoadObjectPropertyTableAddress(Operand operand)
+        {
+            switch (operand.Kind)
+            {
+                case OperandKind.LargeConstant:
+                case OperandKind.SmallConstant:
+                    ReadObjectPropertyTableAddress(operand.Value);
+                    break;
+
+                default: // OperandKind.Variable
+                    EmitLoadVariable((byte)operand.Value);
+                    ReadObjectPropertyTableAddress();
+                    break;
+            }
+        }
+
+        public void EmitLoadObjectShortName(Operand operand)
+        {
+            EmitLoadObjectPropertyTableAddress(operand);
+            ReadObjectShortName();
+        }
+
         public void EmitLoadObjectParent(Operand operand)
         {
             switch (operand.Kind)
@@ -822,6 +844,22 @@ namespace ZDebug.Compiler
         public void EmitPrintText()
         {
             PrintText();
+        }
+
+        public void EmitPrintChar()
+        {
+            PrintChar();
+        }
+
+        public void EmitPrintChar(char ch)
+        {
+            PrintChar(ch);
+        }
+
+        public void Quit()
+        {
+            Profiler_Quit();
+            il.ThrowException<ZMachineQuitException>();
         }
 
         public byte Version

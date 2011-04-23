@@ -118,6 +118,11 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitLoadValidObject(Operand operand, ILabel invalidObject);
 
         /// <summary>
+        /// Emits code to load the Z-Words for the given object's short name onto the evaluation stack.
+        /// </summary>
+        void EmitLoadObjectShortName(Operand operand);
+
+        /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
         void EmitLoadObjectParent(Operand operand);
@@ -176,6 +181,21 @@ namespace ZDebug.Compiler.CodeGeneration
         /// Emits code to print the text on the evaluation stack to the screen.
         /// </summary>
         void EmitPrintText();
+
+        /// <summary>
+        /// Emits code to print the char on the evaluation stack to the screen.
+        /// </summary>
+        void EmitPrintChar();
+
+        /// <summary>
+        /// Emits code to print the specified char to the screen.
+        /// </summary>
+        void EmitPrintChar(char ch);
+
+        /// <summary>
+        /// Emits code to quit the Z-Machine.
+        /// </summary>
+        void Quit();
 
         /// <summary>
         /// Returns the Z-Machine version.

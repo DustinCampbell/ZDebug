@@ -116,9 +116,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new IncGenerator(instruction);
                         case 0x06:
                             return new DecGenerator(instruction);
-                        //case 0x07:
-                        //    op_print_addr();
-                        //    return;
+                        case 0x07:
+                            return new PrintAddrGenerator(instruction);
                         case 0x08:
                             if (version >= 4)
                             {
@@ -127,9 +126,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             break;
                         case 0x09:
                             return new RemoveObjGenerator(instruction);
-                        //case 0x0a:
-                        //    op_print_obj();
-                        //    return;
+                        case 0x0a:
+                            return new PrintObjGenerator(instruction);
                         case 0x0b:
                             return new RetGenerator(instruction);
                         case 0x0c:
@@ -155,9 +153,8 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new RfalseGenerator(instruction);
                         case 0x02:
                             return new PrintGenerator(instruction);
-                        //case 0x03:
-                        //    op_print_ret();
-                        //    return;
+                        case 0x03:
+                            return new PrintRetGenerator(instruction);
                         //case 0x05:
                         //    if (version <= 4)
                         //    {
@@ -177,12 +174,10 @@ namespace ZDebug.Compiler.CodeGeneration
                         //    return;
                         case 0x08:
                             return new RetPoppedGenerator(instruction);
-                        //case 0x0a:
-                        //    op_quit();
-                        //    return;
-                        //case 0x0b:
-                        //    op_new_line();
-                        //    return;
+                        case 0x0a:
+                            return new QuitGenerator(instruction);
+                        case 0x0b:
+                            return new NewLineGenerator(instruction);
                         //case 0x0c:
                         //    if (version == 3)
                         //    {
@@ -190,20 +185,18 @@ namespace ZDebug.Compiler.CodeGeneration
                         //        return;
                         //    }
                         //    break;
-                        //case 0x0d:
-                        //    if (version >= 3)
-                        //    {
-                        //        op_verify();
-                        //        return;
-                        //    }
-                        //    break;
-                        //case 0x0f:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_piracy();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0d:
+                            if (version >= 3)
+                            {
+                                return new VerifyGenerator(instruction);
+                            }
+                            break;
+                        case 0x0f:
+                            if (version >= 5)
+                            {
+                                return new PiracyGenerator(instruction);
+                            }
+                            break;
                     }
                     break;
                 case OpcodeKind.VarOp:
@@ -234,14 +227,12 @@ namespace ZDebug.Compiler.CodeGeneration
                         //        return;
                         //    }
                         //    break;
-                        //case 0x05:
-                        //    op_print_char();
-                        //    return;
+                        case 0x05:
+                            return new PrintCharGenerator(instruction);
                         case 0x06:
                             return new PrintNumGenerator(instruction);
-                        //case 0x07:
-                        //    op_random();
-                        //    return;
+                        case 0x07:
+                            return new RandomGenerator(instruction);
                         case 0x08:
                             return new PushGenerator(instruction);
                         case 0x09:
