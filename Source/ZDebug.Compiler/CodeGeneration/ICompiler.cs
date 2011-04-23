@@ -173,6 +173,56 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitObjectMoveToDestination(ILocal objectNumber, ILocal destinationNumber);
 
         /// <summary>
+        /// Emits code to set the current text style to the specified operand.
+        /// </summary>
+        void EmitSetTextStyle(Operand op);
+
+        /// <summary>
+        /// Emits code to split the window using the specified operand.
+        /// </summary>
+        void EmitSplitWindow(Operand op);
+
+        /// <summary>
+        /// Emits code to set the window using the specified operand.
+        /// </summary>
+        void EmitSetWindow(Operand op);
+
+        /// <summary>
+        /// Emits code to set the cursor to the specified line and column.
+        /// </summary>
+        void EmitSetCursor(ILocal line, ILocal column);
+
+        /// <summary>
+        /// Emits code to select the screen stream.
+        /// </summary>
+        void EmitSelectScreenStream();
+
+        /// <summary>
+        /// Emits code to deselect the screen stream.
+        /// </summary>
+        void EmitDeselectScreenStream();
+
+        /// <summary>
+        /// Emits code to select the transcript stream.
+        /// </summary>
+        void EmitSelectTranscriptStream();
+
+        /// <summary>
+        /// Emits code to deselect the transcript stream.
+        /// </summary>
+        void EmitDeselectTranscriptStream();
+
+        /// <summary>
+        /// Emits code to select a memory stream using the specified operand.
+        /// </summary>
+        void EmitSelectMemoryStream(Operand operand);
+
+        /// <summary>
+        /// Emits code to deselect the last memory stream.
+        /// </summary>
+        void EmitDeselectMemoryStream();
+
+        /// <summary>
         /// Emits code to print the specified Z-Words to the screen.
         /// </summary>
         void EmitPrintZWords(ushort[] zwords);

@@ -55,6 +55,10 @@
     <Compile Include="CodeGeneration\Generators\CallSGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\CheckArgCountGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\ClearAttrGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\AReadGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\OutputStreamGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SaveUndoGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SRead4Generator.cs" />
     <Compile Include="CodeGeneration\Generators\CopyTableGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\GetChildGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\GetNextPropGenerator.cs" />
@@ -81,6 +85,10 @@
     <Compile Include="CodeGeneration\Generators\RemoveObjGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\ScanTableGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\SetAttrGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SetCursorGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SetWindowGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\SplitWindowGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\TextStyleGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\SRead1Generator.cs" />
     <Compile Include="CodeGeneration\Generators\StoreWGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\StoreBGenerator.cs" />
@@ -93,6 +101,7 @@
     <Compile Include="CodeGeneration\Generators\IncChkGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\LoadGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\TestAttrGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\TokenizeGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\UnaryOpWithBranchGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\DecGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\IncGenerator.cs" />

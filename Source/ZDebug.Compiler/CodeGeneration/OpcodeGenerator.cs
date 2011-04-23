@@ -215,16 +215,14 @@ namespace ZDebug.Compiler.CodeGeneration
                             {
                                 return new SRead1Generator(instruction);
                             }
-                            //if (version == 4)
-                            //{
-                            //    op_sread4();
-                            //    return;
-                            //}
-                            //if (version > 4)
-                            //{
-                            //    op_aread();
-                            //    return;
-                            //}
+                            if (version == 4)
+                            {
+                                return new SRead4Generator(instruction);
+                            }
+                            if (version > 4)
+                            {
+                                return new AReadGenerator(instruction);
+                            }
                             break;
                         case 0x05:
                             return new PrintCharGenerator(instruction);
@@ -240,20 +238,18 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new PullGenerator(instruction);
                             }
                             break;
-                        //case 0x0a:
-                        //    if (version >= 3)
-                        //    {
-                        //        op_split_window();
-                        //        return;
-                        //    }
-                        //    break;
-                        //case 0x0b:
-                        //    if (version >= 3)
-                        //    {
-                        //        op_set_window();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0a:
+                            if (version >= 3)
+                            {
+                                return new SplitWindowGenerator(instruction);
+                            }
+                            break;
+                        case 0x0b:
+                            if (version >= 3)
+                            {
+                                return new SetWindowGenerator(instruction);
+                            }
+                            break;
                         //case 0x0d:
                         //    if (version >= 4)
                         //    {
@@ -261,13 +257,12 @@ namespace ZDebug.Compiler.CodeGeneration
                         //        return;
                         //    }
                         //    break;
-                        //case 0x11:
-                        //    if (version >= 4)
-                        //    {
-                        //        op_text_style();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x11:
+                            if (version >= 4)
+                            {
+                                return new TextStyleGenerator(instruction);
+                            }
+                            break;
                         //case 0x12:
                         //    if (version >= 4)
                         //    {
@@ -275,41 +270,20 @@ namespace ZDebug.Compiler.CodeGeneration
                         //        return;
                         //    }
                         //    break;
-                        //case 0x13:
-                        //    if (version >= 3 && version < 5)
-                        //    {
-                        //        op_output_stream();
-                        //        return;
-                        //    }
-                        //    if (version == 6)
-                        //    {
-                        //        op_output_stream();
-                        //        return;
-                        //    }
-                        //    if (version >= 5)
-                        //    {
-                        //        op_output_stream();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x13:
+                            return new OutputStreamGenerator(instruction);
                         case 0x0c:
                             if (version >= 4)
                             {
                                 return new CallSGenerator(instruction);
                             }
                             break;
-                        //case 0x0f:
-                        //    if (version == 6)
-                        //    {
-                        //        op_set_cursor6();
-                        //        return;
-                        //    }
-                        //    if (version >= 4)
-                        //    {
-                        //        op_set_cursor();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0f:
+                            if (version >= 4 && version != 6)
+                            {
+                                return new SetCursorGenerator(instruction);
+                            }
+                            break;
                         //case 0x16:
                         //    if (version >= 4)
                         //    {
@@ -341,13 +315,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new CallNGenerator(instruction);
                             }
                             break;
-                        //case 0x1b:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_tokenize();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x1b:
+                            if (version >= 5)
+                            {
+                                return new TokenizeGenerator(instruction);
+                            }
+                            break;
                         case 0x1d:
                             if (version >= 5)
                             {
@@ -391,13 +364,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new ArtShiftGenerator(instruction);
                             }
                             break;
-                        //case 0x09:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_save_undo();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x09:
+                            if (version >= 5)
+                            {
+                                return new SaveUndoGenerator(instruction);
+                            }
+                            break;
                         //case 0x0a:
                         //    if (version >= 5)
                         //    {

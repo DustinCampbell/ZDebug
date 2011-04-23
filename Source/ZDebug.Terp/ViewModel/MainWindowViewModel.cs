@@ -209,7 +209,7 @@ namespace ZDebug.Terp.ViewModel
 
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
-            profilerService.Create();
+            //profilerService.Create();
             PropertyChanged("Profiling");
 
             e.Story.RegisterInterpreter(new Interpreter());

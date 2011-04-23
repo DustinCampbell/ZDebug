@@ -835,6 +835,64 @@ namespace ZDebug.Compiler
             MoveObjectToDestination(objectNumber, destinationNumber);
         }
 
+        public void EmitSetTextStyle(Operand op)
+        {
+            EmitLoadOperand(op);
+            SetTextStyle();
+        }
+
+        public void EmitSplitWindow(Operand op)
+        {
+            EmitLoadOperand(op);
+            SplitWindow();
+        }
+
+        public void EmitSetWindow(Operand op)
+        {
+            EmitLoadOperand(op);
+            SetWindow();
+        }
+
+        public void EmitSetCursor(ILocal line, ILocal column)
+        {
+            SetCursor(line, column);
+        }
+
+        public void EmitSelectScreenStream()
+        {
+            SelectScreenStream();
+        }
+
+        public void EmitDeselectScreenStream()
+        {
+            DeselectScreenStream();
+        }
+
+        public void EmitSelectTranscriptStream()
+        {
+            SelectTranscriptStream();
+        }
+
+        public void EmitDeselectTranscriptStream()
+        {
+            DeselectTranscriptStream();
+        }
+
+        public void EmitSelectMemoryStream(Operand operand)
+        {
+            using (var address = il.NewLocal<ushort>())
+            {
+                EmitLoadOperand(operand);
+                address.Store();
+                SelectMemoryStream(address);
+            }
+        }
+
+        public void EmitDeselectMemoryStream()
+        {
+            DeselectMemoryStream();
+        }
+
         public void EmitPrintZWords(ushort[] zwords)
         {
             var text = machine.ConvertZText(zwords);

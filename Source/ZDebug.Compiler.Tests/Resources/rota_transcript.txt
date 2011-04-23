@@ -276,7 +276,7 @@ The guardian harpy attacks you, swooping with its talons, making an attack roll 
 [Your score has just gone up by six points.]
 
 Combat> take all from pack
-immaculate scroll: Removed.sea-blue vial: Removed.cursive diary: Removed.immaculate scroll: But it isn't there now.sea-blue vial: But it isn't there now.cursive diary: But it isn't there now.
+immaculate scroll: Removed.sea-blue vial: Removed.cursive diary: Removed.
 You attack the guardian harpy, lunging with the spear, making an attack roll (1d20) of 16, +1 for your level - hit (11 to 19), doing 1d6 of damage: 1d6: 3 points, wounding the guardian harpy to a strength of 11.
 The guardian harpy attacks you, swooping with its talons, making an attack roll (1d20) of 2 - critical miss (2 or less): the guardian harpy roars with impotent rage!
 
@@ -417,7 +417,7 @@ As you intone the words of the detect trap spell, your fingers release diffuse b
 > take chest
 Taken.
 > take all from chest
-green vial: Removed.ochre vial: Removed.crimson vial: Removed.ochre vial: But it isn't there now.crimson vial: But it isn't there now.
+green vial: Removed.ochre vial: Removed.crimson vial: Removed.
 > x green
 The green vial is a 1d6+2 strength potion.
 
