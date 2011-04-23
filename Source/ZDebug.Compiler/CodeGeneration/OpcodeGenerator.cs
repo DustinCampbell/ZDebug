@@ -85,18 +85,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new CallNGenerator(instruction);
                             }
                             break;
-                        //case 0x1b:
-                        //    if (version == 6)
-                        //    {
-                        //        op_set_color6();
-                        //        return;
-                        //    }
-                        //    if (version >= 5)
-                        //    {
-                        //        op_set_color();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x1b:
+                            if (version >= 5 && version != 6)
+                            {
+                                return new SetColorGenerator(instruction);
+                            }
+                            break;
                     }
                     break;
                 case OpcodeKind.OneOp:
@@ -155,36 +149,18 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new PrintGenerator(instruction);
                         case 0x03:
                             return new PrintRetGenerator(instruction);
-                        //case 0x05:
-                        //    if (version <= 4)
-                        //    {
-                        //        op_save();
-                        //        return;
-                        //    }
-                        //    break;
-                        //case 0x06:
-                        //    if (version <= 4)
-                        //    {
-                        //        op_restore();
-                        //        return;
-                        //    }
-                        //    break;
-                        //case 0x07:
-                        //    op_restart();
-                        //    return;
                         case 0x08:
                             return new RetPoppedGenerator(instruction);
                         case 0x0a:
                             return new QuitGenerator(instruction);
                         case 0x0b:
                             return new NewLineGenerator(instruction);
-                        //case 0x0c:
-                        //    if (version == 3)
-                        //    {
-                        //        op_show_status();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0c:
+                            if (version == 3)
+                            {
+                                return new ShowStatusGenerator(instruction);
+                            }
+                            break;
                         case 0x0d:
                             if (version >= 3)
                             {
@@ -250,26 +226,24 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new SetWindowGenerator(instruction);
                             }
                             break;
-                        //case 0x0d:
-                        //    if (version >= 4)
-                        //    {
-                        //        op_erase_window();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0d:
+                            if (version >= 4)
+                            {
+                                return new EraseWindowGenerator(instruction);
+                            }
+                            break;
                         case 0x11:
                             if (version >= 4)
                             {
                                 return new TextStyleGenerator(instruction);
                             }
                             break;
-                        //case 0x12:
-                        //    if (version >= 4)
-                        //    {
-                        //        op_buffer_mode();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x12:
+                            if (version >= 4)
+                            {
+                                return new BufferModeGenerator(instruction);
+                            }
+                            break;
                         case 0x13:
                             return new OutputStreamGenerator(instruction);
                         case 0x0c:
@@ -284,13 +258,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new SetCursorGenerator(instruction);
                             }
                             break;
-                        //case 0x16:
-                        //    if (version >= 4)
-                        //    {
-                        //        op_read_char();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x16:
+                            if (version >= 4)
+                            {
+                                return new ReadCharGenerator(instruction);
+                            }
+                            break;
                         case 0x17:
                             if (version >= 4)
                             {
@@ -338,20 +311,6 @@ namespace ZDebug.Compiler.CodeGeneration
                 case OpcodeKind.Ext:
                     switch (opcode.Number)
                     {
-                        //case 0x00:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_save();
-                        //        return;
-                        //    }
-                        //    break;
-                        //case 0x01:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_restore();
-                        //        return;
-                        //    }
-                        //    break;
                         case 0x02:
                             if (version >= 5)
                             {
@@ -370,13 +329,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new SaveUndoGenerator(instruction);
                             }
                             break;
-                        //case 0x0a:
-                        //    if (version >= 5)
-                        //    {
-                        //        op_restore_undo();
-                        //        return;
-                        //    }
-                        //    break;
+                        case 0x0a:
+                            if (version >= 5)
+                            {
+                                return new RestoreUndoGenerator(instruction);
+                            }
+                            break;
                     }
                     break;
             }

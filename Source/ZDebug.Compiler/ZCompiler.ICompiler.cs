@@ -835,6 +835,11 @@ namespace ZDebug.Compiler
             MoveObjectToDestination(objectNumber, destinationNumber);
         }
 
+        public void EmitShowStatus()
+        {
+            ShowStatus();
+        }
+
         public void EmitSetTextStyle(Operand op)
         {
             EmitLoadOperand(op);
@@ -853,9 +858,20 @@ namespace ZDebug.Compiler
             SetWindow();
         }
 
+        public void EmitEraseWindow(Operand op)
+        {
+            EmitLoadOperand(op);
+            EraseWindow();
+        }
+
         public void EmitSetCursor(ILocal line, ILocal column)
         {
             SetCursor(line, column);
+        }
+
+        public void EmitSetColor(ILocal foreground, ILocal background)
+        {
+            SetColor(foreground, background);
         }
 
         public void EmitSelectScreenStream()

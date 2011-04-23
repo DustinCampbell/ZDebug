@@ -173,6 +173,11 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitObjectMoveToDestination(ILocal objectNumber, ILocal destinationNumber);
 
         /// <summary>
+        /// Emits code to show status line.
+        /// </summary>
+        void EmitShowStatus();
+
+        /// <summary>
         /// Emits code to set the current text style to the specified operand.
         /// </summary>
         void EmitSetTextStyle(Operand op);
@@ -188,9 +193,19 @@ namespace ZDebug.Compiler.CodeGeneration
         void EmitSetWindow(Operand op);
 
         /// <summary>
+        /// Emits code to erase the window using the specified operand.
+        /// </summary>
+        void EmitEraseWindow(Operand op);
+
+        /// <summary>
         /// Emits code to set the cursor to the specified line and column.
         /// </summary>
         void EmitSetCursor(ILocal line, ILocal column);
+
+        /// <summary>
+        /// Emits code to set the color to the specified foreground and background.
+        /// </summary>
+        void EmitSetColor(ILocal foreground, ILocal background);
 
         /// <summary>
         /// Emits code to select the screen stream.
