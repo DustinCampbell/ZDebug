@@ -21,7 +21,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
 
-            using (var number = il.NewLocal<short>())
+            using (var number = il.NewLocal<ushort>())
             using (var places = il.NewLocal<int>())
             {
                 compiler.EmitLoadOperand(op1);

@@ -31,10 +31,10 @@ namespace ZDebug.Compiler.CodeGeneration
                             return new JlGenerator(instruction);
                         case 0x03:
                             return new JgGenerator(instruction);
-                        //case 0x04:
-                        //    return new DecChkGenerator(instruction);
-                        //case 0x05:
-                        //    return new IncChkGenerator(instruction);
+                        case 0x04:
+                            return new DecChkGenerator(instruction);
+                        case 0x05:
+                            return new IncChkGenerator(instruction);
                         case 0x06:
                             return new JinGenerator(instruction);
                         case 0x07:

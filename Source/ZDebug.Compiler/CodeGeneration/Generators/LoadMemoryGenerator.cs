@@ -17,6 +17,9 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.store = instruction.StoreVariable;
         }
 
+        protected abstract int CalculateAddress(int address, int offset);
+        protected abstract void EmitCalculateAddress(Operand addressOp, Operand offsetOp, ILBuilder il, ICompiler compiler);
+
         protected abstract void LoadMemory(int address, ICompiler compiler);
         protected abstract void LoadMemory(ILocal address, ICompiler compiler);
 
@@ -35,9 +38,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var address = il.NewLocal<int>())
             {
-                compiler.EmitLoadOperand(op1);
-                compiler.EmitLoadOperand(op2);
-                il.Math.Add();
+                EmitCalculateAddress(op1, op2, il, compiler);
                 address.Store();
 
                 LoadMemory(address, compiler);
@@ -54,7 +55,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             if (op1.IsConstant && op2.IsConstant)
             {
-                GenerateWithAddress((int)op1.Value + (int)op2.Value, il, compiler);
+                GenerateWithAddress(CalculateAddress(op1.Value, op2.Value), il, compiler);
             }
             else
             {

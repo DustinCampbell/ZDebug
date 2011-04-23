@@ -17,15 +17,18 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.op3 = instruction.Operands[2];
         }
 
+        protected abstract int CalculateAddress(int address, int offset);
+        protected abstract void EmitCalculateAddress(Operand addressOp, Operand offsetOp, ILBuilder il, ICompiler compiler);
+        protected abstract void LoadValue(Operand valueOp, ILBuilder il, ICompiler compiler);
+
         protected abstract void StoreMemory(int address, ILocal value, ICompiler compiler);
         protected abstract void StoreMemory(ILocal address, ILocal value, ICompiler compiler);
 
         private void GenerateWithAddress(int address, ILBuilder il, ICompiler compiler)
         {
-            using (var value = il.NewLocal<byte>())
+            using (var value = il.NewLocal<ushort>())
             {
-                compiler.EmitLoadOperand(op3);
-                il.Convert.ToUInt8();
+                LoadValue(op3, il, compiler);
                 value.Store();
 
                 StoreMemory(address, value, compiler);
@@ -35,15 +38,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         private void GenerateWithCalculatedAddress(ILBuilder il, ICompiler compiler)
         {
             using (var address = il.NewLocal<int>())
-            using (var value = il.NewLocal<byte>())
+            using (var value = il.NewLocal<ushort>())
             {
-                compiler.EmitLoadOperand(op1);
-                compiler.EmitLoadOperand(op2);
-                il.Math.Add();
+                EmitCalculateAddress(op1, op2, il, compiler);
                 address.Store();
 
-                compiler.EmitLoadOperand(op3);
-                il.Convert.ToUInt8();
+                LoadValue(op3, il, compiler);
                 value.Store();
 
                 StoreMemory(address, value, compiler);
@@ -54,7 +54,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             if (op1.IsConstant && op2.IsConstant)
             {
-                GenerateWithAddress((int)op1.Value + (int)op2.Value, il, compiler);
+                GenerateWithAddress(CalculateAddress(op1.Value, op2.Value), il, compiler);
             }
             else
             {
