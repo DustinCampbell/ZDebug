@@ -2,6 +2,7 @@
 using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Core.Collections;
+using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
@@ -838,97 +839,190 @@ namespace ZDebug.Compiler
 
         public void EmitShowStatus()
         {
-            ShowStatus();
+            screen.Load();
+
+            il.CallVirt(Reflection<IScreen>.GetMethod("ShowStatus", Types.None));
         }
 
         public void EmitSetTextStyle(Operand op)
         {
+            screen.Load();
             EmitLoadOperand(op);
-            SetTextStyle();
+
+            il.CallVirt(Reflection<IScreen>.GetMethod("SetTextStyle", Types.Array<ZTextStyle>()));
         }
 
         public void EmitSplitWindow(Operand op)
         {
+            screen.Load();
             EmitLoadOperand(op);
-            SplitWindow();
+
+            il.CallVirt(Reflection<IScreen>.GetMethod("Split", Types.Array<int>()));
         }
 
         public void EmitSetWindow(Operand op)
         {
+            screen.Load();
             EmitLoadOperand(op);
-            SetWindow();
+
+            il.CallVirt(Reflection<IScreen>.GetMethod("SetWindow", Types.Array<int>()));
         }
 
         public void EmitEraseWindow(Operand op)
         {
-            EmitLoadOperand(op);
-            EraseWindow();
+            using (var window = il.NewLocal<short>())
+            {
+                EmitLoadOperand(op);
+                il.Convert.ToInt16();
+                window.Store();
+
+                var clearAllWindows = il.NewLabel();
+                var done = il.NewLabel();
+
+                window.Load();
+                il.Load(0);
+                clearAllWindows.BranchIf(Condition.LessThan, @short: true);
+
+                screen.Load();
+                window.Load();
+
+                il.CallVirt(Reflection<IScreen>.GetMethod("Clear", Types.Array<int>()));
+
+                done.Branch(@short: true);
+
+                clearAllWindows.Mark();
+
+                screen.Load();
+
+                window.Load();
+                il.Load(-1);
+                il.Compare.Equal();
+
+                il.CallVirt(Reflection<IScreen>.GetMethod("ClearAll", Types.Array<bool>()));
+
+                done.Mark();
+            }
         }
 
         public void EmitSetCursor(ILocal line, ILocal column)
         {
-            SetCursor(line, column);
+            screen.Load();
+            line.Load();
+            il.Math.Subtract(1);
+            column.Load();
+            il.Math.Subtract(1);
+
+            il.Call(Reflection<IScreen>.GetMethod("SetCursor", Types.Array<int, int>()));
         }
 
         public void EmitSetColor(ILocal foreground, ILocal background)
         {
-            SetColor(foreground, background);
+            var tryBackground = il.NewLabel();
+            foreground.Load();
+            tryBackground.BranchIf(Condition.False, @short: true);
+
+            screen.Load();
+            foreground.Load();
+
+            il.Call(Reflection<IScreen>.GetMethod("SetForegroundColor", Types.Array<ZColor>()));
+
+            tryBackground.Mark();
+
+            var done = il.NewLabel();
+            background.Load();
+            done.BranchIf(Condition.False, @short: true);
+
+            screen.Load();
+            background.Load();
+
+            il.Call(Reflection<IScreen>.GetMethod("SetBackgroundColor", Types.Array<ZColor>()));
+
+            done.Mark();
         }
 
         public void EmitSelectScreenStream()
         {
-            SelectScreenStream();
+            outputStreams.Load();
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectScreenStream", Types.None));
         }
 
         public void EmitDeselectScreenStream()
         {
-            DeselectScreenStream();
+            outputStreams.Load();
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectScreenStream", Types.None));
         }
 
         public void EmitSelectTranscriptStream()
         {
-            SelectTranscriptStream();
+            outputStreams.Load();
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectTranscriptStream", Types.None));
         }
 
         public void EmitDeselectTranscriptStream()
         {
-            DeselectTranscriptStream();
+            outputStreams.Load();
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectTranscriptStream", Types.None));
         }
 
         public void EmitSelectMemoryStream(Operand operand)
         {
-            using (var address = il.NewLocal<ushort>())
-            {
-                EmitLoadOperand(operand);
-                address.Store();
-                SelectMemoryStream(address);
-            }
+            outputStreams.Load();
+            EmitLoadOperand(operand);
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectMemoryStream", Types.Array<int>()));
         }
 
         public void EmitDeselectMemoryStream()
         {
-            DeselectMemoryStream();
+            outputStreams.Load();
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectMemoryStream", Types.None));
         }
 
         public void EmitPrintZWords(ushort[] zwords)
         {
+            outputStreams.Load();
+
             var text = machine.ConvertZText(zwords);
-            PrintText(text);
+            il.Load(text);
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>()));
         }
 
         public void EmitPrintText()
         {
-            PrintText();
+            using (var text = il.NewLocal<string>())
+            {
+                text.Store();
+                outputStreams.Load();
+                text.Load();
+
+                il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>()));
+            }
         }
 
         public void EmitPrintChar()
         {
-            PrintChar();
+            using (var ch = il.NewLocal<char>())
+            {
+                ch.Store();
+                outputStreams.Load();
+                ch.Load();
+
+                il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>()));
+            }
         }
 
         public void EmitPrintChar(char ch)
         {
-            PrintChar(ch);
+            outputStreams.Load();
+            il.Load(ch);
+
+            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>()));
         }
 
         public void Quit()
