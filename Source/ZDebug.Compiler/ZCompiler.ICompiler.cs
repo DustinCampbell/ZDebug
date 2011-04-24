@@ -283,18 +283,14 @@ namespace ZDebug.Compiler
                 loadAddress: () => address.Load());
         }
 
-        private void EmitLoadMemoryWord(CodeBuilder loadAddress)
+        private void EmitLoadMemoryWord(CodeBuilder loadAddress, CodeBuilder loadSecondAddress)
         {
             // shift memory[address] left 8 bits
             EmitLoadMemoryByte(loadAddress);
             il.Math.Shl(8);
 
             // read memory[address + 1]
-            EmitLoadMemoryByte(() =>
-            {
-                loadAddress();
-                il.Math.Add(1);
-            });
+            EmitLoadMemoryByte(loadSecondAddress);
 
             // or bytes together
             il.Math.Or();
@@ -304,13 +300,19 @@ namespace ZDebug.Compiler
         public void EmitLoadMemoryWord(int address)
         {
             EmitLoadMemoryWord(
-                loadAddress: () => il.Load(address));
+                loadAddress: () => il.Load(address),
+                loadSecondAddress: () => il.Load(address + 1));
         }
 
         public void EmitLoadMemoryWord(ILocal address)
         {
             EmitLoadMemoryWord(
-                loadAddress: () => address.Load());
+                loadAddress: () => address.Load(),
+                loadSecondAddress: () =>
+                {
+                    address.Load();
+                    il.Math.Add(1);
+                });
         }
 
         private void EmitStoreMemoryByte(CodeBuilder loadAddress, CodeBuilder loadValue)
