@@ -392,16 +392,17 @@ namespace ZDebug.Compiler
 
         public void EmitPushStack(ILocal value, bool indirect = false)
         {
+            il.Arguments.LoadStack();
+
+            il.Arguments.LoadSP();
             if (!indirect)
             {
                 // increment sp
-                il.Arguments.LoadSP();
                 il.Math.Add(1);
+                il.Duplicate();
                 il.Arguments.StoreSP();
             }
 
-            il.Arguments.LoadStack();
-            il.Arguments.LoadSP();
             value.Load();
             il.Emit(OpCodes.Stelem_I2);
         }
