@@ -6,7 +6,7 @@ namespace ZDebug.Core.Execution
 {
     public abstract partial class ZMachine
     {
-        public class OutputStreamCollection
+        protected class OutputStreamCollection
         {
             private readonly Story story;
             private readonly byte[] memory;

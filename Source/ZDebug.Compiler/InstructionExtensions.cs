@@ -39,40 +39,6 @@ namespace ZDebug.Compiler
             return i.Opcode.IsCall;
         }
 
-        public static bool UsesOutputStreams(this Instruction i)
-        {
-            var op = i.Opcode;
-
-            return op.Is(OpcodeKind.ZeroOp, 0x02)  // print
-                || op.Is(OpcodeKind.ZeroOp, 0x0b)  // new_line
-                || op.Is(OpcodeKind.VarOp, 0x05)   // print_char
-                || op.Is(OpcodeKind.VarOp, 0x06)   // print_num
-                || op.Is(OpcodeKind.OneOp, 0x07)   // print_addr
-                || op.Is(OpcodeKind.OneOp, 0x0a)   // print_obj
-                || op.Is(OpcodeKind.OneOp, 0x0d)   // print_paddr
-                || op.Is(OpcodeKind.ZeroOp, 0x03)  // print_ret
-                || op.Is(OpcodeKind.VarOp, 0x13);  // output_stream
-        }
-
-        public static bool UsesScreen(this Instruction i)
-        {
-            var op = i.Opcode;
-
-            return op.Is(OpcodeKind.ZeroOp, 0x02)  // print
-                || op.Is(OpcodeKind.ZeroOp, 0x0b)  // new_line
-                || op.Is(OpcodeKind.VarOp, 0x05)   // print_char
-                || op.Is(OpcodeKind.VarOp, 0x06)   // print_num
-                || op.Is(OpcodeKind.OneOp, 0x07)   // print_addr
-                || op.Is(OpcodeKind.OneOp, 0x0a)   // print_obj
-                || op.Is(OpcodeKind.OneOp, 0x0d)   // print_paddr
-                || op.Is(OpcodeKind.ZeroOp, 0x03)  // print_ret
-                || op.Is(OpcodeKind.VarOp, 0x0a)   // split_window
-                || op.Is(OpcodeKind.VarOp, 0x0b)   // set_window
-                || op.Is(OpcodeKind.TwoOp, 0x1b)   // set_color
-                || op.Is(OpcodeKind.VarOp, 0x0f)   // set_cursor
-                || op.Is(OpcodeKind.VarOp, 0x11);  // set_textStyle
-        }
-
         public static bool UsesStack(this Instruction i)
         {
             // TODO: Need to check Z-Machine version

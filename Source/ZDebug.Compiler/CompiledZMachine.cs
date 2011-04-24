@@ -536,6 +536,107 @@ namespace ZDebug.Compiler
             return 0;
         }
 
+        internal void SelectScreenStream()
+        {
+            this.OutputStreams.SelectScreenStream();
+        }
+
+        internal void DeselectScreenStream()
+        {
+            this.OutputStreams.DeselectScreenStream();
+        }
+
+        internal void SelectTranscriptStream()
+        {
+            this.OutputStreams.SelectTranscriptStream();
+        }
+
+        internal void DeselectTranscriptStream()
+        {
+            this.OutputStreams.DeselectTranscriptStream();
+        }
+
+        internal void SelectMemoryStream(int address)
+        {
+            this.OutputStreams.SelectMemoryStream(address);
+        }
+
+        internal void DeselectMemoryStream()
+        {
+            this.OutputStreams.DeselectMemoryStream();
+        }
+
+        internal void PrintText(string text)
+        {
+            this.OutputStreams.Print(text);
+        }
+
+        internal void PrintChar(char ch)
+        {
+            this.OutputStreams.Print(ch);
+        }
+
+        internal void ShowStatus()
+        {
+            this.Screen.ShowStatus();
+        }
+
+        internal void SetTextStyle(ZTextStyle style)
+        {
+            this.Screen.SetTextStyle(style);
+        }
+
+        internal void SplitWindow(int lines)
+        {
+            this.Screen.Split(lines);
+        }
+
+        internal void SetWindow(int window)
+        {
+            this.Screen.SetWindow(window);
+        }
+
+        internal void ClearWindow(int window)
+        {
+            if (window < 0)
+            {
+                if (window == -1)
+                {
+                    this.Screen.ClearAll(unsplit: true);
+                }
+                else if (window == -2)
+                {
+                    this.Screen.ClearAll(unsplit: false);
+                }
+                else
+                {
+                    throw new ZMachineException("Invalid window operand");
+                }
+            }
+            else
+            {
+                this.Screen.Clear(window);
+            }
+        }
+
+        internal void SetCursor(int line, int column)
+        {
+            this.Screen.SetCursor(line - 1, column - 1);
+        }
+
+        internal void SetColors(ZColor foreground, ZColor background)
+        {
+            if (foreground > 0)
+            {
+                this.Screen.SetForegroundColor(foreground);
+            }
+
+            if (background > 0)
+            {
+                this.Screen.SetBackgroundColor(background);
+            }
+        }
+
         public int UnpackRoutineAddress(ushort byteAddress)
         {
             return (byteAddress * packResolution) + (routinesOffset * 8);

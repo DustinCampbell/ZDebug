@@ -839,158 +839,105 @@ namespace ZDebug.Compiler
 
         public void EmitShowStatus()
         {
-            screen.Load();
+            il.Arguments.LoadMachine();
 
-            il.CallVirt(Reflection<IScreen>.GetMethod("ShowStatus", Types.None));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ShowStatus", Types.None, @public: false));
         }
 
         public void EmitSetTextStyle(Operand op)
         {
-            screen.Load();
+            il.Arguments.LoadMachine();
             EmitLoadOperand(op);
 
-            il.CallVirt(Reflection<IScreen>.GetMethod("SetTextStyle", Types.Array<ZTextStyle>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SetTextStyle", Types.Array<ZTextStyle>(), @public: false));
         }
 
         public void EmitSplitWindow(Operand op)
         {
-            screen.Load();
+            il.Arguments.LoadMachine();
             EmitLoadOperand(op);
 
-            il.CallVirt(Reflection<IScreen>.GetMethod("Split", Types.Array<int>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SplitWindow", Types.Array<int>(), @public: false));
         }
 
         public void EmitSetWindow(Operand op)
         {
-            screen.Load();
+            il.Arguments.LoadMachine();
             EmitLoadOperand(op);
 
-            il.CallVirt(Reflection<IScreen>.GetMethod("SetWindow", Types.Array<int>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SetWindow", Types.Array<int>(), @public: false));
         }
 
         public void EmitEraseWindow(Operand op)
         {
-            using (var window = il.NewLocal<short>())
-            {
-                EmitLoadOperand(op);
-                il.Convert.ToInt16();
-                window.Store();
-
-                var clearAllWindows = il.NewLabel();
-                var done = il.NewLabel();
-
-                window.Load();
-                il.Load(0);
-                clearAllWindows.BranchIf(Condition.LessThan, @short: true);
-
-                screen.Load();
-                window.Load();
-
-                il.CallVirt(Reflection<IScreen>.GetMethod("Clear", Types.Array<int>()));
-
-                done.Branch(@short: true);
-
-                clearAllWindows.Mark();
-
-                screen.Load();
-
-                window.Load();
-                il.Load(-1);
-                il.Compare.Equal();
-
-                il.CallVirt(Reflection<IScreen>.GetMethod("ClearAll", Types.Array<bool>()));
-
-                done.Mark();
-            }
+            il.Arguments.LoadMachine();
+            EmitLoadOperand(op);
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ClearWindow", Types.Array<int>(), @public: false));
         }
 
         public void EmitSetCursor(ILocal line, ILocal column)
         {
-            screen.Load();
+            il.Arguments.LoadMachine();
             line.Load();
-            il.Math.Subtract(1);
             column.Load();
-            il.Math.Subtract(1);
 
-            il.Call(Reflection<IScreen>.GetMethod("SetCursor", Types.Array<int, int>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SetCursor", Types.Array<int, int>(), @public: false));
         }
 
         public void EmitSetColor(ILocal foreground, ILocal background)
         {
-            var tryBackground = il.NewLabel();
+            il.Arguments.LoadMachine();
             foreground.Load();
-            tryBackground.BranchIf(Condition.False, @short: true);
-
-            screen.Load();
-            foreground.Load();
-
-            il.Call(Reflection<IScreen>.GetMethod("SetForegroundColor", Types.Array<ZColor>()));
-
-            tryBackground.Mark();
-
-            var done = il.NewLabel();
-            background.Load();
-            done.BranchIf(Condition.False, @short: true);
-
-            screen.Load();
             background.Load();
 
-            il.Call(Reflection<IScreen>.GetMethod("SetBackgroundColor", Types.Array<ZColor>()));
-
-            done.Mark();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SetColors", Types.Array<ZColor, ZColor>(), @public: false));
         }
 
         public void EmitSelectScreenStream()
         {
-            outputStreams.Load();
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectScreenStream", Types.None));
+            il.Arguments.LoadMachine();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SelectScreenStream", Types.None, @public: false));
         }
 
         public void EmitDeselectScreenStream()
         {
-            outputStreams.Load();
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectScreenStream", Types.None));
+            il.Arguments.LoadMachine();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("DeselectScreenStream", Types.None, @public: false));
         }
 
         public void EmitSelectTranscriptStream()
         {
-            outputStreams.Load();
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectTranscriptStream", Types.None));
+            il.Arguments.LoadMachine();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SelectTranscriptStream", Types.None, @public: false));
         }
 
         public void EmitDeselectTranscriptStream()
         {
-            outputStreams.Load();
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectTranscriptStream", Types.None));
+            il.Arguments.LoadMachine();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("DeselectTranscriptStream", Types.None, @public: false));
         }
 
         public void EmitSelectMemoryStream(Operand operand)
         {
-            outputStreams.Load();
+            il.Arguments.LoadMachine();
             EmitLoadOperand(operand);
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("SelectMemoryStream", Types.Array<int>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SelectMemoryStream", Types.Array<int>(), @public: false));
         }
 
         public void EmitDeselectMemoryStream()
         {
-            outputStreams.Load();
-
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("DeselectMemoryStream", Types.None));
+            il.Arguments.LoadMachine();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("DeselectMemoryStream", Types.None, @public: false));
         }
 
         public void EmitPrintZWords(ushort[] zwords)
         {
-            outputStreams.Load();
+            il.Arguments.LoadMachine();
 
             var text = machine.ConvertZText(zwords);
             il.Load(text);
 
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("PrintText", Types.Array<string>(), @public: false));
         }
 
         public void EmitPrintText()
@@ -998,10 +945,11 @@ namespace ZDebug.Compiler
             using (var text = il.NewLocal<string>())
             {
                 text.Store();
-                outputStreams.Load();
+
+                il.Arguments.LoadMachine();
                 text.Load();
 
-                il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<string>()));
+                il.Call(Reflection<CompiledZMachine>.GetMethod("PrintText", Types.Array<string>(), @public: false));
             }
         }
 
@@ -1010,19 +958,20 @@ namespace ZDebug.Compiler
             using (var ch = il.NewLocal<char>())
             {
                 ch.Store();
-                outputStreams.Load();
+
+                il.Arguments.LoadMachine();
                 ch.Load();
 
-                il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>()));
+                il.Call(Reflection<CompiledZMachine>.GetMethod("PrintChar", Types.Array<char>(), @public: false));
             }
         }
 
         public void EmitPrintChar(char ch)
         {
-            outputStreams.Load();
+            il.Arguments.LoadMachine();
             il.Load(ch);
 
-            il.Call(Reflection<ZMachine.OutputStreamCollection>.GetMethod("Print", Types.Array<char>()));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("PrintChar", Types.Array<char>(), @public: false));
         }
 
         public void Quit()

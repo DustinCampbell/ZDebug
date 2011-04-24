@@ -6,7 +6,6 @@ using ZDebug.Compiler.Analysis.ControlFlow;
 using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
 using ZDebug.Compiler.Profiling;
-using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 using ZDebug.Core.Utilities;
@@ -29,13 +28,8 @@ namespace ZDebug.Compiler
         private Dictionary<int, ILabel> addressToLabelMap;
         private List<ZRoutineCall> calls;
 
-        private ILocal screen;
-        private ILocal outputStreams;
-
         private bool usesStack;
         private bool usesMemory;
-        private bool usesScreen;
-        private bool usesOutputStreams;
 
         private int calculatedLoadVariableCount;
         private int calculatedStoreVariableCount;
@@ -86,24 +80,6 @@ namespace ZDebug.Compiler
                     if (!this.usesMemory && i.UsesMemory())
                     {
                         this.usesMemory = true;
-                    }
-
-                    if (!this.usesScreen && i.UsesScreen())
-                    {
-                        this.usesScreen = true;
-
-                        // screen...
-                        var screenField = Reflection<ZMachine>.GetField("Screen", @public: false);
-                        this.screen = il.NewLocal<IScreen>(il.GenerateLoadInstanceField(screenField));
-                    }
-
-                    if (!this.usesOutputStreams && i.UsesOutputStreams())
-                    {
-                        this.usesOutputStreams = true;
-
-                        // outputStreams...
-                        var outputStreamsField = Reflection<ZMachine>.GetField("OutputStreams", @public: false);
-                        this.outputStreams = il.NewLocal<IOutputStream>(il.GenerateLoadInstanceField(outputStreamsField));
                     }
                 }
             }
