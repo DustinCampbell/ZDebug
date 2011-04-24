@@ -536,6 +536,29 @@ namespace ZDebug.Compiler
             return 0;
         }
 
+        internal void op_print_table(ushort address, ushort width, ushort height, ushort skip)
+        {
+            int left = this.Screen.GetCursorColumn();
+
+            for (int i = 0; i < height; i++)
+            {
+                if (i != 0)
+                {
+                    int y = this.Screen.GetCursorLine() + 1;
+                    this.Screen.SetCursor(y, left);
+                }
+
+                for (int j = 0; j < width; j++)
+                {
+                    char ch = (char)this.Memory.ReadByte(address);
+                    address++;
+                    this.Screen.Print(ch);
+                }
+
+                address += skip;
+            }
+        }
+
         internal void SelectScreenStream()
         {
             this.OutputStreams.SelectScreenStream();
@@ -596,7 +619,7 @@ namespace ZDebug.Compiler
             this.Screen.SetWindow(window);
         }
 
-        internal void ClearWindow(int window)
+        internal void ClearWindow(short window)
         {
             if (window < 0)
             {

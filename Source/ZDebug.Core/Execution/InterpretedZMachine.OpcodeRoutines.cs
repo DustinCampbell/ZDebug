@@ -864,7 +864,6 @@ namespace ZDebug.Core.Execution
 
                 address += skip;
             }
-
         }
 
         internal void op_set_color()

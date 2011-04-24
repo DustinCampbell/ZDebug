@@ -874,7 +874,7 @@ namespace ZDebug.Compiler
         {
             il.Arguments.LoadMachine();
             EmitLoadOperand(op);
-            il.Call(Reflection<CompiledZMachine>.GetMethod("ClearWindow", Types.Array<int>(), @public: false));
+            il.Call(Reflection<CompiledZMachine>.GetMethod("ClearWindow", Types.Array<short>(), @public: false));
         }
 
         public void EmitSetCursor(ILocal line, ILocal column)

@@ -300,6 +300,12 @@ namespace ZDebug.Compiler.CodeGeneration
                                 return new CopyTableGenerator(instruction);
                             }
                             break;
+                        case 0x1e:
+                            if (version >= 5)
+                            {
+                                return new PrintTableGenerator(instruction);
+                            }
+                            break;
                         case 0x1f:
                             if (version >= 5)
                             {

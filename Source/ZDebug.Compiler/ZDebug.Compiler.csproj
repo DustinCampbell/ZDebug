@@ -57,6 +57,7 @@
     <Compile Include="CodeGeneration\Generators\Miscellaneous\CheckArgCountGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\Objects\ClearAttrGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\Input\AReadGenerator.cs" />
+    <Compile Include="CodeGeneration\Generators\Output\PrintTableGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\Windows\EraseWindowGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\Output\OutputStreamGenerator.cs" />
     <Compile Include="CodeGeneration\Generators\Input\ReadCharGenerator.cs" />
