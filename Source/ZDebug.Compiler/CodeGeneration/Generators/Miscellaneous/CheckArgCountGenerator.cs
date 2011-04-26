@@ -17,11 +17,20 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLoadOperand(op);
+            if (!ReuseFirstOperand)
+            {
+                compiler.EmitLoadOperand(op);
+            }
+
             il.Arguments.LoadArgCount();
 
             il.Compare.AtMost();
             compiler.EmitBranch(branch);
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

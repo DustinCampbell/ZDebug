@@ -169,11 +169,15 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void EmitCalculatedCall(Operand addressOp, ReadOnlyArray<Operand> args)
+        private void EmitCalculatedCall(Operand addressOp, ReadOnlyArray<Operand> args, bool reuse)
         {
             using (var address = il.NewLocal<int>())
             {
-                EmitLoadVariable((byte)addressOp.Value);
+                if (!reuse)
+                {
+                    EmitLoadVariable((byte)addressOp.Value);
+                }
+
                 address.Store();
 
                 // is this address 0?
@@ -248,17 +252,22 @@ namespace ZDebug.Compiler
             }
         }
 
-        public void EmitCall(Operand address, ReadOnlyArray<Operand> args)
+        public void EmitCall(Operand address, ReadOnlyArray<Operand> args, bool reuse = false)
         {
             il.DebugIndent();
 
             if (address.Kind != OperandKind.Variable)
             {
+                if (reuse)
+                {
+                    throw new ZCompilerException("Can't reuse a call to a constant value.");
+                }
+
                 EmitDirectCall(address, args);
             }
             else
             {
-                EmitCalculatedCall(address, args);
+                EmitCalculatedCall(address, args, reuse);
             }
 
             il.DebugUnindent();
@@ -585,12 +594,20 @@ namespace ZDebug.Compiler
             }
         }
 
-        public void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false)
+        public void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false, bool reuse = false)
         {
             switch (variable.Kind)
             {
                 case VariableKind.Stack:
-                    EmitPushStack(value, indirect);
+                    if (indirect && reuse)
+                    {
+                        throw new ZCompilerException("Cannot reuse an indirect stack write.");
+                    }
+
+                    if (!reuse)
+                    {
+                        EmitPushStack(value, indirect);
+                    }
                     break;
 
                 case VariableKind.Local:
@@ -600,6 +617,11 @@ namespace ZDebug.Compiler
                 case VariableKind.Global:
                     EmitStoreGlobalVariable(variable.Index, value);
                     break;
+            }
+
+            if (reuse)
+            {
+                value.Load();
             }
         }
 
@@ -712,9 +734,12 @@ namespace ZDebug.Compiler
             }
         }
 
-        public void EmitLoadValidObject(Operand operand, ILabel invalidObject)
+        public void EmitLoadValidObject(Operand operand, ILabel invalidObject, bool reuse = false)
         {
-            EmitLoadOperand(operand);
+            if (!reuse)
+            {
+                EmitLoadOperand(operand);
+            }
 
             // Check to see if object number is 0.
             var objNumOk = il.NewLabel();
@@ -730,29 +755,38 @@ namespace ZDebug.Compiler
             objNumOk.Mark();
         }
 
-        private void EmitLoadObjectPropertyTableAddress(Operand operand)
+        private void EmitLoadObjectPropertyTableAddress(Operand operand, bool reuse)
         {
             switch (operand.Kind)
             {
                 case OperandKind.LargeConstant:
                 case OperandKind.SmallConstant:
+                    if (reuse)
+                    {
+                        throw new ZCompilerException("Can't reuse a constant value.");
+                    }
+
                     ReadObjectPropertyTableAddress(operand.Value);
                     break;
 
                 default: // OperandKind.Variable
-                    EmitLoadVariable((byte)operand.Value);
+                    if (!reuse)
+                    {
+                        EmitLoadVariable((byte)operand.Value);
+                    }
+
                     ReadObjectPropertyTableAddress();
                     break;
             }
         }
 
-        public void EmitLoadObjectShortName(Operand operand)
+        public void EmitLoadObjectShortName(Operand operand, bool reuse = false)
         {
-            EmitLoadObjectPropertyTableAddress(operand);
+            EmitLoadObjectPropertyTableAddress(operand, reuse);
             ReadObjectShortName();
         }
 
-        public void EmitLoadObjectParent(Operand operand)
+        public void EmitLoadObjectParent(Operand operand, bool reuse = false)
         {
             switch (operand.Kind)
             {
@@ -762,13 +796,17 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    EmitLoadOperand(operand);
+                    if (!reuse)
+                    {
+                        EmitLoadOperand(operand);
+                    }
+
                     ReadObjectParent();
                     break;
             }
         }
 
-        public void EmitLoadObjectSibling(Operand operand)
+        public void EmitLoadObjectSibling(Operand operand, bool reuse = false)
         {
             switch (operand.Kind)
             {
@@ -778,13 +816,17 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    EmitLoadOperand(operand);
+                    if (!reuse)
+                    {
+                        EmitLoadOperand(operand);
+                    }
+
                     ReadObjectSibling();
                     break;
             }
         }
 
-        public void EmitLoadObjectChild(Operand operand)
+        public void EmitLoadObjectChild(Operand operand, bool reuse = false)
         {
             switch (operand.Kind)
             {
@@ -794,7 +836,11 @@ namespace ZDebug.Compiler
                     break;
 
                 case OperandKind.Variable:
-                    EmitLoadOperand(operand);
+                    if (!reuse)
+                    {
+                        EmitLoadOperand(operand);
+                    }
+
                     ReadObjectChild();
                     break;
             }

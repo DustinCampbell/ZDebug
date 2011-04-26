@@ -17,13 +17,23 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLoadObjectParent(op);
+            compiler.EmitLoadObjectParent(op, reuse: ReuseFirstOperand);
 
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

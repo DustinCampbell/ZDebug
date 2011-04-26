@@ -20,7 +20,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var dataAddress = il.NewLocal<ushort>())
             using (var value = il.NewLocal<byte>())
             {
-                compiler.EmitLoadOperand(dataAddressOp);
+                if (!ReuseFirstOperand)
+                {
+                    compiler.EmitLoadOperand(dataAddressOp);
+                }
+
                 dataAddress.Store();
 
                 var done = il.NewLabel();
@@ -85,8 +89,18 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 done.Mark();
 
-                compiler.EmitStoreVariable(store, value);
+                compiler.EmitStoreVariable(store, value, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

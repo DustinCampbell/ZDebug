@@ -14,6 +14,7 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to loads an operand onto the evaluation stack.
         /// </summary>
+        /// <param name="operand">The operand to load onto the evaluation stack.</param>
         void EmitLoadOperand(Operand operand);
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to call a routine.
         /// </summary>
-        void EmitCall(Operand address, ReadOnlyArray<Operand> args);
+        void EmitCall(Operand address, ReadOnlyArray<Operand> args, bool reuse = false);
 
         /// <summary>
         /// Emits code to load a byte from Z-machine memory at the given address.
@@ -99,7 +100,7 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to store an IL local to the specified Z-machine variable.
         /// </summary>
-        void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false);
+        void EmitStoreVariable(Variable variable, ILocal value, bool indirect = false, bool reuse = false);
 
         /// <summary>
         /// Emits code to store an IL local to the Z-machine variable at the index stored in the given IL local.
@@ -115,27 +116,27 @@ namespace ZDebug.Compiler.CodeGeneration
         /// Emits code to load the object number from the specified operand value and branch to the given label
         /// if it's invalid.
         /// </summary>
-        void EmitLoadValidObject(Operand operand, ILabel invalidObject);
+        void EmitLoadValidObject(Operand operand, ILabel invalidObject, bool reuse = false);
 
         /// <summary>
         /// Emits code to load the Z-Words for the given object's short name onto the evaluation stack.
         /// </summary>
-        void EmitLoadObjectShortName(Operand operand);
+        void EmitLoadObjectShortName(Operand operand, bool reuse = false);
 
         /// <summary>
         /// Emits code to load the object parent of the specified operand value onto the evaluation stack.
         /// </summary>
-        void EmitLoadObjectParent(Operand operand);
+        void EmitLoadObjectParent(Operand operand, bool reuse = false);
 
         /// <summary>
         /// Emits code to load the object sibling of the specified operand value onto the evaluation stack.
         /// </summary>
-        void EmitLoadObjectSibling(Operand operand);
+        void EmitLoadObjectSibling(Operand operand, bool reuse = false);
 
         /// <summary>
         /// Emits code to load the object child of the specified operand value onto the evaluation stack.
         /// </summary>
-        void EmitLoadObjectChild(Operand operand);
+        void EmitLoadObjectChild(Operand operand, bool reuse = false);
 
         /// <summary>
         /// Emits code to test whether the specified object has the given attribute.

@@ -22,7 +22,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 var done = il.NewLabel();
 
-                compiler.EmitLoadValidObject(objectOp, done);
+                compiler.EmitLoadValidObject(objectOp, done, reuse: ReuseFirstOperand);
                 objNum.Store();
 
                 compiler.EmitLoadValidObject(destinationOp, done);
@@ -32,6 +32,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 done.Mark();
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

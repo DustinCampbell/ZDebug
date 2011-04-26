@@ -18,10 +18,19 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)
         {
-            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
-
-            compiler.EmitLoadOperand(ops[0]);
-            compiler.EmitLoadOperand(ops[1]);
+            if (ReuseFirstOperand)
+            {
+                compiler.EmitLoadOperand(ops[1]);
+            }
+            else if (ReuseSecondOperand)
+            {
+                compiler.EmitLoadOperand(ops[0]);
+            }
+            else
+            {
+                compiler.EmitLoadOperand(ops[0]);
+                compiler.EmitLoadOperand(ops[1]);
+            }
 
             il.Compare.Equal();
 
@@ -30,11 +39,13 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         private void GeneratorForMoreThanTwoOperands(ILBuilder il, ICompiler compiler)
         {
-            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
-
             using (var x = il.NewLocal<ushort>())
             {
-                compiler.EmitLoadOperand(ops[0]);
+                if (!ReuseFirstOperand)
+                {
+                    compiler.EmitLoadOperand(ops[0]);
+                }
+
                 x.Store();
 
                 var success = il.NewLabel();
@@ -77,6 +88,16 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 GeneratorForMoreThanTwoOperands(il, compiler);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseSecondOperand
+        {
+            get { return ops.Length == 2; }
         }
     }
 }

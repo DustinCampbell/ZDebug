@@ -12,10 +12,17 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            // OPTIMIZE: Use IL evaluation stack if last instruction stored to SP.
+            if (!ReuseStack)
+            {
+                compiler.EmitPopStack();
+            }
 
-            compiler.EmitPopStack();
             compiler.EmitReturn();
+        }
+
+        public override bool CanReuseStack
+        {
+            get { return true; }
         }
     }
 }

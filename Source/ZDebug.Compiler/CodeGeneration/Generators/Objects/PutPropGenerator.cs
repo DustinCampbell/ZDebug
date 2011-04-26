@@ -23,7 +23,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 // Read objNum
                 var done = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, done);
+                compiler.EmitLoadValidObject(objectOp, done, reuse: ReuseFirstOperand);
                 objNum.Store();
 
                 using (var propNum = il.NewLocal<ushort>())
@@ -135,6 +135,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 done.Mark();
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

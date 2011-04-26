@@ -28,7 +28,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 // Read objNum
                 var invalidObjNum = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, invalidObjNum);
+                compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
                 objNum.Store();
 
                 // Read propNum
@@ -84,7 +84,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Math.And();
                 il.Convert.ToUInt16();
                 value.Store();
-                compiler.EmitStoreVariable(store, value);
+                compiler.EmitStoreVariable(store, value, reuse: ReuseStoreVariable);
 
                 done.Branch(@short: true);
 
@@ -93,10 +93,20 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 il.Load(0);
                 value.Store();
-                compiler.EmitStoreVariable(store, value);
+                compiler.EmitStoreVariable(store, value, reuse: ReuseStoreVariable);
 
                 done.Mark();
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

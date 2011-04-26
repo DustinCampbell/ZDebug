@@ -18,7 +18,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var value = il.NewLocal<short>())
             {
-                compiler.EmitLoadOperand(number);
+                if (!ReuseFirstOperand)
+                {
+                    compiler.EmitLoadOperand(number);
+                }
+
                 il.Convert.ToInt16();
                 value.Store();
 
@@ -27,6 +31,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 compiler.EmitPrintText();
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

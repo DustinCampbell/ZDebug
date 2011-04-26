@@ -30,7 +30,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
         }
 
@@ -46,7 +46,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 using (var result = il.NewLocal<ushort>())
                 {
                     result.Store();
-                    compiler.EmitStoreVariable(store, result);
+                    compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
                 }
             }
         }
@@ -61,6 +61,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 GenerateWithCalculatedAddress(il, compiler);
             }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

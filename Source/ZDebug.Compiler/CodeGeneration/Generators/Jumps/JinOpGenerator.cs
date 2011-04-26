@@ -19,13 +19,16 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
-
-            compiler.EmitLoadObjectParent(op1);
+            compiler.EmitLoadObjectParent(op1, reuse: ReuseFirstOperand);
             compiler.EmitLoadOperand(op2);
 
             il.Compare.Equal();
             compiler.EmitBranch(branch);
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

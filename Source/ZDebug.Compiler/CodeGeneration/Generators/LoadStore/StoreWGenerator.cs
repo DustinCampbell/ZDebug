@@ -17,9 +17,23 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         protected override void EmitCalculateAddress(Operand addressOp, Operand offsetOp, ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLoadOperand(addressOp);
-            compiler.EmitLoadOperand(offsetOp);
-            il.Math.Multiply(2);
+            if (ReuseFirstOperand)
+            {
+                compiler.EmitLoadOperand(offsetOp);
+                il.Math.Multiply(2);
+            }
+            else if (ReuseSecondOperand)
+            {
+                il.Math.Multiply(2);
+                compiler.EmitLoadOperand(addressOp);
+            }
+            else
+            {
+                compiler.EmitLoadOperand(addressOp);
+                compiler.EmitLoadOperand(offsetOp);
+                il.Math.Multiply(2);
+            }
+
             il.Math.Add();
         }
 
@@ -36,6 +50,16 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         protected override void StoreMemory(ILocal address, ILocal value, ICompiler compiler)
         {
             compiler.EmitStoreMemoryWord(address, value);
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseSecondOperand
+        {
+            get { return true; }
         }
     }
 }

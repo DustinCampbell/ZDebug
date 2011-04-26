@@ -16,6 +16,52 @@ namespace ZDebug.Compiler.CodeGeneration
 
         public abstract void Generate(ILBuilder il, ICompiler compiler);
 
+        public virtual bool CanReuseFirstOperand
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool CanReuseSecondOperand
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool CanReuseStoreVariable
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool CanReuseStack
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool CanReuseByRefOperand
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public bool ReuseFirstOperand { get; set; }
+        public bool ReuseSecondOperand { get; set; }
+        public bool ReuseStoreVariable { get; set; }
+        public bool ReuseStack { get; set; }
+        public bool ReuseByRefOperand { get; set; }
+
         public static OpcodeGenerator GetGenerator(Instruction instruction, byte version)
         {
             var opcode = instruction.Opcode;

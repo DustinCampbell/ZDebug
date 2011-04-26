@@ -19,7 +19,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLoadObjectSibling(op);
+            compiler.EmitLoadObjectSibling(op, reuse: ReuseFirstOperand);
 
             using (var result = il.NewLocal<ushort>())
             {
@@ -31,6 +31,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Compare.GreaterThan();
                 compiler.EmitBranch(branch);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

@@ -31,7 +31,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 compiler.EmitLoadVariable(variableIndex);
                 calculatedVariableIndex.Store();
 
-                compiler.EmitPopStack();
+                if (!ReuseStack)
+                {
+                    compiler.EmitPopStack();
+                }
                 value.Store();
 
                 compiler.EmitStoreVariable(calculatedVariableIndex, value, indirect: true);
@@ -42,7 +45,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var value = il.NewLocal<short>())
             {
-                compiler.EmitPopStack();
+                if (!ReuseStack)
+                {
+                    compiler.EmitPopStack();
+                }
                 value.Store();
 
                 compiler.EmitStoreVariable(variableIndex, value, indirect: true);
@@ -59,6 +65,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 GenerateWithVariable((byte)op.Value, il, compiler);
             }
+        }
+
+        public override bool CanReuseStack
+        {
+            get { return true; }
         }
     }
 }

@@ -17,11 +17,20 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             using (var objNum = il.NewLocal<ushort>())
             {
-                compiler.EmitLoadOperand(objectOp);
+                if (!ReuseFirstOperand)
+                {
+                    compiler.EmitLoadOperand(objectOp);
+                }
+
                 objNum.Store();
 
                 compiler.EmitObjectRemoveFromParent(objNum);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

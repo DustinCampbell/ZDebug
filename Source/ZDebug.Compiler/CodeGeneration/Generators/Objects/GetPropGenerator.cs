@@ -26,7 +26,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 // Read objNum
                 var invalidObjNum = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, invalidObjNum);
+                compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
                 objNum.Store();
 
                 using (var propNum = il.NewLocal<ushort>())
@@ -115,8 +115,18 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 done.Mark();
 
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

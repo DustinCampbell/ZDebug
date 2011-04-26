@@ -87,7 +87,141 @@ namespace ZDebug.Compiler
             // Emit IL
             foreach (var codeBlock in this.controlFlowGraph.CodeBlocks)
             {
-                var generators = codeBlock.Instructions.Select(i => OpcodeGenerator.GetGenerator(i, machine.Version));
+                var generators = codeBlock.Instructions
+                    .Select(i => OpcodeGenerator.GetGenerator(i, machine.Version))
+                    .ToList();
+
+                for (int i = 0; i < generators.Count - 1; i++)
+                {
+                    var generator = generators[i];
+                    var nextGenerator = generators[i + 1];
+
+                    if (generator.CanReuseStoreVariable)
+                    {
+                        Debug.Assert(generator.Instruction.HasStoreVariable);
+
+                        if (nextGenerator.CanReuseFirstOperand || nextGenerator.CanReuseSecondOperand)
+                        {
+                            if (nextGenerator.CanReuseFirstOperand)
+                            {
+                                Debug.Assert(nextGenerator.Instruction.OperandCount > 0);
+
+                                var firstOperand = nextGenerator.Instruction.Operands[0];
+                                if (firstOperand.IsVariable)
+                                {
+                                    if (firstOperand.Value == generator.Instruction.StoreVariable.ToByte())
+                                    {
+                                        Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                            generator.Instruction.Address,
+                                            generator.Instruction.StoreVariable,
+                                            generator.Instruction.Opcode.Name,
+                                            nextGenerator.Instruction.Opcode.Name);
+
+                                        generator.ReuseStoreVariable = true;
+                                        nextGenerator.ReuseFirstOperand = true;
+                                    }
+                                }
+                            }
+
+                            if (nextGenerator.CanReuseSecondOperand && !nextGenerator.ReuseFirstOperand)
+                            {
+                                Debug.Assert(nextGenerator.Instruction.OperandCount > 1);
+
+                                var secondOperand = nextGenerator.Instruction.Operands[1];
+                                if (secondOperand.IsVariable)
+                                {
+                                    if (secondOperand.Value == generator.Instruction.StoreVariable.ToByte())
+                                    {
+                                        Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                            generator.Instruction.Address,
+                                            generator.Instruction.StoreVariable,
+                                            generator.Instruction.Opcode.Name,
+                                            nextGenerator.Instruction.Opcode.Name);
+
+                                        generator.ReuseStoreVariable = true;
+                                        nextGenerator.ReuseSecondOperand = true;
+                                    }
+                                }
+                            }
+                        }
+                        else if (nextGenerator.CanReuseStack && generator.Instruction.StoreVariable.Kind == VariableKind.Stack)
+                        {
+                            Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                generator.Instruction.Address,
+                                generator.Instruction.StoreVariable,
+                                generator.Instruction.Opcode.Name,
+                                nextGenerator.Instruction.Opcode.Name);
+
+                            generator.ReuseStoreVariable = true;
+                            nextGenerator.ReuseStack = true;
+                        }
+                    }
+                    else if (generator.CanReuseByRefOperand)
+                    {
+                        Debug.Assert(generator.Instruction.Opcode.IsFirstOpByRef);
+                        Debug.Assert(generator.Instruction.OperandCount > 0);
+
+                        var byRefOperand = generator.Instruction.Operands[0];
+                        if (byRefOperand.Kind == OperandKind.SmallConstant)
+                        {
+                            if (nextGenerator.CanReuseFirstOperand || nextGenerator.CanReuseSecondOperand)
+                            {
+                                if (nextGenerator.CanReuseFirstOperand)
+                                {
+                                    Debug.Assert(nextGenerator.Instruction.OperandCount > 0);
+
+                                    var firstOperand = nextGenerator.Instruction.Operands[0];
+                                    if (firstOperand.IsVariable)
+                                    {
+                                        if (firstOperand.Value == byRefOperand.Value)
+                                        {
+                                            Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                                generator.Instruction.Address,
+                                                Variable.FromByte((byte)byRefOperand.Value),
+                                                generator.Instruction.Opcode.Name,
+                                                nextGenerator.Instruction.Opcode.Name);
+
+                                            generator.ReuseByRefOperand = true;
+                                            nextGenerator.ReuseFirstOperand = true;
+                                        }
+                                    }
+                                }
+
+                                if (nextGenerator.CanReuseSecondOperand && !nextGenerator.ReuseFirstOperand)
+                                {
+                                    Debug.Assert(nextGenerator.Instruction.OperandCount > 1);
+
+                                    var secondOperand = nextGenerator.Instruction.Operands[1];
+                                    if (secondOperand.IsVariable)
+                                    {
+                                        if (secondOperand.Value == byRefOperand.Value)
+                                        {
+                                            Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                                generator.Instruction.Address,
+                                                Variable.FromByte((byte)byRefOperand.Value),
+                                                generator.Instruction.Opcode.Name,
+                                                nextGenerator.Instruction.Opcode.Name);
+
+                                            generator.ReuseByRefOperand = true;
+                                            nextGenerator.ReuseSecondOperand = true;
+                                        }
+                                    }
+                                }
+                            }
+                            else if (nextGenerator.CanReuseStack && byRefOperand.Value == 0)
+                            {
+                                Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
+                                    generator.Instruction.Address,
+                                    Variable.FromByte((byte)byRefOperand.Value),
+                                    generator.Instruction.Opcode.Name,
+                                    nextGenerator.Instruction.Opcode.Name);
+
+                                generator.ReuseByRefOperand = true;
+                                nextGenerator.ReuseStack = true;
+                            }
+                        }
+                    }
+                }
 
                 foreach (var generator in generators)
                 {

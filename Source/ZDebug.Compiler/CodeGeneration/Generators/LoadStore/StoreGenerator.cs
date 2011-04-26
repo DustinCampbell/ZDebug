@@ -37,7 +37,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 value.Store();
 
                 compiler.EmitStoreVariable(calculatedVariableIndex, value, indirect: true);
-
             }
         }
 
@@ -46,6 +45,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var value = il.NewLocal<ushort>())
             {
                 compiler.EmitLoadOperand(op2);
+
+                if (ReuseByRefOperand)
+                {
+                    il.Duplicate();
+                }
+
                 value.Store();
 
                 compiler.EmitStoreVariable(variableIndex, value, indirect: true);
@@ -64,5 +69,9 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             }
         }
 
+        public override bool CanReuseByRefOperand
+        {
+            get { return op1.IsConstant; }
+        }
     }
 }

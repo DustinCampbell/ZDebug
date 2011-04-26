@@ -24,7 +24,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 var seed = il.NewLabel();
                 var done = il.NewLabel();
 
-                compiler.EmitLoadOperand(rangeOp);
+                if (!ReuseFirstOperand)
+                {
+                    compiler.EmitLoadOperand(rangeOp);
+                }
+
                 il.Convert.ToInt16();
                 range.Store();
 
@@ -51,8 +55,18 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Convert.ToUInt16();
 
                 result.Store();
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

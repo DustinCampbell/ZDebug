@@ -23,11 +23,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            // OPTIMIZE: Use IL evaluation stack if first op is SP and last instruction stored to SP.
-            // OPTIMIZE: If the storing to SP and the next instruction uses SP in its first operand, we don't need
-            // the call to EmitStore().
+            if (!ReuseFirstOperand)
+            {
+                compiler.EmitLoadOperand(op1);
+            }
 
-            compiler.EmitLoadOperand(op1);
             if (signed)
             {
                 il.Convert.ToInt16();
@@ -45,8 +45,18 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }

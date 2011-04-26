@@ -24,7 +24,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 // Read objNum
                 var invalidObjNum = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, invalidObjNum);
+                compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
                 objNum.Store();
 
                 // Read attribute
@@ -43,6 +43,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 done.Mark();
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

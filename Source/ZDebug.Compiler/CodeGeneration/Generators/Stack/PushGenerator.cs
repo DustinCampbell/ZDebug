@@ -15,13 +15,21 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            compiler.EmitLoadOperand(op);
+            if (!ReuseFirstOperand)
+            {
+                compiler.EmitLoadOperand(op);
+            }
 
             using (var value = il.NewLocal<ushort>())
             {
                 value.Store();
                 compiler.EmitPushStack(value);
             }
+        }
+
+        public override bool CanReuseFirstOperand
+        {
+            get { return true; }
         }
     }
 }

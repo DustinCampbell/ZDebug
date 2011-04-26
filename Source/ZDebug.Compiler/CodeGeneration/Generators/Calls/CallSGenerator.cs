@@ -18,8 +18,13 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             using (var result = il.NewLocal<ushort>())
             {
                 result.Store();
-                compiler.EmitStoreVariable(store, result);
+                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
             }
+        }
+
+        public override bool CanReuseStoreVariable
+        {
+            get { return true; }
         }
     }
 }
