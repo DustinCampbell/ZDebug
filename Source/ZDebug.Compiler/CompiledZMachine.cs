@@ -111,7 +111,11 @@ namespace ZDebug.Compiler
                 var localCount = routine.Locals.Length;
                 for (int i = 0; i < localCount; i++)
                 {
-                    result[i] = routine.Locals[i];
+                    var localValue = routine.Locals[i];
+                    if (localValue > 0)
+                    {
+                        result[i] = localValue;
+                    }
                 }
             }
 
