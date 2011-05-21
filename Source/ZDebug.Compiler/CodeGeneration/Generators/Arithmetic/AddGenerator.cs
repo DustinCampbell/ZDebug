@@ -14,11 +14,15 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             if (ReuseFirstOperand)
             {
+                il.Convert.ToInt16();
+
                 compiler.EmitLoadOperand(op2);
                 il.Convert.ToInt16();
             }
             else if (ReuseSecondOperand)
             {
+                il.Convert.ToInt16();
+
                 compiler.EmitLoadOperand(op1);
                 il.Convert.ToInt16();
             }

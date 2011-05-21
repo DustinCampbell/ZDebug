@@ -32,7 +32,23 @@ namespace ZDebug.Compiler.CodeGeneration
             }
         }
 
+        public virtual bool SignsOperands
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public virtual bool CanReuseStoreVariable
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public virtual bool CanLeaveStoreVariableSigned
         {
             get
             {
@@ -59,6 +75,7 @@ namespace ZDebug.Compiler.CodeGeneration
         public bool ReuseFirstOperand { get; set; }
         public bool ReuseSecondOperand { get; set; }
         public bool ReuseStoreVariable { get; set; }
+        public bool LeaveStoreVariableSigned { get; set; }
         public bool ReuseStack { get; set; }
         public bool ReuseByRefOperand { get; set; }
 

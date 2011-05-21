@@ -2,27 +2,27 @@ Current stats:
 
 CZech:
 
-Compile Time: 0.202
+Compile Time: 0.220
 # Routines: 64
-Z-Code / IL: 1 / 9.246 (924.581%)
+Z-Code / IL: 1 / 9.206 (920.6%)
 Executed (R/I): 1,111 / 11,685
 Calculated Variables (L/S): 21 / 27
 Calls (D/C): 1,108 / 2
 
 ROTA:
 
-Compile Time: 0.487
+Compile Time: 0.489
 # Routines: 795
-Z-Code / IL: 1 / 10.134 (1013.442%)
+Z-Code / IL: 1 / 10.039 (1003.875%)
 Executed (R/I): 1,187,714 / 26,979,589
 Calculated Variables (L/S): 0 / 0
 Calls (D/C): 1,086,541 / 101,172
 
 ZORK I:
 
-Compile Time: 0.267
+Compile Time: 0.255
 # Routines: 188
-Z-Code / IL: 1 / 8.445 (844.527%)
+Z-Code / IL: 1 / 7.739 (773.894%)
 Executed (R/I): 22,819 / 337,694
 Calculated Variables (L/S): 2 / 1
 Calls (D/C): 20,613 / 3,787

@@ -45,7 +45,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             LoadOperands(il, compiler, op1, op2);
 
             Operation(il);
-            il.Convert.ToUInt16();
+
+            if (!LeaveStoreVariableSigned)
+            {
+                il.Convert.ToUInt16();
+            }
 
             using (var result = il.NewLocal<ushort>())
             {
@@ -60,6 +64,16 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         }
 
         public override bool CanReuseStoreVariable
+        {
+            get { return true; }
+        }
+
+        public override bool SignsOperands
+        {
+            get { return signed; }
+        }
+
+        public override bool CanLeaveStoreVariableSigned
         {
             get { return true; }
         }
