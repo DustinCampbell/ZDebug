@@ -150,6 +150,7 @@
     <Compile Include="Generate\ILocal.cs" />
     <Compile Include="Generate\IRefLocal.cs" />
     <Compile Include="InstructionExtensions.cs" />
+    <Compile Include="Profiling\InstructionStatistics.cs" />
     <Compile Include="Profiling\IZMachineProfiler.cs" />
     <Compile Include="Profiling\RoutineCompilationStatistics.cs" />
     <Compile Include="Properties\InternalsVisibleTo.cs" />

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using ZDebug.Core.Routines;
 
 namespace ZDebug.Compiler.Profiling
@@ -12,15 +14,17 @@ namespace ZDebug.Compiler.Profiling
         private readonly TimeSpan compileTime;
         private readonly int calculatedLoadVariableCount;
         private readonly int calculatedStoreVariableCount;
+        private readonly ReadOnlyCollection<InstructionStatistics> instructionSizes;
 
-        public RoutineCompilationStatistics(
+        internal RoutineCompilationStatistics(
             ZRoutine routine,
             int opcodeCount,
             int localCount,
             int size,
             TimeSpan compileTime,
             int calculatedLoadVariableCount,
-            int calculatedStoreVariableCount)
+            int calculatedStoreVariableCount,
+            List<InstructionStatistics> instructionSizes)
         {
             this.routine = routine;
             this.opcodeCount = opcodeCount;
@@ -29,6 +33,7 @@ namespace ZDebug.Compiler.Profiling
             this.compileTime = compileTime;
             this.calculatedLoadVariableCount = calculatedLoadVariableCount;
             this.calculatedStoreVariableCount = calculatedStoreVariableCount;
+            this.instructionSizes = new ReadOnlyCollection<InstructionStatistics>(instructionSizes);
         }
 
         /// <summary>
@@ -85,6 +90,11 @@ namespace ZDebug.Compiler.Profiling
         public int CalculatedStoreVariableCount
         {
             get { return calculatedStoreVariableCount; }
+        }
+
+        public ReadOnlyCollection<InstructionStatistics> InstructionSizes
+        {
+            get { return instructionSizes; }
         }
 
         public override string ToString()
