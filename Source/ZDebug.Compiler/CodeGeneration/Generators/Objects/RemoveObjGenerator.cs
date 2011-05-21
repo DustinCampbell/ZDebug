@@ -1,5 +1,6 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
@@ -24,7 +25,10 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
                 objNum.Store();
 
-                compiler.EmitObjectRemoveFromParent(objNum);
+                il.Arguments.LoadMachine();
+                objNum.Load();
+
+                il.Call(Reflection<CompiledZMachine>.GetMethod("op_remove_obj", Types.Array<ushort>(), @public: false));
             }
         }
 

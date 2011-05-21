@@ -563,6 +563,16 @@ namespace ZDebug.Compiler
             }
         }
 
+        internal void op_insert_obj(ushort objNum, ushort destNum)
+        {
+            this.Story.ObjectTable.MoveObjectToDestinationByNumber(objNum, destNum);
+        }
+
+        internal void op_remove_obj(ushort objNum)
+        {
+            this.Story.ObjectTable.RemoveObjectFromParentByNumber(objNum);
+        }
+
         internal void SelectScreenStream()
         {
             this.OutputStreams.SelectScreenStream();

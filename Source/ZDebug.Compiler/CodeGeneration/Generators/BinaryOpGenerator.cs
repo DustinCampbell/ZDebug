@@ -21,7 +21,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
 
         protected abstract void Operation(ILBuilder il);
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
+        protected virtual void LoadOperands(ILBuilder il, ICompiler compiler, Operand op1, Operand op2)
         {
             if (!ReuseFirstOperand)
             {
@@ -38,6 +38,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 il.Convert.ToInt16();
             }
+        }
+
+        public override void Generate(ILBuilder il, ICompiler compiler)
+        {
+            LoadOperands(il, compiler, op1, op2);
 
             Operation(il);
             il.Convert.ToUInt16();

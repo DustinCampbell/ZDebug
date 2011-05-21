@@ -468,7 +468,7 @@ namespace ZDebug.Core.Objects
             return null;
         }
 
-        internal void RemoveObjectFromParentByNumber(ushort objNum)
+        public void RemoveObjectFromParentByNumber(ushort objNum)
         {
             ushort? leftSiblingNum = TryReadLeftSiblingNumberByObjectNumber(objNum);
             ushort rightSiblingNum = ReadSiblingNumberByObjectNumber(objNum);
@@ -491,7 +491,7 @@ namespace ZDebug.Core.Objects
             WriteSiblingNumberByObjectNumber(objNum, 0);
         }
 
-        internal void MoveObjectToDestinationByNumber(ushort objNum, ushort destNum)
+        public void MoveObjectToDestinationByNumber(ushort objNum, ushort destNum)
         {
             RemoveObjectFromParentByNumber(objNum);
 

@@ -1,5 +1,6 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
+using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
@@ -28,7 +29,11 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 compiler.EmitLoadValidObject(destinationOp, done);
                 destNum.Store();
 
-                compiler.EmitObjectMoveToDestination(objNum, destNum);
+                il.Arguments.LoadMachine();
+                objNum.Load();
+                destNum.Load();
+
+                il.Call(Reflection<CompiledZMachine>.GetMethod("op_insert_obj", Types.Array<ushort, ushort>(), @public: false));
 
                 done.Mark();
             }

@@ -1,5 +1,4 @@
 ﻿using ZDebug.Compiler.Generate;
-using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
 {
@@ -362,8 +361,8 @@ namespace ZDebug.Compiler
             using (var address = il.NewLocal<ushort>())
             using (var length = il.NewLocal<byte>())
             using (var zwords = il.NewArrayLocal<ushort>())
-            using (var index = il.NewArrayLocal<int>())
-            using (var value = il.NewArrayLocal<ushort>())
+            using (var index = il.NewLocal<int>())
+            using (var value = il.NewLocal<ushort>())
             {
                 address.Store();
 
