@@ -96,7 +96,8 @@ namespace ZDebug.Terp.ViewModel
                               {
                                   Name = g.Key,
                                   TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
-                                  Count = g.Sum(x => x.TimesExecuted)
+                                  Count = g.Sum(x => x.TimesExecuted),
+                                  AverageILSize = profilerService.Profiler.GetAverageOpcodeILSize(g.Key)
                               };
 
                 this.opcodes = opcodes.OrderByDescending(x => x.TotalTime).ToList();

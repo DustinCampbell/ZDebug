@@ -92,7 +92,7 @@ namespace ZDebug.Compiler.Profiling
             get { return calculatedStoreVariableCount; }
         }
 
-        public ReadOnlyCollection<InstructionStatistics> InstructionSizes
+        public ReadOnlyCollection<InstructionStatistics> InstructionStatistics
         {
             get { return instructionSizes; }
         }

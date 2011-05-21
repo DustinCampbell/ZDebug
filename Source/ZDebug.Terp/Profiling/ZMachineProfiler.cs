@@ -148,6 +148,30 @@ namespace ZDebug.Terp.Profiling
             }
         }
 
+        public double GetAverageOpcodeILSize(string opcodeName)
+        {
+            long totalILSize = 0;
+            long numberOpcodes = 0;
+            foreach (var routineStat in allStatistics)
+            {
+                foreach (var stat in routineStat.InstructionStatistics)
+                {
+                    if (stat.Instruction.Opcode.Name == opcodeName)
+                    {
+                        numberOpcodes++;
+                        totalILSize += stat.Size;
+                    }
+                }
+            }
+
+            if (numberOpcodes == 0)
+            {
+                return 0;
+            }
+
+            return (double)totalILSize / (double)numberOpcodes;
+        }
+
         public int RoutinesCompiled
         {
             get
