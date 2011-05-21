@@ -62,7 +62,7 @@ namespace ZDebug.Compiler
             throw new ZCompilerException(string.Format("Could not find label for address, {0:x4}", address));
         }
 
-        public void EmitLoadOperand(Operand operand)
+        public void EmitLoadOperand(Operand operand, bool convertResult = true)
         {
             switch (operand.Kind)
             {
@@ -72,7 +72,7 @@ namespace ZDebug.Compiler
                     break;
 
                 default: // OperandKind.Variable
-                    EmitLoadVariable((byte)operand.Value);
+                    EmitLoadVariable((byte)operand.Value, convertResult: convertResult);
                     break;
             }
         }
@@ -292,7 +292,7 @@ namespace ZDebug.Compiler
                 loadAddress: () => address.Load());
         }
 
-        private void EmitLoadMemoryWord(CodeBuilder loadAddress, CodeBuilder loadSecondAddress)
+        private void EmitLoadMemoryWord(CodeBuilder loadAddress, CodeBuilder loadSecondAddress, bool convertResult)
         {
             // shift memory[address] left 8 bits
             EmitLoadMemoryByte(loadAddress);
@@ -303,17 +303,22 @@ namespace ZDebug.Compiler
 
             // or bytes together
             il.Math.Or();
-            il.Convert.ToUInt16();
+
+            if (convertResult)
+            {
+                il.Convert.ToUInt16();
+            }
         }
 
-        public void EmitLoadMemoryWord(int address)
+        public void EmitLoadMemoryWord(int address, bool convertResult = true)
         {
             EmitLoadMemoryWord(
                 loadAddress: () => il.Load(address),
-                loadSecondAddress: () => il.Load(address + 1));
+                loadSecondAddress: () => il.Load(address + 1),
+                convertResult: convertResult);
         }
 
-        public void EmitLoadMemoryWord(ILocal address)
+        public void EmitLoadMemoryWord(ILocal address, bool convertResult = true)
         {
             EmitLoadMemoryWord(
                 loadAddress: () => address.Load(),
@@ -321,7 +326,8 @@ namespace ZDebug.Compiler
                 {
                     address.Load();
                     il.Math.Add(1);
-                });
+                },
+                convertResult: convertResult);
         }
 
         private void EmitStoreMemoryByte(CodeBuilder loadAddress, CodeBuilder loadValue)
@@ -449,13 +455,13 @@ namespace ZDebug.Compiler
             il.Emit(OpCodes.Stelem_I2);
         }
 
-        private void EmitLoadGlobalVariable(byte variableIndex)
+        private void EmitLoadGlobalVariable(byte variableIndex, bool convertResult)
         {
             var address = (variableIndex * 2) + machine.GlobalVariableTableAddress;
-            EmitLoadMemoryWord(address);
+            EmitLoadMemoryWord(address, convertResult);
         }
 
-        private void EmitLoadGlobalVariable(ILocal variableIndex)
+        private void EmitLoadGlobalVariable(ILocal variableIndex, bool convertResult)
         {
             using (var address = il.NewLocal<int>())
             {
@@ -464,7 +470,7 @@ namespace ZDebug.Compiler
                 il.Math.Add(machine.GlobalVariableTableAddress);
                 address.Store();
 
-                EmitLoadMemoryWord(address);
+                EmitLoadMemoryWord(address, convertResult);
             }
         }
 
@@ -487,7 +493,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public void EmitLoadVariable(byte variableIndex, bool indirect = false)
+        public void EmitLoadVariable(byte variableIndex, bool indirect = false, bool convertResult = true)
         {
             if (variableIndex == 0)
             {
@@ -499,11 +505,11 @@ namespace ZDebug.Compiler
             }
             else
             {
-                EmitLoadGlobalVariable((byte)(variableIndex - 16));
+                EmitLoadGlobalVariable((byte)(variableIndex - 16), convertResult);
             }
         }
 
-        public void EmitLoadVariable(ILocal variableIndex, bool indirect = false)
+        public void EmitLoadVariable(ILocal variableIndex, bool indirect = false, bool convertResult = true)
         {
             il.DebugIndent();
 
@@ -563,7 +569,7 @@ namespace ZDebug.Compiler
                 using (var globalVariableIndex = il.NewLocal<byte>())
                 {
                     globalVariableIndex.Store();
-                    EmitLoadGlobalVariable(globalVariableIndex);
+                    EmitLoadGlobalVariable(globalVariableIndex, convertResult);
                 }
             }
             else

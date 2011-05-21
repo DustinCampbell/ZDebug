@@ -15,7 +15,7 @@ namespace ZDebug.Compiler.CodeGeneration
         /// Emits code to loads an operand onto the evaluation stack.
         /// </summary>
         /// <param name="operand">The operand to load onto the evaluation stack.</param>
-        void EmitLoadOperand(Operand operand);
+        void EmitLoadOperand(Operand operand, bool convertResult = true);
 
         /// <summary>
         /// Emits code to execute the given branch using the value on top of the evaluation stack.
@@ -45,12 +45,12 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to load a word from Z-machine memory at the given address.
         /// </summary>
-        void EmitLoadMemoryWord(int address);
+        void EmitLoadMemoryWord(int address, bool convertResult = true);
 
         /// <summary>
         /// Emits code to load a word from Z-machine memory at the address stored in the given IL local.
         /// </summary>
-        void EmitLoadMemoryWord(ILocal address);
+        void EmitLoadMemoryWord(ILocal address, bool convertResult = true);
 
         /// <summary>
         /// Emits code to store an IL local as a byte in Z-machine memory at the given address.
@@ -85,12 +85,12 @@ namespace ZDebug.Compiler.CodeGeneration
         /// <summary>
         /// Emits code to load the Z-machine variable at the given index.
         /// </summary>
-        void EmitLoadVariable(byte variableIndex, bool indirect = false);
+        void EmitLoadVariable(byte variableIndex, bool indirect = false, bool convertResult = true);
 
         /// <summary>
         /// Emits code to load the Z-machine variable at the index stored in the given IL local.
         /// </summary>
-        void EmitLoadVariable(ILocal variableIndex, bool indirect = false);
+        void EmitLoadVariable(ILocal variableIndex, bool indirect = false, bool convertResult = true);
 
         /// <summary>
         /// Emits code to store an IL local to the Z-machine variable at the given index.

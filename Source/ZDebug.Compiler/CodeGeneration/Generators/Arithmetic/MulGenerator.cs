@@ -16,22 +16,22 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 il.Convert.ToInt16();
 
-                compiler.EmitLoadOperand(op2);
+                compiler.EmitLoadOperand(op2, convertResult: false);
                 il.Convert.ToInt16();
             }
             else if (ReuseSecondOperand)
             {
                 il.Convert.ToInt16();
 
-                compiler.EmitLoadOperand(op1);
+                compiler.EmitLoadOperand(op1, convertResult: false);
                 il.Convert.ToInt16();
             }
             else
             {
-                compiler.EmitLoadOperand(op1);
+                compiler.EmitLoadOperand(op1, convertResult: false);
                 il.Convert.ToInt16();
 
-                compiler.EmitLoadOperand(op2);
+                compiler.EmitLoadOperand(op2, convertResult: false);
                 il.Convert.ToInt16();
             }
         }

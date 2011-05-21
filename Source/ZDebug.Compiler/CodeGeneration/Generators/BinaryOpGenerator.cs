@@ -25,7 +25,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             if (!ReuseFirstOperand)
             {
-                compiler.EmitLoadOperand(op1);
+                compiler.EmitLoadOperand(op1, convertResult: !signed);
             }
 
             if (signed)
@@ -33,7 +33,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Convert.ToInt16();
             }
 
-            compiler.EmitLoadOperand(op2);
+            compiler.EmitLoadOperand(op2, convertResult: !signed);
             if (signed)
             {
                 il.Convert.ToInt16();
