@@ -13,7 +13,7 @@ namespace ZDebug.Compiler
 {
     public sealed partial class CompiledZMachine : ZMachine
     {
-        internal const int STACK_SIZE = 32768;
+        internal const int STACK_SIZE = 65536;
 
         private readonly IZMachineProfiler profiler;
         private readonly bool precompile;
