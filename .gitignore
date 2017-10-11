@@ -1,4 +1,5 @@
-# Ignore binary folders
+# Ignore binary folders'
+.vs/
 Binaries/
 obj
 bin
