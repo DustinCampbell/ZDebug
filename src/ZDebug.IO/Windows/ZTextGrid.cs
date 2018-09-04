@@ -80,7 +80,8 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: GetTypeface(),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: FontsAndColorsService.DefaultForeground);
+                foreground: FontsAndColorsService.DefaultForeground,
+                pixelsPerDip: 1.0);
 
             fontCharSize = new Size(zero.Width, zero.Height);
 
@@ -169,7 +170,8 @@ namespace ZDebug.IO.Windows
                         FontsAndColorsService.FontSize,
                         fg,
                         new NumberSubstitution(NumberCultureSource.User, CultureInfo.CurrentUICulture, NumberSubstitutionMethod.AsCulture),
-                        TextFormattingMode.Display),
+                        TextFormattingMode.Display,
+                        pixelsPerDip: 1.0),
                     new Point(x, y));
 
                 textContext.Close();

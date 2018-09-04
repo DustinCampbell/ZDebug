@@ -23,7 +23,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{790DFF51
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZDebug.Core.Tests", "tests\ZDebug.Core.Tests\ZDebug.Core.Tests.csproj", "{C384AF1A-D47A-4CEE-BEE1-DA3453124ADA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZDebug.Compiler.Tests", "tests\ZDebug.Compiler.Tests\ZDebug.Compiler.Tests.csproj", "{09C25043-CC07-4BA2-BBB2-8A2608112C3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZDebug.Compiler.Tests", "tests\ZDebug.Compiler.Tests\ZDebug.Compiler.Tests.csproj", "{09C25043-CC07-4BA2-BBB2-8A2608112C3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BCDF2537-3726-4EF5-8758-82827DE5F539}"
+	ProjectSection(SolutionItems) = preProject
+		build\Packages.props = build\Packages.props
+		build\Settings.props = build\Settings.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

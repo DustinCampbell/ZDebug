@@ -76,7 +76,8 @@ namespace ZDebug.Terp.ViewModel
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: new Typeface(FontsAndColorsService.FixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: Brushes.Black,
+                pixelsPerDip: 1.0);
         }
 
         private bool ForceFixedWidthFont()

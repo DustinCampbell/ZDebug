@@ -24,7 +24,8 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: FontsAndColorsService.FixedTypeface,
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: Brushes.Black,
+                pixelsPerDip: 1.0);
 
             fontCharSize = new Size(zero.Width, zero.Height);
 
