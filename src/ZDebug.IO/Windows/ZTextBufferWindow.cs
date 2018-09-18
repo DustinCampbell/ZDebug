@@ -50,7 +50,8 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: new Typeface(FontsAndColorsService.NormalFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: FontsAndColorsService.DefaultForeground);
+                foreground: FontsAndColorsService.DefaultForeground,
+                pixelsPerDip: 1.0);
 
             fontCharSize = new Size(zero.Width, zero.Height);
         }

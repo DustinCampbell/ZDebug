@@ -63,6 +63,9 @@ namespace ZDebug.UI.Utilities
 
         public static void RestoreDockingLayout(DockingManager dockManager, string prefix = null)
         {
+            // The code below results in the following error:
+            //   Reference to type 'TextReader' claims it is defined in 'mscorlib', but it could not be found
+#if false
             using (var dockLayoutReader = OpenXmlFile(GetDockLayoutFileName(prefix)))
             {
                 if (dockLayoutReader != null)
@@ -70,14 +73,19 @@ namespace ZDebug.UI.Utilities
                     dockManager.RestoreLayout(dockLayoutReader);
                 }
             }
+#endif
         }
 
         public static void SaveDockingLayout(DockingManager dockManager, string prefix = null)
         {
+            // The code below results in the following error:
+            //   Reference to type 'TextReader' claims it is defined in 'mscorlib', but it could not be found
+#if false
             using (var dockLayoutWriter = CreateXmlFile(GetDockLayoutFileName(prefix)))
             {
                 dockManager.SaveLayout(dockLayoutWriter);
             }
+#endif
         }
 
         public static void RestoreWindowLayout(Window window)
