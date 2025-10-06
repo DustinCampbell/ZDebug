@@ -5,9 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using ZDebug.IO.Services;
 using System.Windows.Threading;
-using System.Windows.Controls.Primitives;
+using ZDebug.IO.Services;
 using ZDebug.IO.Utilities;
 
 namespace ZDebug.IO.Windows
@@ -52,7 +51,7 @@ namespace ZDebug.IO.Windows
                 typeface: new Typeface(FontsAndColorsService.NormalFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
                 foreground: FontsAndColorsService.DefaultForeground,
-                pixelsPerDip: DpiHelper.GetPixelsPerDip());
+                pixelsPerDip: this.GetPixelsPerDip());
 
             fontCharSize = new Size(zero.Width, zero.Height);
         }

@@ -82,7 +82,7 @@ namespace ZDebug.IO.Windows
                 typeface: GetTypeface(),
                 emSize: FontsAndColorsService.FontSize,
                 foreground: FontsAndColorsService.DefaultForeground,
-                pixelsPerDip: DpiHelper.GetPixelsPerDip());
+                pixelsPerDip: this.GetPixelsPerDip());
 
             fontCharSize = new Size(zero.Width, zero.Height);
 
@@ -172,7 +172,7 @@ namespace ZDebug.IO.Windows
                         fg,
                         new NumberSubstitution(NumberCultureSource.User, CultureInfo.CurrentUICulture, NumberSubstitutionMethod.AsCulture),
                         TextFormattingMode.Display,
-                        pixelsPerDip: DpiHelper.GetPixelsPerDip()),
+                        pixelsPerDip: this.GetPixelsPerDip()),
                     new Point(x, y));
 
                 textContext.Close();

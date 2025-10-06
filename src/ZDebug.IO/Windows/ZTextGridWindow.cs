@@ -26,7 +26,7 @@ namespace ZDebug.IO.Windows
                 typeface: FontsAndColorsService.FixedTypeface,
                 emSize: FontsAndColorsService.FontSize,
                 foreground: Brushes.Black,
-                pixelsPerDip: DpiHelper.GetPixelsPerDip());
+                pixelsPerDip: this.GetPixelsPerDip());
 
             fontCharSize = new Size(zero.Width, zero.Height);
 

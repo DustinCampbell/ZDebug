@@ -78,7 +78,7 @@ namespace ZDebug.Terp.ViewModel
                 typeface: new Typeface(FontsAndColorsService.FixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
                 foreground: Brushes.Black,
-                pixelsPerDip: DpiHelper.GetPixelsPerDip());
+                pixelsPerDip: this.View.GetPixelsPerDip());
         }
 
         private bool ForceFixedWidthFont()
