@@ -7,6 +7,7 @@ using System.Windows.Media;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Extensions;
 using ZDebug.IO.Services;
+using ZDebug.IO.Utilities;
 using ZDebug.IO.Windows;
 using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
@@ -76,7 +77,8 @@ namespace ZDebug.Terp.ViewModel
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: new Typeface(FontsAndColorsService.FixedFontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: Brushes.Black,
+                pixelsPerDip: DpiHelper.GetPixelsPerDip());
         }
 
         private bool ForceFixedWidthFont()
