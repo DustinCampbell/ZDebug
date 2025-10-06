@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ZDebug.IO.Services;
+using ZDebug.IO.Utilities;
 
 namespace ZDebug.IO.Windows
 {
@@ -24,7 +25,8 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: FontsAndColorsService.FixedTypeface,
                 emSize: FontsAndColorsService.FontSize,
-                foreground: Brushes.Black);
+                foreground: Brushes.Black,
+                pixelsPerDip: this.GetPixelsPerDip());
 
             fontCharSize = new Size(zero.Width, zero.Height);
 

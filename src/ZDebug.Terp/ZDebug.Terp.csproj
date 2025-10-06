@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <OutputType>WinExe</OutputType>
+    <UseWpf>true</UseWpf>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,22 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="App.xaml" />
-    <ApplicationDefinition Include="App.xaml" Subtype="Designer" Generator="MSBuild:UpdateDesignTimeXaml" />
-    <Page Include="**\*.xaml" SubType="Designer" Generator="MSBuild:UpdateDesignTimeXaml" Exclude="App.xaml" />
-    <PackageReference Include="System.Composition" Version="1.1.0" />
-    <Compile Update="**\*.xaml.cs" SubType="Designer" DependentUpon="%(Filename)" />
+    <PackageReference Include="System.Composition" />
   </ItemGroup>
 
 </Project>

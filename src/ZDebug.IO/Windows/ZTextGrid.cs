@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using ZDebug.IO.Services;
+using ZDebug.IO.Utilities;
 
 namespace ZDebug.IO.Windows
 {
@@ -80,7 +81,8 @@ namespace ZDebug.IO.Windows
                 flowDirection: FlowDirection.LeftToRight,
                 typeface: GetTypeface(),
                 emSize: FontsAndColorsService.FontSize,
-                foreground: FontsAndColorsService.DefaultForeground);
+                foreground: FontsAndColorsService.DefaultForeground,
+                pixelsPerDip: this.GetPixelsPerDip());
 
             fontCharSize = new Size(zero.Width, zero.Height);
 
@@ -169,7 +171,8 @@ namespace ZDebug.IO.Windows
                         FontsAndColorsService.FontSize,
                         fg,
                         new NumberSubstitution(NumberCultureSource.User, CultureInfo.CurrentUICulture, NumberSubstitutionMethod.AsCulture),
-                        TextFormattingMode.Display),
+                        TextFormattingMode.Display,
+                        pixelsPerDip: this.GetPixelsPerDip()),
                     new Point(x, y));
 
                 textContext.Close();
