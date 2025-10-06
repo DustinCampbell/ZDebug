@@ -12,10 +12,6 @@
     <ProjectReference Include="..\ZDebug.UI.Core\ZDebug.UI.Core.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <LanguageTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</LanguageTargets>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.Composition" />
   </ItemGroup>
