@@ -5,39 +5,30 @@ using ZDebug.Core.Utilities;
 
 namespace ZDebug.Compiler
 {
-    internal sealed class ZRoutineCall
+    internal sealed class ZRoutineCall(ZRoutine routine, CompiledZMachine machine)
     {
-        public readonly CompiledZMachine Machine;
-        public readonly ZRoutine Routine;
+        private readonly CompiledZMachine machine = machine;
+        private readonly ZRoutine routine = routine;
 
         private ZCompilerResult compilationResult;
 
-        public ZRoutineCall(ZRoutine routine, CompiledZMachine machine)
-        {
-            this.Machine = machine;
-            this.Routine = routine;
-        }
-
         public void Compile()
         {
-            if (compilationResult == null)
-            {
-                compilationResult = Machine.Compile(Routine);
-            }
+            compilationResult ??= machine.Compile(routine);
         }
 
         public ushort Invoke0(byte[] memory, ushort[] stack, int sp)
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 return compilationResult.Code(memory, locals, stack, sp, compilationResult.Calls, 0);
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -45,7 +36,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -54,7 +45,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -62,7 +53,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -72,7 +63,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -80,7 +71,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -91,7 +82,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -99,7 +90,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -111,7 +102,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -119,7 +110,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -132,7 +123,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -140,7 +131,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -154,7 +145,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 
@@ -162,7 +153,7 @@ namespace ZDebug.Compiler
         {
             Compile();
 
-            var locals = Machine.GetLocalArray(Routine);
+            var locals = machine.GetLocalArray(routine);
             try
             {
                 locals[0] = arg0;
@@ -177,7 +168,7 @@ namespace ZDebug.Compiler
             }
             finally
             {
-                Machine.ReleaseLocalArray(locals);
+                machine.ReleaseLocalArray(locals);
             }
         }
 

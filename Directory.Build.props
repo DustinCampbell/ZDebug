@@ -3,11 +3,15 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
-    <RepositoryRootDirectory>$(MSBuildThisFileDirectory)</RepositoryRootDirectory>
-    <OutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\$(Configuration)\$(MSBuildProjectName)'))\</OutputPath>
-    <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(RepositoryRootDirectory)bin\obj\$(MSBuildProjectName)'))\</BaseIntermediateOutputPath>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+
+    <ArtifactsPath>$(RepoRoot)artifacts\</ArtifactsPath>
+    <BinPath>$(ArtifactsPath)bin\</BinPath>
+    <ObjPath>$(ArtifactsPath)obj\</ObjPath>
+
+    <OutputPath>$(BinPath)$(MSBuildProjectName)\$(Configuration)</OutputPath>
+    <BaseIntermediateOutputPath>$(ObjPath)$(MSBuildProjectName)\$(Configuration)</BaseIntermediateOutputPath>
   </PropertyGroup>
 
 </Project>

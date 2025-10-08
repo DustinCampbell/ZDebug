@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using AvalonDock;
+using AvalonDock.Layout;
 using Microsoft.Win32;
 using ZDebug.UI.Extensions;
 using ZDebug.UI.Services;
@@ -295,34 +296,34 @@ namespace ZDebug.UI.ViewModel
 
         protected override void ViewCreated(Window view)
         {
-            var storyInfoContent = this.View.FindName<DockableContent>("storyInfoContent");
+            var storyInfoContent = this.View.FindName<LayoutAnchorable>("storyInfoContent");
             storyInfoContent.Content = this.storyInfoViewModel.CreateView();
 
-            var memoryMapContent = this.View.FindName<DockableContent>("memoryMapContent");
+            var memoryMapContent = this.View.FindName<LayoutAnchorable>("memoryMapContent");
             memoryMapContent.Content = this.memoryMapViewModel.CreateView();
 
-            var globalsContent = this.View.FindName<DockableContent>("globalsContent");
+            var globalsContent = this.View.FindName<LayoutAnchorable>("globalsContent");
             globalsContent.Content = this.globalsViewModel.CreateView();
 
-            var disassemblyContent = this.View.FindName<DocumentContent>("disassemblyContent");
+            var disassemblyContent = this.View.FindName<LayoutDocument>("disassemblyContent");
             disassemblyContent.Content = this.disassemblyViewModel.CreateView();
 
-            var objectsContent = this.View.FindName<DocumentContent>("objectsContent");
+            var objectsContent = this.View.FindName<LayoutDocument>("objectsContent");
             objectsContent.Content = this.objectsViewModel.CreateView();
 
             //var memoryContent = this.View.FindName<DocumentContent>("memoryContent");
             //memoryContent.Content = ViewModelWithView.Create<MemoryViewModel, UserControl>();
 
-            var localsContent = this.View.FindName<DockableContent>("localsContent");
+            var localsContent = this.View.FindName<LayoutAnchorable>("localsContent");
             localsContent.Content = this.localsViewModel.CreateView();
 
-            var callStackContent = this.View.FindName<DockableContent>("callStackContent");
+            var callStackContent = this.View.FindName<LayoutAnchorable>("callStackContent");
             callStackContent.Content = this.callStackViewModel.CreateView();
 
-            var outputContent = this.View.FindName<DockableContent>("outputContent");
+            var outputContent = this.View.FindName<LayoutAnchorable>("outputContent");
             outputContent.Content = this.outputViewModel.CreateView();
 
-            var messagesContent = this.View.FindName<DockableContent>("messagesContent");
+            var messagesContent = this.View.FindName<LayoutAnchorable>("messagesContent");
             messagesContent.Content = this.messageLogViewModel.CreateView();
 
             this.View.SourceInitialized += (s, e) =>

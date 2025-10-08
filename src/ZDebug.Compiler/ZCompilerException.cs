@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace ZDebug.Compiler
 {
-    [Serializable]
     public class ZCompilerException : Exception
     {
         public ZCompilerException()
@@ -18,11 +16,6 @@ namespace ZDebug.Compiler
 
         public ZCompilerException(string message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        protected ZCompilerException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

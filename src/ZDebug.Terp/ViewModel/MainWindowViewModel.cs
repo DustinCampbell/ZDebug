@@ -2,10 +2,12 @@
 using System.Composition;
 using System.Media;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AvalonDock;
+using AvalonDock.Layout;
 using Microsoft.Win32;
 using ZDebug.Compiler;
 using ZDebug.Core.Execution;
@@ -31,8 +33,8 @@ namespace ZDebug.Terp.ViewModel
 
         private IScreen screen;
         private CompiledZMachine zmachine;
-        private Thread zmachineThread;
         private DispatcherTimer updateTimer;
+        private Task zmachineTask;
 
         [ImportingConstructor]
         public MainWindowViewModel(
@@ -93,11 +95,11 @@ namespace ZDebug.Terp.ViewModel
 
         protected override void ViewCreated(Window view)
         {
-            var screenContent = this.View.FindName<DocumentContent>("screenContent");
+            var screenContent = this.View.FindName<LayoutDocument>("screenContent");
             screenContent.Content = screenViewModel.CreateView();
             this.screen = screenViewModel;
 
-            var profilerContent = this.View.FindName<DocumentContent>("profilerContent");
+            var profilerContent = this.View.FindName<LayoutDocument>("profilerContent");
             profilerContent.Content = profilerViewModel.CreateView();
 
             this.updateTimer = new DispatcherTimer(
@@ -219,22 +221,23 @@ namespace ZDebug.Terp.ViewModel
             zmachine.RegisterScreen(screen);
             zmachine.RegisterSoundEngine(this);
 
-            zmachineThread = new Thread(new ThreadStart(Run));
-            zmachineThread.Start();
+            zmachineTask = Task.Run(() => Run());
 
             PropertyChanged("Title");
         }
 
         void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
         {
-            if (zmachineThread != null)
+            if (zmachineTask != null)
             {
-                zmachineThread.Abort();
+                zmachine.Cancel();
+                zmachineTask.Wait();
             }
 
             profilerService.Destroy();
 
-            zmachineThread = null;
+            zmachine.Dispose();
+            zmachineTask = null;
             zmachine = null;
 
             PropertyChanged("Title");

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace ZDebug.Core.Instructions
 {
-    [Serializable]
     public class InstructionReaderException : Exception
     {
         public InstructionReaderException()
@@ -18,11 +16,6 @@ namespace ZDebug.Core.Instructions
 
         public InstructionReaderException(string message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        protected InstructionReaderException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

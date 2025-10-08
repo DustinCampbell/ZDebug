@@ -14,25 +14,10 @@ namespace ZDebug.Compiler
 
         internal ZCompilerResult(ZRoutine routine, ZRoutineCall[] calls, ZRoutineCode code, RoutineCompilationStatistics statistics)
         {
-            if (routine == null)
-            {
-                throw new ArgumentNullException("routine");
-            }
-
-            if (calls == null)
-            {
-                throw new ArgumentNullException("calls");
-            }
-
-            if (code == null)
-            {
-                throw new ArgumentNullException("code");
-            }
-
-            if (statistics == null)
-            {
-                throw new ArgumentNullException("statistics");
-            }
+            ArgumentNullException.ThrowIfNull(routine);
+            ArgumentNullException.ThrowIfNull(calls);
+            ArgumentNullException.ThrowIfNull(code);
+            ArgumentNullException.ThrowIfNull(statistics);
 
             this.Routine = routine;
             this.Calls = calls;

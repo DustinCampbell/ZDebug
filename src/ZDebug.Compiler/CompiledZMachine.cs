@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core;
 using ZDebug.Core.Basics;
@@ -11,9 +12,11 @@ using ZDebug.Core.Text;
 
 namespace ZDebug.Compiler
 {
-    public sealed partial class CompiledZMachine : ZMachine
+    public sealed partial class CompiledZMachine : ZMachine, IDisposable
     {
         internal const int STACK_SIZE = 65536;
+
+        private readonly CancellationTokenSource cancellationTokenSource = new();
 
         private readonly IZMachineProfiler profiler;
         private readonly bool precompile;
@@ -89,6 +92,17 @@ namespace ZDebug.Compiler
             }
         }
 
+        public void Dispose()
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+        }
+
+        public void Cancel()
+        {
+            cancellationTokenSource.Cancel();
+        }
+
         private int GetMainRoutineAddress()
         {
             var mainAddress = this.Memory.ReadWord(0x06);
@@ -135,8 +149,7 @@ namespace ZDebug.Compiler
 
         private ZRoutine GetRoutineByAddress(int address)
         {
-            ZRoutine routine;
-            if (!routineTable.TryGetByAddress(address, out routine))
+            if (!routineTable.TryGetByAddress(address, out var routine))
             {
                 routineTable.Add(address);
                 routine = routineTable.GetByAddress(address);
@@ -147,17 +160,15 @@ namespace ZDebug.Compiler
 
         internal ZCompilerResult Compile(ZRoutine routine)
         {
-            ZCompilerResult result;
-            if (!compilationResults.TryGetValue(routine.Address, out result))
+            cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+            if (!compilationResults.TryGetValue(routine.Address, out var result))
             {
                 result = ZCompiler.Compile(routine, machine: this);
 
                 compilationResults.Add(routine.Address, result);
 
-                if (profiler != null)
-                {
-                    profiler.RoutineCompiled(result.Statistics);
-                }
+                profiler?.RoutineCompiled(result.Statistics);
             }
 
             return result;
