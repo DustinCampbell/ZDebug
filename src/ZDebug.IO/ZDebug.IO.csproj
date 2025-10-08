@@ -5,4 +5,8 @@
     <UseWpf>true</UseWpf>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PolyFills\PolyFills.csproj" />
+  </ItemGroup>
+
 </Project>

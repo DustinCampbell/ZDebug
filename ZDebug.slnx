@@ -5,6 +5,7 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/PolyFills/PolyFills.csproj" Id="64e2cbf4-2583-4d4f-a191-6e3333636c8a" />
     <Project Path="src/ZDebug.Compiler/ZDebug.Compiler.csproj" />
     <Project Path="src/ZDebug.Core/ZDebug.Core.csproj" />
     <Project Path="src/ZDebug.IO/ZDebug.IO.csproj" />

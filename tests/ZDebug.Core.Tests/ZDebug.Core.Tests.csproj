@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\PolyFills\PolyFills.csproj" />
     <ProjectReference Include="..\..\src\ZDebug.Core\ZDebug.Core.csproj" />
   </ItemGroup>
 

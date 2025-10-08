@@ -2,22 +2,14 @@
 
 internal sealed class MessageViewModel : ViewModelBase
 {
-    private readonly string message;
-    private readonly bool error;
+    public required string Message { get; init; }
+    public required bool IsError { get; init; }
 
-    private MessageViewModel(string message, bool error)
-    {
-        this.message = message;
-        this.error = error;
-    }
+    public bool IsWarning => !IsError;
 
-    public bool IsError => error;
+    public static MessageViewModel CreateError(string message)
+        => new() { Message = message, IsError = true };
 
-    public bool IsWarning => !error;
-
-    public string Message => message;
-
-    public static MessageViewModel CreateError(string message) => new MessageViewModel(message, error: true);
-
-    public static MessageViewModel CreateWarning(string message) => new MessageViewModel(message, error: false);
+    public static MessageViewModel CreateWarning(string message)
+        => new() { Message = message, IsError = false };
 }
