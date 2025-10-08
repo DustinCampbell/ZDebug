@@ -1,8 +1,7 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public interface ISoundEngine
 {
-    public interface ISoundEngine
-    {
-        void HighBeep();
-        void LowBeep();
-    }
+    void HighBeep();
+    void LowBeep();
 }

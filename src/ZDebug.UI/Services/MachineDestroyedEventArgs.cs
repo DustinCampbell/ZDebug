@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+public class MachineDestroyedEventArgs : EventArgs
 {
-    public class MachineDestroyedEventArgs : EventArgs
-    {
-    }
 }

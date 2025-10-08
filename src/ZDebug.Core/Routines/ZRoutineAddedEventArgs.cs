@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace ZDebug.Core.Routines
+namespace ZDebug.Core.Routines;
+
+public sealed class ZRoutineAddedEventArgs : EventArgs
 {
-    public sealed class ZRoutineAddedEventArgs : EventArgs
+    private readonly ZRoutine routine;
+
+    public ZRoutineAddedEventArgs(ZRoutine routine)
     {
-        private readonly ZRoutine routine;
+        this.routine = routine;
+    }
 
-        public ZRoutineAddedEventArgs(ZRoutine routine)
-        {
-            this.routine = routine;
-        }
-
-        public ZRoutine Routine
-        {
-            get { return routine; }
-        }
+    public ZRoutine Routine
+    {
+        get { return routine; }
     }
 }

@@ -1,47 +1,46 @@
 ﻿using System.Collections.Generic;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.Analysis.ControlFlow
+namespace ZDebug.Compiler.Analysis.ControlFlow;
+
+internal class CodeBlock : Block
 {
-    internal class CodeBlock : Block
+    private readonly int address;
+    private readonly List<Instruction> instructions;
+
+    public CodeBlock(int address)
+        : base(isEntry: false, isExit: false)
     {
-        private readonly int address;
-        private readonly List<Instruction> instructions;
+        this.address = address;
+        this.instructions = new List<Instruction>();
+    }
 
-        public CodeBlock(int address)
-            : base(isEntry: false, isExit: false)
+    public void AddInstruction(Instruction instruction)
+    {
+        this.instructions.Add(instruction);
+    }
+
+    public int Address
+    {
+        get
         {
-            this.address = address;
-            this.instructions = new List<Instruction>();
+            return this.address;
         }
+    }
 
-        public void AddInstruction(Instruction instruction)
+    public IEnumerable<Instruction> Instructions
+    {
+        get
         {
-            this.instructions.Add(instruction);
-        }
-
-        public int Address
-        {
-            get
+            foreach (var instruction in this.instructions)
             {
-                return this.address;
+                yield return instruction;
             }
         }
+    }
 
-        public IEnumerable<Instruction> Instructions
-        {
-            get
-            {
-                foreach (var instruction in this.instructions)
-                {
-                    yield return instruction;
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return "Code block: " + this.address.ToString("x4");
-        }
+    public override string ToString()
+    {
+        return "Code block: " + this.address.ToString("x4");
     }
 }

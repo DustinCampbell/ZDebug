@@ -1,6 +1,5 @@
-﻿namespace ZDebug.UI.Services
+﻿namespace ZDebug.UI.Services;
+
+public interface IService
 {
-    public interface IService
-    {
-    }
 }

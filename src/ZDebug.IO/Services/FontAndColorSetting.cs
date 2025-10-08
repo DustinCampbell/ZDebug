@@ -2,168 +2,167 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace ZDebug.IO.Services
+namespace ZDebug.IO.Services;
+
+public sealed class FontAndColorSetting
 {
-    public sealed class FontAndColorSetting
+    private readonly FontAndColorSetting baseSetting;
+    private readonly FontFamily fontFamily;
+    private readonly double fontSize;
+    private readonly Brush foreground;
+    private readonly Brush background;
+    private readonly FontWeight fontWeight;
+    private readonly FontStyle fontStyle;
+    private readonly FontStretch fontStretch;
+
+    private readonly bool hasFontFamily;
+    private readonly bool hasFontSize;
+    private readonly bool hasForeground;
+    private readonly bool hasBackground;
+    private readonly bool hasFontWeight;
+    private readonly bool hasFontStyle;
+    private readonly bool hasFontStretch;
+
+    private Typeface typeface;
+
+    public FontAndColorSetting(
+        FontAndColorSetting baseSetting,
+        FontFamily fontFamily = null,
+        double? fontSize = null,
+        Brush foreground = null,
+        Brush background = null,
+        FontWeight? fontWeight = null,
+        FontStyle? fontStyle = null,
+        FontStretch? fontStretch = null)
     {
-        private readonly FontAndColorSetting baseSetting;
-        private readonly FontFamily fontFamily;
-        private readonly double fontSize;
-        private readonly Brush foreground;
-        private readonly Brush background;
-        private readonly FontWeight fontWeight;
-        private readonly FontStyle fontStyle;
-        private readonly FontStretch fontStretch;
-
-        private readonly bool hasFontFamily;
-        private readonly bool hasFontSize;
-        private readonly bool hasForeground;
-        private readonly bool hasBackground;
-        private readonly bool hasFontWeight;
-        private readonly bool hasFontStyle;
-        private readonly bool hasFontStretch;
-
-        private Typeface typeface;
-
-        public FontAndColorSetting(
-            FontAndColorSetting baseSetting,
-            FontFamily fontFamily = null,
-            double? fontSize = null,
-            Brush foreground = null,
-            Brush background = null,
-            FontWeight? fontWeight = null,
-            FontStyle? fontStyle = null,
-            FontStretch? fontStretch = null)
+        if (baseSetting == null)
         {
-            if (baseSetting == null)
-            {
-                throw new ArgumentNullException("baseSetting");
-            }
-
-            this.baseSetting = baseSetting;
-
-            if (fontFamily != null)
-            {
-                this.hasFontFamily = true;
-                this.fontFamily = fontFamily;
-            }
-
-            if (fontSize != null)
-            {
-                this.hasFontSize = true;
-                this.fontSize = fontSize.Value;
-            }
-
-            if (foreground != null)
-            {
-                this.hasForeground = true;
-                this.foreground = foreground;
-            }
-
-            if (background != null)
-            {
-                this.hasBackground = true;
-                this.background = background;
-            }
-
-            if (fontWeight != null)
-            {
-                this.hasFontWeight = true;
-                this.fontWeight = fontWeight.Value;
-            }
-
-            if (fontStyle != null)
-            {
-                this.hasFontStyle = true;
-                this.fontStyle = fontStyle.Value;
-            }
-
-            if (fontStretch != null)
-            {
-                this.hasFontStretch = true;
-                this.fontStretch = fontStretch.Value;
-            }
+            throw new ArgumentNullException("baseSetting");
         }
 
-        public FontAndColorSetting(
-            FontFamily fontFamily,
-            double fontSize,
-            Brush foreground = null,
-            Brush background = null,
-            FontWeight? fontWeight = null,
-            FontStyle? fontStyle = null,
-            FontStretch? fontStretch = null)
+        this.baseSetting = baseSetting;
+
+        if (fontFamily != null)
         {
-            if (fontFamily == null)
-            {
-                throw new ArgumentNullException("fontFamily");
-            }
-
-            if (fontSize < 0.0)
-            {
-                throw new ArgumentOutOfRangeException("fontSize");
-            }
-
-            this.fontFamily = fontFamily;
-            this.fontSize = fontSize;
-            this.foreground = foreground ?? Brushes.Black;
-            this.background = background ?? Brushes.White;
-            this.fontWeight = fontWeight ?? FontWeights.Normal;
-            this.fontStyle = fontStyle ?? FontStyles.Normal;
-            this.fontStretch = fontStretch ?? FontStretches.Normal;
-
             this.hasFontFamily = true;
+            this.fontFamily = fontFamily;
+        }
+
+        if (fontSize != null)
+        {
             this.hasFontSize = true;
+            this.fontSize = fontSize.Value;
+        }
+
+        if (foreground != null)
+        {
             this.hasForeground = true;
+            this.foreground = foreground;
+        }
+
+        if (background != null)
+        {
             this.hasBackground = true;
+            this.background = background;
+        }
+
+        if (fontWeight != null)
+        {
             this.hasFontWeight = true;
+            this.fontWeight = fontWeight.Value;
+        }
+
+        if (fontStyle != null)
+        {
             this.hasFontStyle = true;
+            this.fontStyle = fontStyle.Value;
+        }
+
+        if (fontStretch != null)
+        {
             this.hasFontStretch = true;
+            this.fontStretch = fontStretch.Value;
         }
+    }
 
-        public Typeface GetTypeface()
+    public FontAndColorSetting(
+        FontFamily fontFamily,
+        double fontSize,
+        Brush foreground = null,
+        Brush background = null,
+        FontWeight? fontWeight = null,
+        FontStyle? fontStyle = null,
+        FontStretch? fontStretch = null)
+    {
+        if (fontFamily == null)
         {
-            if (typeface == null)
-            {
-                typeface = new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch);
-            }
-
-            return typeface;
+            throw new ArgumentNullException("fontFamily");
         }
 
-        public FontFamily FontFamily
+        if (fontSize < 0.0)
         {
-            get { return hasFontFamily ? fontFamily : baseSetting.fontFamily; }
+            throw new ArgumentOutOfRangeException("fontSize");
         }
 
-        public double FontSize
+        this.fontFamily = fontFamily;
+        this.fontSize = fontSize;
+        this.foreground = foreground ?? Brushes.Black;
+        this.background = background ?? Brushes.White;
+        this.fontWeight = fontWeight ?? FontWeights.Normal;
+        this.fontStyle = fontStyle ?? FontStyles.Normal;
+        this.fontStretch = fontStretch ?? FontStretches.Normal;
+
+        this.hasFontFamily = true;
+        this.hasFontSize = true;
+        this.hasForeground = true;
+        this.hasBackground = true;
+        this.hasFontWeight = true;
+        this.hasFontStyle = true;
+        this.hasFontStretch = true;
+    }
+
+    public Typeface GetTypeface()
+    {
+        if (typeface == null)
         {
-            get { return hasFontSize ? fontSize : baseSetting.fontSize; }
+            typeface = new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch);
         }
 
-        public Brush Foreground
-        {
-            get { return hasForeground ? foreground : baseSetting.foreground; }
-        }
+        return typeface;
+    }
 
-        public Brush Background
-        {
-            get { return hasBackground ? background : baseSetting.background; }
-        }
+    public FontFamily FontFamily
+    {
+        get { return hasFontFamily ? fontFamily : baseSetting.fontFamily; }
+    }
 
-        public FontWeight FontWeight
-        {
-            get { return hasFontWeight ? fontWeight : baseSetting.fontWeight; }
-        }
+    public double FontSize
+    {
+        get { return hasFontSize ? fontSize : baseSetting.fontSize; }
+    }
 
-        public FontStyle FontStyle
-        {
-            get { return hasFontStyle ? fontStyle : baseSetting.fontStyle; }
-        }
+    public Brush Foreground
+    {
+        get { return hasForeground ? foreground : baseSetting.foreground; }
+    }
 
-        public FontStretch FontStretch
-        {
-            get { return hasFontStretch ? fontStretch : baseSetting.fontStretch; }
-        }
+    public Brush Background
+    {
+        get { return hasBackground ? background : baseSetting.background; }
+    }
+
+    public FontWeight FontWeight
+    {
+        get { return hasFontWeight ? fontWeight : baseSetting.fontWeight; }
+    }
+
+    public FontStyle FontStyle
+    {
+        get { return hasFontStyle ? fontStyle : baseSetting.fontStyle; }
+    }
+
+    public FontStretch FontStretch
+    {
+        get { return hasFontStretch ? fontStretch : baseSetting.fontStretch; }
     }
 }

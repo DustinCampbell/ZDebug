@@ -2,71 +2,70 @@
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class RandomGenerator : OpcodeGenerator
 {
-    internal class RandomGenerator : OpcodeGenerator
+    private readonly Operand rangeOp;
+    private readonly Variable store;
+
+    public RandomGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand rangeOp;
-        private readonly Variable store;
+        this.rangeOp = instruction.Operands[0];
+        this.store = instruction.StoreVariable;
+    }
 
-        public RandomGenerator(Instruction instruction)
-            : base(instruction)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        using (var range = il.NewLocal<short>())
+        using (var result = il.NewLocal<ushort>())
         {
-            this.rangeOp = instruction.Operands[0];
-            this.store = instruction.StoreVariable;
-        }
+            var seed = il.NewLabel();
+            var done = il.NewLabel();
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            using (var range = il.NewLocal<short>())
-            using (var result = il.NewLocal<ushort>())
+            if (!ReuseFirstOperand)
             {
-                var seed = il.NewLabel();
-                var done = il.NewLabel();
-
-                if (!ReuseFirstOperand)
-                {
-                    compiler.EmitLoadOperand(rangeOp);
-                }
-
-                il.Convert.ToInt16();
-                range.Store();
-
-                range.Load();
-                il.Load(0);
-                seed.BranchIf(Condition.AtMost, @short: true);
-
-                il.Arguments.LoadMachine();
-                range.Load();
-                il.Call(Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false));
-
-                done.Branch(@short: true);
-
-                seed.Mark();
-
-                il.Arguments.LoadMachine();
-                range.Load();
-                il.Call(Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false));
-
-                il.Load(0);
-
-                done.Mark();
-
-                il.Convert.ToUInt16();
-
-                result.Store();
-                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
+                compiler.EmitLoadOperand(rangeOp);
             }
-        }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+            il.Convert.ToInt16();
+            range.Store();
 
-        public override bool CanReuseStoreVariable
-        {
-            get { return true; }
+            range.Load();
+            il.Load(0);
+            seed.BranchIf(Condition.AtMost, @short: true);
+
+            il.Arguments.LoadMachine();
+            range.Load();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("NextRandom", Types.Array<short>(), @public: false));
+
+            done.Branch(@short: true);
+
+            seed.Mark();
+
+            il.Arguments.LoadMachine();
+            range.Load();
+            il.Call(Reflection<CompiledZMachine>.GetMethod("SeedRandom", Types.Array<short>(), @public: false));
+
+            il.Load(0);
+
+            done.Mark();
+
+            il.Convert.ToUInt16();
+
+            result.Store();
+            compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
         }
+    }
+
+    public override bool CanReuseFirstOperand
+    {
+        get { return true; }
+    }
+
+    public override bool CanReuseStoreVariable
+    {
+        get { return true; }
     }
 }

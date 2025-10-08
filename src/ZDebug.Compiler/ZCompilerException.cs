@@ -1,22 +1,21 @@
 ﻿using System;
 
-namespace ZDebug.Compiler
+namespace ZDebug.Compiler;
+
+public class ZCompilerException : Exception
 {
-    public class ZCompilerException : Exception
+    public ZCompilerException()
+        : base()
     {
-        public ZCompilerException()
-            : base()
-        {
-        }
+    }
 
-        public ZCompilerException(string message)
-            : base(message)
-        {
-        }
+    public ZCompilerException(string message)
+        : base(message)
+    {
+    }
 
-        public ZCompilerException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+    public ZCompilerException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

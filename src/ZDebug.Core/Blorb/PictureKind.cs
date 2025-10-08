@@ -1,9 +1,8 @@
-﻿namespace ZDebug.Core.Blorb
+﻿namespace ZDebug.Core.Blorb;
+
+public enum PictureKind
 {
-    public enum PictureKind
-    {
-        Unknown,
-        Jpeg,
-        Png
-    }
+    Unknown,
+    Jpeg,
+    Png
 }

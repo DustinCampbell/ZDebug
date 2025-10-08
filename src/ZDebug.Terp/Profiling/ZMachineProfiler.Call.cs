@@ -4,136 +4,135 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 
-namespace ZDebug.Terp.Profiling
+namespace ZDebug.Terp.Profiling;
+
+public partial class ZMachineProfiler
 {
-    public partial class ZMachineProfiler
+    private sealed class Call : ICall
     {
-        private sealed class Call : ICall
+        private readonly ZMachineProfiler profiler;
+        private readonly Routine routine;
+        private readonly int index;
+        private readonly int parentIndex;
+        private readonly bool recursive;
+        private List<int> childIndexes;
+        private ReadOnlyCollection<ICall> children;
+
+        private Stopwatch stopwatch;
+        private TimeSpan inclusiveTime;
+        private TimeSpan exclusiveTime;
+
+        public Call(ZMachineProfiler profiler, Routine routine, int index, int parentIndex, bool recursive)
         {
-            private readonly ZMachineProfiler profiler;
-            private readonly Routine routine;
-            private readonly int index;
-            private readonly int parentIndex;
-            private readonly bool recursive;
-            private List<int> childIndexes;
-            private ReadOnlyCollection<ICall> children;
+            this.profiler = profiler;
+            this.routine = routine;
+            this.index = index;
+            this.parentIndex = parentIndex;
+            this.recursive = recursive;
+            this.childIndexes = new List<int>();
 
-            private Stopwatch stopwatch;
-            private TimeSpan inclusiveTime;
-            private TimeSpan exclusiveTime;
+            routine.AddCall(index);
 
-            public Call(ZMachineProfiler profiler, Routine routine, int index, int parentIndex, bool recursive)
+            if (parentIndex >= 0)
             {
-                this.profiler = profiler;
-                this.routine = routine;
-                this.index = index;
-                this.parentIndex = parentIndex;
-                this.recursive = recursive;
-                this.childIndexes = new List<int>();
-
-                routine.AddCall(index);
-
-                if (parentIndex >= 0)
-                {
-                    profiler.GetCallByIndex(parentIndex).childIndexes.Add(index);
-                }
+                profiler.GetCallByIndex(parentIndex).childIndexes.Add(index);
             }
+        }
 
-            public void Enter()
+        public void Enter()
+        {
+            stopwatch = Stopwatch.StartNew();
+        }
+
+        public void Exit()
+        {
+            stopwatch.Stop();
+
+            var childList = childIndexes.ConvertAll(i => (ICall)profiler.GetCallByIndex(i));
+            childList.TrimExcess();
+            childList.Sort((c1, c2) => c1.InclusiveTime.CompareTo(c2.InclusiveTime));
+            childList.Reverse();
+            children = new ReadOnlyCollection<ICall>(childList);
+            childIndexes = null;
+
+            inclusiveTime = stopwatch.Elapsed;
+            exclusiveTime = inclusiveTime - (children.Aggregate(TimeSpan.Zero, (r, c) => r + c.InclusiveTime));
+            stopwatch = null;
+        }
+
+        public IRoutine Routine
+        {
+            get
             {
-                stopwatch = Stopwatch.StartNew();
+                return routine;
             }
+        }
 
-            public void Exit()
+        public int Index
+        {
+            get
             {
-                stopwatch.Stop();
-
-                var childList = childIndexes.ConvertAll(i => (ICall)profiler.GetCallByIndex(i));
-                childList.TrimExcess();
-                childList.Sort((c1, c2) => c1.InclusiveTime.CompareTo(c2.InclusiveTime));
-                childList.Reverse();
-                children = new ReadOnlyCollection<ICall>(childList);
-                childIndexes = null;
-
-                inclusiveTime = stopwatch.Elapsed;
-                exclusiveTime = inclusiveTime - (children.Aggregate(TimeSpan.Zero, (r, c) => r + c.InclusiveTime));
-                stopwatch = null;
+                return index;
             }
+        }
 
-            public IRoutine Routine
+        public ICall Parent
+        {
+            get
             {
-                get
-                {
-                    return routine;
-                }
+                return parentIndex >= 0
+                    ? profiler.GetCallByIndex(parentIndex)
+                    : null;
             }
+        }
 
-            public int Index
+        public ReadOnlyCollection<ICall> Children
+        {
+            get
             {
-                get
-                {
-                    return index;
-                }
+                return children;
             }
+        }
 
-            public ICall Parent
+        public TimeSpan InclusiveTime
+        {
+            get
             {
-                get
-                {
-                    return parentIndex >= 0
-                        ? profiler.GetCallByIndex(parentIndex)
-                        : null;
-                }
+                return inclusiveTime;
             }
+        }
 
-            public ReadOnlyCollection<ICall> Children
+        public TimeSpan ExclusiveTime
+        {
+            get
             {
-                get
-                {
-                    return children;
-                }
+                return exclusiveTime;
             }
+        }
 
-            public TimeSpan InclusiveTime
+        public double InclusivePercentage
+        {
+            get
             {
-                get
-                {
-                    return inclusiveTime;
-                }
+                return parentIndex >= 0
+                    ? ((double)inclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100
+                    : 100.0;
             }
+        }
 
-            public TimeSpan ExclusiveTime
+        public double ExclusivePercentage
+        {
+            get
             {
-                get
-                {
-                    return exclusiveTime;
-                }
+                return ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
             }
+        }
 
-            public double InclusivePercentage
+        public bool Recursive
+        {
+            get
             {
-                get
-                {
-                    return parentIndex >= 0
-                        ? ((double)inclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100
-                        : 100.0;
-                }
-            }
-
-            public double ExclusivePercentage
-            {
-                get
-                {
-                    return ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
-                }
-            }
-
-            public bool Recursive
-            {
-                get
-                {
-                    return recursive;
-                }
+                return recursive;
             }
         }
     }

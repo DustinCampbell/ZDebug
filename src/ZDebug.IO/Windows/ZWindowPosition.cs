@@ -1,10 +1,9 @@
-﻿namespace ZDebug.IO.Windows
+﻿namespace ZDebug.IO.Windows;
+
+public enum ZWindowPosition
 {
-    public enum ZWindowPosition
-    {
-        Left,
-        Right,
-        Above,
-        Below
-    }
+    Left,
+    Right,
+    Above,
+    Below
 }

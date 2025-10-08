@@ -2,44 +2,43 @@
 using System.Composition;
 using ZDebug.UI.Services;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+[Export, Shared]
+public sealed class GameScriptDialogViewModel : DialogViewModelBase
 {
-    [Export, Shared]
-    public sealed class GameScriptDialogViewModel : DialogViewModelBase
+    private readonly GameScriptService gameScriptService;
+
+    private string commands;
+
+    [ImportingConstructor]
+    public GameScriptDialogViewModel(
+        GameScriptService gameScriptService)
+        : base("GameScriptDialogView")
     {
-        private readonly GameScriptService gameScriptService;
+        this.gameScriptService = gameScriptService;
+        this.gameScriptService.Reset += GameScriptService_Reset;
 
-        private string commands;
+        commands = string.Join("\r\n", gameScriptService.Commands);
+    }
 
-        [ImportingConstructor]
-        public GameScriptDialogViewModel(
-            GameScriptService gameScriptService)
-            : base("GameScriptDialogView")
+    private void GameScriptService_Reset(object sender, ResetEventArgs e)
+    {
+        commands = string.Join("\r\n", gameScriptService.Commands);
+    }
+
+    protected override void OnDialogShown(bool? result)
+    {
+        if (result == true)
         {
-            this.gameScriptService = gameScriptService;
-            this.gameScriptService.Reset += GameScriptService_Reset;
-
-            commands = string.Join("\r\n", gameScriptService.Commands);
+            this.gameScriptService.SetCommands(
+                commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
         }
+    }
 
-        private void GameScriptService_Reset(object sender, ResetEventArgs e)
-        {
-            commands = string.Join("\r\n", gameScriptService.Commands);
-        }
-
-        protected override void OnDialogShown(bool? result)
-        {
-            if (result == true)
-            {
-                this.gameScriptService.SetCommands(
-                    commands.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
-            }
-        }
-
-        public string Commands
-        {
-            get { return commands; }
-            set { commands = value; }
-        }
+    public string Commands
+    {
+        get { return commands; }
+        set { commands = value; }
     }
 }

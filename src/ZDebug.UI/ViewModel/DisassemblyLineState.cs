@@ -1,10 +1,9 @@
-﻿namespace ZDebug.UI.ViewModel
+﻿namespace ZDebug.UI.ViewModel;
+
+public enum DisassemblyLineState
 {
-    public enum DisassemblyLineState
-    {
-        None,
-        Paused,
-        Stopped,
-        Blocked
-    }
+    None,
+    Paused,
+    Stopped,
+    Blocked
 }

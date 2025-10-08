@@ -1,9 +1,8 @@
-﻿namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions;
+
+public enum BranchKind
 {
-    public enum BranchKind
-    {
-        RFalse,
-        RTrue,
-        Address
-    }
+    RFalse,
+    RTrue,
+    Address
 }

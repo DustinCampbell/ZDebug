@@ -1,78 +1,77 @@
 ﻿
-namespace ZDebug.Core.Instructions
+namespace ZDebug.Core.Instructions;
+
+public sealed class Variable
 {
-    public sealed class Variable
+    public readonly VariableKind Kind;
+    public readonly byte Index;
+
+    public static readonly Variable Stack;
+    private static readonly Variable[] locals;
+    private static readonly Variable[] globals;
+
+    static Variable()
     {
-        public readonly VariableKind Kind;
-        public readonly byte Index;
+        Stack = new Variable(VariableKind.Stack, 0);
 
-        public static readonly Variable Stack;
-        private static readonly Variable[] locals;
-        private static readonly Variable[] globals;
-
-        static Variable()
+        locals = new Variable[15];
+        for (byte i = 0; i < 15; i++)
         {
-            Stack = new Variable(VariableKind.Stack, 0);
-
-            locals = new Variable[15];
-            for (byte i = 0; i < 15; i++)
-            {
-                locals[i] = new Variable(VariableKind.Local, i);
-            }
-
-            globals = new Variable[240];
-            for (byte i = 0; i < 240; i++)
-            {
-                globals[i] = new Variable(VariableKind.Global, i);
-            }
+            locals[i] = new Variable(VariableKind.Local, i);
         }
 
-        private Variable(VariableKind kind, byte index)
+        globals = new Variable[240];
+        for (byte i = 0; i < 240; i++)
         {
-            this.Kind = kind;
-            this.Index = index;
+            globals[i] = new Variable(VariableKind.Global, i);
         }
+    }
 
-        public byte ToByte()
+    private Variable(VariableKind kind, byte index)
+    {
+        this.Kind = kind;
+        this.Index = index;
+    }
+
+    public byte ToByte()
+    {
+        switch (Kind)
         {
-            switch (Kind)
-            {
-                case VariableKind.Stack:
-                    return 0;
-                case VariableKind.Local:
-                    return (byte)(Index + 0x01);
-                default: // VariableKind.Global
-                    return (byte)(Index + 0x10);
-            }
+            case VariableKind.Stack:
+                return 0;
+            case VariableKind.Local:
+                return (byte)(Index + 0x01);
+            default: // VariableKind.Global
+                return (byte)(Index + 0x10);
         }
+    }
 
-        public override string ToString()
+    public override string ToString()
+    {
+        switch (Kind)
         {
-            switch (Kind)
-            {
-                case VariableKind.Stack:
-                    return "SP";
-                case VariableKind.Local:
-                    return "L" + Index.ToString("x2");
-                default: // VariableKind.Global:
-                    return "G" + Index.ToString("x2");
-            }
+            case VariableKind.Stack:
+                return "SP";
+            case VariableKind.Local:
+                return "L" + Index.ToString("x2");
+            default: // VariableKind.Global:
+                return "G" + Index.ToString("x2");
         }
+    }
 
-        public static Variable FromByte(byte b)
+    public static Variable FromByte(byte b)
+    {
+        if (b == 0x00)
         {
-            if (b == 0x00)
-            {
-                return Variable.Stack;
-            }
-            else if (b >= 0x01 && b <= 0x0f)
-            {
-                return Variable.locals[b - 0x01];
-            }
-            else // b >= 0x10 && b <= 0xff
-            {
-                return Variable.globals[b - 0x10];
-            }
+            return Variable.Stack;
+        }
+        else if (b >= 0x01 && b <= 0x0f)
+        {
+            return Variable.locals[b - 0x01];
+        }
+        else // b >= 0x10 && b <= 0xff
+        {
+            return Variable.globals[b - 0x10];
         }
     }
 }

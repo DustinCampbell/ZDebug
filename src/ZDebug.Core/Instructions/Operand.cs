@@ -1,72 +1,71 @@
 ﻿
-namespace ZDebug.Core.Instructions
+namespace ZDebug.Core.Instructions;
+
+public struct Operand
 {
-    public struct Operand
+    public readonly OperandKind Kind;
+    public readonly ushort Value;
+
+    public Operand(OperandKind kind, ushort value)
     {
-        public readonly OperandKind Kind;
-        public readonly ushort Value;
+        this.Kind = kind;
+        this.Value = value;
+    }
 
-        public Operand(OperandKind kind, ushort value)
+    public bool IsConstant
+    {
+        get
         {
-            this.Kind = kind;
-            this.Value = value;
+            return Kind == OperandKind.LargeConstant
+                || Kind == OperandKind.SmallConstant;
         }
+    }
 
-        public bool IsConstant
+    public bool IsVariable
+    {
+        get
         {
-            get
-            {
-                return Kind == OperandKind.LargeConstant
-                    || Kind == OperandKind.SmallConstant;
-            }
+            return Kind == OperandKind.Variable;
         }
+    }
 
-        public bool IsVariable
+    public bool IsStackVariable
+    {
+        get
         {
-            get
-            {
-                return Kind == OperandKind.Variable;
-            }
+            return Kind == OperandKind.Variable
+                && Value == 0;
         }
+    }
 
-        public bool IsStackVariable
+    public bool IsLocalVariable
+    {
+        get
         {
-            get
-            {
-                return Kind == OperandKind.Variable
-                    && Value == 0;
-            }
+            return Kind == OperandKind.Variable
+                && Value >= 1 && Value <= 15;
         }
+    }
 
-        public bool IsLocalVariable
+    public bool IsGlobalVariable
+    {
+        get
         {
-            get
-            {
-                return Kind == OperandKind.Variable
-                    && Value >= 1 && Value <= 15;
-            }
+            return Kind == OperandKind.Variable
+                && Value >= 16;
         }
+    }
 
-        public bool IsGlobalVariable
+    public override string ToString()
+    {
+        switch (Kind)
         {
-            get
-            {
-                return Kind == OperandKind.Variable
-                    && Value >= 16;
-            }
-        }
-
-        public override string ToString()
-        {
-            switch (Kind)
-            {
-                case OperandKind.LargeConstant:
-                    return "#" + Value.ToString("x4");
-                case OperandKind.SmallConstant:
-                    return "#" + Value.ToString("x2");
-                default: // OperandKind.Variable
-                    return Variable.FromByte((byte)Value).ToString();
-            }
+            case OperandKind.LargeConstant:
+                return "#" + Value.ToString("x4");
+            case OperandKind.SmallConstant:
+                return "#" + Value.ToString("x2");
+            default: // OperandKind.Variable
+                return Variable.FromByte((byte)Value).ToString();
         }
     }
 }

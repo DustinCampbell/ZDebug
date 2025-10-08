@@ -3,209 +3,208 @@ using System.Diagnostics;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 
-namespace ZDebug.Compiler.Analysis.ControlFlow
+namespace ZDebug.Compiler.Analysis.ControlFlow;
+
+internal partial class ControlFlowGraph
 {
-    internal partial class ControlFlowGraph
+    private readonly ZRoutine routine;
+
+    private readonly List<CodeBlock> codeBlocks;
+    private readonly Block entry;
+    private readonly Block exit;
+
+    private int instructionCount;
+
+    private ControlFlowGraph(ZRoutine routine)
     {
-        private readonly ZRoutine routine;
+        this.routine = routine;
 
-        private readonly List<CodeBlock> codeBlocks;
-        private readonly Block entry;
-        private readonly Block exit;
+        this.entry = new Block(isEntry: true);
+        this.exit = new Block(isExit: true);
 
-        private int instructionCount;
+        var instructions = new InstructionLinkedList(routine);
+        this.codeBlocks = new List<CodeBlock>(BuildGraph(instructions));
+    }
 
-        private ControlFlowGraph(ZRoutine routine)
+    private List<CodeBlock> BuildGraph(InstructionLinkedList instructions)
+    {
+        var jumpTargets = CollectJumpTargets(instructions);
+
+        var results = new List<CodeBlock>(jumpTargets.Count);
+        var codeBlocks = new Dictionary<int, CodeBlock>(jumpTargets.Count);
+
+        foreach (var jumpTarget in jumpTargets)
         {
-            this.routine = routine;
-
-            this.entry = new Block(isEntry: true);
-            this.exit = new Block(isExit: true);
-
-            var instructions = new InstructionLinkedList(routine);
-            this.codeBlocks = new List<CodeBlock>(BuildGraph(instructions));
+            var codeBlock = new CodeBlock(jumpTarget);
+            results.Add(codeBlock);
+            codeBlocks.Add(jumpTarget, codeBlock);
         }
 
-        private List<CodeBlock> BuildGraph(InstructionLinkedList instructions)
+        var node = instructions.First;
+        var currentBlock = codeBlocks[node.Value.Address];
+        this.entry.AddJumpTarget(currentBlock);
+
+        while (node != null)
         {
-            var jumpTargets = CollectJumpTargets(instructions);
+            var instruction = node.Value;
 
-            var results = new List<CodeBlock>(jumpTargets.Count);
-            var codeBlocks = new Dictionary<int, CodeBlock>(jumpTargets.Count);
-
-            foreach (var jumpTarget in jumpTargets)
+            if (codeBlocks.ContainsKey(instruction.Address))
             {
-                var codeBlock = new CodeBlock(jumpTarget);
-                results.Add(codeBlock);
-                codeBlocks.Add(jumpTarget, codeBlock);
+                currentBlock = codeBlocks[instruction.Address];
             }
 
-            var node = instructions.First;
-            var currentBlock = codeBlocks[node.Value.Address];
-            this.entry.AddJumpTarget(currentBlock);
-
-            while (node != null)
+            if (currentBlock != null)
             {
-                var instruction = node.Value;
-
-                if (codeBlocks.ContainsKey(instruction.Address))
-                {
-                    currentBlock = codeBlocks[instruction.Address];
-                }
-
-                if (currentBlock != null)
-                {
-                    currentBlock.AddInstruction(instruction);
-                    instructionCount++;
-
-                    if (instruction.HasBranch)
-                    {
-                        // conditional branch
-                        switch (instruction.Branch.Kind)
-                        {
-                            case BranchKind.Address:
-                                var address = instruction.Address + instruction.Length + instruction.Branch.Offset - 2;
-                                var blockAtAddress = codeBlocks[address];
-                                currentBlock.AddJumpTarget(blockAtAddress);
-                                break;
-
-                            case BranchKind.RFalse:
-                            case BranchKind.RTrue:
-                                currentBlock.AddJumpTarget(exit);
-                                break;
-                        }
-
-                        // add "else" portion of conditional (i.e. the next instruction).
-                        if (node.Next != null)
-                        {
-                            var blockAtAddres = codeBlocks[node.Next.Value.Address];
-                            currentBlock.AddJumpTarget(blockAtAddres);
-                        }
-
-                        // done with this block
-                        currentBlock = null;
-                    }
-                    else if (instruction.Opcode.IsJump)
-                    {
-                        // unconditional jump
-                        var address = instruction.Address + instruction.Length + (short)instruction.Operands[0].Value - 2;
-                        var blockAtAddress = codeBlocks[address];
-                        currentBlock.AddJumpTarget(blockAtAddress);
-
-                        // done with this block
-                        currentBlock = null;
-                    }
-                    else if (instruction.Opcode.IsReturn || instruction.Opcode.IsQuit)
-                    {
-                        currentBlock.AddJumpTarget(exit);
-
-                        // done with this block
-                        currentBlock = null;
-                    }
-                }
-                else
-                {
-                    Debug.WriteLine("Unreachable code encountered at: " + instruction);
-                }
-
-                node = node.Next;
-            }
-
-            return results;
-        }
-
-        private SortedSet<int> CollectJumpTargets(InstructionLinkedList instructions)
-        {
-            var results = new SortedSet<int>();
-            var node = instructions.First;
-
-            // the first instruction is a jump target of the entry block.
-            results.Add(node.Value.Address);
-
-            while (node != null)
-            {
-                var instruction = node.Value;
+                currentBlock.AddInstruction(instruction);
+                instructionCount++;
 
                 if (instruction.HasBranch)
                 {
                     // conditional branch
-                    if (instruction.Branch.Kind == BranchKind.Address)
+                    switch (instruction.Branch.Kind)
                     {
-                        var address = instruction.Address + instruction.Length + instruction.Branch.Offset - 2;
-                        results.Add(address);
+                        case BranchKind.Address:
+                            var address = instruction.Address + instruction.Length + instruction.Branch.Offset - 2;
+                            var blockAtAddress = codeBlocks[address];
+                            currentBlock.AddJumpTarget(blockAtAddress);
+                            break;
+
+                        case BranchKind.RFalse:
+                        case BranchKind.RTrue:
+                            currentBlock.AddJumpTarget(exit);
+                            break;
                     }
 
                     // add "else" portion of conditional (i.e. the next instruction).
                     if (node.Next != null)
                     {
-                        results.Add(node.Next.Value.Address);
+                        var blockAtAddres = codeBlocks[node.Next.Value.Address];
+                        currentBlock.AddJumpTarget(blockAtAddres);
                     }
+
+                    // done with this block
+                    currentBlock = null;
                 }
-                else if (node.Value.Opcode.IsJump)
+                else if (instruction.Opcode.IsJump)
                 {
                     // unconditional jump
                     var address = instruction.Address + instruction.Length + (short)instruction.Operands[0].Value - 2;
+                    var blockAtAddress = codeBlocks[address];
+                    currentBlock.AddJumpTarget(blockAtAddress);
+
+                    // done with this block
+                    currentBlock = null;
+                }
+                else if (instruction.Opcode.IsReturn || instruction.Opcode.IsQuit)
+                {
+                    currentBlock.AddJumpTarget(exit);
+
+                    // done with this block
+                    currentBlock = null;
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Unreachable code encountered at: " + instruction);
+            }
+
+            node = node.Next;
+        }
+
+        return results;
+    }
+
+    private SortedSet<int> CollectJumpTargets(InstructionLinkedList instructions)
+    {
+        var results = new SortedSet<int>();
+        var node = instructions.First;
+
+        // the first instruction is a jump target of the entry block.
+        results.Add(node.Value.Address);
+
+        while (node != null)
+        {
+            var instruction = node.Value;
+
+            if (instruction.HasBranch)
+            {
+                // conditional branch
+                if (instruction.Branch.Kind == BranchKind.Address)
+                {
+                    var address = instruction.Address + instruction.Length + instruction.Branch.Offset - 2;
                     results.Add(address);
                 }
 
-                node = node.Next;
-            }
-
-            return results;
-        }
-
-        public Block Entry
-        {
-            get
-            {
-                return entry;
-            }
-        }
-
-        public Block Exit
-        {
-            get
-            {
-                return exit;
-            }
-        }
-
-        public IEnumerable<CodeBlock> CodeBlocks
-        {
-            get
-            {
-                foreach (var codeBlock in this.codeBlocks)
+                // add "else" portion of conditional (i.e. the next instruction).
+                if (node.Next != null)
                 {
-                    yield return codeBlock;
+                    results.Add(node.Next.Value.Address);
+                }
+            }
+            else if (node.Value.Opcode.IsJump)
+            {
+                // unconditional jump
+                var address = instruction.Address + instruction.Length + (short)instruction.Operands[0].Value - 2;
+                results.Add(address);
+            }
+
+            node = node.Next;
+        }
+
+        return results;
+    }
+
+    public Block Entry
+    {
+        get
+        {
+            return entry;
+        }
+    }
+
+    public Block Exit
+    {
+        get
+        {
+            return exit;
+        }
+    }
+
+    public IEnumerable<CodeBlock> CodeBlocks
+    {
+        get
+        {
+            foreach (var codeBlock in this.codeBlocks)
+            {
+                yield return codeBlock;
+            }
+        }
+    }
+
+    public IEnumerable<Instruction> Instructions
+    {
+        get
+        {
+            foreach (var codeBlock in this.codeBlocks)
+            {
+                foreach (var instruction in codeBlock.Instructions)
+                {
+                    yield return instruction;
                 }
             }
         }
+    }
 
-        public IEnumerable<Instruction> Instructions
+    public int InstructionCount
+    {
+        get
         {
-            get
-            {
-                foreach (var codeBlock in this.codeBlocks)
-                {
-                    foreach (var instruction in codeBlock.Instructions)
-                    {
-                        yield return instruction;
-                    }
-                }
-            }
+            return this.instructionCount;
         }
+    }
 
-        public int InstructionCount
-        {
-            get
-            {
-                return this.instructionCount;
-            }
-        }
-
-        public static ControlFlowGraph Build(ZRoutine routine)
-        {
-            return new ControlFlowGraph(routine);
-        }
+    public static ControlFlowGraph Build(ZRoutine routine)
+    {
+        return new ControlFlowGraph(routine);
     }
 }

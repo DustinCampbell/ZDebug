@@ -1,22 +1,21 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public abstract partial class ZMachine
 {
-    public abstract partial class ZMachine
+    private class NullSoundEngine : ISoundEngine
     {
-        private class NullSoundEngine : ISoundEngine
+        private NullSoundEngine()
         {
-            private NullSoundEngine()
-            {
-            }
-
-            public void HighBeep()
-            {
-            }
-
-            public void LowBeep()
-            {
-            }
-
-            public static readonly ISoundEngine Instance = new NullSoundEngine();
         }
+
+        public void HighBeep()
+        {
+        }
+
+        public void LowBeep()
+        {
+        }
+
+        public static readonly ISoundEngine Instance = new NullSoundEngine();
     }
 }

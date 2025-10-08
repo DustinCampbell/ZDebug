@@ -1,105 +1,104 @@
 ﻿using ZDebug.Core.Text;
 
-namespace ZDebug.Core.Objects
+namespace ZDebug.Core.Objects;
+
+public class ZObject
 {
-    public class ZObject
+    private readonly ZObjectTable objectTable;
+    private readonly ZText ztext;
+    private readonly ushort address;
+    private readonly ushort number;
+
+    internal ZObject(ZObjectTable objectTable, ZText ztext, ushort address, ushort number)
     {
-        private readonly ZObjectTable objectTable;
-        private readonly ZText ztext;
-        private readonly ushort address;
-        private readonly ushort number;
+        this.objectTable = objectTable;
+        this.ztext = ztext;
+        this.address = address;
+        this.number = number;
+    }
 
-        internal ZObject(ZObjectTable objectTable, ZText ztext, ushort address, ushort number)
+    public ushort Address
+    {
+        get { return address; }
+    }
+
+    public ushort Number
+    {
+        get { return number; }
+    }
+
+    public string ShortName
+    {
+        get
         {
-            this.objectTable = objectTable;
-            this.ztext = ztext;
-            this.address = address;
-            this.number = number;
+            var shortNameZWords = PropertyTable.GetShortNameZWords();
+            return ztext.ZWordsAsString(shortNameZWords, ZTextFlags.All);
         }
+    }
 
-        public ushort Address
-        {
-            get { return address; }
-        }
+    private ZObject GetObjectByNumber(int number)
+    {
+        return number > 0
+            ? objectTable.GetByNumber(number)
+            : null;
+    }
 
-        public ushort Number
-        {
-            get { return number; }
-        }
+    public bool HasParent
+    {
+        get { return objectTable.ReadParentNumberByObjectAddress(address) != 0; }
+    }
 
-        public string ShortName
-        {
-            get
-            {
-                var shortNameZWords = PropertyTable.GetShortNameZWords();
-                return ztext.ZWordsAsString(shortNameZWords, ZTextFlags.All);
-            }
-        }
+    public ZObject Parent
+    {
+        get { return GetObjectByNumber(objectTable.ReadParentNumberByObjectAddress(address)); }
+    }
 
-        private ZObject GetObjectByNumber(int number)
-        {
-            return number > 0
-                ? objectTable.GetByNumber(number)
-                : null;
-        }
+    public bool HasSibling
+    {
+        get { return objectTable.ReadSiblingNumberByObjectAddress(address) != 0; }
+    }
 
-        public bool HasParent
-        {
-            get { return objectTable.ReadParentNumberByObjectAddress(address) != 0; }
-        }
+    public ZObject Sibling
+    {
+        get { return GetObjectByNumber(objectTable.ReadSiblingNumberByObjectAddress(address)); }
+    }
 
-        public ZObject Parent
-        {
-            get { return GetObjectByNumber(objectTable.ReadParentNumberByObjectAddress(address)); }
-        }
+    public bool HasChild
+    {
+        get { return objectTable.ReadChildNumberByObjectAddress(address) != 0; }
+    }
 
-        public bool HasSibling
-        {
-            get { return objectTable.ReadSiblingNumberByObjectAddress(address) != 0; }
-        }
+    public ZObject Child
+    {
+        get { return GetObjectByNumber(objectTable.ReadChildNumberByObjectAddress(address)); }
+    }
 
-        public ZObject Sibling
-        {
-            get { return GetObjectByNumber(objectTable.ReadSiblingNumberByObjectAddress(address)); }
-        }
+    public bool HasAttribute(byte attribute)
+    {
+        return objectTable.HasAttributeByObjectAddress(address, attribute);
+    }
 
-        public bool HasChild
-        {
-            get { return objectTable.ReadChildNumberByObjectAddress(address) != 0; }
-        }
+    public void SetAttribute(byte attribute)
+    {
+        objectTable.SetAttributeValueByObjectAddress(address, attribute, true);
+    }
 
-        public ZObject Child
-        {
-            get { return GetObjectByNumber(objectTable.ReadChildNumberByObjectAddress(address)); }
-        }
+    public void ClearAttribute(byte attribute)
+    {
+        objectTable.SetAttributeValueByObjectAddress(address, attribute, false);
+    }
 
-        public bool HasAttribute(byte attribute)
-        {
-            return objectTable.HasAttributeByObjectAddress(address, attribute);
-        }
+    public bool[] GetAllAttributes()
+    {
+        return objectTable.GetAllAttributeByObjectAddress(address);
+    }
 
-        public void SetAttribute(byte attribute)
+    public ZPropertyTable PropertyTable
+    {
+        get
         {
-            objectTable.SetAttributeValueByObjectAddress(address, attribute, true);
-        }
-
-        public void ClearAttribute(byte attribute)
-        {
-            objectTable.SetAttributeValueByObjectAddress(address, attribute, false);
-        }
-
-        public bool[] GetAllAttributes()
-        {
-            return objectTable.GetAllAttributeByObjectAddress(address);
-        }
-
-        public ZPropertyTable PropertyTable
-        {
-            get
-            {
-                return objectTable.GetPropertyTable(
-                    objectTable.ReadPropertyTableAddressByObjectAddress(address));
-            }
+            return objectTable.GetPropertyTable(
+                objectTable.ReadPropertyTableAddressByObjectAddress(address));
         }
     }
 }

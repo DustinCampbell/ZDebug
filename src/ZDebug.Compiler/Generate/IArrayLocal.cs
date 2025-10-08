@@ -1,13 +1,12 @@
-﻿namespace ZDebug.Compiler.Generate
+﻿namespace ZDebug.Compiler.Generate;
+
+public interface IArrayLocal : ILocal
 {
-    public interface IArrayLocal : ILocal
-    {
-        void Create(int length);
-        void Create(ILocal length);
+    void Create(int length);
+    void Create(ILocal length);
 
-        void LoadLength();
+    void LoadLength();
 
-        void LoadElement(CodeBuilder indexLoader);
-        void StoreElement(CodeBuilder indexLoader, CodeBuilder valueLoader);
-    }
+    void LoadElement(CodeBuilder indexLoader);
+    void StoreElement(CodeBuilder indexLoader, CodeBuilder valueLoader);
 }

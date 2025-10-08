@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ZDebug.Compiler.Generate
+namespace ZDebug.Compiler.Generate;
+
+public enum Condition
 {
-    public enum Condition
-    {
-        False,
-        True,
-        Equal,
-        NotEqual,
-        AtLeast,
-        AtMost,
-        LessThan,
-        GreaterThan
-    }
+    False,
+    True,
+    Equal,
+    NotEqual,
+    AtLeast,
+    AtMost,
+    LessThan,
+    GreaterThan
 }

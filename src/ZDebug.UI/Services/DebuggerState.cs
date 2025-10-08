@@ -1,12 +1,11 @@
-﻿namespace ZDebug.UI.Services
+﻿namespace ZDebug.UI.Services;
+
+public enum DebuggerState
 {
-    public enum DebuggerState
-    {
-        Unavailable,
-        Stopped,
-        Running,
-        AwaitingInput,
-        StoppedAtError,
-        Done
-    }
+    Unavailable,
+    Stopped,
+    Running,
+    AwaitingInput,
+    StoppedAtError,
+    Done
 }

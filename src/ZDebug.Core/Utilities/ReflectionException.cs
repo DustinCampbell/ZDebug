@@ -1,22 +1,21 @@
 ﻿using System;
 
-namespace ZDebug.Core.Utilities
+namespace ZDebug.Core.Utilities;
+
+public class ReflectionException : Exception
 {
-    public class ReflectionException : Exception
+    public ReflectionException()
+        : base()
     {
-        public ReflectionException()
-            : base()
-        {
-        }
+    }
 
-        public ReflectionException(string message)
-            : base(message)
-        {
-        }
+    public ReflectionException(string message)
+        : base(message)
+    {
+    }
 
-        public ReflectionException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+    public ReflectionException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

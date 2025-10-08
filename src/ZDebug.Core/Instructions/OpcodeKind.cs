@@ -1,11 +1,10 @@
-﻿namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions;
+
+public enum OpcodeKind
 {
-    public enum OpcodeKind
-    {
-        TwoOp,
-        OneOp,
-        ZeroOp,
-        VarOp,
-        Ext
-    }
+    TwoOp,
+    OneOp,
+    ZeroOp,
+    VarOp,
+    Ext
 }

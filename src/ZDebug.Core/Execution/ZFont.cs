@@ -1,10 +1,9 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public enum ZFont
 {
-    public enum ZFont
-    {
-        Normal = 1,
-        Picture = 2,
-        CharacterGraphics = 3,
-        Fixed = 4
-    }
+    Normal = 1,
+    Picture = 2,
+    CharacterGraphics = 3,
+    Fixed = 4
 }

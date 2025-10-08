@@ -4,143 +4,142 @@ using System.Windows.Controls;
 using ZDebug.Core.Extensions;
 using ZDebug.UI.Services;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+[Export, Shared]
+internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
 {
-    [Export, Shared]
-    internal sealed class LocalsViewModel : ViewModelWithViewBase<UserControl>
+    private readonly StoryService storyService;
+    private readonly DebuggerService debuggerService;
+
+    private readonly IndexedVariableViewModel[] locals;
+
+    private VariableViewModel[] stack;
+    private VariableViewModel[] reversedStack;
+
+    [ImportingConstructor]
+    public LocalsViewModel(
+        StoryService storyService,
+        DebuggerService debuggerService)
+        : base("LocalsView")
     {
-        private readonly StoryService storyService;
-        private readonly DebuggerService debuggerService;
+        this.storyService = storyService;
 
-        private readonly IndexedVariableViewModel[] locals;
+        this.debuggerService = debuggerService;
+        this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
+        this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
+        this.debuggerService.StateChanged += DebuggerService_StateChanged;
+        this.debuggerService.Stepped += DebuggerService_ProcessorStepped;
 
-        private VariableViewModel[] stack;
-        private VariableViewModel[] reversedStack;
+        this.locals = new IndexedVariableViewModel[15];
 
-        [ImportingConstructor]
-        public LocalsViewModel(
-            StoryService storyService,
-            DebuggerService debuggerService)
-            : base("LocalsView")
+        for (int i = 0; i < 15; i++)
         {
-            this.storyService = storyService;
+            this.locals[i] = new IndexedVariableViewModel(i, 0);
+        }
 
-            this.debuggerService = debuggerService;
-            this.debuggerService.MachineCreated += DebuggerService_MachineCreated;
-            this.debuggerService.MachineDestroyed += DebuggerService_MachineDestroyed;
-            this.debuggerService.StateChanged += DebuggerService_StateChanged;
-            this.debuggerService.Stepped += DebuggerService_ProcessorStepped;
+        this.stack = new VariableViewModel[0];
+        this.reversedStack = new VariableViewModel[0];
+    }
 
-            this.locals = new IndexedVariableViewModel[15];
+    private void Update()
+    {
+        if (debuggerService.State != DebuggerState.Running)
+        {
+            var processor = debuggerService.Machine;
 
+            // Update locals...
+            var localCount = processor.LocalCount;
             for (int i = 0; i < 15; i++)
             {
-                this.locals[i] = new IndexedVariableViewModel(i, 0);
+                var local = locals[i];
+
+                var visible = i < localCount;
+                if (visible)
+                {
+                    local.IsModified = local.Value != processor.Locals[i] && local.Visible == visible;
+                    local.Value = processor.Locals[i];
+                }
+
+                local.Visible = visible;
+
+                if (!visible)
+                {
+                    local.IsModified = false;
+                }
             }
 
-            this.stack = new VariableViewModel[0];
-            this.reversedStack = new VariableViewModel[0];
-        }
-
-        private void Update()
-        {
-            if (debuggerService.State != DebuggerState.Running)
+            // Update stack...
+            var stackValues = processor.GetStackValues();
+            Array.Resize(ref stack, stackValues.Length);
+            var numItems = stackValues.Length - 1;
+            for (int i = numItems; i >= 0; i--)
             {
-                var processor = debuggerService.Machine;
-
-                // Update locals...
-                var localCount = processor.LocalCount;
-                for (int i = 0; i < 15; i++)
+                int index = numItems - i;
+                if (stack[index] == null)
                 {
-                    var local = locals[i];
-
-                    var visible = i < localCount;
-                    if (visible)
-                    {
-                        local.IsModified = local.Value != processor.Locals[i] && local.Visible == visible;
-                        local.Value = processor.Locals[i];
-                    }
-
-                    local.Visible = visible;
-
-                    if (!visible)
-                    {
-                        local.IsModified = false;
-                    }
+                    var stackValue = new VariableViewModel(stackValues[i]);
+                    stackValue.IsModified = true;
+                    stack[index] = stackValue;
                 }
-
-                // Update stack...
-                var stackValues = processor.GetStackValues();
-                Array.Resize(ref stack, stackValues.Length);
-                var numItems = stackValues.Length - 1;
-                for (int i = numItems; i >= 0; i--)
+                else
                 {
-                    int index = numItems - i;
-                    if (stack[index] == null)
-                    {
-                        var stackValue = new VariableViewModel(stackValues[i]);
-                        stackValue.IsModified = true;
-                        stack[index] = stackValue;
-                    }
-                    else
-                    {
-                        var stackValue = stack[index];
-                        stackValue.IsModified = stackValue.Value != stackValues[i];
-                        stackValue.Value = stackValues[i];
-                    }
+                    var stackValue = stack[index];
+                    stackValue.IsModified = stackValue.Value != stackValues[i];
+                    stackValue.Value = stackValues[i];
                 }
-
-                reversedStack = stack.Reverse();
-                PropertyChanged("LocalStack");
             }
-        }
 
-        private void DebuggerService_ProcessorStepped(object sender, SteppedEventArgs e)
+            reversedStack = stack.Reverse();
+            PropertyChanged("LocalStack");
+        }
+    }
+
+    private void DebuggerService_ProcessorStepped(object sender, SteppedEventArgs e)
+    {
+        Update();
+    }
+
+    private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+    {
+        // When input is wrapped up, we need to update as if the processor had stepped.
+        if ((e.OldState == DebuggerState.AwaitingInput ||
+            e.OldState == DebuggerState.Running) &&
+            e.NewState != DebuggerState.Unavailable)
         {
             Update();
         }
+    }
 
-        private void DebuggerService_StateChanged(object sender, DebuggerStateChangedEventArgs e)
+    private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
+    {
+        Update();
+
+        PropertyChanged("HasStory");
+    }
+
+    private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
+    {
+        for (int i = 0; i < 15; i++)
         {
-            // When input is wrapped up, we need to update as if the processor had stepped.
-            if ((e.OldState == DebuggerState.AwaitingInput ||
-                e.OldState == DebuggerState.Running) &&
-                e.NewState != DebuggerState.Unavailable)
-            {
-                Update();
-            }
+            locals[i].Visible = false;
         }
 
-        private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
-        {
-            Update();
+        PropertyChanged("HasStory");
+    }
 
-            PropertyChanged("HasStory");
-        }
+    public IndexedVariableViewModel[] Locals
+    {
+        get { return locals; }
+    }
 
-        private void DebuggerService_MachineDestroyed(object sender, MachineDestroyedEventArgs e)
-        {
-            for (int i = 0; i < 15; i++)
-            {
-                locals[i].Visible = false;
-            }
+    public VariableViewModel[] LocalStack
+    {
+        get { return reversedStack; }
+    }
 
-            PropertyChanged("HasStory");
-        }
-
-        public IndexedVariableViewModel[] Locals
-        {
-            get { return locals; }
-        }
-
-        public VariableViewModel[] LocalStack
-        {
-            get { return reversedStack; }
-        }
-
-        public bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
+    public bool HasStory
+    {
+        get { return storyService.IsStoryOpen; }
     }
 }

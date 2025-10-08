@@ -1,10 +1,9 @@
-﻿namespace ZDebug.IO.Windows
+﻿namespace ZDebug.IO.Windows;
+
+public enum ZWindowType
 {
-    public enum ZWindowType
-    {
-        Blank,
-        Pair,
-        TextBuffer,
-        TextGrid
-    }
+    Blank,
+    Pair,
+    TextBuffer,
+    TextGrid
 }

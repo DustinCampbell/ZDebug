@@ -1,89 +1,88 @@
-﻿namespace ZDebug.UI.ViewModel
+﻿namespace ZDebug.UI.ViewModel;
+
+internal abstract partial class DisassemblyLineViewModel : ViewModelBase
 {
-    internal abstract partial class DisassemblyLineViewModel : ViewModelBase
+    private bool hasBreakpoint;
+    private bool hasIP;
+    private bool showBlankBefore;
+    private bool showBlankAfter;
+    private DisassemblyLineState state;
+    private object toolTip;
+
+    public bool HasBreakpoint
     {
-        private bool hasBreakpoint;
-        private bool hasIP;
-        private bool showBlankBefore;
-        private bool showBlankAfter;
-        private DisassemblyLineState state;
-        private object toolTip;
-
-        public bool HasBreakpoint
+        get { return hasBreakpoint; }
+        set
         {
-            get { return hasBreakpoint; }
-            set
+            if (hasBreakpoint != value)
             {
-                if (hasBreakpoint != value)
-                {
-                    hasBreakpoint = value;
-                    PropertyChanged("HasBreakpoint");
-                }
+                hasBreakpoint = value;
+                PropertyChanged("HasBreakpoint");
             }
         }
+    }
 
-        public bool HasIP
+    public bool HasIP
+    {
+        get { return hasIP; }
+        set
         {
-            get { return hasIP; }
-            set
+            if (hasIP != value)
             {
-                if (hasIP != value)
-                {
-                    hasIP = value;
-                    PropertyChanged("HasIP");
-                }
+                hasIP = value;
+                PropertyChanged("HasIP");
             }
         }
+    }
 
-        public DisassemblyLineState State
+    public DisassemblyLineState State
+    {
+        get { return state; }
+        set
         {
-            get { return state; }
-            set
+            if (state != value)
             {
-                if (state != value)
-                {
-                    state = value;
-                    PropertyChanged("State");
-                }
+                state = value;
+                PropertyChanged("State");
             }
         }
+    }
 
-        public object ToolTip
+    public object ToolTip
+    {
+        get { return toolTip; }
+        set
         {
-            get { return toolTip; }
-            set
+            if (toolTip != value)
             {
-                if (toolTip != value)
-                {
-                    toolTip = value;
-                    PropertyChanged("ToolTip");
-                }
+                toolTip = value;
+                PropertyChanged("ToolTip");
             }
         }
+    }
 
-        public bool ShowBlankBefore
+    public bool ShowBlankBefore
+    {
+        get { return showBlankBefore; }
+        set
         {
-            get { return showBlankBefore; }
-            set
+            if (showBlankBefore != value)
             {
-                if (showBlankBefore != value)
-                {
-                    showBlankBefore = value;
-                    PropertyChanged("ShowBlankBefore");
-                }
+                showBlankBefore = value;
+                PropertyChanged("ShowBlankBefore");
             }
         }
+    }
 
-        public bool ShowBlankAfter
+    public bool ShowBlankAfter
+    {
+        get { return showBlankAfter; }
+        set
         {
-            get { return showBlankAfter; }
-            set
+            if (showBlankAfter != value)
             {
-                if (showBlankAfter != value)
-                {
-                    showBlankAfter = value;
-                    PropertyChanged("ShowBlankAfter");
-                }
+                showBlankAfter = value;
+                PropertyChanged("ShowBlankAfter");
             }
         }
     }

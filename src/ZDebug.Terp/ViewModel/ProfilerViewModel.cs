@@ -10,132 +10,131 @@ using ZDebug.Terp.Services;
 using ZDebug.UI.Services;
 using ZDebug.UI.ViewModel;
 
-namespace ZDebug.Terp.ViewModel
+namespace ZDebug.Terp.ViewModel;
+
+[Export, Shared]
+internal sealed class ProfilerViewModel : ViewModelWithViewBase<UserControl>
 {
-    [Export, Shared]
-    internal sealed class ProfilerViewModel : ViewModelWithViewBase<UserControl>
+    private readonly StoryService storyService;
+    private readonly ProfilerService profilerService;
+
+    private List<ICall> callTreeRoot;
+    private IEnumerable<IRoutine> routines;
+    private IEnumerable instructions;
+    private IEnumerable opcodes;
+
+    [ImportingConstructor]
+    public ProfilerViewModel(
+        ProfilerService profilerService,
+        StoryService storyService)
+        : base("ProfilerView")
     {
-        private readonly StoryService storyService;
-        private readonly ProfilerService profilerService;
+        this.profilerService = profilerService;
+        this.storyService = storyService;
 
-        private List<ICall> callTreeRoot;
-        private IEnumerable<IRoutine> routines;
-        private IEnumerable instructions;
-        private IEnumerable opcodes;
+        this.profilerService.Starting += ProfilerService_Starting;
+        this.profilerService.Stopped += ProfilerService_Stopped;
+    }
 
-        [ImportingConstructor]
-        public ProfilerViewModel(
-            ProfilerService profilerService,
-            StoryService storyService)
-            : base("ProfilerView")
+    private void ProfilerService_Starting(object sender, ProfilerStartingEventArgs e)
+    {
+        ClearProfilerData();
+    }
+
+    private void ProfilerService_Stopped(object sender, ProfilerStoppedEventArgs e)
+    {
+        PopulateProfilerData();
+    }
+
+    private void ClearProfilerData()
+    {
+        Dispatch(() =>
         {
-            this.profilerService = profilerService;
-            this.storyService = storyService;
+            callTreeRoot = null;
+            routines = null;
+            instructions = null;
+            opcodes = null;
 
-            this.profilerService.Starting += ProfilerService_Starting;
-            this.profilerService.Stopped += ProfilerService_Stopped;
+            AllPropertiesChanged();
+        });
+    }
+
+    private void PopulateProfilerData()
+    {
+        if (profilerService.Profiler == null)
+        {
+            return;
         }
 
-        private void ProfilerService_Starting(object sender, ProfilerStartingEventArgs e)
+        Dispatch(() =>
         {
-            ClearProfilerData();
-        }
+            callTreeRoot = new List<ICall>() { profilerService.Profiler.RootCall };
+            routines = profilerService.Profiler.Routines;
 
-        private void ProfilerService_Stopped(object sender, ProfilerStoppedEventArgs e)
-        {
-            PopulateProfilerData();
-        }
+            var reader = new InstructionReader(0, storyService.Story.Memory);
 
-        private void ClearProfilerData()
-        {
-            Dispatch(() =>
+            var instructions = profilerService.Profiler.InstructionTimings.Select(timing =>
             {
-                callTreeRoot = null;
-                routines = null;
-                instructions = null;
-                opcodes = null;
-
-                AllPropertiesChanged();
-            });
-        }
-
-        private void PopulateProfilerData()
-        {
-            if (profilerService.Profiler == null)
-            {
-                return;
-            }
-
-            Dispatch(() =>
-            {
-                callTreeRoot = new List<ICall>() { profilerService.Profiler.RootCall };
-                routines = profilerService.Profiler.Routines;
-
-                var reader = new InstructionReader(0, storyService.Story.Memory);
-
-                var instructions = profilerService.Profiler.InstructionTimings.Select(timing =>
+                reader.Address = timing.Item1;
+                var i = reader.NextInstruction();
+                return new
                 {
-                    reader.Address = timing.Item1;
-                    var i = reader.NextInstruction();
-                    return new
-                    {
-                        Instruction = i,
-                        Address = i.Address,
-                        OpcodeName = i.Opcode.Name,
-                        OperandCount = i.OperandCount,
-                        TimesExecuted = timing.Item2.Item1,
-                        TotalTime = timing.Item2.Item2
-                    };
-                });
-
-                this.instructions = instructions.OrderByDescending(x => x.TotalTime).ToList();
-
-                var opcodes = from i in instructions
-                              group i by i.Instruction.Opcode.Name into g
-                              select new
-                              {
-                                  Name = g.Key,
-                                  TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
-                                  Count = g.Sum(x => x.TimesExecuted),
-                                  AverageILSize = profilerService.Profiler.GetAverageOpcodeILSize(g.Key)
-                              };
-
-                this.opcodes = opcodes.OrderByDescending(x => x.TotalTime).ToList();
-
-                AllPropertiesChanged();
+                    Instruction = i,
+                    Address = i.Address,
+                    OpcodeName = i.Opcode.Name,
+                    OperandCount = i.OperandCount,
+                    TimesExecuted = timing.Item2.Item1,
+                    TotalTime = timing.Item2.Item2
+                };
             });
-        }
 
-        public List<ICall> CallTreeRoot
-        {
-            get
-            {
-                return callTreeRoot;
-            }
-        }
+            this.instructions = instructions.OrderByDescending(x => x.TotalTime).ToList();
 
-        public IEnumerable<IRoutine> Routines
-        {
-            get
-            {
-                return routines;
-            }
-        }
+            var opcodes = from i in instructions
+                          group i by i.Instruction.Opcode.Name into g
+                          select new
+                          {
+                              Name = g.Key,
+                              TotalTime = g.Aggregate(TimeSpan.Zero, (r, t) => r + t.TotalTime),
+                              Count = g.Sum(x => x.TimesExecuted),
+                              AverageILSize = profilerService.Profiler.GetAverageOpcodeILSize(g.Key)
+                          };
 
-        public IEnumerable Instructions
-        {
-            get
-            {
-                return instructions;
-            }
-        }
+            this.opcodes = opcodes.OrderByDescending(x => x.TotalTime).ToList();
 
-        public IEnumerable Opcodes
+            AllPropertiesChanged();
+        });
+    }
+
+    public List<ICall> CallTreeRoot
+    {
+        get
         {
-            get
-            {
-                return opcodes;
-            }
+            return callTreeRoot;
+        }
+    }
+
+    public IEnumerable<IRoutine> Routines
+    {
+        get
+        {
+            return routines;
+        }
+    }
+
+    public IEnumerable Instructions
+    {
+        get
+        {
+            return instructions;
+        }
+    }
+
+    public IEnumerable Opcodes
+    {
+        get
+        {
+            return opcodes;
         }
     }
 }

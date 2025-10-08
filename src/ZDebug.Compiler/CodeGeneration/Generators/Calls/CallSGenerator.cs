@@ -1,30 +1,29 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class CallSGenerator : CallGenerator
 {
-    internal class CallSGenerator : CallGenerator
+    private readonly Variable store;
+
+    public CallSGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Variable store;
+        this.store = instruction.StoreVariable;
+    }
 
-        public CallSGenerator(Instruction instruction)
-            : base(instruction)
+    protected override void PostCall(ILBuilder il, ICompiler compiler)
+    {
+        using (var result = il.NewLocal<ushort>())
         {
-            this.store = instruction.StoreVariable;
+            result.Store();
+            compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
         }
+    }
 
-        protected override void PostCall(ILBuilder il, ICompiler compiler)
-        {
-            using (var result = il.NewLocal<ushort>())
-            {
-                result.Store();
-                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
-            }
-        }
-
-        public override bool CanReuseStoreVariable
-        {
-            get { return true; }
-        }
+    public override bool CanReuseStoreVariable
+    {
+        get { return true; }
     }
 }
