@@ -110,7 +110,7 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
     {
         var dictionaryBase = Header.ReadDictionaryAddress(memory);
 
-        var reader = new MemoryReader(memory, dictionaryBase);
+        var reader = new SpanBasedMemoryReader(memory, dictionaryBase);
         var separatorCount = reader.NextByte();
         reader.Skip(separatorCount);
 
@@ -157,7 +157,7 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
         objectTableEnd = objectAddress - 1;
 
         // skip last property table to get end...
-        var reader = new MemoryReader(memory, objectDataEnd);
+        var reader = new SpanBasedMemoryReader(memory, objectDataEnd);
         reader.SkipShortName();
         reader.SkipProperties(version);
 
@@ -184,7 +184,7 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
         var propertyDataRegion = kindToRegionMap[MemoryMapRegionKind.PropertyData];
         var classNumbersBase = propertyDataRegion.End + 1;
 
-        var reader = new MemoryReader(memory, classNumbersBase);
+        var reader = new SpanBasedMemoryReader(memory, classNumbersBase);
 
         while (reader.NextWord() != 0)
             ;

@@ -101,7 +101,7 @@ public sealed class BlorbFile
 
         memory = stream.ReadFully();
 
-        var reader = new MemoryReader(memory, 0);
+        var reader = new SpanBasedMemoryReader(memory, 0);
 
         var dwords = reader.NextDWords(3);
 

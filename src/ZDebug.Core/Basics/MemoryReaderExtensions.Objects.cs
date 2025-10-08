@@ -70,7 +70,13 @@ internal static partial class IMemoryReaderExtensions
         reader.Skip(length * 2);
     }
 
-    public static void SkipProperties(this MemoryReader reader, int version)
+    public static void SkipShortName(this ref SpanBasedMemoryReader reader)
+    {
+        var length = reader.NextByte();
+        reader.Skip(length * 2);
+    }
+
+    public static void SkipProperties(this ref SpanBasedMemoryReader reader, int version)
     {
         while (true)
         {
@@ -81,7 +87,7 @@ internal static partial class IMemoryReaderExtensions
             }
 
             int dataLength;
-            if (version >= 1 && version <= 3)
+            if (version is >= 1 and <= 3)
             {
                 dataLength = (sizeByte / 32) + 1;
             }

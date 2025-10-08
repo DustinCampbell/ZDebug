@@ -55,7 +55,7 @@ internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
 
     private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
     {
-        var reader = new MemoryReader(e.Story.Memory, 0);
+        var reader = new SpanBasedMemoryReader(e.Story.Memory, 0);
 
         lines.BeginBulkOperation();
         try
@@ -69,7 +69,8 @@ internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
                 if (reader.RemainingBytes >= 16 || reader.RemainingBytes % 2 == 0)
                 {
                     var count = Math.Min(8, reader.RemainingBytes / 2);
-                    values = reader.NextWords(count);
+                    values = new ushort[count];
+                    reader.CopyNextWords(count, values);
                 }
                 else
                 {
