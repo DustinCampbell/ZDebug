@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/build/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ZDebug.Compiler/ZDebug.Compiler.csproj" />
+    <Project Path="src/ZDebug.Core/ZDebug.Core.csproj" />
+    <Project Path="src/ZDebug.IO/ZDebug.IO.csproj" />
+    <Project Path="src/ZDebug.PerfHarness/ZDebug.PerfHarness.csproj" />
+    <Project Path="src/ZDebug.Terp/ZDebug.Terp.csproj" />
+    <Project Path="src/ZDebug.UI.Core/ZDebug.UI.Core.csproj" />
+    <Project Path="src/ZDebug.UI/ZDebug.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZDebug.Compiler.Tests/ZDebug.Compiler.Tests.csproj" />
+    <Project Path="tests/ZDebug.Core.Tests/ZDebug.Core.Tests.csproj" />
+  </Folder>
+</Solution>
