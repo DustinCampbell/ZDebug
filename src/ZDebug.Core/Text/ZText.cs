@@ -220,25 +220,16 @@ public sealed class ZText
     }
 
 
-    private string ExpandCommonAbbreviations(string text)
+    private ReadOnlySpan<char> ExpandCommonAbbreviations(ReadOnlySpan<char> text)
     {
         // Some older games don't define these common abbreviations
-        if (text == "g")
+        return text switch
         {
-            return "again";
-        }
-        if (text == "x")
-        {
-            return "examine";
-        }
-        else if (text == "z")
-        {
-            return "wait";
-        }
-        else
-        {
-            return text;
-        }
+            "g" => "again",
+            "x" => "examine",
+            "z" => "wait",
+            _ => text
+        };
     }
 
     private ushort TranslateToZscii(char ch) =>
@@ -246,7 +237,7 @@ public sealed class ZText
 
         (ushort)ch;
 
-    private ushort[] EncodeZText(string text)
+    private ushort[] EncodeZText(ReadOnlySpan<char> text)
     {
         var resolution = version <= 3 ? 2 : 3;
         text = ExpandCommonAbbreviations(text);
@@ -268,14 +259,14 @@ public sealed class ZText
 
                 var setAndIndex = alphabetTable.FindSetAndIndexOfChar(ch);
 
-                if (setAndIndex != null)
+                if (setAndIndex is var (set, index))
                 {
-                    if (setAndIndex.Item1 != 0)
+                    if (set != 0)
                     {
-                        zchars[i++] = (byte)((version <= 2 ? 1 : 3) + setAndIndex.Item1);
+                        zchars[i++] = (byte)((version <= 2 ? 1 : 3) + set);
                     }
 
-                    zchars[i++] = setAndIndex.Item2;
+                    zchars[i++] = index;
                 }
                 else
                 {
@@ -471,12 +462,14 @@ public sealed class ZText
     {
         var resolution = version <= 3 ? 2 : 3;
 
-        if (word.Length > resolution * 3)
+        var wordSpan = word.AsSpan();
+
+        if (wordSpan.Length > resolution * 3)
         {
-            word = word.Substring(0, resolution * 3);
+            wordSpan = wordSpan.Slice(0, resolution * 3);
         }
 
-        var encoded = EncodeZText(word);
+        var encoded = EncodeZText(wordSpan);
 
         var wordSepCount = memory.ReadByte(ref dictionaryAddress);
         dictionaryAddress += wordSepCount;

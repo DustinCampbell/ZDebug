@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Buffers.Binary;
 using ZDebug.Core.Utilities;
 
 namespace ZDebug.Core.Extensions;
 
 public static class ByteArrayExtensions
 {
-    public static byte ReadByte(this byte[] array, int index) => array[index];
+    public static byte ReadByte(this byte[] array, int index)
+        => array[index];
 
-    public static byte ReadByte(this byte[] array, ref int index) => array[index++];
+    public static byte ReadByte(this byte[] array, ref int index)
+        => array[index++];
 
     public static byte[] ReadBytes(this byte[] array, int index, int length)
     {
@@ -24,20 +27,26 @@ public static class ByteArrayExtensions
         return result;
     }
 
-    public static ushort ReadWord(this byte[] bytes, int index) => (ushort)((bytes[index] << 8) | bytes[index + 1]);
+    public static ushort ReadWord(this byte[] array, int index)
+        => BinaryPrimitives.ReadUInt16BigEndian(array.AsSpan(index));
 
-    public static ushort ReadWord(this byte[] array, ref int index) => (ushort)((array[index++] << 8) | array[index++]);
+    public static ushort ReadWord(this byte[] array, ref int index)
+    {
+        var result = BinaryPrimitives.ReadUInt16BigEndian(array.AsSpan(index));
+        index += 2;
+
+        return result;
+    }
 
     public static ushort[] ReadWords(this byte[] array, int index, int length)
     {
+        var span = array.AsSpan(index);
         var result = new ushort[length];
 
         for (var i = 0; i < length; i++)
         {
-            var b1 = array[index + (i * 2)];
-            var b2 = array[index + (i * 2) + 1];
-
-            result[i] = (ushort)((b1 << 8) | b2);
+            result[i] = BinaryPrimitives.ReadUInt16BigEndian(span);
+            span = span.Slice(2);
         }
 
         return result;
@@ -45,15 +54,16 @@ public static class ByteArrayExtensions
 
     public static ushort[] ReadWords(this byte[] array, ref int index, int length)
     {
+        var span = array.AsSpan(index);
         var result = new ushort[length];
 
         for (var i = 0; i < length; i++)
         {
-            var b1 = array[index++];
-            var b2 = array[index++];
-
-            result[i] = (ushort)((b1 << 8) | b2);
+            result[i] = BinaryPrimitives.ReadUInt16BigEndian(span);
+            span = span.Slice(2);
         }
+
+        index += length * 2;
 
         return result;
     }

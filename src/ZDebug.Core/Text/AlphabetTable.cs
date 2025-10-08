@@ -106,7 +106,7 @@ internal sealed class AlphabetTable
 
     public int CurrentAlphabet => currentAlphabet;
 
-    public Tuple<byte, byte> FindSetAndIndexOfChar(char ch)
+    public (byte set, byte index)? FindSetAndIndexOfChar(char ch)
     {
         for (byte set = 0; set < 3; set++)
         {
@@ -114,7 +114,7 @@ internal sealed class AlphabetTable
             {
                 if (alphabets[set][index] == ch)
                 {
-                    return Tuple.Create(set, index);
+                    return (set, index);
                 }
             }
         }
