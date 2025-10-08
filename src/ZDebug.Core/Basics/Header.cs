@@ -55,14 +55,9 @@ public static class Header
 
     public static int ReadMainRoutineAddress(byte[] memory)
     {
-        if (Header.ReadVersion(memory) == 6)
-        {
-            return Header.UnpackRoutineAddress(memory, Header.ReadInitialPC(memory));
-        }
-        else
-        {
-            return Header.ReadInitialPC(memory) - 1;
-        }
+        return ReadVersion(memory) == 6 
+            ? UnpackRoutineAddress(memory, ReadInitialPC(memory)) 
+            : ReadInitialPC(memory) - 1;
     }
 
     public static ushort ReadDictionaryAddress(byte[] memory)
@@ -100,7 +95,7 @@ public static class Header
 
     public static string ReadSerialNumberText(byte[] memory)
     {
-        return Header.ReadAsciiString(memory, SerialNumberIndex, 6);
+        return ReadAsciiString(memory, SerialNumberIndex, 6);
     }
 
     public static ushort ReadAbbreviationsTableAddress(byte[] memory)
@@ -112,23 +107,15 @@ public static class Header
     {
         var fileSize = memory.ReadWord(FileSizeIndex);
 
-        var version = Header.ReadVersion(memory);
-        switch (version)
+        var version = ReadVersion(memory);
+
+        return version switch
         {
-            case 1:
-            case 2:
-            case 3:
-                return fileSize * 2;
-            case 4:
-            case 5:
-                return fileSize * 4;
-            case 6:
-            case 7:
-            case 8:
-                return fileSize * 8;
-            default:
-                throw new InvalidOperationException("Invalid version number: " + version);
-        }
+            1 or 2 or 3 => fileSize * 2,
+            4 or 5 => fileSize * 4,
+            6 or 7 or 8 => fileSize * 8,
+            _ => throw new InvalidOperationException("Invalid version number: " + version),
+        };
     }
 
     public static ushort ReadChecksum(byte[] memory)
@@ -138,7 +125,7 @@ public static class Header
 
     public static ushort CalculateChecksum(byte[] memory)
     {
-        var size = Math.Min(Header.ReadFileSize(memory), memory.Length);
+        var size = Math.Min(ReadFileSize(memory), memory.Length);
         ushort result = 0;
         for (int i = 0x40; i < size; i++)
         {
@@ -175,7 +162,7 @@ public static class Header
 
     public static bool IsInformStory(byte[] memory)
     {
-        var serialNumber = Header.ReadSerialNumber(memory);
+        var serialNumber = ReadSerialNumber(memory);
         return serialNumber < 800000 || serialNumber >= 930000;
     }
 
@@ -198,7 +185,7 @@ public static class Header
 
     public static string ReadInformVersionText(byte[] memory)
     {
-        return Header.ReadAsciiString(memory, InformVersionNumberIndex, 4);
+        return ReadAsciiString(memory, InformVersionNumberIndex, 4);
     }
 
     public static void WriteScreenHeightInLines(byte[] memory, byte screenHeight)
@@ -223,7 +210,7 @@ public static class Header
 
     public static void WriteFontHeightInUnits(byte[] memory, byte fontHeight)
     {
-        if (Header.ReadVersion(memory) == 6)
+        if (ReadVersion(memory) == 6)
         {
             memory.WriteByte(0x26, fontHeight);
         }
@@ -235,7 +222,7 @@ public static class Header
 
     public static void WriteFontWidthInUnits(byte[] memory, byte fontWidth)
     {
-        if (Header.ReadVersion(memory) == 6)
+        if (ReadVersion(memory) == 6)
         {
             memory.WriteByte(0x27, fontWidth);
         }
@@ -247,7 +234,7 @@ public static class Header
 
     public static int UnpackRoutineAddress(byte[] memory, ushort byteAddress)
     {
-        var version = Header.ReadVersion(memory);
+        var version = ReadVersion(memory);
         switch (version)
         {
             case 1:
@@ -259,7 +246,7 @@ public static class Header
                 return byteAddress * 4;
             case 6:
             case 7:
-                var routinesOffset = Header.ReadRoutinesOffset(memory);
+                var routinesOffset = ReadRoutinesOffset(memory);
                 return (byteAddress * 4) + (routinesOffset * 8);
             case 8:
                 return byteAddress * 8;
@@ -270,7 +257,7 @@ public static class Header
 
     public static int UnpackStringAddress(byte[] memory, ushort byteAddress)
     {
-        var version = Header.ReadVersion(memory);
+        var version = ReadVersion(memory);
         switch (version)
         {
             case 1:
@@ -282,7 +269,7 @@ public static class Header
                 return byteAddress * 4;
             case 6:
             case 7:
-                var stringsOffset = Header.ReadStringsOffset(memory);
+                var stringsOffset = ReadStringsOffset(memory);
                 return (byteAddress * 4) + (stringsOffset * 8);
             case 8:
                 return byteAddress * 8;

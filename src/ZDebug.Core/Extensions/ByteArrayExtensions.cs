@@ -1,264 +1,241 @@
-﻿using System;
-using ZDebug.Core.Utilities;
+﻿#nullable enable
+
+using System;
+using System.Buffers.Binary;
 
 namespace ZDebug.Core.Extensions;
 
 public static class ByteArrayExtensions
 {
+    private const int WordSize = 2;
+    private const int DWordSize = 4;
+
+    public static byte ReadByte(this ReadOnlySpan<byte> source)
+        => source[0];
+
     public static byte ReadByte(this byte[] array, int index)
-    {
-        return array[index];
-    }
+        => array.AsSpan(index).ReadByte();
 
     public static byte ReadByte(this byte[] array, ref int index)
     {
-        return array[index++];
-    }
+        var result = array.AsSpan(index).ReadByte();
+        index++;
 
-    public static byte[] ReadBytes(this byte[] array, int index, int length)
-    {
-        byte[] result = new byte[length];
-        Array.Copy(array, index, result, 0, length);
         return result;
     }
 
-    public static byte[] ReadBytes(this byte[] array, ref int index, int length)
+    public static byte[] ReadBytes(this ReadOnlySpan<byte> source, int count)
     {
-        byte[] result = new byte[length];
-        Array.Copy(array, index, result, 0, length);
-        index += length;
+        byte[] result = new byte[count];
+        source[..count].CopyTo(result);
+
         return result;
     }
 
-    public static ushort ReadWord(this byte[] bytes, int index)
+    public static byte[] ReadBytes(this byte[] array, int index, int count)
     {
-        return (ushort)(bytes[index] << 8 | bytes[index + 1]);
+        return ReadBytes(array.AsSpan(index), count);
+    }
+
+    public static byte[] ReadBytes(this byte[] array, ref int index, int count)
+    {
+        var result = ReadBytes(array.AsSpan(index), count);
+        index += count;
+
+        return result;
+    }
+
+    public static ushort ReadWord(this ReadOnlySpan<byte> source)
+    {
+        return BinaryPrimitives.ReadUInt16BigEndian(source);
+    }
+
+    public static ushort ReadWord(this byte[] array, int index)
+    {
+        return ReadWord(array.AsSpan(index));
     }
 
     public static ushort ReadWord(this byte[] array, ref int index)
     {
-        return (ushort)(array[index++] << 8 | array[index++]);
+        var result = ReadWord(array.AsSpan(index));
+        index += WordSize;
+
+        return result;
     }
 
-    public static ushort[] ReadWords(this byte[] array, int index, int length)
+    public static ushort[] ReadWords(this ReadOnlySpan<byte> source, int count)
     {
-        ushort[] result = new ushort[length];
+        ushort[] result = new ushort[count];
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < count; i++)
         {
-            byte b1 = array[index + (i * 2)];
-            byte b2 = array[index + (i * 2) + 1];
+            result[i] = ReadWord(source);
 
-            result[i] = (ushort)(b1 << 8 | b2);
+            source = source[WordSize..];
         }
 
         return result;
+    }
+
+    public static ushort[] ReadWords(this byte[] array, int index, int count)
+    {
+        return ReadWords(array.AsSpan(index), count);
     }
 
     public static ushort[] ReadWords(this byte[] array, ref int index, int length)
     {
-        ushort[] result = new ushort[length];
-
-        for (int i = 0; i < length; i++)
-        {
-            byte b1 = array[index++];
-            byte b2 = array[index++];
-
-            result[i] = (ushort)(b1 << 8 | b2);
-        }
+        var result = ReadWords(array.AsSpan(index), length);
+        index += length * WordSize;
 
         return result;
+    }
+
+    public static uint ReadDWord(this ReadOnlySpan<byte> source)
+    {
+        return BinaryPrimitives.ReadUInt32BigEndian(source);
     }
 
     public static uint ReadDWord(this byte[] array, int index)
     {
-        var b1 = array[index];
-        var b2 = array[index + 1];
-        var b3 = array[index + 2];
-        var b4 = array[index + 3];
-
-        return (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+        return ReadDWord(array.AsSpan(index));
     }
 
     public static uint ReadDWord(this byte[] array, ref int index)
     {
-        var b1 = array[index];
-        var b2 = array[index + 1];
-        var b3 = array[index + 2];
-        var b4 = array[index + 3];
+        var result = ReadDWord(array.AsSpan(index));
+        index += DWordSize;
 
-        index += 4;
-
-        return (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+        return result;
     }
 
-    public static uint[] ReadDWords(this byte[] array, int index, int length)
+    public static uint[] ReadDWords(this ReadOnlySpan<byte> source, int count)
     {
-        uint[] result = new uint[length];
-        for (int i = 0; i < length; i++)
-        {
-            var offset = i * 4;
-            var b1 = array[index + offset];
-            var b2 = array[index + offset + 1];
-            var b3 = array[index + offset + 2];
-            var b4 = array[index + offset + 3];
+        uint[] result = new uint[count];
 
-            result[i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = ReadDWord(source);
+
+            source = source[DWordSize..];
         }
 
         return result;
     }
 
-    public static uint[] ReadDWords(this byte[] array, ref int index, int length)
+    public static uint[] ReadDWords(this byte[] array, int index, int count)
     {
-        if (length == 0)
-        {
-            return ArrayEx.Empty<uint>();
-        }
+        return ReadDWords(array.AsSpan(index), count);
+    }
 
-        uint[] result = new uint[length];
-        for (int i = 0; i < length; i++)
-        {
-            var offset = i * 4;
-            var b1 = array[index + offset];
-            var b2 = array[index + offset + 1];
-            var b3 = array[index + offset + 2];
-            var b4 = array[index + offset + 3];
-
-            result[i] = (uint)(b1 << 24 | b2 << 16 | b3 << 8 | b4);
-        }
-
-        index += length * 4;
+    public static uint[] ReadDWords(this byte[] array, ref int index, int count)
+    {
+        var result = ReadDWords(array.AsSpan(index), count);
+        index += count * DWordSize;
 
         return result;
+    }
+
+    public static void WriteByte(this Span<byte> destination, byte value)
+    {
+        destination[0] = value;
     }
 
     public static void WriteByte(this byte[] array, int index, byte value)
     {
-        array[index] = value;
+        array.AsSpan(index).WriteByte(value);
     }
 
     public static void WriteByte(this byte[] array, ref int index, byte value)
     {
-        array[index++] = value;
+        array.AsSpan(index).WriteByte(value);
+        index++;
+    }
+
+    public static void WriteBytes(this Span<byte> destination, ReadOnlySpan<byte> values)
+    {
+        values.CopyTo(destination);
     }
 
     public static void WriteBytes(this byte[] array, int index, byte[] values)
     {
-        Array.Copy(values, 0, array, index, values.Length);
+        array.AsSpan(index).WriteBytes(values);
     }
 
     public static void WriteBytes(this byte[] array, ref int index, byte[] values)
     {
-        Array.Copy(values, 0, array, index, values.Length);
+        array.AsSpan(index).WriteBytes(values);
         index += values.Length;
+    }
+
+    public static void WriteWord(this Span<byte> destination, ushort value)
+    {
+        BinaryPrimitives.WriteUInt16BigEndian(destination, value);
     }
 
     public static void WriteWord(this byte[] bytes, int index, ushort value)
     {
-        byte b1 = (byte)(value >> 8);
-        byte b2 = (byte)(value & 0x00ff);
-
-        bytes[index] = b1;
-        bytes[index + 1] = b2;
+        bytes.AsSpan(index).WriteWord(value);
     }
 
     public static void WriteWord(this byte[] bytes, ref int index, ushort value)
     {
-        byte b1 = (byte)(value >> 8);
-        byte b2 = (byte)(value & 0x00ff);
+        bytes.AsSpan(index).WriteWord(value);
+        index += WordSize;
+    }
 
-        bytes[index++] = b1;
-        bytes[index++] = b2;
+    public static void WriteWords(this Span<byte> destination, ReadOnlySpan<ushort> values)
+    {
+        foreach (var value in values)
+        {
+            destination.WriteWord(value);
+            destination = destination[WordSize..];
+        }
     }
 
     public static void WriteWords(this byte[] array, int index, ushort[] values)
     {
-        int i = 0;
-        foreach (var value in values)
-        {
-            byte b1 = (byte)(value >> 8);
-            byte b2 = (byte)(value & 0x00ff);
-
-            array[index + i] = b1;
-            array[index + i + 1] = b2;
-
-            i += 2;
-        }
+        array.AsSpan(index).WriteWords(values);
     }
 
     public static void WriteWords(this byte[] array, ref int index, ushort[] values)
     {
-        foreach (var value in values)
-        {
-            byte b1 = (byte)(value >> 8);
-            byte b2 = (byte)(value & 0x00ff);
+        array.AsSpan(index).WriteWords(values);
+        index += values.Length * WordSize;
+    }
 
-            array[index++] = b1;
-            array[index++] = b2;
-        }
+    public static void WriteDWord(this Span<byte> destination, uint value)
+    {
+        BinaryPrimitives.WriteUInt32BigEndian(destination, value);
     }
 
     public static void WriteDWord(this byte[] array, int index, uint value)
     {
-        var b1 = (byte)(value >> 24);
-        var b2 = (byte)((value & 0x00ff0000) >> 16);
-        var b3 = (byte)((value & 0x0000ff00) >> 8);
-        var b4 = (byte)(value & 0x000000ff);
-
-        array[index] = b1;
-        array[index + 1] = b2;
-        array[index + 2] = b3;
-        array[index + 3] = b4;
+        array.AsSpan(index).WriteDWord(value);
     }
 
     public static void WriteDWord(this byte[] array, ref int index, uint value)
     {
-        var b1 = (byte)(value >> 24);
-        var b2 = (byte)((value & 0x00ff0000) >> 16);
-        var b3 = (byte)((value & 0x0000ff00) >> 8);
-        var b4 = (byte)(value & 0x000000ff);
+        array.AsSpan(index).WriteDWord(value);
+        index += DWordSize;
+    }
 
-        array[index] = b1;
-        array[index + 1] = b2;
-        array[index + 2] = b3;
-        array[index + 3] = b4;
-
-        index += 4;
+    public static void WriteDWords(this Span<byte> destination, ReadOnlySpan<uint> values)
+    {
+        foreach (var value in values)
+        {
+            destination.WriteDWord(value);
+            destination = destination[DWordSize..];
+        }
     }
 
     public static void WriteDWords(this byte[] array, int index, uint[] values)
     {
-        if (values.Length == 0)
-        {
-            return;
-        }
-
-        for (int i = 0; i < values.Length; i++)
-        {
-            var offset = i * 4;
-            var value = values[i];
-            array[index + offset] = (byte)(value >> 24);
-            array[index + offset + 1] = (byte)((value & 0x00ff0000) >> 16);
-            array[index + offset + 2] = (byte)((value & 0x0000ff00) >> 8);
-            array[index + offset + 3] = (byte)(value & 0x000000ff);
-        }
+        array.AsSpan(index).WriteDWords(values);
     }
 
     public static void WriteDWords(this byte[] array, ref int index, uint[] values)
     {
-        if (values.Length == 0)
-        {
-            return;
-        }
-
-        for (int i = 0; i < values.Length; i++)
-        {
-            var value = values[i];
-            array[index++] = (byte)(value >> 24);
-            array[index++] = (byte)((value & 0x00ff0000) >> 16);
-            array[index++] = (byte)((value & 0x0000ff00) >> 8);
-            array[index++] = (byte)(value & 0x000000ff);
-        }
+        array.AsSpan(index).WriteDWords(values);
+        index += values.Length * DWordSize;
     }
 }
