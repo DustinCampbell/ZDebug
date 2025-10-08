@@ -20,13 +20,7 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
             this.instructions.Add(instruction);
         }
 
-        public int Address
-        {
-            get
-            {
-                return this.address;
-            }
-        }
+        public int Address => this.address;
 
         public IEnumerable<Instruction> Instructions
         {

@@ -39,63 +39,39 @@ namespace ZDebug.Compiler.Profiling
         /// <summary>
         /// The Z-machine routine that was compiled.
         /// </summary>
-        public ZRoutine Routine
-        {
-            get { return routine; }
-        }
+        public ZRoutine Routine => routine;
 
         /// <summary>
         /// The number of IL opcodes generated.
         /// </summary>
-        public int OpcodeCount
-        {
-            get { return opcodeCount; }
-        }
+        public int OpcodeCount => opcodeCount;
 
         /// <summary>
         /// The number of IL locals generated.
         /// </summary>
-        public int LocalCount
-        {
-            get { return localCount; }
-        }
+        public int LocalCount => localCount;
 
         /// <summary>
         /// The size of the IL generated.
         /// </summary>
-        public int Size
-        {
-            get { return size; }
-        }
+        public int Size => size;
 
         /// <summary>
         /// The time elapsed during compilation.
         /// </summary>
-        public TimeSpan CompileTime
-        {
-            get { return compileTime; }
-        }
+        public TimeSpan CompileTime => compileTime;
 
         /// <summary>
         /// The number of calculated variable loads.
         /// </summary>
-        public int CalculatedLoadVariableCount
-        {
-            get { return calculatedLoadVariableCount; }
-        }
+        public int CalculatedLoadVariableCount => calculatedLoadVariableCount;
 
         /// <summary>
         /// The number of calculated variable stores.
         /// </summary>
-        public int CalculatedStoreVariableCount
-        {
-            get { return calculatedStoreVariableCount; }
-        }
+        public int CalculatedStoreVariableCount => calculatedStoreVariableCount;
 
-        public ReadOnlyCollection<InstructionStatistics> InstructionStatistics
-        {
-            get { return instructionSizes; }
-        }
+        public ReadOnlyCollection<InstructionStatistics> InstructionStatistics => instructionSizes;
 
         public override string ToString()
         {

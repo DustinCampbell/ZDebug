@@ -106,109 +106,31 @@ namespace ZDebug.Terp.Services
             }
         }
 
-        public bool Profiling
-        {
-            get
-            {
-                return profiler != null;
-            }
-        }
+        public bool Profiling => profiler != null;
 
-        public TimeSpan Elapsed
-        {
-            get
-            {
-                return watch.Elapsed;
-            }
-        }
+        public TimeSpan Elapsed => watch.Elapsed;
 
-        public ZMachineProfiler Profiler
-        {
-            get
-            {
-                return profiler;
-            }
-        }
+        public ZMachineProfiler Profiler => profiler;
 
-        public TimeSpan CompileTime
-        {
-            get
-            {
-                return compileTime;
-            }
-        }
+        public TimeSpan CompileTime => compileTime;
 
-        public int RoutinesCompiled
-        {
-            get
-            {
-                return routinesCompiled;
-            }
-        }
+        public int RoutinesCompiled => routinesCompiled;
 
-        public double ZCodeToILRatio
-        {
-            get
-            {
-                return zcodeToILRatio;
-            }
-        }
+        public double ZCodeToILRatio => zcodeToILRatio;
 
-        public double ZCodeToILRatioPercent
-        {
-            get
-            {
-                return zcodeToILRatio * 100;
-            }
-        }
+        public double ZCodeToILRatioPercent => zcodeToILRatio * 100;
 
-        public int RoutinesExecuted
-        {
-            get
-            {
-                return routinesExecuted;
-            }
-        }
+        public int RoutinesExecuted => routinesExecuted;
 
-        public int InstructionsExecuted
-        {
-            get
-            {
-                return instructionsExecuted;
-            }
-        }
+        public int InstructionsExecuted => instructionsExecuted;
 
-        public int CalculatedVariableLoads
-        {
-            get
-            {
-                return calculatedVariableLoads;
-            }
-        }
+        public int CalculatedVariableLoads => calculatedVariableLoads;
 
-        public int CalculatedVariableStores
-        {
-            get
-            {
-                return calculatedVariableStores;
-            }
-        }
+        public int CalculatedVariableStores => calculatedVariableStores;
 
-        public int DirectCalls
-        {
-            get
-            {
-                return directCalls;
-            }
-        }
+        public int DirectCalls => directCalls;
 
-        public int CalculatedCalls
-        {
-            get
-            {
-                return calculatedCalls;
-            }
-        }
+        public int CalculatedCalls => calculatedCalls;
 
         public event EventHandler<ProfilerStartingEventArgs> Starting;
         public event EventHandler<ProfilerStoppedEventArgs> Stopped;

@@ -416,45 +416,21 @@ namespace ZDebug.Terp.ViewModel
             });
         }
 
-        byte IScreen.ScreenHeightInLines
-        {
-            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height); }
-        }
+        byte IScreen.ScreenHeightInLines => (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height);
 
-        byte IScreen.ScreenWidthInColumns
-        {
-            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width); }
-        }
+        byte IScreen.ScreenWidthInColumns => (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width);
 
-        ushort IScreen.ScreenHeightInUnits
-        {
-            get { return (ushort)windowContainer.ActualHeight; }
-        }
+        ushort IScreen.ScreenHeightInUnits => (ushort)windowContainer.ActualHeight;
 
-        ushort IScreen.ScreenWidthInUnits
-        {
-            get { return (ushort)windowContainer.ActualWidth; }
-        }
+        ushort IScreen.ScreenWidthInUnits => (ushort)windowContainer.ActualWidth;
 
-        byte IScreen.FontHeightInUnits
-        {
-            get { return (byte)GetFixedFontMeasureText().Height; }
-        }
+        byte IScreen.FontHeightInUnits => (byte)GetFixedFontMeasureText().Height;
 
-        byte IScreen.FontWidthInUnits
-        {
-            get { return (byte)GetFixedFontMeasureText().Width; }
-        }
+        byte IScreen.FontWidthInUnits => (byte)GetFixedFontMeasureText().Width;
 
-        ZColor IScreen.DefaultBackgroundColor
-        {
-            get { return ZColor.White; }
-        }
+        ZColor IScreen.DefaultBackgroundColor => ZColor.White;
 
-        ZColor IScreen.DefaultForegroundColor
-        {
-            get { return ZColor.Black; }
-        }
+        ZColor IScreen.DefaultForegroundColor => ZColor.Black;
 
         void IOutputStream.Print(string text)
         {

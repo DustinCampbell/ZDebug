@@ -128,19 +128,10 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        public IndexedVariableViewModel[] Locals
-        {
-            get { return locals; }
-        }
+        public IndexedVariableViewModel[] Locals => locals;
 
-        public VariableViewModel[] LocalStack
-        {
-            get { return reversedStack; }
-        }
+        public VariableViewModel[] LocalStack => reversedStack;
 
-        public bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
+        public bool HasStory => storyService.IsStoryOpen;
     }
 }

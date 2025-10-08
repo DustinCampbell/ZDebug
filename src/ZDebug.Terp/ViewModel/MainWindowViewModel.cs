@@ -199,13 +199,7 @@ namespace ZDebug.Terp.ViewModel
             gameInfoDialogViewModel.ShowDialog(owner: this.View);
         }
 
-        public string Title
-        {
-            get
-            {
-                return "Z-Terp";
-            }
-        }
+        public string Title => "Z-Terp";
 
         void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
         {
@@ -306,92 +300,26 @@ namespace ZDebug.Terp.ViewModel
             PropertyChanged("CalculatedCalls");
         }
 
-        public bool Profiling
-        {
-            get
-            {
-                return profilerService.Profiling;
-            }
-        }
+        public bool Profiling => profilerService.Profiling;
 
-        public TimeSpan CompileTime
-        {
-            get
-            {
-                return profilerService.CompileTime;
-            }
-        }
+        public TimeSpan CompileTime => profilerService.CompileTime;
 
-        public int RoutinesCompiled
-        {
-            get
-            {
-                return profilerService.RoutinesCompiled;
-            }
-        }
+        public int RoutinesCompiled => profilerService.RoutinesCompiled;
 
-        public double ZCodeToILRatio
-        {
-            get
-            {
-                return profilerService.ZCodeToILRatio;
-            }
-        }
+        public double ZCodeToILRatio => profilerService.ZCodeToILRatio;
 
-        public double ZCodeToILRatioPercent
-        {
-            get
-            {
-                return profilerService.ZCodeToILRatio * 100;
-            }
-        }
+        public double ZCodeToILRatioPercent => profilerService.ZCodeToILRatio * 100;
 
-        public int RoutinesExecuted
-        {
-            get
-            {
-                return profilerService.RoutinesExecuted;
-            }
-        }
+        public int RoutinesExecuted => profilerService.RoutinesExecuted;
 
-        public int InstructionsExecuted
-        {
-            get
-            {
-                return profilerService.InstructionsExecuted;
-            }
-        }
+        public int InstructionsExecuted => profilerService.InstructionsExecuted;
 
-        public int CalculatedVariableLoads
-        {
-            get
-            {
-                return profilerService.CalculatedVariableLoads;
-            }
-        }
+        public int CalculatedVariableLoads => profilerService.CalculatedVariableLoads;
 
-        public int CalculatedVariableStores
-        {
-            get
-            {
-                return profilerService.CalculatedVariableStores;
-            }
-        }
+        public int CalculatedVariableStores => profilerService.CalculatedVariableStores;
 
-        public int DirectCalls
-        {
-            get
-            {
-                return profilerService.DirectCalls;
-            }
-        }
+        public int DirectCalls => profilerService.DirectCalls;
 
-        public int CalculatedCalls
-        {
-            get
-            {
-                return profilerService.CalculatedCalls;
-            }
-        }
+        public int CalculatedCalls => profilerService.CalculatedCalls;
     }
 }

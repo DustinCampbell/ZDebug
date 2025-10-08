@@ -12,9 +12,6 @@ namespace ZDebug.UI.Services
             this.routine = routine;
         }
 
-        public ZRoutine Routine
-        {
-            get { return routine; }
-        }
+        public ZRoutine Routine => routine;
     }
 }

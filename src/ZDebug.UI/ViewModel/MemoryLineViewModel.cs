@@ -12,20 +12,11 @@ namespace ZDebug.UI.ViewModel
             this.values = values;
         }
 
-        public int Address
-        {
-            get { return address; }
-        }
+        public int Address => address;
 
-        public ushort[] Values
-        {
-            get { return values; }
-        }
+        public ushort[] Values => values;
 
-        public int ValueCount
-        {
-            get { return values.Length; }
-        }
+        public int ValueCount => values.Length;
 
         private ushort? GetValue(int index)
         {
@@ -39,44 +30,20 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public ushort? Value1
-        {
-            get { return GetValue(0); }
-        }
+        public ushort? Value1 => GetValue(0);
 
-        public ushort? Value2
-        {
-            get { return GetValue(1); }
-        }
+        public ushort? Value2 => GetValue(1);
 
-        public ushort? Value3
-        {
-            get { return GetValue(2); }
-        }
+        public ushort? Value3 => GetValue(2);
 
-        public ushort? Value4
-        {
-            get { return GetValue(3); }
-        }
+        public ushort? Value4 => GetValue(3);
 
-        public ushort? Value5
-        {
-            get { return GetValue(4); }
-        }
+        public ushort? Value5 => GetValue(4);
 
-        public ushort? Value6
-        {
-            get { return GetValue(5); }
-        }
+        public ushort? Value6 => GetValue(5);
 
-        public ushort? Value7
-        {
-            get { return GetValue(6); }
-        }
+        public ushort? Value7 => GetValue(6);
 
-        public ushort? Value8
-        {
-            get { return GetValue(7); }
-        }
+        public ushort? Value8 => GetValue(7);
     }
 }

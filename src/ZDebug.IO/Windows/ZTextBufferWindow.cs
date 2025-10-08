@@ -250,19 +250,10 @@ namespace ZDebug.IO.Windows
             return oldValue;
         }
 
-        public override int RowHeight
-        {
-            get { return (int)fontCharSize.Height; }
-        }
+        public override int RowHeight => (int)fontCharSize.Height;
 
-        public override int ColumnWidth
-        {
-            get { return (int)fontCharSize.Width; }
-        }
+        public override int ColumnWidth => (int)fontCharSize.Width;
 
-        public override ZWindowType WindowType
-        {
-            get { return ZWindowType.TextBuffer; }
-        }
+        public override ZWindowType WindowType => ZWindowType.TextBuffer;
     }
 }

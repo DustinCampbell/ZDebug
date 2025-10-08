@@ -17,12 +17,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.addressOp = instruction.Operands[0];
             this.widthOp = instruction.Operands[1];
 
-            if (instruction.OperandCount > 2)
+            if (instruction.Operands.Length > 2)
             {
                 this.heightOp = instruction.Operands[2];
             }
 
-            if (instruction.OperandCount > 3)
+            if (instruction.Operands.Length > 3)
             {
                 this.skipOp = instruction.Operands[3];
             }

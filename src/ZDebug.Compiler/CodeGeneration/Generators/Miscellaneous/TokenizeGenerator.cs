@@ -17,12 +17,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.textBufferOp = instruction.Operands[0];
             this.parseBufferOp = instruction.Operands[1];
 
-            if (instruction.OperandCount > 2)
+            if (instruction.Operands.Length > 2)
             {
                 this.dictionaryOp = instruction.Operands[2];
             }
 
-            if (instruction.OperandCount > 3)
+            if (instruction.Operands.Length > 3)
             {
                 this.flagOp = instruction.Operands[3];
             }

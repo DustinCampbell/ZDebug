@@ -13,14 +13,8 @@ namespace ZDebug.UI.Services
             this.newState = newState;
         }
 
-        public DebuggerState OldState
-        {
-            get { return oldState; }
-        }
+        public DebuggerState OldState => oldState;
 
-        public DebuggerState NewState
-        {
-            get { return newState; }
-        }
+        public DebuggerState NewState => newState;
     }
 }

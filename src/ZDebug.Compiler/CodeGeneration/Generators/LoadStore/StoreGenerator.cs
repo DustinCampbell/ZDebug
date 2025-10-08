@@ -69,9 +69,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             }
         }
 
-        public override bool CanReuseByRefOperand
-        {
-            get { return op1.IsConstant; }
-        }
+        public override bool CanReuseByRefOperand => op1.IsConstant;
     }
 }

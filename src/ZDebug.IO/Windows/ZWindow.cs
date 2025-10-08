@@ -29,10 +29,7 @@ namespace ZDebug.IO.Windows
             this.windowParent = windowParent;
         }
 
-        internal ZPairWindow WindowParent
-        {
-            get { return windowParent; }
-        }
+        internal ZPairWindow WindowParent => windowParent;
 
         public void Activate()
         {

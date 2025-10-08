@@ -70,14 +70,8 @@ namespace ZDebug.UI.ViewModel
 
         public ICommand NavigateCommand { get; private set; }
 
-        public bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
+        public bool HasStory => storyService.IsStoryOpen;
 
-        public BulkObservableCollection<ObjectViewModel> Objects
-        {
-            get { return objects; }
-        }
+        public BulkObservableCollection<ObjectViewModel> Objects => objects;
     }
 }

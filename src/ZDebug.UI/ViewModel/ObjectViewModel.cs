@@ -22,30 +22,15 @@ namespace ZDebug.UI.ViewModel
             properties = new ReadOnlyCollection<PropertyViewModel>(props);
         }
 
-        public int Number
-        {
-            get { return obj.Number; }
-        }
+        public int Number => obj.Number;
 
-        public int Parent
-        {
-            get { return obj.HasParent ? obj.Parent.Number : 0; }
-        }
+        public int Parent => obj.HasParent ? obj.Parent.Number : 0;
 
-        public int Sibling
-        {
-            get { return obj.HasSibling ? obj.Sibling.Number : 0; }
-        }
+        public int Sibling => obj.HasSibling ? obj.Sibling.Number : 0;
 
-        public int Child
-        {
-            get { return obj.HasChild ? obj.Child.Number : 0; }
-        }
+        public int Child => obj.HasChild ? obj.Child.Number : 0;
 
-        public string ShortName
-        {
-            get { return obj.ShortName; }
-        }
+        public string ShortName => obj.ShortName;
 
         public string Attributes
         {
@@ -73,14 +58,8 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public int PropertyTableAddress
-        {
-            get { return obj.PropertyTable.Address; }
-        }
+        public int PropertyTableAddress => obj.PropertyTable.Address;
 
-        public ReadOnlyCollection<PropertyViewModel> Properties
-        {
-            get { return properties; }
-        }
+        public ReadOnlyCollection<PropertyViewModel> Properties => properties;
     }
 }

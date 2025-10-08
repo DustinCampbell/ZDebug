@@ -11,24 +11,12 @@ namespace ZDebug.UI.ViewModel
             this.region = region;
         }
 
-        public string Name
-        {
-            get { return region.Name; }
-        }
+        public string Name => region.Name;
 
-        public int Base
-        {
-            get { return region.Base; }
-        }
+        public int Base => region.Base;
 
-        public int End
-        {
-            get { return region.End; }
-        }
+        public int End => region.End;
 
-        public int Size
-        {
-            get { return region.Size; }
-        }
+        public int Size => region.Size;
     }
 }

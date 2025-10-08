@@ -53,9 +53,6 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public BulkObservableCollection<MessageViewModel> Messages
-        {
-            get { return messages; }
-        }
+        public BulkObservableCollection<MessageViewModel> Messages => messages;
     }
 }

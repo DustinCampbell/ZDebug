@@ -13,10 +13,7 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
-        public bool AcceptableName
-        {
-            get { return name.Length > 0; }
-        }
+        public bool AcceptableName => name.Length > 0;
 
         public string Name
         {

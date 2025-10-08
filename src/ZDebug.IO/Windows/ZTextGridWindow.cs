@@ -105,19 +105,10 @@ namespace ZDebug.IO.Windows
             textGrid.SetHeight(lines);
         }
 
-        public override int RowHeight
-        {
-            get { return (int)fontCharSize.Height; }
-        }
+        public override int RowHeight => (int)fontCharSize.Height;
 
-        public override int ColumnWidth
-        {
-            get { return (int)fontCharSize.Width; }
-        }
+        public override int ColumnWidth => (int)fontCharSize.Width;
 
-        public override ZWindowType WindowType
-        {
-            get { return ZWindowType.TextGrid; }
-        }
+        public override ZWindowType WindowType => ZWindowType.TextGrid;
     }
 }

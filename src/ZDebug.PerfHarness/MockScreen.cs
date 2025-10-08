@@ -81,65 +81,29 @@ namespace ZDebug.PerfHarness
         {
         }
 
-        public byte ScreenHeightInLines
-        {
-            get { return 25; }
-        }
+        public byte ScreenHeightInLines => 25;
 
-        public byte ScreenWidthInColumns
-        {
-            get { return 80; }
-        }
+        public byte ScreenWidthInColumns => 80;
 
-        public ushort ScreenHeightInUnits
-        {
-            get { return 0; }
-        }
+        public ushort ScreenHeightInUnits => 0;
 
-        public ushort ScreenWidthInUnits
-        {
-            get { return 0; }
-        }
+        public ushort ScreenWidthInUnits => 0;
 
-        public byte FontHeightInUnits
-        {
-            get { return 0; }
-        }
+        public byte FontHeightInUnits => 0;
 
-        public byte FontWidthInUnits
-        {
-            get { return 0; }
-        }
+        public byte FontWidthInUnits => 0;
 
-        public bool SupportsColors
-        {
-            get { return false; }
-        }
+        public bool SupportsColors => false;
 
-        public bool SupportsBold
-        {
-            get { return false; }
-        }
+        public bool SupportsBold => false;
 
-        public bool SupportsItalic
-        {
-            get { return false; }
-        }
+        public bool SupportsItalic => false;
 
-        public bool SupportsFixedFont
-        {
-            get { return false; }
-        }
+        public bool SupportsFixedFont => false;
 
-        public ZColor DefaultBackgroundColor
-        {
-            get { return ZColor.Default; }
-        }
+        public ZColor DefaultBackgroundColor => ZColor.Default;
 
-        public ZColor DefaultForegroundColor
-        {
-            get { return ZColor.Default; }
-        }
+        public ZColor DefaultForegroundColor => ZColor.Default;
 
         public void Print(string text)
         {
@@ -170,9 +134,6 @@ namespace ZDebug.PerfHarness
             }
         }
 
-        public string Output
-        {
-            get { return output.ToString(); }
-        }
+        public string Output => output.ToString();
     }
 }

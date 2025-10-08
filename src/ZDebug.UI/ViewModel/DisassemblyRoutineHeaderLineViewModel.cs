@@ -16,15 +16,9 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("Name");
         }
 
-        public int Address
-        {
-            get { return routine.Address; }
-        }
+        public int Address => routine.Address;
 
-        public bool HasLocals
-        {
-            get { return routine.Locals.Length > 0; }
-        }
+        public bool HasLocals => routine.Locals.Length > 0;
 
         public string LocalCountText
         {
@@ -42,9 +36,6 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public string Name
-        {
-            get { return routine.Name; }
-        }
+        public string Name => routine.Name;
     }
 }

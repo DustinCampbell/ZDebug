@@ -13,30 +13,15 @@ namespace ZDebug.UI.ViewModel
             this.end = end;
         }
 
-        public ZRoutine Start
-        {
-            get { return start; }
-        }
+        public ZRoutine Start => start;
 
-        public ZRoutine End
-        {
-            get { return end; }
-        }
+        public ZRoutine End => end;
 
-        public int StartAddress
-        {
-            get { return start.Address + start.Length - 1; }
-        }
+        public int StartAddress => start.Address + start.Length - 1;
 
-        public int EndAddress
-        {
-            get { return end.Address; }
-        }
+        public int EndAddress => end.Address;
 
-        public int Length
-        {
-            get { return EndAddress - StartAddress; }
-        }
+        public int Length => EndAddress - StartAddress;
 
         public string LengthText
         {

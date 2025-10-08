@@ -14,9 +14,6 @@ namespace ZDebug.UI.Services
             this.address = address;
         }
 
-        public int Address
-        {
-            get { return address; }
-        }
+        public int Address => address;
     }
 }

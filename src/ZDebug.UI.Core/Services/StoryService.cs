@@ -84,45 +84,15 @@ namespace ZDebug.UI.Services
             return story;
         }
 
-        public string FileName
-        {
-            get
-            {
-                return fileName;
-            }
-        }
+        public string FileName => fileName;
 
-        public Story Story
-        {
-            get
-            {
-                return story;
-            }
-        }
+        public Story Story => story;
 
-        public bool IsStoryOpen
-        {
-            get
-            {
-                return story != null;
-            }
-        }
+        public bool IsStoryOpen => story != null;
 
-        public GameInfo GameInfo
-        {
-            get
-            {
-                return gameInfo;
-            }
-        }
+        public GameInfo GameInfo => gameInfo;
 
-        public bool HasGameInfo
-        {
-            get
-            {
-                return gameInfo != null;
-            }
-        }
+        public bool HasGameInfo => gameInfo != null;
 
         public event EventHandler<StoryOpenedEventArgs> StoryOpened;
         public event EventHandler<StoryClosingEventArgs> StoryClosing;

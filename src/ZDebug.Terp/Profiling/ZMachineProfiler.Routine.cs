@@ -43,85 +43,25 @@ namespace ZDebug.Terp.Profiling
                 exclusiveTime = calls.Aggregate(TimeSpan.Zero, (r, c) => r + c.ExclusiveTime);
             }
 
-            public int Address
-            {
-                get
-                {
-                    return address;
-                }
-            }
+            public int Address => address;
 
-            public ReadOnlyCollection<ICall> Calls
-            {
-                get
-                {
-                    return calls;
-                }
-            }
+            public ReadOnlyCollection<ICall> Calls => calls;
 
-            public TimeSpan InclusiveTime
-            {
-                get
-                {
-                    return inclusiveTime;
-                }
-            }
+            public TimeSpan InclusiveTime => inclusiveTime;
 
-            public TimeSpan ExclusiveTime
-            {
-                get
-                {
-                    return exclusiveTime;
-                }
-            }
+            public TimeSpan ExclusiveTime => exclusiveTime;
 
-            public double InclusivePercentage
-            {
-                get
-                {
-                    return ((double)inclusiveTime.Ticks / (double)profiler.RunningTime.Ticks) * 100;
-                }
-            }
+            public double InclusivePercentage => ((double)inclusiveTime.Ticks / (double)profiler.RunningTime.Ticks) * 100;
 
-            public double ExclusivePercentage
-            {
-                get
-                {
-                    return ((double)exclusiveTime.Ticks / (double)profiler.RunningTime.Ticks) * 100;
-                }
-            }
+            public double ExclusivePercentage => ((double)exclusiveTime.Ticks / (double)profiler.RunningTime.Ticks) * 100;
 
-            public int LocalCount
-            {
-                get
-                {
-                    return statistics.LocalCount;
-                }
-            }
+            public int LocalCount => statistics.LocalCount;
 
-            public int ZCodeInstructionCount
-            {
-                get
-                {
-                    return statistics.Routine.Instructions.Length;
-                }
-            }
+            public int ZCodeInstructionCount => statistics.Routine.Instructions.Length;
 
-            public int ILInstructionCount
-            {
-                get
-                {
-                    return statistics.OpcodeCount;
-                }
-            }
+            public int ILInstructionCount => statistics.OpcodeCount;
 
-            public int ILByteSize
-            {
-                get
-                {
-                    return statistics.Size;
-                }
-            }
+            public int ILByteSize => statistics.Size;
 
         }
     }

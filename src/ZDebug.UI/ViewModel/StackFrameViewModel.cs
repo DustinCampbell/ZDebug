@@ -16,27 +16,12 @@ namespace ZDebug.UI.ViewModel
             this.routineTable = routineTable;
         }
 
-        public string Name
-        {
-            get { return routineTable.GetByAddress((int)stackFrame.CallAddress).Name; }
-        }
+        public string Name => routineTable.GetByAddress((int)stackFrame.CallAddress).Name;
 
-        public bool HasName
-        {
-            get { return Name.Length > 0; }
-        }
+        public bool HasName => Name.Length > 0;
 
-        public uint CallAddress
-        {
-            get { return stackFrame.CallAddress; }
-        }
+        public uint CallAddress => stackFrame.CallAddress;
 
-        public string ArgText
-        {
-            get
-            {
-                return "(" + string.Join(", ", stackFrame.Arguments.ToArray().ConvertAll(arg => arg.ToString("x4"))) + ")";
-            }
-        }
+        public string ArgText => "(" + string.Join(", ", stackFrame.Arguments.ToArray().ConvertAll(arg => arg.ToString("x4"))) + ")";
     }
 }

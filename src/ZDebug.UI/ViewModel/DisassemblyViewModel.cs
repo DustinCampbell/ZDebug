@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Routines;
 using ZDebug.IO.Utilities;
 using ZDebug.UI.Collections;
@@ -39,7 +38,7 @@ namespace ZDebug.UI.ViewModel
         private readonly EditRoutineNameDialogViewModel editRoutineNameDialogViewModel;
 
         private readonly BulkObservableCollection<DisassemblyLineViewModel> lines;
-        private readonly IntegerMap<DisassemblyLineViewModel> addressToLineMap;
+        private readonly Dictionary<int, DisassemblyLineViewModel> addressToLineMap;
         private readonly List<AddressAndIndex> routineAddressAndIndexList;
 
         private DisassemblyLineViewModel inputLine;
@@ -75,7 +74,7 @@ namespace ZDebug.UI.ViewModel
             this.editRoutineNameDialogViewModel = editRoutineNameDialogViewModel;
 
             lines = new BulkObservableCollection<DisassemblyLineViewModel>();
-            addressToLineMap = new IntegerMap<DisassemblyLineViewModel>();
+            addressToLineMap = new Dictionary<int, DisassemblyLineViewModel>();
             routineAddressAndIndexList = new List<AddressAndIndex>();
 
             this.EditNameCommand = RegisterCommand<int>(
@@ -110,8 +109,7 @@ namespace ZDebug.UI.ViewModel
 
         private DisassemblyLineViewModel GetLineByAddress(int address)
         {
-            DisassemblyLineViewModel result;
-            if (addressToLineMap.TryGetValue(address, out result))
+            if (addressToLineMap.TryGetValue(address, out var result))
             {
                 return result;
             }
@@ -453,9 +451,6 @@ namespace ZDebug.UI.ViewModel
 
         }
 
-        public BulkObservableCollection<DisassemblyLineViewModel> Lines
-        {
-            get { return lines; }
-        }
+        public BulkObservableCollection<DisassemblyLineViewModel> Lines => lines;
     }
 }

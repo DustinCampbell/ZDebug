@@ -63,9 +63,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             }
         }
 
-        public override bool CanReuseStoreVariable
-        {
-            get { return true; }
-        }
+        public override bool CanReuseStoreVariable => true;
     }
 }

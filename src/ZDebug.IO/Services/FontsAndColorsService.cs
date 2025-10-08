@@ -20,20 +20,11 @@ namespace ZDebug.IO.Services
         private static Typeface normalTypeface;
         private static Typeface fixedTypeface;
 
-        public static FontFamily NormalFontFamily
-        {
-            get { return normalFontFamily; }
-        }
+        public static FontFamily NormalFontFamily => normalFontFamily;
 
-        public static FontFamily FixedFontFamily
-        {
-            get { return fixedFontFamily; }
-        }
+        public static FontFamily FixedFontFamily => fixedFontFamily;
 
-        public static double FontSize
-        {
-            get { return fontSize; }
-        }
+        public static double FontSize => fontSize;
 
         public static FontFamily FontFamily
         {
@@ -41,15 +32,9 @@ namespace ZDebug.IO.Services
             set { fontFamily = value; }
         }
 
-        public static Brush DefaultForeground
-        {
-            get { return defaultForeground; }
-        }
+        public static Brush DefaultForeground => defaultForeground;
 
-        public static Brush DefaultBackground
-        {
-            get { return defaultBackground; }
-        }
+        public static Brush DefaultBackground => defaultBackground;
 
         public static Brush Foreground
         {
@@ -110,54 +95,24 @@ namespace ZDebug.IO.Services
         private static readonly FontAndColorSetting ztextSetting =
             new FontAndColorSetting(defaultSetting, new FontFamily("Times New Roman"), 15.5, Brushes.Maroon, new SolidColorBrush(Color.FromRgb(0xff, 0xff, 0xe6)));
 
-        public static FontAndColorSetting DefaultSetting
-        {
-            get { return defaultSetting; }
-        }
+        public static FontAndColorSetting DefaultSetting => defaultSetting;
 
-        public static FontAndColorSetting AddressSetting
-        {
-            get { return addressSetting; }
-        }
+        public static FontAndColorSetting AddressSetting => addressSetting;
 
-        public static FontAndColorSetting CommentSetting
-        {
-            get { return commentSetting; }
-        }
+        public static FontAndColorSetting CommentSetting => commentSetting;
 
-        public static FontAndColorSetting ConstantSetting
-        {
-            get { return constantSetting; }
-        }
+        public static FontAndColorSetting ConstantSetting => constantSetting;
 
-        public static FontAndColorSetting GlobalVariableSetting
-        {
-            get { return globalVariableSetting; }
-        }
+        public static FontAndColorSetting GlobalVariableSetting => globalVariableSetting;
 
-        public static FontAndColorSetting KeywordSetting
-        {
-            get { return keywordSetting; }
-        }
+        public static FontAndColorSetting KeywordSetting => keywordSetting;
 
-        public static FontAndColorSetting LocalVariableSetting
-        {
-            get { return localVariableSetting; }
-        }
+        public static FontAndColorSetting LocalVariableSetting => localVariableSetting;
 
-        public static FontAndColorSetting SeparatorSetting
-        {
-            get { return separatorSetting; }
-        }
+        public static FontAndColorSetting SeparatorSetting => separatorSetting;
 
-        public static FontAndColorSetting StackVariableSetting
-        {
-            get { return stackVariableSetting; }
-        }
+        public static FontAndColorSetting StackVariableSetting => stackVariableSetting;
 
-        public static FontAndColorSetting ZTextSetting
-        {
-            get { return ztextSetting; }
-        }
+        public static FontAndColorSetting ZTextSetting => ztextSetting;
     }
 }

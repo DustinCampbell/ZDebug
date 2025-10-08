@@ -15,45 +15,21 @@ namespace ZDebug.UI.Controls
                 this.defaultTextRunProperties = new SimpleTextRunProperties(defaultSetting);
             }
 
-            public override TextRunProperties DefaultTextRunProperties
-            {
-                get { return defaultTextRunProperties; }
-            }
+            public override TextRunProperties DefaultTextRunProperties => defaultTextRunProperties;
 
-            public override bool FirstLineInParagraph
-            {
-                get { return false; }
-            }
+            public override bool FirstLineInParagraph => false;
 
-            public override FlowDirection FlowDirection
-            {
-                get { return FlowDirection.LeftToRight; }
-            }
+            public override FlowDirection FlowDirection => FlowDirection.LeftToRight;
 
-            public override double Indent
-            {
-                get { return 0.0; }
-            }
+            public override double Indent => 0.0;
 
-            public override double LineHeight
-            {
-                get { return 0.0; }
-            }
+            public override double LineHeight => 0.0;
 
-            public override TextAlignment TextAlignment
-            {
-                get { return TextAlignment.Left; }
-            }
+            public override TextAlignment TextAlignment => TextAlignment.Left;
 
-            public override TextMarkerProperties TextMarkerProperties
-            {
-                get { return null; }
-            }
+            public override TextMarkerProperties TextMarkerProperties => null;
 
-            public override TextWrapping TextWrapping
-            {
-                get { return TextWrapping.Wrap; }
-            }
+            public override TextWrapping TextWrapping => TextWrapping.Wrap;
         }
 
     }

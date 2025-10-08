@@ -43,40 +43,19 @@ namespace ZDebug.Compiler.Generate
             this.math = new MathFunctions(this);
         }
 
-        public int OpcodeCount
-        {
-            get { return opcodeCount; }
-        }
+        public int OpcodeCount => opcodeCount;
 
-        public int LocalCount
-        {
-            get { return localCount; }
-        }
+        public int LocalCount => localCount;
 
-        public int Size
-        {
-            get { return il.ILOffset; }
-        }
+        public int Size => il.ILOffset;
 
-        public ArgumentFunctions Arguments
-        {
-            get { return arguments; }
-        }
+        public ArgumentFunctions Arguments => arguments;
 
-        public CompareFunctions Compare
-        {
-            get { return compare; }
-        }
+        public CompareFunctions Compare => compare;
 
-        public ConvertFunctions Convert
-        {
-            get { return convert; }
-        }
+        public ConvertFunctions Convert => convert;
 
-        public MathFunctions Math
-        {
-            get { return math; }
-        }
+        public MathFunctions Math => math;
 
         internal void Emit(OpCode opcode)
         {

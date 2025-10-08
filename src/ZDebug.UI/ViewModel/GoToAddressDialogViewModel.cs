@@ -16,18 +16,9 @@ namespace ZDebug.UI.ViewModel
         {
         }
 
-        public bool AcceptableAddress
-        {
-            get
-            {
-                return address > 0;
-            }
-        }
+        public bool AcceptableAddress => address > 0;
 
-        public int Address
-        {
-            get { return address; }
-        }
+        public int Address => address;
 
         public string AddressText
         {

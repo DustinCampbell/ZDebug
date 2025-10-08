@@ -11,7 +11,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         public ReadCharGenerator(Instruction instruction)
             : base(instruction)
         {
-            if (instruction.OperandCount > 0)
+            if (instruction.Operands.Length > 0)
             {
                 var inputStreamOp = instruction.Operands[0];
                 if (inputStreamOp.Kind == OperandKind.Variable)

@@ -44,14 +44,8 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             compiler.EmitLoadMemoryByte(address);
         }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+        public override bool CanReuseFirstOperand => true;
 
-        public override bool CanReuseSecondOperand
-        {
-            get { return true; }
-        }
+        public override bool CanReuseSecondOperand => true;
     }
 }

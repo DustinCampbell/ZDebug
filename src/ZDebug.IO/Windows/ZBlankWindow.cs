@@ -28,19 +28,10 @@ namespace ZDebug.IO.Windows
         {
         }
 
-        public override int RowHeight
-        {
-            get { return 0; }
-        }
+        public override int RowHeight => 0;
 
-        public override int ColumnWidth
-        {
-            get { return 0; }
-        }
+        public override int ColumnWidth => 0;
 
-        public override ZWindowType WindowType
-        {
-            get { return ZWindowType.Blank; }
-        }
+        public override ZWindowType WindowType => ZWindowType.Blank;
     }
 }

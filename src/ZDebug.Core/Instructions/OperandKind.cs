@@ -1,9 +1,8 @@
-﻿namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions;
+
+public enum OperandKind
 {
-    public enum OperandKind
-    {
-        LargeConstant,
-        SmallConstant,
-        Variable
-    }
+    LargeConstant,
+    SmallConstant,
+    Variable
 }

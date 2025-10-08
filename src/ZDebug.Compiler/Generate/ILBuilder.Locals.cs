@@ -144,15 +144,9 @@ namespace ZDebug.Compiler.Generate
                 }
             }
 
-            public int Index
-            {
-                get { return local.LocalIndex; }
-            }
+            public int Index => local.LocalIndex;
 
-            public Type Type
-            {
-                get { return local.LocalType; }
-            }
+            public Type Type => local.LocalType;
         }
 
         private class ArrayLocalWrapper : LocalWrapper, IArrayLocal
@@ -336,8 +330,7 @@ namespace ZDebug.Compiler.Generate
                 type = type.MakeByRefType();
             }
 
-            Stack<ILocal> stack;
-            if (!locals.TryGetValue(type, out stack))
+            if (!locals.TryGetValue(type, out var stack))
             {
                 return createWrapper(this, DeclareLocal(type));
             }
@@ -354,8 +347,7 @@ namespace ZDebug.Compiler.Generate
 
         private void ReleaseLocal(LocalWrapper local)
         {
-            Stack<ILocal> stack;
-            if (!locals.TryGetValue(local.Type, out stack))
+            if (!locals.TryGetValue(local.Type, out var stack))
             {
                 stack = new Stack<ILocal>();
                 locals.Add(local.Type, stack);

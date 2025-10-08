@@ -16,61 +16,19 @@ namespace ZDebug.Compiler.CodeGeneration
 
         public abstract void Generate(ILBuilder il, ICompiler compiler);
 
-        public virtual bool CanReuseFirstOperand
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanReuseFirstOperand => false;
 
-        public virtual bool CanReuseSecondOperand
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanReuseSecondOperand => false;
 
-        public virtual bool SignsOperands
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool SignsOperands => false;
 
-        public virtual bool CanReuseStoreVariable
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanReuseStoreVariable => false;
 
-        public virtual bool CanLeaveStoreVariableSigned
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanLeaveStoreVariableSigned => false;
 
-        public virtual bool CanReuseStack
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanReuseStack => false;
 
-        public virtual bool CanReuseByRefOperand
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool CanReuseByRefOperand => false;
 
         public bool ReuseFirstOperand { get; set; }
         public bool ReuseSecondOperand { get; set; }

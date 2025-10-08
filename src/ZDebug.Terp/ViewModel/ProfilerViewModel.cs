@@ -82,7 +82,7 @@ namespace ZDebug.Terp.ViewModel
                         Instruction = i,
                         Address = i.Address,
                         OpcodeName = i.Opcode.Name,
-                        OperandCount = i.OperandCount,
+                        OperandCount = i.Operands.Length,
                         TimesExecuted = timing.Item2.Item1,
                         TotalTime = timing.Item2.Item2
                     };
@@ -106,36 +106,12 @@ namespace ZDebug.Terp.ViewModel
             });
         }
 
-        public List<ICall> CallTreeRoot
-        {
-            get
-            {
-                return callTreeRoot;
-            }
-        }
+        public List<ICall> CallTreeRoot => callTreeRoot;
 
-        public IEnumerable<IRoutine> Routines
-        {
-            get
-            {
-                return routines;
-            }
-        }
+        public IEnumerable<IRoutine> Routines => routines;
 
-        public IEnumerable Instructions
-        {
-            get
-            {
-                return instructions;
-            }
-        }
+        public IEnumerable Instructions => instructions;
 
-        public IEnumerable Opcodes
-        {
-            get
-            {
-                return opcodes;
-            }
-        }
+        public IEnumerable Opcodes => opcodes;
     }
 }

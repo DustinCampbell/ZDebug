@@ -11,10 +11,7 @@ namespace ZDebug.IO.Streams
             this.window = window;
         }
 
-        public ZWindow Window
-        {
-            get { return window; }
-        }
+        public ZWindow Window => window;
 
         public override void PutChar(char ch)
         {

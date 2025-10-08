@@ -33,8 +33,7 @@ namespace ZDebug.UI.Controls
 
             public void Add(string text, FontAndColorSetting format)
             {
-                SimpleTextRunProperties props;
-                if (!propMap.TryGetValue(format.GetHashCode(), out props))
+                if (!propMap.TryGetValue(format.GetHashCode(), out var props))
                 {
                     props = new SimpleTextRunProperties(format);
                     propMap.Add(format.GetHashCode(), props);
@@ -84,15 +83,9 @@ namespace ZDebug.UI.Controls
                 return new TextEndOfParagraph(1);
             }
 
-            public TextRunCache Cache
-            {
-                get { return cache; }
-            }
+            public TextRunCache Cache => cache;
 
-            public int Length
-            {
-                get { return textBuilder.Length; }
-            }
+            public int Length => textBuilder.Length;
         }
     }
 }

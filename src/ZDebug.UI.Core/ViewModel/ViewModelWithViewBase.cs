@@ -16,10 +16,7 @@ namespace ZDebug.UI.ViewModel
             this.viewName = viewName;
         }
 
-        protected TView View
-        {
-            get { return view; }
-        }
+        protected TView View => view;
 
         protected void Dispatch(Action method, DispatcherPriority priority)
         {

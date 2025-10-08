@@ -15,19 +15,10 @@ namespace ZDebug.Compiler.Profiling
             this.size = size;
         }
 
-        public Instruction Instruction
-        {
-            get { return instruction; }
-        }
+        public Instruction Instruction => instruction;
 
-        public int Offset
-        {
-            get { return offset; }
-        }
+        public int Offset => offset;
 
-        public int Size
-        {
-            get { return size; }
-        }
+        public int Size => size;
     }
 }

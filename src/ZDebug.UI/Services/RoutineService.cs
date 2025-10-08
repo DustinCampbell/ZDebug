@@ -55,13 +55,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public ZRoutineTable RoutineTable
-        {
-            get
-            {
-                return routineTable;
-            }
-        }
+        public ZRoutineTable RoutineTable => routineTable;
 
         void IPersistable.Load(XElement xml)
         {

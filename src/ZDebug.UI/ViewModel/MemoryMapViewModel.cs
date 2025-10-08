@@ -45,14 +45,8 @@ namespace ZDebug.UI.ViewModel
             PropertyChanged("HasStory");
         }
 
-        public ReadOnlyCollection<MemoryMapRegionViewModel> Regions
-        {
-            get { return regions; }
-        }
+        public ReadOnlyCollection<MemoryMapRegionViewModel> Regions => regions;
 
-        public bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
+        public bool HasStory => storyService.IsStoryOpen;
     }
 }

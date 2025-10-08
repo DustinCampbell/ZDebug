@@ -12,10 +12,7 @@ namespace ZDebug.UI.ViewModel
             this.property = property;
         }
 
-        public int Number
-        {
-            get { return property.Number; }
-        }
+        public int Number => property.Number;
 
         public string DataDisplayText
         {

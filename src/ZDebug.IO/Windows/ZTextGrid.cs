@@ -239,9 +239,6 @@ namespace ZDebug.IO.Windows
             return visuals[index];
         }
 
-        protected override int VisualChildrenCount
-        {
-            get { return visuals.Count; }
-        }
+        protected override int VisualChildrenCount => visuals.Count;
     }
 }

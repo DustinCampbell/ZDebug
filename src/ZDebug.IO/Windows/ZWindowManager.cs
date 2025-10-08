@@ -149,14 +149,8 @@ namespace ZDebug.IO.Windows
             activeWindow = window;
         }
 
-        public ZWindow Root
-        {
-            get { return root; }
-        }
+        public ZWindow Root => root;
 
-        public ZWindow ActiveWindow
-        {
-            get { return activeWindow; }
-        }
+        public ZWindow ActiveWindow => activeWindow;
     }
 }

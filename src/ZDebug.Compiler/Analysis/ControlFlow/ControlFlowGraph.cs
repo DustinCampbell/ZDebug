@@ -154,21 +154,9 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
             return results;
         }
 
-        public Block Entry
-        {
-            get
-            {
-                return entry;
-            }
-        }
+        public Block Entry => entry;
 
-        public Block Exit
-        {
-            get
-            {
-                return exit;
-            }
-        }
+        public Block Exit => exit;
 
         public IEnumerable<CodeBlock> CodeBlocks
         {
@@ -195,13 +183,7 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
             }
         }
 
-        public int InstructionCount
-        {
-            get
-            {
-                return this.instructionCount;
-            }
-        }
+        public int InstructionCount => this.instructionCount;
 
         public static ControlFlowGraph Build(ZRoutine routine)
         {

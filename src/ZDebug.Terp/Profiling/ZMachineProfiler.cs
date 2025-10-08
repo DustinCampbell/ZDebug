@@ -97,8 +97,7 @@ namespace ZDebug.Terp.Profiling
         {
             instructionTimer.Stop();
 
-            Tuple<int, TimeSpan> timings;
-            if (instructionTimings.TryGetValue(address, out timings))
+            if (instructionTimings.TryGetValue(address, out var timings))
             {
                 timings = Tuple.Create(timings.Item1 + 1, timings.Item2.Add(instructionTimer.Elapsed));
             }
@@ -140,13 +139,7 @@ namespace ZDebug.Terp.Profiling
             }
         }
 
-        public IEnumerable<RoutineCompilationStatistics> CompilationStatistics
-        {
-            get
-            {
-                return allStatistics.ToList();
-            }
-        }
+        public IEnumerable<RoutineCompilationStatistics> CompilationStatistics => allStatistics.ToList();
 
         public double GetAverageOpcodeILSize(string opcodeName)
         {
@@ -172,37 +165,13 @@ namespace ZDebug.Terp.Profiling
             return (double)totalILSize / (double)numberOpcodes;
         }
 
-        public int RoutinesCompiled
-        {
-            get
-            {
-                return allStatistics.Count;
-            }
-        }
+        public int RoutinesCompiled => allStatistics.Count;
 
-        public int RoutinesExecuted
-        {
-            get
-            {
-                return routinesExecuted;
-            }
-        }
+        public int RoutinesExecuted => routinesExecuted;
 
-        public int InstructionsExecuted
-        {
-            get
-            {
-                return instructionsExecuted;
-            }
-        }
+        public int InstructionsExecuted => instructionsExecuted;
 
-        public ICall RootCall
-        {
-            get
-            {
-                return calls[0];
-            }
-        }
+        public ICall RootCall => calls[0];
 
         public IEnumerable<IRoutine> Routines
         {
@@ -228,28 +197,10 @@ namespace ZDebug.Terp.Profiling
             }
         }
 
-        public TimeSpan RunningTime
-        {
-            get
-            {
-                return runningTime;
-            }
-        }
+        public TimeSpan RunningTime => runningTime;
 
-        public int DirectCallCount
-        {
-            get
-            {
-                return directCallCount;
-            }
-        }
+        public int DirectCallCount => directCallCount;
 
-        public int CalculatedCallCount
-        {
-            get
-            {
-                return calculatedCallCount;
-            }
-        }
+        public int CalculatedCallCount => calculatedCallCount;
     }
 }

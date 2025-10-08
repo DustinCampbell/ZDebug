@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 using ZDebug.IO.Services;
 
@@ -149,7 +148,7 @@ namespace ZDebug.UI.Controls
                 }
             }
 
-            public void AddOperands(ReadOnlyArray<Operand> operands)
+            public void AddOperands(ReadOnlySpan<Operand> operands)
             {
                 var firstOpAdded = false;
 

@@ -1,75 +1,74 @@
 ﻿using System;
-using ZDebug.Core.Collections;
+using System.Collections.Generic;
 
-namespace ZDebug.Core.Instructions
+namespace ZDebug.Core.Instructions;
+
+public sealed class InstructionCache
 {
-    public sealed class InstructionCache
+    private readonly Dictionary<int, Instruction> _map;
+
+    private Operand[] _operandArray = new Operand[1024];
+    private int _operandArrayFreeIndex;
+    private int _operandArraySize = 1024;
+
+    private ushort[] _zwordArray = new ushort[1024];
+    private int _zwordArrayFreeIndex;
+    private int _zwordArraySize = 1024;
+
+    public InstructionCache(int capacity = 0)
     {
-        private readonly IntegerMap<Instruction> map;
+        _map = new Dictionary<int, Instruction>(capacity);
+    }
 
-        private Operand[] operandArray = new Operand[1024];
-        private int operandArrayFreeIndex;
-        private int operandArraySize = 1024;
+    internal bool TryGet(int address, out Instruction instruction)
+    {
+        return _map.TryGetValue(address, out instruction);
+    }
 
-        private ushort[] zwordArray = new ushort[1024];
-        private int zwordArrayFreeIndex;
-        private int zwordArraySize = 1024;
+    internal void Add(int address, Instruction instruction)
+    {
+        _map.Add(address, instruction);
+    }
 
-        public InstructionCache(int capacity = 0)
+    internal Memory<Operand> AllocateOperands(int length)
+    {
+        if (length == 0)
         {
-            map = new IntegerMap<Instruction>(capacity);
+            return Memory<Operand>.Empty;
         }
 
-        internal bool TryGet(int address, out Instruction instruction)
+        if (_operandArrayFreeIndex > _operandArraySize - length)
         {
-            return map.TryGetValue(address, out instruction);
+            var newSize = _operandArray.Length * 2;
+            var newOperandArray = new Operand[newSize];
+            Array.Copy(_operandArray, 0, newOperandArray, 0, _operandArray.Length);
+            _operandArray = newOperandArray;
+            _operandArraySize = newSize;
         }
 
-        internal void Add(int address, Instruction instruction)
+        var result = _operandArray.AsMemory(_operandArrayFreeIndex, length);
+        _operandArrayFreeIndex += length;
+        return result;
+    }
+
+    internal Memory<ushort> AllocateZWords(int length)
+    {
+        if (length == 0)
         {
-            map.Add(address, instruction);
+            return Memory<ushort>.Empty;
         }
 
-        internal ReadOnlyArray<Operand> AllocateOperands(int length)
+        if (_zwordArrayFreeIndex > _zwordArraySize - length)
         {
-            if (length == 0)
-            {
-                return ReadOnlyArray<Operand>.Empty;
-            }
-
-            if (operandArrayFreeIndex > operandArraySize - length)
-            {
-                var newSize = operandArray.Length * 2;
-                var newOperandArray = new Operand[newSize];
-                Array.Copy(operandArray, 0, newOperandArray, 0, operandArray.Length);
-                operandArray = newOperandArray;
-                operandArraySize = newSize;
-            }
-
-            var result = new ReadOnlyArray<Operand>(operandArray, operandArrayFreeIndex, length);
-            operandArrayFreeIndex += length;
-            return result;
+            var newSize = _zwordArray.Length * 2;
+            var newZWordsArray = new ushort[newSize];
+            Array.Copy(_zwordArray, 0, newZWordsArray, 0, _zwordArray.Length);
+            _zwordArray = newZWordsArray;
+            _zwordArraySize = newSize;
         }
 
-        internal ReadOnlyArray<ushort> AllocateZWords(int length)
-        {
-            if (length == 0)
-            {
-                return ReadOnlyArray<ushort>.Empty;
-            }
-
-            if (zwordArrayFreeIndex > zwordArraySize - length)
-            {
-                var newSize = zwordArray.Length * 2;
-                var newZWordsArray = new ushort[newSize];
-                Array.Copy(zwordArray, 0, newZWordsArray, 0, zwordArray.Length);
-                zwordArray = newZWordsArray;
-                zwordArraySize = newSize;
-            }
-
-            var result = new ReadOnlyArray<ushort>(zwordArray, zwordArrayFreeIndex, length);
-            zwordArrayFreeIndex += length;
-            return result;
-        }
+        var result = _zwordArray.AsMemory(_zwordArrayFreeIndex, length);
+        _zwordArrayFreeIndex += length;
+        return result;
     }
 }

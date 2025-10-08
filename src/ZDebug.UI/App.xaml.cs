@@ -32,12 +32,6 @@ namespace ZDebug.UI
             this.MainWindow.Show();
         }
 
-        public new static App Current
-        {
-            get
-            {
-                return ((App)Application.Current);
-            }
-        }
+        public new static App Current => ((App)Application.Current);
     }
 }

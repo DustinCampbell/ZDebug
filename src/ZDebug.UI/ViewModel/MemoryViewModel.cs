@@ -124,14 +124,8 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public bool HasStory
-        {
-            get { return storyService.IsStoryOpen; }
-        }
+        public bool HasStory => storyService.IsStoryOpen;
 
-        public BulkObservableCollection<MemoryLineViewModel> Lines
-        {
-            get { return lines; }
-        }
+        public BulkObservableCollection<MemoryLineViewModel> Lines => lines;
     }
 }

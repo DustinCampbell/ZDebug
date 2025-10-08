@@ -20,9 +20,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             compiler.EmitReturn();
         }
 
-        public override bool CanReuseStack
-        {
-            get { return true; }
-        }
+        public override bool CanReuseStack => true;
     }
 }

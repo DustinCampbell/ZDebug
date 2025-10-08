@@ -23,9 +23,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             compiler.EmitPrintChar();
         }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+        public override bool CanReuseFirstOperand => true;
     }
 }

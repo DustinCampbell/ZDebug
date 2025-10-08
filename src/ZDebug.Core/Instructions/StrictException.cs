@@ -1,20 +1,16 @@
 ﻿using System;
 
-namespace ZDebug.Core.Instructions
+namespace ZDebug.Core.Instructions;
+
+public class StrictException : Exception
 {
-    public class StrictException : Exception
+    private readonly Instruction instruction;
+
+    public StrictException(Instruction instruction, string message)
+        : base(message)
     {
-        private readonly Instruction instruction;
-
-        public StrictException(Instruction instruction, string message)
-            : base(message)
-        {
-            this.instruction = instruction;
-        }
-
-        public Instruction Instruction
-        {
-            get { return instruction; }
-        }
+        this.instruction = instruction;
     }
+
+    public Instruction Instruction => instruction;
 }

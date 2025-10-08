@@ -19,7 +19,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             this.op1 = instruction.Operands[0];
             this.op2 = instruction.Operands[1];
             this.op3 = instruction.Operands[2];
-            this.op4 = (instruction.OperandCount > 3 ? instruction.Operands[3] : (Operand?)null);
+            this.op4 = (instruction.Operands.Length > 3 ? instruction.Operands[3] : (Operand?)null);
             this.store = instruction.StoreVariable;
             this.branch = instruction.Branch;
         }

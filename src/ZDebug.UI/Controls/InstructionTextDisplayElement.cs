@@ -61,7 +61,7 @@ namespace ZDebug.UI.Controls
                 return;
             }
 
-            if (instruction.OperandCount > 0)
+            if (instruction.Operands.Length > 0)
             {
                 if (instruction.Opcode.IsCall)
                 {
@@ -83,10 +83,10 @@ namespace ZDebug.UI.Controls
                         }
                     }
 
-                    if (instruction.OperandCount > 1)
+                    if (instruction.Operands.Length > 1)
                     {
                         builder.AddSeparator(" (");
-                        builder.AddOperands(instruction.Operands.Skip(1));
+                        builder.AddOperands(instruction.Operands.Slice(1));
                         builder.AddSeparator(")");
                     }
 
@@ -101,10 +101,10 @@ namespace ZDebug.UI.Controls
                 {
                     builder.AddByRefOperand(instruction.Operands[0]);
 
-                    if (instruction.OperandCount > 1)
+                    if (instruction.Operands.Length > 1)
                     {
                         builder.AddSeparator(", ");
-                        builder.AddOperands(instruction.Operands.Skip(1));
+                        builder.AddOperands(instruction.Operands.Slice(1));
                     }
                 }
                 else
@@ -175,7 +175,7 @@ namespace ZDebug.UI.Controls
 
             if (instruction.HasBranch)
             {
-                if (instruction.OperandCount > 0)
+                if (instruction.Operands.Length > 0)
                 {
                     builder.AddSeparator(" ");
                 }

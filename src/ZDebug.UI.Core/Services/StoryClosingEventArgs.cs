@@ -12,12 +12,6 @@ namespace ZDebug.UI.Services
             this.story = story;
         }
 
-        public Story Story
-        {
-            get
-            {
-                return story;
-            }
-        }
+        public Story Story => story;
     }
 }

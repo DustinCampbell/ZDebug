@@ -82,9 +82,6 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public BulkObservableCollection<StackFrameViewModel> StackFrames
-        {
-            get { return stackFrames; }
-        }
+        public BulkObservableCollection<StackFrameViewModel> StackFrames => stackFrames;
     }
 }

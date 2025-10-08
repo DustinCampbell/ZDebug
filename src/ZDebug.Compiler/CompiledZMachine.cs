@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Extensions;
 using ZDebug.Core.Routines;
@@ -39,8 +38,8 @@ namespace ZDebug.Compiler
         private readonly int stringsOffset;
 
         private readonly ZRoutineTable routineTable;
-        private readonly IntegerMap<ZRoutineCall> addressToRoutineCallMap;
-        private readonly IntegerMap<ZCompilerResult> compilationResults;
+        private readonly Dictionary<int, ZRoutineCall> addressToRoutineCallMap;
+        private readonly Dictionary<int, ZCompilerResult> compilationResults;
 
         private readonly Stack<ushort[]> localArrayPool;
 
@@ -73,8 +72,8 @@ namespace ZDebug.Compiler
             this.stringsOffset = (this.Version >= 6 && this.Version <= 7) ? Memory.ReadWord(0x2a) : 0;
 
             this.routineTable = new ZRoutineTable(story);
-            this.addressToRoutineCallMap = new IntegerMap<ZRoutineCall>(8192);
-            this.compilationResults = new IntegerMap<ZCompilerResult>(8192);
+            this.addressToRoutineCallMap = new Dictionary<int, ZRoutineCall>(8192);
+            this.compilationResults = new Dictionary<int, ZCompilerResult>(8192);
 
             this.localArrayPool = new Stack<ushort[]>();
 
@@ -135,8 +134,7 @@ namespace ZDebug.Compiler
 
         private ZRoutine GetRoutineByAddress(int address)
         {
-            ZRoutine routine;
-            if (!routineTable.TryGetByAddress(address, out routine))
+            if (!routineTable.TryGetByAddress(address, out var routine))
             {
                 routineTable.Add(address);
                 routine = routineTable.GetByAddress(address);
@@ -147,8 +145,7 @@ namespace ZDebug.Compiler
 
         internal ZCompilerResult Compile(ZRoutine routine)
         {
-            ZCompilerResult result;
-            if (!compilationResults.TryGetValue(routine.Address, out result))
+            if (!compilationResults.TryGetValue(routine.Address, out var result))
             {
                 result = ZCompiler.Compile(routine, machine: this);
 
@@ -167,8 +164,7 @@ namespace ZDebug.Compiler
 
         internal ZRoutineCall GetRoutineCall(int address)
         {
-            ZRoutineCall routineCall;
-            if (!addressToRoutineCallMap.TryGetValue(address, out routineCall))
+            if (!addressToRoutineCallMap.TryGetValue(address, out var routineCall))
             {
                 cacheMiss++;
                 var routine = GetRoutineByAddress(address);
@@ -709,85 +705,34 @@ namespace ZDebug.Compiler
             stopping = true;
         }
 
-        public bool Profiling
-        {
-            get { return profiler != null; }
-        }
+        public bool Profiling => profiler != null;
 
-        public bool Precompile
-        {
-            get
-            {
-                return precompile;
-            }
-        }
+        public bool Precompile => precompile;
 
-        public bool Debugging
-        {
-            get
-            {
-                return debugging;
-            }
-        }
+        public bool Debugging => debugging;
 
-        public ushort ObjectTableAddress
-        {
-            get { return objectTableAddress; }
-        }
+        public ushort ObjectTableAddress => objectTableAddress;
 
-        public byte PropertyDefaultsTableSize
-        {
-            get { return propertyDefaultsTableSize; }
-        }
+        public byte PropertyDefaultsTableSize => propertyDefaultsTableSize;
 
-        public ushort ObjectEntriesAddress
-        {
-            get { return objectEntriesAddress; }
-        }
+        public ushort ObjectEntriesAddress => objectEntriesAddress;
 
-        public byte ObjectEntrySize
-        {
-            get { return objectEntrySize; }
-        }
+        public byte ObjectEntrySize => objectEntrySize;
 
-        public byte ObjectParentOffset
-        {
-            get { return objectParentOffset; }
-        }
+        public byte ObjectParentOffset => objectParentOffset;
 
-        public byte ObjectSiblingOffset
-        {
-            get { return objectSiblingOffset; }
-        }
+        public byte ObjectSiblingOffset => objectSiblingOffset;
 
-        public byte ObjectChildOffset
-        {
-            get { return objectChildOffset; }
-        }
+        public byte ObjectChildOffset => objectChildOffset;
 
-        public byte ObjectPropertyTableAddressOffset
-        {
-            get { return objectPropertyTableAddressOffset; }
-        }
+        public byte ObjectPropertyTableAddressOffset => objectPropertyTableAddressOffset;
 
-        public byte ObjectAttributesByteCount
-        {
-            get { return objectAttributeByteCount; }
-        }
+        public byte ObjectAttributesByteCount => objectAttributeByteCount;
 
-        public byte ObjectAttributeCount
-        {
-            get { return objectAttributeCount; }
-        }
+        public byte ObjectAttributeCount => objectAttributeCount;
 
-        public int RoutinesOffset
-        {
-            get { return routinesOffset; }
-        }
+        public int RoutinesOffset => routinesOffset;
 
-        public int StringsOffset
-        {
-            get { return stringsOffset; }
-        }
+        public int StringsOffset => stringsOffset;
     }
 }

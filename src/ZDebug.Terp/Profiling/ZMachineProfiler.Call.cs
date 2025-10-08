@@ -60,81 +60,27 @@ namespace ZDebug.Terp.Profiling
                 stopwatch = null;
             }
 
-            public IRoutine Routine
-            {
-                get
-                {
-                    return routine;
-                }
-            }
+            public IRoutine Routine => routine;
 
-            public int Index
-            {
-                get
-                {
-                    return index;
-                }
-            }
+            public int Index => index;
 
-            public ICall Parent
-            {
-                get
-                {
-                    return parentIndex >= 0
+            public ICall Parent => parentIndex >= 0
                         ? profiler.GetCallByIndex(parentIndex)
                         : null;
-                }
-            }
 
-            public ReadOnlyCollection<ICall> Children
-            {
-                get
-                {
-                    return children;
-                }
-            }
+            public ReadOnlyCollection<ICall> Children => children;
 
-            public TimeSpan InclusiveTime
-            {
-                get
-                {
-                    return inclusiveTime;
-                }
-            }
+            public TimeSpan InclusiveTime => inclusiveTime;
 
-            public TimeSpan ExclusiveTime
-            {
-                get
-                {
-                    return exclusiveTime;
-                }
-            }
+            public TimeSpan ExclusiveTime => exclusiveTime;
 
-            public double InclusivePercentage
-            {
-                get
-                {
-                    return parentIndex >= 0
+            public double InclusivePercentage => parentIndex >= 0
                         ? ((double)inclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100
                         : 100.0;
-                }
-            }
 
-            public double ExclusivePercentage
-            {
-                get
-                {
-                    return ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
-                }
-            }
+            public double ExclusivePercentage => ((double)exclusiveTime.Ticks / (double)profiler.GetCallByIndex(parentIndex).InclusiveTime.Ticks) * 100;
 
-            public bool Recursive
-            {
-                get
-                {
-                    return recursive;
-                }
-            }
+            public bool Recursive => recursive;
         }
     }
 }

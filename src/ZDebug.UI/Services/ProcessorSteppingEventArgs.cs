@@ -11,9 +11,6 @@ namespace ZDebug.UI.Services
             this.oldPC = oldPC;
         }
 
-        public int OldPC
-        {
-            get { return oldPC; }
-        }
+        public int OldPC => oldPC;
     }
 }

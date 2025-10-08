@@ -115,54 +115,24 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public string Title
-        {
-            get { return title; }
-        }
+        public string Title => title;
 
-        public string Headline
-        {
-            get { return headline; }
-        }
+        public string Headline => headline;
 
-        public string Author
-        {
-            get { return author; }
-        }
+        public string Author => author;
 
-        public string FirstPublished
-        {
-            get { return firstPublished; }
-        }
+        public string FirstPublished => firstPublished;
 
-        public string Description
-        {
-            get { return description; }
-        }
+        public string Description => description;
 
-        public string CoverFormat
-        {
-            get { return coverFormat; }
-        }
+        public string CoverFormat => coverFormat;
 
-        public int CoverHeight
-        {
-            get { return coverHeight; }
-        }
+        public int CoverHeight => coverHeight;
 
-        public int CoverWidth
-        {
-            get { return coverWidth; }
-        }
+        public int CoverWidth => coverWidth;
 
-        public int CoverId
-        {
-            get { return coverId; }
-        }
+        public int CoverId => coverId;
 
-        public BitmapSource Cover
-        {
-            get { return cover; }
-        }
+        public BitmapSource Cover => cover;
     }
 }

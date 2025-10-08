@@ -131,39 +131,18 @@ namespace ZDebug.IO.Services
             return typeface;
         }
 
-        public FontFamily FontFamily
-        {
-            get { return hasFontFamily ? fontFamily : baseSetting.fontFamily; }
-        }
+        public FontFamily FontFamily => hasFontFamily ? fontFamily : baseSetting.fontFamily;
 
-        public double FontSize
-        {
-            get { return hasFontSize ? fontSize : baseSetting.fontSize; }
-        }
+        public double FontSize => hasFontSize ? fontSize : baseSetting.fontSize;
 
-        public Brush Foreground
-        {
-            get { return hasForeground ? foreground : baseSetting.foreground; }
-        }
+        public Brush Foreground => hasForeground ? foreground : baseSetting.foreground;
 
-        public Brush Background
-        {
-            get { return hasBackground ? background : baseSetting.background; }
-        }
+        public Brush Background => hasBackground ? background : baseSetting.background;
 
-        public FontWeight FontWeight
-        {
-            get { return hasFontWeight ? fontWeight : baseSetting.fontWeight; }
-        }
+        public FontWeight FontWeight => hasFontWeight ? fontWeight : baseSetting.fontWeight;
 
-        public FontStyle FontStyle
-        {
-            get { return hasFontStyle ? fontStyle : baseSetting.fontStyle; }
-        }
+        public FontStyle FontStyle => hasFontStyle ? fontStyle : baseSetting.fontStyle;
 
-        public FontStretch FontStretch
-        {
-            get { return hasFontStretch ? fontStretch : baseSetting.fontStretch; }
-        }
+        public FontStretch FontStretch => hasFontStretch ? fontStretch : baseSetting.fontStretch;
     }
 }

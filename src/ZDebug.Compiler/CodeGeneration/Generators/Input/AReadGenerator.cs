@@ -15,14 +15,14 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
         {
             this.textBufferOp = instruction.Operands[0];
 
-            if (instruction.OperandCount > 1)
+            if (instruction.Operands.Length > 1)
             {
                 this.parseBufferOp = instruction.Operands[1];
             }
 
             this.store = instruction.StoreVariable;
 
-            if (instruction.OperandCount > 2)
+            if (instruction.Operands.Length > 2)
             {
                 new ZCompilerException("Timed input not supported");
             }

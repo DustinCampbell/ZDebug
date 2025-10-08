@@ -13,14 +13,8 @@ namespace ZDebug.UI.Services
             this.newPC = newPC;
         }
 
-        public int OldPC
-        {
-            get { return oldPC; }
-        }
+        public int OldPC => oldPC;
 
-        public int NewPC
-        {
-            get { return newPC; }
-        }
+        public int NewPC => newPC;
     }
 }

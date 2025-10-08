@@ -102,15 +102,9 @@ namespace ZDebug.IO.Windows
             }
         }
 
-        public ZWindow Child1
-        {
-            get { return child1; }
-        }
+        public ZWindow Child1 => child1;
 
-        public ZWindow Child2
-        {
-            get { return child2; }
-        }
+        public ZWindow Child2 => child2;
 
         public override void Clear()
         {
@@ -124,19 +118,10 @@ namespace ZDebug.IO.Windows
         {
         }
 
-        public override int RowHeight
-        {
-            get { return 0; }
-        }
+        public override int RowHeight => 0;
 
-        public override int ColumnWidth
-        {
-            get { return 0; }
-        }
+        public override int ColumnWidth => 0;
 
-        public override ZWindowType WindowType
-        {
-            get { return ZWindowType.Pair; }
-        }
+        public override ZWindowType WindowType => ZWindowType.Pair;
     }
 }

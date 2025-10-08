@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Routines;
 
@@ -7,12 +6,16 @@ namespace ZDebug.Compiler.Analysis
 {
     internal class InstructionLinkedList : LinkedList<Instruction>
     {
-        private readonly IntegerMap<LinkedListNode<Instruction>> addressToNodeMap;
+        private readonly Dictionary<int, LinkedListNode<Instruction>> addressToNodeMap;
 
         public InstructionLinkedList(ZRoutine routine)
-            : base(routine.Instructions)
         {
-            this.addressToNodeMap = new IntegerMap<LinkedListNode<Instruction>>();
+            foreach (var i in routine.Instructions)
+            {
+                this.AddLast(i);
+            }
+
+            this.addressToNodeMap = new Dictionary<int, LinkedListNode<Instruction>>();
 
             var node = this.First;
             while (node != null)

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2002
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11104.47 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{341C699C-8941-4F47-BD21-77F1903A8BB8}"
 EndProject
@@ -24,6 +24,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZDebug.Core.Tests", "tests\ZDebug.Core.Tests\ZDebug.Core.Tests.csproj", "{C384AF1A-D47A-4CEE-BEE1-DA3453124ADA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZDebug.Compiler.Tests", "tests\ZDebug.Compiler.Tests\ZDebug.Compiler.Tests.csproj", "{09C25043-CC07-4BA2-BBB2-8A2608112C3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E1ECD9A0-D9C1-41C3-BB82-90B21B33207E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

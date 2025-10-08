@@ -26,21 +26,9 @@ namespace ZDebug.Compiler.Analysis.ControlFlow
             block.jumpSources.Add(this);
         }
 
-        public List<Block> JumpSources
-        {
-            get
-            {
-                return this.jumpSources;
-            }
-        }
+        public List<Block> JumpSources => this.jumpSources;
 
-        public List<Block> JumpTargets
-        {
-            get
-            {
-                return this.jumpTargets;
-            }
-        }
+        public List<Block> JumpTargets => this.jumpTargets;
 
         public override string ToString()
         {

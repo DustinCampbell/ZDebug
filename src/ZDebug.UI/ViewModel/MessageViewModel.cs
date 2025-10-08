@@ -11,20 +11,11 @@
             this.error = error;
         }
 
-        public bool IsError
-        {
-            get { return error; }
-        }
+        public bool IsError => error;
 
-        public bool IsWarning
-        {
-            get { return !error; }
-        }
+        public bool IsWarning => !error;
 
-        public string Message
-        {
-            get { return message; }
-        }
+        public string Message => message;
 
         public static MessageViewModel CreateError(string message)
         {

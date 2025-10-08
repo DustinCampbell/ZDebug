@@ -17,45 +17,21 @@ namespace ZDebug.UI.Controls
                 this.fontAndColorSetting = fontAndColorSetting;
             }
 
-            public override Brush BackgroundBrush
-            {
-                get { return fontAndColorSetting.Background; }
-            }
+            public override Brush BackgroundBrush => fontAndColorSetting.Background;
 
-            public override CultureInfo CultureInfo
-            {
-                get { return CultureInfo.InvariantCulture; }
-            }
+            public override CultureInfo CultureInfo => CultureInfo.InvariantCulture;
 
-            public override double FontHintingEmSize
-            {
-                get { return fontAndColorSetting.FontSize; }
-            }
+            public override double FontHintingEmSize => fontAndColorSetting.FontSize;
 
-            public override double FontRenderingEmSize
-            {
-                get { return fontAndColorSetting.FontSize; }
-            }
+            public override double FontRenderingEmSize => fontAndColorSetting.FontSize;
 
-            public override Brush ForegroundBrush
-            {
-                get { return fontAndColorSetting.Foreground; }
-            }
+            public override Brush ForegroundBrush => fontAndColorSetting.Foreground;
 
-            public override TextDecorationCollection TextDecorations
-            {
-                get { return null; }
-            }
+            public override TextDecorationCollection TextDecorations => null;
 
-            public override TextEffectCollection TextEffects
-            {
-                get { return null; }
-            }
+            public override TextEffectCollection TextEffects => null;
 
-            public override Typeface Typeface
-            {
-                get { return fontAndColorSetting.GetTypeface(); }
-            }
+            public override Typeface Typeface => fontAndColorSetting.GetTypeface();
         }
 
     }

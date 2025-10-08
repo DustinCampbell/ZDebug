@@ -63,10 +63,7 @@ namespace ZDebug.UI.Services
             return commands[commandIndex++];
         }
 
-        public int CommandCount
-        {
-            get { return commands.Count; }
-        }
+        public int CommandCount => commands.Count;
 
         public IEnumerable<string> Commands
         {

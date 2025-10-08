@@ -1,7 +1,7 @@
-﻿using System.Reflection.Emit;
+﻿using System;
+using System.Reflection.Emit;
 using ZDebug.Compiler.CodeGeneration;
 using ZDebug.Compiler.Generate;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
@@ -53,8 +53,7 @@ namespace ZDebug.Compiler
 
         public ILabel GetLabel(int address)
         {
-            ILabel result;
-            if (addressToLabelMap.TryGetValue(address, out result))
+            if (addressToLabelMap.TryGetValue(address, out var result))
             {
                 return result;
             }
@@ -119,7 +118,7 @@ namespace ZDebug.Compiler
             il.Return();
         }
 
-        private void EmitDirectCall(Operand addressOp, ReadOnlyArray<Operand> args)
+        private void EmitDirectCall(Operand addressOp, ReadOnlySpan<Operand> args)
         {
             if (machine.Profiling)
             {
@@ -169,7 +168,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        private void EmitCalculatedCall(Operand addressOp, ReadOnlyArray<Operand> args, bool reuse)
+        private void EmitCalculatedCall(Operand addressOp, ReadOnlySpan<Operand> args, bool reuse)
         {
             using (var address = il.NewLocal<int>())
             {
@@ -252,7 +251,7 @@ namespace ZDebug.Compiler
             }
         }
 
-        public void EmitCall(Operand address, ReadOnlyArray<Operand> args, bool reuse = false)
+        public void EmitCall(Operand address, ReadOnlySpan<Operand> args, bool reuse = false)
         {
             il.DebugIndent();
 
@@ -1034,9 +1033,6 @@ namespace ZDebug.Compiler
             il.ThrowException<ZMachineQuitException>();
         }
 
-        public byte Version
-        {
-            get { return machine.Version; }
-        }
+        public byte Version => machine.Version;
     }
 }

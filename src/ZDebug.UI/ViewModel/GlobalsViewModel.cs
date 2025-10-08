@@ -88,9 +88,6 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public IndexedVariableViewModel[] Globals
-        {
-            get { return globals; }
-        }
+        public IndexedVariableViewModel[] Globals => globals;
     }
 }

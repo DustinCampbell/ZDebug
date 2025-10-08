@@ -18,7 +18,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 throw new ZCompilerException("Expected non-variable operand.");
             }
 
-            if (instruction.OperandCount > 1)
+            if (instruction.Operands.Length > 1)
             {
                 this.addressOp = instruction.Operands[1];
             }

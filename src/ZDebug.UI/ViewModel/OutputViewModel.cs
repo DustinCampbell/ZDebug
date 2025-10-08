@@ -455,45 +455,21 @@ namespace ZDebug.UI.ViewModel
             }
         }
 
-        public byte ScreenHeightInLines
-        {
-            get { return (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height); }
-        }
+        public byte ScreenHeightInLines => (byte)(windowContainer.ActualHeight / GetFixedFontMeasureText().Height);
 
-        public byte ScreenWidthInColumns
-        {
-            get { return (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width); }
-        }
+        public byte ScreenWidthInColumns => (byte)(windowContainer.ActualWidth / GetFixedFontMeasureText().Width);
 
-        public ushort ScreenHeightInUnits
-        {
-            get { return (ushort)windowContainer.ActualHeight; }
-        }
+        public ushort ScreenHeightInUnits => (ushort)windowContainer.ActualHeight;
 
-        public ushort ScreenWidthInUnits
-        {
-            get { return (ushort)windowContainer.ActualWidth; }
-        }
+        public ushort ScreenWidthInUnits => (ushort)windowContainer.ActualWidth;
 
-        public byte FontHeightInUnits
-        {
-            get { return (byte)GetFixedFontMeasureText().Height; }
-        }
+        public byte FontHeightInUnits => (byte)GetFixedFontMeasureText().Height;
 
-        public byte FontWidthInUnits
-        {
-            get { return (byte)GetFixedFontMeasureText().Width; }
-        }
+        public byte FontWidthInUnits => (byte)GetFixedFontMeasureText().Width;
 
-        public ZColor DefaultBackgroundColor
-        {
-            get { return ZColor.White; }
-        }
+        public ZColor DefaultBackgroundColor => ZColor.White;
 
-        public ZColor DefaultForegroundColor
-        {
-            get { return ZColor.Black; }
-        }
+        public ZColor DefaultForegroundColor => ZColor.Black;
 
 
         public void HighBeep()

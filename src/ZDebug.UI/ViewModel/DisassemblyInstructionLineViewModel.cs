@@ -13,24 +13,12 @@ namespace ZDebug.UI.ViewModel
             this.isLast = isLast;
         }
 
-        public int Address
-        {
-            get { return instruction.Address; }
-        }
+        public int Address => instruction.Address;
 
-        public bool IsLast
-        {
-            get { return isLast; }
-        }
+        public bool IsLast => isLast;
 
-        public string OpcodeName
-        {
-            get { return instruction.Opcode.Name; }
-        }
+        public string OpcodeName => instruction.Opcode.Name;
 
-        public Instruction Instruction
-        {
-            get { return instruction; }
-        }
+        public Instruction Instruction => instruction;
     }
 }

@@ -147,13 +147,7 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public bool CanStartDebugging
-        {
-            get
-            {
-                return state == DebuggerState.Stopped;
-            }
-        }
+        public bool CanStartDebugging => state == DebuggerState.Stopped;
 
         private void RunModePump()
         {
@@ -194,23 +188,14 @@ namespace ZDebug.UI.Services
             Application.Current.Dispatcher.BeginInvoke(new Action(RunModePump), DispatcherPriority.Background);
         }
 
-        public bool CanStopDebugging
-        {
-            get
-            {
-                return state == DebuggerState.Running;
-            }
-        }
+        public bool CanStopDebugging => state == DebuggerState.Running;
 
         public void StopDebugging()
         {
             stopping = true;
         }
 
-        public bool CanStepNext
-        {
-            get { return state == DebuggerState.Stopped; }
-        }
+        public bool CanStepNext => state == DebuggerState.Stopped;
 
         public void StepNext()
         {
@@ -225,14 +210,8 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public bool CanResetSession
-        {
-            get
-            {
-                return state != DebuggerState.Running
+        public bool CanResetSession => state != DebuggerState.Running
                     && state != DebuggerState.Unavailable && hasStepped;
-            }
-        }
 
         public void ResetSession()
         {
@@ -276,20 +255,11 @@ namespace ZDebug.UI.Services
             }
         }
 
-        public DebuggerState State
-        {
-            get { return state; }
-        }
+        public DebuggerState State => state;
 
-        public InterpretedZMachine Machine
-        {
-            get { return machine; }
-        }
+        public InterpretedZMachine Machine => machine;
 
-        public Exception CurrentException
-        {
-            get { return currentException; }
-        }
+        public Exception CurrentException => currentException;
 
         public event EventHandler<MachineCreatedEventArgs> MachineCreated;
         public event EventHandler<MachineDestroyedEventArgs> MachineDestroyed;

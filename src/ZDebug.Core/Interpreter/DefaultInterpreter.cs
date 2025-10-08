@@ -1,95 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿namespace ZDebug.Core.Interpreter;
 
-namespace ZDebug.Core.Interpreter
+internal sealed class DefaultInterpreter : IInterpreter
 {
-    internal sealed class DefaultInterpreter : IInterpreter
-    {
-        public InterpreterTarget Target
-        {
-            get { return InterpreterTarget.IBMPC; }
-        }
+    public InterpreterTarget Target => InterpreterTarget.IBMPC;
 
-        public byte Version
-        {
-            get { return (byte)'A'; }
-        }
+    public byte Version => (byte)'A';
 
-        public byte StandardRevisionMajorVersion
-        {
-            get { return 1; }
-        }
+    public byte StandardRevisionMajorVersion => 1;
 
-        public byte StandardRevisionMinorVersion
-        {
-            get { return 0; }
-        }
+    public byte StandardRevisionMinorVersion => 0;
 
-        public bool SupportsStatusLine
-        {
-            get { return false; }
-        }
+    public bool SupportsStatusLine => false;
 
-        public bool SupportsScreenSplitting
-        {
-            get { return false; }
-        }
+    public bool SupportsScreenSplitting => false;
 
-        public bool IsDefaultFontVariablePitch
-        {
-            get { return false; }
-        }
+    public bool IsDefaultFontVariablePitch => false;
 
-        public bool SupportsColor
-        {
-            get { return false; }
-        }
+    public bool SupportsColor => false;
 
-        public bool SupportsPictureDisplay
-        {
-            get { return false; }
-        }
+    public bool SupportsPictureDisplay => false;
 
-        public bool SupportsBoldFont
-        {
-            get { return false; }
-        }
+    public bool SupportsBoldFont => false;
 
-        public bool SupportsItalicFont
-        {
-            get { return false; }
-        }
+    public bool SupportsItalicFont => false;
 
-        public bool SupportsFixedWidthFont
-        {
-            get { return false; }
-        }
+    public bool SupportsFixedWidthFont => false;
 
-        public bool SupportsSoundEffects
-        {
-            get { return false; }
-        }
+    public bool SupportsSoundEffects => false;
 
-        public bool SupportsTimedKeyboardInput
-        {
-            get { return false; }
-        }
+    public bool SupportsTimedKeyboardInput => false;
 
-        public bool SupportsUndo
-        {
-            get { return false; }
-        }
+    public bool SupportsUndo => false;
 
-        public bool SupportsMouse
-        {
-            get { return false; }
-        }
+    public bool SupportsMouse => false;
 
-        public bool SupportsMenus
-        {
-            get { return false; }
-        }
-    }
+    public bool SupportsMenus => false;
 }

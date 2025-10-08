@@ -1,39 +1,18 @@
-﻿namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions;
+
+public readonly struct Branch(bool condition, short offset, int endAddress)
 {
-    public struct Branch
+    public readonly bool Condition = condition;
+    public readonly short Offset = offset;
+
+    private readonly int _endAddress = endAddress;
+
+    public BranchKind Kind => Offset switch
     {
-        public readonly BranchKind Kind;
-        public readonly bool Condition;
-        public readonly short Offset;
+        0 => BranchKind.RFalse,
+        1 => BranchKind.RTrue,
+        _ => BranchKind.Address,
+    };
 
-        private readonly int endAddress;
-
-        public Branch(bool condition, short offset, int endAddress)
-        {
-            this.Condition = condition;
-            this.Offset = offset;
-            this.endAddress = endAddress;
-
-            if (offset == 0)
-            {
-                this.Kind = BranchKind.RFalse;
-            }
-            else if (offset == 1)
-            {
-                this.Kind = BranchKind.RTrue;
-            }
-            else
-            {
-                this.Kind = BranchKind.Address;
-            }
-        }
-
-        public int TargetAddress
-        {
-            get
-            {
-                return endAddress + Offset - 2;
-            }
-        }
-    }
+    public int TargetAddress => _endAddress + Offset - 2;
 }

@@ -1,40 +1,38 @@
-﻿using ZDebug.Compiler.Generate;
-using ZDebug.Core.Collections;
+﻿using System;
+using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler.CodeGeneration.Generators
 {
     internal class JeGenerator : OpcodeGenerator
     {
-        private readonly ReadOnlyArray<Operand> ops;
-        private readonly Branch branch;
+        private ReadOnlySpan<Operand> Ops => Instruction.Operands;
+        private Branch Branch => Instruction.Branch;
 
         public JeGenerator(Instruction instruction)
             : base(instruction)
         {
-            this.ops = instruction.Operands;
-            this.branch = instruction.Branch;
         }
 
         private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)
         {
             if (ReuseFirstOperand)
             {
-                compiler.EmitLoadOperand(ops[1]);
+                compiler.EmitLoadOperand(Ops[1]);
             }
             else if (ReuseSecondOperand)
             {
-                compiler.EmitLoadOperand(ops[0]);
+                compiler.EmitLoadOperand(Ops[0]);
             }
             else
             {
-                compiler.EmitLoadOperand(ops[0]);
-                compiler.EmitLoadOperand(ops[1]);
+                compiler.EmitLoadOperand(Ops[0]);
+                compiler.EmitLoadOperand(Ops[1]);
             }
 
             il.Compare.Equal();
 
-            compiler.EmitBranch(branch);
+            compiler.EmitBranch(Branch);
         }
 
         private void GeneratorForMoreThanTwoOperands(ILBuilder il, ICompiler compiler)
@@ -43,7 +41,7 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             {
                 if (!ReuseFirstOperand)
                 {
-                    compiler.EmitLoadOperand(ops[0]);
+                    compiler.EmitLoadOperand(Ops[0]);
                 }
 
                 x.Store();
@@ -51,15 +49,15 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 var success = il.NewLabel();
                 var done = il.NewLabel();
 
-                for (int j = 1; j < ops.Length; j++)
+                for (int j = 1; j < Ops.Length; j++)
                 {
-                    compiler.EmitLoadOperand(ops[j]);
+                    compiler.EmitLoadOperand(Ops[j]);
                     x.Load();
 
                     il.Compare.Equal();
 
                     // no need to write a branch for the last test
-                    if (j < ops.Length - 1)
+                    if (j < Ops.Length - 1)
                     {
                         success.BranchIf(Condition.True, @short: true);
                     }
@@ -73,31 +71,25 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
                 il.Load(1);
 
                 done.Mark();
-                compiler.EmitBranch(branch);
+                compiler.EmitBranch(Branch);
             }
 
         }
 
         public override void Generate(ILBuilder il, ICompiler compiler)
         {
-            if (ops.Length == 2)
+            if (Ops.Length == 2)
             {
                 GenerateForTwoOperands(il, compiler);
             }
-            else if (ops.Length == 3 || ops.Length == 4)
+            else if (Ops.Length == 3 || Ops.Length == 4)
             {
                 GeneratorForMoreThanTwoOperands(il, compiler);
             }
         }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+        public override bool CanReuseFirstOperand => true;
 
-        public override bool CanReuseSecondOperand
-        {
-            get { return ops.Length == 2; }
-        }
+        public override bool CanReuseSecondOperand => Ops.Length == 2;
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace ZDebug.Core.Execution
+namespace ZDebug.Core.Execution;
+
+public interface IInputStream
 {
-    public interface IInputStream
-    {
-        void ReadChar(Action<char> callback);
-        void ReadCommand(int maxChars, Action<string> callback);
-    }
+    void ReadChar(Action<char> callback);
+    void ReadCommand(int maxChars, Action<string> callback);
 }

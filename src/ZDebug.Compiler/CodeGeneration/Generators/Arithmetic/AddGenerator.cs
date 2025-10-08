@@ -41,12 +41,6 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             il.Math.Add();
         }
 
-        public override bool CanReuseSecondOperand
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool CanReuseSecondOperand => true;
     }
 }

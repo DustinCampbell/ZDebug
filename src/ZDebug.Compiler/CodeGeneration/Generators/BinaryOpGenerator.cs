@@ -58,24 +58,12 @@ namespace ZDebug.Compiler.CodeGeneration.Generators
             }
         }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+        public override bool CanReuseFirstOperand => true;
 
-        public override bool CanReuseStoreVariable
-        {
-            get { return true; }
-        }
+        public override bool CanReuseStoreVariable => true;
 
-        public override bool SignsOperands
-        {
-            get { return signed; }
-        }
+        public override bool SignsOperands => signed;
 
-        public override bool CanLeaveStoreVariableSigned
-        {
-            get { return true; }
-        }
+        public override bool CanLeaveStoreVariableSigned => true;
     }
 }

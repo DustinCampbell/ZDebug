@@ -97,8 +97,7 @@ namespace ZDebug.Compiler
 
                 foreach (var generator in generators)
                 {
-                    ILabel label;
-                    if (this.addressToLabelMap.TryGetValue(generator.Instruction.Address, out label))
+                    if (this.addressToLabelMap.TryGetValue(generator.Instruction.Address, out var label))
                     {
                         label.Mark();
                     }
@@ -178,7 +177,7 @@ namespace ZDebug.Compiler
         private static void OptimizeReuseByRefOperand(OpcodeGenerator generator, OpcodeGenerator nextGenerator)
         {
             Debug.Assert(generator.Instruction.Opcode.IsFirstOpByRef);
-            Debug.Assert(generator.Instruction.OperandCount > 0);
+            Debug.Assert(generator.Instruction.Operands.Length > 0);
 
             var byRefOperand = generator.Instruction.Operands[0];
             if (byRefOperand.Kind == OperandKind.SmallConstant)
@@ -187,7 +186,7 @@ namespace ZDebug.Compiler
                 {
                     if (nextGenerator.CanReuseFirstOperand)
                     {
-                        Debug.Assert(nextGenerator.Instruction.OperandCount > 0);
+                        Debug.Assert(nextGenerator.Instruction.Operands.Length > 0);
 
                         var firstOperand = nextGenerator.Instruction.Operands[0];
                         if (firstOperand.IsVariable)
@@ -208,7 +207,7 @@ namespace ZDebug.Compiler
 
                     if (nextGenerator.CanReuseSecondOperand && !nextGenerator.ReuseFirstOperand)
                     {
-                        Debug.Assert(nextGenerator.Instruction.OperandCount > 1);
+                        Debug.Assert(nextGenerator.Instruction.Operands.Length > 1);
 
                         var secondOperand = nextGenerator.Instruction.Operands[1];
                         if (secondOperand.IsVariable)
@@ -249,12 +248,12 @@ namespace ZDebug.Compiler
             {
                 if (nextGenerator.CanReuseFirstOperand)
                 {
-                    Debug.Assert(nextGenerator.Instruction.OperandCount > 0);
+                    Debug.Assert(nextGenerator.Instruction.Operands.Length > 0);
 
                     var firstOperand = nextGenerator.Instruction.Operands[0];
                     if (firstOperand.IsVariable)
                     {
-                        if (firstOperand.Value == generator.Instruction.StoreVariable.ToByte())
+                        if (firstOperand.Value == generator.Instruction.StoreVariable.ByteValue)
                         {
                             Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
                                 generator.Instruction.Address,
@@ -270,12 +269,12 @@ namespace ZDebug.Compiler
 
                 if (nextGenerator.CanReuseSecondOperand && !nextGenerator.ReuseFirstOperand)
                 {
-                    Debug.Assert(nextGenerator.Instruction.OperandCount > 1);
+                    Debug.Assert(nextGenerator.Instruction.Operands.Length > 1);
 
                     var secondOperand = nextGenerator.Instruction.Operands[1];
                     if (secondOperand.IsVariable)
                     {
-                        if (secondOperand.Value == generator.Instruction.StoreVariable.ToByte())
+                        if (secondOperand.Value == generator.Instruction.StoreVariable.ByteValue)
                         {
                             Debug.WriteLine("{0:x4}: Optimizing {1} between {2} and {3}",
                                 generator.Instruction.Address,

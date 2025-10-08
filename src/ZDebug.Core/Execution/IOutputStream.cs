@@ -1,8 +1,7 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public interface IOutputStream
 {
-    public interface IOutputStream
-    {
-        void Print(string text);
-        void Print(char ch);
-    }
+    void Print(string text);
+    void Print(char ch);
 }

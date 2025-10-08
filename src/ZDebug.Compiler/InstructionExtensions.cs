@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using ZDebug.Core.Extensions;
 using ZDebug.Core.Instructions;
 
 namespace ZDebug.Compiler
@@ -186,7 +187,7 @@ namespace ZDebug.Compiler
 
             builder.AppendFormat("{0:x4}: {1}", i.Address, i.Opcode.Name);
 
-            if (i.OperandCount > 0)
+            if (i.Operands.Length > 0)
             {
                 builder.Append(" ");
 
@@ -201,10 +202,10 @@ namespace ZDebug.Compiler
                         builder.Append(Variable.FromByte((byte)i.Operands[0].Value));
                     }
 
-                    if (i.OperandCount > 1)
+                    if (i.Operands.Length > 1)
                     {
                         builder.Append(" (");
-                        builder.Append(string.Join(", ", i.Operands.Skip(1).Select(op => op.PrettyPrint())));
+                        builder.AppendCommaSeparatedList(i.Operands, op => op.PrettyPrint());
                         builder.Append(")");
                     }
                 }
@@ -218,15 +219,15 @@ namespace ZDebug.Compiler
                 {
                     builder.Append(i.Operands[0].PrettyPrintByRef());
 
-                    if (i.OperandCount > 1)
+                    if (i.Operands.Length > 1)
                     {
                         builder.Append(", ");
-                        builder.Append(string.Join(", ", i.Operands.Skip(1).Select(op => op.PrettyPrint())));
+                        builder.AppendCommaSeparatedList(i.Operands.Slice(1), op => op.PrettyPrint());
                     }
                 }
                 else
                 {
-                    builder.Append(string.Join(", ", i.Operands.Select(op => op.PrettyPrint())));
+                    builder.AppendCommaSeparatedList(i.Operands, op => op.PrettyPrint());
                 }
             }
 
