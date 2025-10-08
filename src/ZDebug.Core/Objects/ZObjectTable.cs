@@ -6,552 +6,502 @@ using ZDebug.Core.Collections;
 using ZDebug.Core.Extensions;
 using ZDebug.Core.Text;
 
-namespace ZDebug.Core.Objects
+namespace ZDebug.Core.Objects;
+
+public class ZObjectTable : IIndexedEnumerable<ZObject>
 {
-    public class ZObjectTable : IIndexedEnumerable<ZObject>
+    private readonly byte[] memory;
+    private readonly ZText ztext;
+    private readonly byte version;
+    private readonly ushort address;
+
+    private readonly ushort maxObjects;
+    private readonly byte maxProperties;
+    private readonly byte propertyDefaultsTableSize;
+    private readonly ushort objectEntriesAddress;
+    private readonly byte entrySize;
+    private readonly byte attributeBytesSize;
+    private readonly byte attributeCount;
+    private readonly byte numberSize;
+    private readonly byte parentOffset;
+    private readonly byte siblingOffset;
+    private readonly byte childOffset;
+    private readonly byte propertyTableAddressOffset;
+
+    private readonly IntegerMap<ZPropertyTable> propertyTables;
+    private readonly ZObject[] objects;
+
+    internal ZObjectTable(byte[] memory, ZText ztext)
     {
-        private readonly byte[] memory;
-        private readonly ZText ztext;
-        private readonly byte version;
-        private readonly ushort address;
+        this.memory = memory;
+        this.ztext = ztext;
+        version = Header.ReadVersion(memory);
+        address = Header.ReadObjectTableAddress(memory);
 
-        private readonly ushort maxObjects;
-        private readonly byte maxProperties;
-        private readonly byte propertyDefaultsTableSize;
-        private readonly ushort objectEntriesAddress;
-        private readonly byte entrySize;
-        private readonly byte attributeBytesSize;
-        private readonly byte attributeCount;
-        private readonly byte numberSize;
-        private readonly byte parentOffset;
-        private readonly byte siblingOffset;
-        private readonly byte childOffset;
-        private readonly byte propertyTableAddressOffset;
+        maxObjects = (ushort)(version <= 3 ? 255 : 65535);
+        maxProperties = (byte)(version <= 3 ? 31 : 63);
+        propertyDefaultsTableSize = (byte)(maxProperties * 2);
+        objectEntriesAddress = (ushort)(address + propertyDefaultsTableSize);
+        entrySize = (byte)(version <= 3 ? 9 : 14);
+        attributeBytesSize = (byte)(version <= 3 ? 4 : 6);
+        attributeCount = (byte)(version <= 3 ? 32 : 48);
+        numberSize = (byte)(version <= 3 ? 1 : 2);
+        parentOffset = (byte)(version <= 3 ? 4 : 6);
+        siblingOffset = (byte)(version <= 3 ? 5 : 8);
+        childOffset = (byte)(version <= 3 ? 6 : 10);
+        propertyTableAddressOffset = (byte)(version <= 3 ? 7 : 12);
 
-        private readonly IntegerMap<ZPropertyTable> propertyTables;
-        private readonly ZObject[] objects;
+        objects = ReadAllObjects();
 
-        internal ZObjectTable(byte[] memory, ZText ztext)
+        propertyTables = new IntegerMap<ZPropertyTable>(objects.Length);
+    }
+
+    internal byte MaxProperties => maxProperties;
+
+    internal ushort GetObjectEntryAddress(ushort objNum)
+    {
+        if (objNum < 1)
         {
-            this.memory = memory;
-            this.ztext = ztext;
-            this.version = Header.ReadVersion(memory);
-            this.address = Header.ReadObjectTableAddress(memory);
-
-            this.maxObjects = (ushort)(version <= 3 ? 255 : 65535);
-            this.maxProperties = (byte)(version <= 3 ? 31 : 63);
-            this.propertyDefaultsTableSize = (byte)(maxProperties * 2);
-            this.objectEntriesAddress = (ushort)(address + propertyDefaultsTableSize);
-            this.entrySize = (byte)(version <= 3 ? 9 : 14);
-            this.attributeBytesSize = (byte)(version <= 3 ? 4 : 6);
-            this.attributeCount = (byte)(version <= 3 ? 32 : 48);
-            this.numberSize = (byte)(version <= 3 ? 1 : 2);
-            this.parentOffset = (byte)(version <= 3 ? 4 : 6);
-            this.siblingOffset = (byte)(version <= 3 ? 5 : 8);
-            this.childOffset = (byte)(version <= 3 ? 6 : 10);
-            this.propertyTableAddressOffset = (byte)(version <= 3 ? 7 : 12);
-
-            this.objects = ReadAllObjects();
-
-            this.propertyTables = new IntegerMap<ZPropertyTable>(objects.Length);
+            throw new ArgumentOutOfRangeException("objNum");
         }
 
-        internal byte MaxProperties
+        return (ushort)(objectEntriesAddress + ((objNum - 1) * entrySize));
+    }
+
+    internal ushort ReadPropertyDefault(int propNum)
+    {
+        if (propNum < 1 || propNum > maxProperties)
         {
-            get { return maxProperties; }
+            throw new ArgumentOutOfRangeException("propNum");
         }
 
-        internal ushort GetObjectEntryAddress(ushort objNum)
-        {
-            if (objNum < 1)
-            {
-                throw new ArgumentOutOfRangeException("objNum");
-            }
+        return memory.ReadWord(address + ((propNum - 1) * 2));
+    }
 
-            return (ushort)(objectEntriesAddress + ((objNum - 1) * entrySize));
+    internal byte[] ReadAttributeBytesByObjectAddress(ushort objAddress) => memory.ReadBytes(objAddress, attributeBytesSize);
+
+    internal byte[] ReadAttributeBytesByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return ReadAttributeBytesByObjectAddress(objAddress);
+    }
+
+    internal void WriteAttributeBytesByObjectAddress(ushort objAddress, byte[] bytes)
+    {
+        if (bytes == null)
+        {
+            throw new ArgumentNullException("bytes");
         }
 
-        internal ushort ReadPropertyDefault(int propNum)
+        if (bytes.Length != attributeBytesSize)
         {
-            if (propNum < 1 || propNum > maxProperties)
-            {
-                throw new ArgumentOutOfRangeException("propNum");
-            }
-
-            return memory.ReadWord(address + ((propNum - 1) * 2));
+            throw new ArgumentException("Invalid attribute byte length: " + bytes.Length, "bytes");
         }
 
-        internal byte[] ReadAttributeBytesByObjectAddress(ushort objAddress)
+        memory.WriteBytes(objAddress, bytes);
+    }
+
+    internal void WriteAttributeBytesByObjectNumber(ushort objNum, byte[] bytes)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        WriteAttributeBytesByObjectAddress(objAddress, bytes);
+    }
+
+    internal bool HasAttributeByObjectAddress(ushort objAddress, byte attribute)
+    {
+        if (attribute < 0 || attribute >= attributeCount)
         {
-            return memory.ReadBytes(objAddress, attributeBytesSize);
+            throw new ArgumentOutOfRangeException("attribute");
         }
 
-        internal byte[] ReadAttributeBytesByObjectNumber(ushort objNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
+        var byteIdx = attribute / 8;
+        var bitMask = 1 << (7 - (attribute % 8));
 
-            return ReadAttributeBytesByObjectAddress(objAddress);
+        var b = memory[objAddress + byteIdx];
+
+        return (b & bitMask) != 0;
+    }
+
+    internal bool HasAttributeByObjectNumber(ushort objNum, byte attribute)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return HasAttributeByObjectAddress(objAddress, attribute);
+    }
+
+    internal bool[] GetAllAttributeByObjectAddress(ushort objAddress)
+    {
+        var attributeBytes = ReadAttributeBytesByObjectAddress(objAddress);
+
+        var result = new bool[attributeCount];
+
+        for (var i = 0; i < attributeCount; i++)
+        {
+            var byteIdx = i / 8;
+            var bitMask = 1 << (7 - (i % 8));
+
+            result[i] = (attributeBytes[byteIdx] & bitMask) == bitMask;
         }
 
-        internal void WriteAttributeBytesByObjectAddress(ushort objAddress, byte[] bytes)
+        return result;
+    }
+
+    internal bool[] GetAllAttributeByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return GetAllAttributeByObjectAddress(objAddress);
+    }
+
+    internal void SetAttributeValueByObjectAddress(ushort objAddress, byte attribute, bool value)
+    {
+        if (attribute < 0 || attribute >= attributeCount)
         {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException("bytes");
-            }
-
-            if (bytes.Length != attributeBytesSize)
-            {
-                throw new ArgumentException("Invalid attribute byte length: " + bytes.Length, "bytes");
-            }
-
-            memory.WriteBytes(objAddress, bytes);
+            throw new ArgumentOutOfRangeException("attribute");
         }
 
-        internal void WriteAttributeBytesByObjectNumber(ushort objNum, byte[] bytes)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
+        var attributeBytes = ReadAttributeBytesByObjectAddress(objAddress);
 
-            WriteAttributeBytesByObjectAddress(objAddress, bytes);
+        var byteIdx = attribute / 8;
+        var bitMask = 1 << (7 - (attribute % 8));
+
+        attributeBytes[byteIdx] = value
+            ? (byte)(attributeBytes[byteIdx] | bitMask)
+            : (byte)(attributeBytes[byteIdx] & ~bitMask);
+
+        WriteAttributeBytesByObjectAddress(objAddress, attributeBytes);
+    }
+
+    internal void SetAttributeValueByObjectNumber(ushort objNum, byte attribute, bool value)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        SetAttributeValueByObjectAddress(objAddress, attribute, value);
+    }
+
+    internal ushort ReadObjectNumber(ushort address)
+    {
+        if (numberSize == 1)
+        {
+            return memory[address];
         }
-
-        internal bool HasAttributeByObjectAddress(ushort objAddress, byte attribute)
+        else if (numberSize == 2)
         {
-            if (attribute < 0 || attribute >= attributeCount)
-            {
-                throw new ArgumentOutOfRangeException("attribute");
-            }
-
-            int byteIdx = attribute / 8;
-            int bitMask = 1 << (7 - (attribute % 8));
-
-            byte b = memory[objAddress + byteIdx];
-
-            return (b & bitMask) != 0;
+            return memory.ReadWord(address);
         }
-
-        internal bool HasAttributeByObjectNumber(ushort objNum, byte attribute)
+        else
         {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return HasAttributeByObjectAddress(objAddress, attribute);
+            throw new InvalidOperationException("Invalid object number size: " + numberSize);
         }
+    }
 
-        internal bool[] GetAllAttributeByObjectAddress(ushort objAddress)
+    internal void WriteObjectNumber(ushort address, ushort value)
+    {
+        if (numberSize == 1)
         {
-            byte[] attributeBytes = ReadAttributeBytesByObjectAddress(objAddress);
-
-            bool[] result = new bool[attributeCount];
-
-            for (int i = 0; i < attributeCount; i++)
-            {
-                var byteIdx = i / 8;
-                var bitMask = 1 << (7 - (i % 8));
-
-                result[i] = (attributeBytes[byteIdx] & bitMask) == bitMask;
-            }
-
-            return result;
+            memory[address] = (byte)value;
         }
-
-        internal bool[] GetAllAttributeByObjectNumber(ushort objNum)
+        else if (numberSize == 2)
         {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return GetAllAttributeByObjectAddress(objAddress);
+            memory.WriteWord(address, value);
         }
-
-        internal void SetAttributeValueByObjectAddress(ushort objAddress, byte attribute, bool value)
+        else
         {
-            if (attribute < 0 || attribute >= attributeCount)
-            {
-                throw new ArgumentOutOfRangeException("attribute");
-            }
-
-            byte[] attributeBytes = ReadAttributeBytesByObjectAddress(objAddress);
-
-            int byteIdx = attribute / 8;
-            int bitMask = 1 << (7 - (attribute % 8));
-
-            attributeBytes[byteIdx] = value
-                ? (byte)(attributeBytes[byteIdx] | bitMask)
-                : (byte)(attributeBytes[byteIdx] & ~bitMask);
-
-            WriteAttributeBytesByObjectAddress(objAddress, attributeBytes);
+            throw new InvalidOperationException("Invalid object number size: " + numberSize);
         }
+    }
 
-        internal void SetAttributeValueByObjectNumber(ushort objNum, byte attribute, bool value)
+    internal ushort ReadParentNumberByObjectAddress(ushort objAddress) => ReadObjectNumber((ushort)(objAddress + parentOffset));
+
+    internal ushort ReadParentNumberByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return ReadParentNumberByObjectAddress(objAddress);
+    }
+
+    internal void WriteParentNumberByObjectAddress(ushort objAddress, ushort parentObjNum) => WriteObjectNumber((ushort)(objAddress + parentOffset), parentObjNum);
+
+    internal void WriteParentNumberByObjectNumber(ushort objNum, ushort parentObjNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        WriteParentNumberByObjectAddress(objAddress, parentObjNum);
+    }
+
+    internal ushort ReadSiblingNumberByObjectAddress(ushort objAddress) => ReadObjectNumber((ushort)(objAddress + siblingOffset));
+
+    internal ushort ReadSiblingNumberByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return ReadSiblingNumberByObjectAddress(objAddress);
+    }
+
+    internal void WriteSiblingNumberByObjectAddress(ushort objAddress, ushort siblingObjNum) => WriteObjectNumber((ushort)(objAddress + siblingOffset), siblingObjNum);
+
+    internal void WriteSiblingNumberByObjectNumber(ushort objNum, ushort siblingObjNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        WriteSiblingNumberByObjectAddress(objAddress, siblingObjNum);
+    }
+
+    internal ushort ReadChildNumberByObjectAddress(ushort objAddress) => ReadObjectNumber((ushort)(objAddress + childOffset));
+
+    internal ushort ReadChildNumberByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return ReadChildNumberByObjectAddress(objAddress);
+    }
+
+    internal void WriteChildNumberByObjectAddress(ushort objAddress, ushort childObjNum) => WriteObjectNumber((ushort)(objAddress + childOffset), childObjNum);
+
+    internal void WriteChildNumberByObjectNumber(ushort objNum, ushort childObjNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        WriteChildNumberByObjectAddress(objAddress, childObjNum);
+    }
+
+    internal ushort ReadPropertyTableAddressByObjectAddress(ushort objAddress) => memory.ReadWord(objAddress + propertyTableAddressOffset);
+
+    internal ushort ReadPropertyTableAddressByObjectNumber(ushort objNum)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        return ReadPropertyTableAddressByObjectAddress(objAddress);
+    }
+
+    internal void WritePropertyTableAddressByObjectAddress(ushort objAddress, ushort value) => memory.WriteWord(objAddress + propertyTableAddressOffset, value);
+
+    internal void WritePropertyTableAddressByObjectNumber(ushort objNum, ushort value)
+    {
+        var objAddress = GetObjectEntryAddress(objNum);
+
+        WritePropertyTableAddressByObjectAddress(objAddress, value);
+    }
+
+    internal ZObject[] ReadAllObjects()
+    {
+        var address = objectEntriesAddress;
+        var smallestPropertyTableAddress = UInt16.MaxValue;
+
+        var objects = new List<ZObject>();
+
+        for (ushort i = 1; i <= maxObjects; i++)
         {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            SetAttributeValueByObjectAddress(objAddress, attribute, value);
-        }
-
-        internal ushort ReadObjectNumber(ushort address)
-        {
-            if (numberSize == 1)
-            {
-                return memory[address];
-            }
-            else if (numberSize == 2)
-            {
-                return memory.ReadWord(address);
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid object number size: " + numberSize);
-            }
-        }
-
-        internal void WriteObjectNumber(ushort address, ushort value)
-        {
-            if (numberSize == 1)
-            {
-                memory[address] = (byte)value;
-            }
-            else if (numberSize == 2)
-            {
-                memory.WriteWord(address, value);
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid object number size: " + numberSize);
-            }
-        }
-
-        internal ushort ReadParentNumberByObjectAddress(ushort objAddress)
-        {
-            return ReadObjectNumber((ushort)(objAddress + parentOffset));
-        }
-
-        internal ushort ReadParentNumberByObjectNumber(ushort objNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return ReadParentNumberByObjectAddress(objAddress);
-        }
-
-        internal void WriteParentNumberByObjectAddress(ushort objAddress, ushort parentObjNum)
-        {
-            WriteObjectNumber((ushort)(objAddress + parentOffset), parentObjNum);
-        }
-
-        internal void WriteParentNumberByObjectNumber(ushort objNum, ushort parentObjNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            WriteParentNumberByObjectAddress(objAddress, parentObjNum);
-        }
-
-        internal ushort ReadSiblingNumberByObjectAddress(ushort objAddress)
-        {
-            return ReadObjectNumber((ushort)(objAddress + siblingOffset));
-        }
-
-        internal ushort ReadSiblingNumberByObjectNumber(ushort objNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return ReadSiblingNumberByObjectAddress(objAddress);
-        }
-
-        internal void WriteSiblingNumberByObjectAddress(ushort objAddress, ushort siblingObjNum)
-        {
-            WriteObjectNumber((ushort)(objAddress + siblingOffset), siblingObjNum);
-        }
-
-        internal void WriteSiblingNumberByObjectNumber(ushort objNum, ushort siblingObjNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            WriteSiblingNumberByObjectAddress(objAddress, siblingObjNum);
-        }
-
-        internal ushort ReadChildNumberByObjectAddress(ushort objAddress)
-        {
-            return ReadObjectNumber((ushort)(objAddress + childOffset));
-        }
-
-        internal ushort ReadChildNumberByObjectNumber(ushort objNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return ReadChildNumberByObjectAddress(objAddress);
-        }
-
-        internal void WriteChildNumberByObjectAddress(ushort objAddress, ushort childObjNum)
-        {
-            WriteObjectNumber((ushort)(objAddress + childOffset), childObjNum);
-        }
-
-        internal void WriteChildNumberByObjectNumber(ushort objNum, ushort childObjNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            WriteChildNumberByObjectAddress(objAddress, childObjNum);
-        }
-
-        internal ushort ReadPropertyTableAddressByObjectAddress(ushort objAddress)
-        {
-            return memory.ReadWord(objAddress + propertyTableAddressOffset);
-        }
-
-        internal ushort ReadPropertyTableAddressByObjectNumber(ushort objNum)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            return ReadPropertyTableAddressByObjectAddress(objAddress);
-        }
-
-        internal void WritePropertyTableAddressByObjectAddress(ushort objAddress, ushort value)
-        {
-            memory.WriteWord(objAddress + propertyTableAddressOffset, value);
-        }
-
-        internal void WritePropertyTableAddressByObjectNumber(ushort objNum, ushort value)
-        {
-            ushort objAddress = GetObjectEntryAddress(objNum);
-
-            WritePropertyTableAddressByObjectAddress(objAddress, value);
-        }
-
-        internal ZObject[] ReadAllObjects()
-        {
-            ushort address = objectEntriesAddress;
-            ushort smallestPropertyTableAddress = UInt16.MaxValue;
-
-            var objects = new List<ZObject>();
-
-            for (ushort i = 1; i <= maxObjects; i++)
-            {
-                if (address >= smallestPropertyTableAddress)
-                {
-                    return objects.ToArray();
-                }
-
-                objects.Add(new ZObject(this, ztext, address, i));
-
-                var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
-                smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
-
-                address += entrySize;
-            }
-
             if (address >= smallestPropertyTableAddress)
             {
                 return objects.ToArray();
             }
 
-            throw new InvalidOperationException("Could not find the end of the object table");
+            objects.Add(new ZObject(this, ztext, address, i));
+
+            var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
+            smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
+
+            address += entrySize;
         }
 
-        /// <summary>
-        /// Because this operation walks the entire object table it can be expensive.
-        /// </summary>
-        internal int GetObjectCount()
+        if (address >= smallestPropertyTableAddress)
         {
-            ushort address = objectEntriesAddress;
-            ushort smallestPropertyTableAddress = UInt16.MaxValue;
+            return objects.ToArray();
+        }
 
-            for (int i = 1; i <= maxObjects; i++)
-            {
-                if (address >= smallestPropertyTableAddress)
-                {
-                    return i - 1;
-                }
+        throw new InvalidOperationException("Could not find the end of the object table");
+    }
 
-                var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
-                smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
+    /// <summary>
+    /// Because this operation walks the entire object table it can be expensive.
+    /// </summary>
+    internal int GetObjectCount()
+    {
+        var address = objectEntriesAddress;
+        var smallestPropertyTableAddress = UInt16.MaxValue;
 
-                address += entrySize;
-            }
-
+        for (var i = 1; i <= maxObjects; i++)
+        {
             if (address >= smallestPropertyTableAddress)
             {
-                return maxObjects;
+                return i - 1;
             }
 
-            throw new InvalidOperationException("Could not find the end of the object table");
+            var propertyTableAddress = memory.ReadWord(address + propertyTableAddressOffset);
+            smallestPropertyTableAddress = Math.Min(smallestPropertyTableAddress, propertyTableAddress);
+
+            address += entrySize;
         }
 
-        internal ushort[] ReadShortName(ushort address)
+        if (address >= smallestPropertyTableAddress)
         {
-            var length = memory[address];
-            return memory.ReadWords(address + 1, length);
+            return maxObjects;
         }
 
-        internal ushort[] ReadObjectShortName(ushort objNum)
+        throw new InvalidOperationException("Could not find the end of the object table");
+    }
+
+    internal ushort[] ReadShortName(ushort address)
+    {
+        var length = memory[address];
+        return memory.ReadWords(address + 1, length);
+    }
+
+    internal ushort[] ReadObjectShortName(ushort objNum)
+    {
+        var propertyTableAddress = ReadPropertyTableAddressByObjectNumber(objNum);
+        return ReadShortName(propertyTableAddress);
+    }
+
+    internal byte ReadPropertyDataLength(ushort dataAddress)
+    {
+        if (dataAddress == 0)
         {
-            var propertyTableAddress = ReadPropertyTableAddressByObjectNumber(objNum);
-            return ReadShortName(propertyTableAddress);
+            return 0;
         }
 
-        internal byte ReadPropertyDataLength(ushort dataAddress)
+        var sizeByte = memory[dataAddress - 1];
+
+        byte dataLength;
+        if (version <= 3)
         {
-            if (dataAddress == 0)
-            {
-                return 0;
-            }
-
-            byte sizeByte = memory[dataAddress - 1];
-
-            byte dataLength;
-            if (version <= 3)
-            {
-                dataLength = (byte)((sizeByte >> 5) + 1);
-            }
-            else if ((sizeByte & 0x80) == 0)
-            {
-                dataLength = (byte)((sizeByte >> 6) + 1);
-            }
-            else
-            {
-                dataLength = (byte)(sizeByte & 0x3F);
-            }
-
-            if (dataLength == 0)
-            {
-                dataLength = 64;
-            }
-
-            return dataLength;
+            dataLength = (byte)((sizeByte >> 5) + 1);
+        }
+        else if ((sizeByte & 0x80) == 0)
+        {
+            dataLength = (byte)((sizeByte >> 6) + 1);
+        }
+        else
+        {
+            dataLength = (byte)(sizeByte & 0x3F);
         }
 
-        internal ZProperty[] ReadPropertyTableProperties(ZPropertyTable propertyTable)
+        if (dataLength == 0)
         {
-            // read properties...
-            var props = new List<ZProperty>();
-            var reader = new MemoryReader(memory, propertyTable.Address);
-
-            reader.SkipShortName();
-
-            var version = Header.ReadVersion(memory);
-            var index = 0;
-            var prop = reader.NextProperty(version, propertyTable, index);
-            while (prop != null)
-            {
-                props.Add(prop);
-                prop = reader.NextProperty(version, propertyTable, ++index);
-            }
-
-            return props.ToArray();
+            dataLength = 64;
         }
 
-        internal ushort? TryReadLeftSiblingNumberByObjectNumber(ushort objNum)
+        return dataLength;
+    }
+
+    internal ZProperty[] ReadPropertyTableProperties(ZPropertyTable propertyTable)
+    {
+        // read properties...
+        var props = new List<ZProperty>();
+        var reader = new MemoryReader(memory, propertyTable.Address);
+
+        reader.SkipShortName();
+
+        var version = Header.ReadVersion(memory);
+        var index = 0;
+        var prop = reader.NextProperty(version, propertyTable, index);
+        while (prop != null)
         {
-            ushort parentNum = ReadParentNumberByObjectNumber(objNum);
-            if (parentNum == 0)
-            {
-                return null;
-            }
+            props.Add(prop);
+            prop = reader.NextProperty(version, propertyTable, ++index);
+        }
 
-            ushort parentChildNum = ReadChildNumberByObjectNumber(parentNum);
-            if (parentChildNum == objNum)
-            {
-                return null;
-            }
+        return props.ToArray();
+    }
 
-            ushort next = parentChildNum;
-            while (next != 0)
-            {
-                ushort siblingNum = ReadSiblingNumberByObjectNumber(next);
-                if (siblingNum == objNum)
-                {
-                    return next;
-                }
-                else
-                {
-                    next = siblingNum;
-                }
-            }
-
+    internal ushort? TryReadLeftSiblingNumberByObjectNumber(ushort objNum)
+    {
+        var parentNum = ReadParentNumberByObjectNumber(objNum);
+        if (parentNum == 0)
+        {
             return null;
         }
 
-        public void RemoveObjectFromParentByNumber(ushort objNum)
+        var parentChildNum = ReadChildNumberByObjectNumber(parentNum);
+        if (parentChildNum == objNum)
         {
-            ushort? leftSiblingNum = TryReadLeftSiblingNumberByObjectNumber(objNum);
-            ushort rightSiblingNum = ReadSiblingNumberByObjectNumber(objNum);
-            if (leftSiblingNum.HasValue)
-            {
-                WriteSiblingNumberByObjectNumber(leftSiblingNum.Value, rightSiblingNum);
-            }
-
-            ushort parentNum = ReadParentNumberByObjectNumber(objNum);
-            if (parentNum != 0)
-            {
-                var parentChildNum = ReadChildNumberByObjectNumber(parentNum);
-                if (parentChildNum == objNum)
-                {
-                    WriteChildNumberByObjectNumber(parentNum, rightSiblingNum);
-                }
-            }
-
-            WriteParentNumberByObjectNumber(objNum, 0);
-            WriteSiblingNumberByObjectNumber(objNum, 0);
+            return null;
         }
 
-        public void MoveObjectToDestinationByNumber(ushort objNum, ushort destNum)
+        var next = parentChildNum;
+        while (next != 0)
         {
-            RemoveObjectFromParentByNumber(objNum);
-
-            if (destNum != 0)
+            var siblingNum = ReadSiblingNumberByObjectNumber(next);
+            if (siblingNum == objNum)
             {
-                WriteParentNumberByObjectNumber(objNum, destNum);
-                ushort parentChildNum = ReadChildNumberByObjectNumber(destNum);
-                WriteSiblingNumberByObjectNumber(objNum, parentChildNum);
-                WriteChildNumberByObjectNumber(destNum, objNum);
+                return next;
+            }
+            else
+            {
+                next = siblingNum;
             }
         }
 
-        internal ZPropertyTable GetPropertyTable(ushort address)
+        return null;
+    }
+
+    public void RemoveObjectFromParentByNumber(ushort objNum)
+    {
+        var leftSiblingNum = TryReadLeftSiblingNumberByObjectNumber(objNum);
+        var rightSiblingNum = ReadSiblingNumberByObjectNumber(objNum);
+        if (leftSiblingNum.HasValue)
         {
-            ZPropertyTable propertyTable;
-            if (!propertyTables.TryGetValue(address, out propertyTable))
+            WriteSiblingNumberByObjectNumber(leftSiblingNum.Value, rightSiblingNum);
+        }
+
+        var parentNum = ReadParentNumberByObjectNumber(objNum);
+        if (parentNum != 0)
+        {
+            var parentChildNum = ReadChildNumberByObjectNumber(parentNum);
+            if (parentChildNum == objNum)
             {
-                propertyTable = new ZPropertyTable(this, address);
-                propertyTables.Add(address, propertyTable);
-            }
-
-            return propertyTable;
-        }
-
-        public int Address
-        {
-            get { return address; }
-        }
-
-        public ZObject GetByNumber(int objNum)
-        {
-            return objects[objNum - 1];
-        }
-
-        public ushort GetPropertyDefault(int propNum)
-        {
-            return ReadPropertyDefault(propNum);
-        }
-
-        public ZObject this[int index]
-        {
-            get { return objects[index]; }
-        }
-
-        public int Count
-        {
-            get { return objects.Length; }
-        }
-
-        public IEnumerator<ZObject> GetEnumerator()
-        {
-            for (int i = 0; i < objects.Length; i++)
-            {
-                yield return objects[i];
+                WriteChildNumberByObjectNumber(parentNum, rightSiblingNum);
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        WriteParentNumberByObjectNumber(objNum, 0);
+        WriteSiblingNumberByObjectNumber(objNum, 0);
+    }
+
+    public void MoveObjectToDestinationByNumber(ushort objNum, ushort destNum)
+    {
+        RemoveObjectFromParentByNumber(objNum);
+
+        if (destNum != 0)
         {
-            return GetEnumerator();
+            WriteParentNumberByObjectNumber(objNum, destNum);
+            var parentChildNum = ReadChildNumberByObjectNumber(destNum);
+            WriteSiblingNumberByObjectNumber(objNum, parentChildNum);
+            WriteChildNumberByObjectNumber(destNum, objNum);
         }
     }
+
+    internal ZPropertyTable GetPropertyTable(ushort address)
+    {
+        if (!propertyTables.TryGetValue(address, out var propertyTable))
+        {
+            propertyTable = new ZPropertyTable(this, address);
+            propertyTables.Add(address, propertyTable);
+        }
+
+        return propertyTable;
+    }
+
+    public int Address => address;
+
+    public ZObject GetByNumber(int objNum) => objects[objNum - 1];
+
+    public ushort GetPropertyDefault(int propNum) => ReadPropertyDefault(propNum);
+
+    public ZObject this[int index] => objects[index];
+
+    public int Count => objects.Length;
+
+    public IEnumerator<ZObject> GetEnumerator()
+    {
+        for (var i = 0; i < objects.Length; i++)
+        {
+            yield return objects[i];
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

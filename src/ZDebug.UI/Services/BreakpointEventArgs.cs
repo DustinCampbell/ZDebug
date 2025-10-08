@@ -1,19 +1,15 @@
 ﻿using System;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+public sealed class BreakpointEventArgs : EventArgs
 {
-    public sealed class BreakpointEventArgs : EventArgs
+    private readonly int address;
+
+    public BreakpointEventArgs(int address)
     {
-        private readonly int address;
-
-        public BreakpointEventArgs(int address)
-        {
-            this.address = address;
-        }
-
-        public int Address
-        {
-            get { return address; }
-        }
+        this.address = address;
     }
+
+    public int Address => address;
 }

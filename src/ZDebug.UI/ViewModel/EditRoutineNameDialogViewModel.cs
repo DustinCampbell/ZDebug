@@ -1,31 +1,27 @@
 ﻿using System.Composition;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+[Export, Shared]
+internal sealed class EditRoutineNameDialogViewModel : DialogViewModelBase
 {
-    [Export, Shared]
-    internal sealed class EditRoutineNameDialogViewModel : DialogViewModelBase
+    private string name;
+
+    [ImportingConstructor]
+    public EditRoutineNameDialogViewModel()
+        : base("EditRoutineNameDialogView")
     {
-        private string name;
+    }
 
-        [ImportingConstructor]
-        public EditRoutineNameDialogViewModel()
-            : base("EditRoutineNameDialogView")
-        {
-        }
+    public bool AcceptableName => name.Length > 0;
 
-        public bool AcceptableName
+    public string Name
+    {
+        get => name;
+        set
         {
-            get { return name.Length > 0; }
-        }
-
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                name = value;
-                PropertyChanged("AcceptableName");
-            }
+            name = value;
+            PropertyChanged("AcceptableName");
         }
     }
 }

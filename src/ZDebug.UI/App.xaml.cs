@@ -3,41 +3,31 @@ using System.Windows;
 using ZDebug.UI.Services;
 using ZDebug.UI.ViewModel;
 
-namespace ZDebug.UI
+namespace ZDebug.UI;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    private CompositionHost compositionHost;
+
+    public T GetService<T>()
+        where T : IService => compositionHost.GetExport<T>();
+
+    protected override void OnStartup(StartupEventArgs e)
     {
-        private CompositionHost compositionHost;
+        var configuration = new ContainerConfiguration()
+            .WithAssembly(typeof(App).Assembly)
+            .WithAssembly(typeof(StoryService).Assembly);
 
-        public T GetService<T>()
-            where T : IService
-        {
-            return this.compositionHost.GetExport<T>();
-        }
+        compositionHost = configuration.CreateContainer();
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            var configuration = new ContainerConfiguration()
-                .WithAssembly(typeof(App).Assembly)
-                .WithAssembly(typeof(StoryService).Assembly);
+        // retrieve StorageService to allow it to be connected properly.
+        compositionHost.GetExport<StorageService>();
 
-            this.compositionHost = configuration.CreateContainer();
+        var mainWindowViewModel = compositionHost.GetExport<MainWindowViewModel>();
 
-            // retrieve StorageService to allow it to be connected properly.
-            this.compositionHost.GetExport<StorageService>();
-
-            var mainWindowViewModel = this.compositionHost.GetExport<MainWindowViewModel>();
-
-            this.MainWindow = mainWindowViewModel.CreateView();
-            this.MainWindow.Show();
-        }
-
-        public new static App Current
-        {
-            get
-            {
-                return ((App)Application.Current);
-            }
-        }
+        MainWindow = mainWindowViewModel.CreateView();
+        MainWindow.Show();
     }
+
+    public static new App Current => (App)Application.Current;
 }

@@ -5,139 +5,108 @@ using System.Xml.Linq;
 using ZDebug.Core;
 using ZDebug.Core.Blorb;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+[Export, Shared]
+public class StoryService : IService, IPersistable
 {
-    [Export, Shared]
-    public class StoryService : IService, IPersistable
+    private string fileName;
+    private Story story;
+    private GameInfo gameInfo;
+
+    private void OnStoryOpened(Story story)
     {
-        private string fileName;
-        private Story story;
-        private GameInfo gameInfo;
-
-        private void OnStoryOpened(Story story)
+        var handler = StoryOpened;
+        if (handler != null)
         {
-            var handler = StoryOpened;
-            if (handler != null)
+            handler(this, new StoryOpenedEventArgs(story));
+        }
+    }
+
+    private void OnStoryClosing(Story story)
+    {
+        var handler = StoryClosing;
+        if (handler != null)
+        {
+            handler(this, new StoryClosingEventArgs(story));
+        }
+    }
+
+    private void OnStoryClosed(Story story)
+    {
+        var handler = StoryClosed;
+        if (handler != null)
+        {
+            handler(this, new StoryClosedEventArgs(story));
+        }
+    }
+
+    public void CloseStory()
+    {
+        if (!IsStoryOpen)
+        {
+            return;
+        }
+
+        OnStoryClosing(story);
+
+        var oldStory = story;
+
+        fileName = null;
+        story = null;
+        gameInfo = null;
+
+        OnStoryClosed(oldStory);
+    }
+
+    public Story OpenStory(string fileName)
+    {
+        CloseStory();
+
+        if (Path.GetExtension(fileName) == ".zblorb")
+        {
+            using (var stream = File.OpenRead(fileName))
             {
-                handler(this, new StoryOpenedEventArgs(story));
+                var blorb = new BlorbFile(stream);
+                gameInfo = new GameInfo(blorb);
+                story = blorb.LoadStory();
             }
         }
-
-        private void OnStoryClosing(Story story)
+        else
         {
-            var handler = StoryClosing;
-            if (handler != null)
-            {
-                handler(this, new StoryClosingEventArgs(story));
-            }
+            story = Story.FromBytes(File.ReadAllBytes(fileName));
         }
 
-        private void OnStoryClosed(Story story)
-        {
-            var handler = StoryClosed;
-            if (handler != null)
-            {
-                handler(this, new StoryClosedEventArgs(story));
-            }
-        }
+        this.fileName = fileName;
 
-        public void CloseStory()
-        {
-            if (!IsStoryOpen)
-            {
-                return;
-            }
+        OnStoryOpened(story);
 
-            OnStoryClosing(story);
+        return story;
+    }
 
-            var oldStory = story;
+    public string FileName => fileName;
 
-            fileName = null;
-            story = null;
-            gameInfo = null;
+    public Story Story => story;
 
-            OnStoryClosed(oldStory);
-        }
+    public bool IsStoryOpen => story != null;
 
-        public Story OpenStory(string fileName)
-        {
-            CloseStory();
+    public GameInfo GameInfo => gameInfo;
 
-            if (Path.GetExtension(fileName) == ".zblorb")
-            {
-                using (var stream = File.OpenRead(fileName))
-                {
-                    var blorb = new BlorbFile(stream);
-                    gameInfo = new GameInfo(blorb);
-                    story = blorb.LoadStory();
-                }
-            }
-            else
-            {
-                story = Story.FromBytes(File.ReadAllBytes(fileName));
-            }
+    public bool HasGameInfo => gameInfo != null;
 
-            this.fileName = fileName;
+    public event EventHandler<StoryOpenedEventArgs> StoryOpened;
+    public event EventHandler<StoryClosingEventArgs> StoryClosing;
+    public event EventHandler<StoryClosedEventArgs> StoryClosed;
 
-            OnStoryOpened(story);
+    void IPersistable.Load(XElement xml)
+    {
+    }
 
-            return story;
-        }
-
-        public string FileName
-        {
-            get
-            {
-                return fileName;
-            }
-        }
-
-        public Story Story
-        {
-            get
-            {
-                return story;
-            }
-        }
-
-        public bool IsStoryOpen
-        {
-            get
-            {
-                return story != null;
-            }
-        }
-
-        public GameInfo GameInfo
-        {
-            get
-            {
-                return gameInfo;
-            }
-        }
-
-        public bool HasGameInfo
-        {
-            get
-            {
-                return gameInfo != null;
-            }
-        }
-
-        public event EventHandler<StoryOpenedEventArgs> StoryOpened;
-        public event EventHandler<StoryClosingEventArgs> StoryClosing;
-        public event EventHandler<StoryClosedEventArgs> StoryClosed;
-
-        void IPersistable.Load(XElement xml)
-        {
-        }
-
-        XElement IPersistable.Store()
-        {
-            return new XElement("story",
-                new XAttribute("serial", story.SerialNumber),
-                new XAttribute("release", story.ReleaseNumber),
-                new XAttribute("version", story.Version));
-        }
+    XElement IPersistable.Store()
+    {
+        return new XElement("story",
+            new XAttribute("serial", story.SerialNumber),
+            new XAttribute("release", story.ReleaseNumber),
+            new XAttribute("version", story.Version));
     }
 }

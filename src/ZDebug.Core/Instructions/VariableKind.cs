@@ -1,9 +1,8 @@
-﻿namespace ZDebug.Core.Instructions
+﻿namespace ZDebug.Core.Instructions;
+
+public enum VariableKind
 {
-    public enum VariableKind
-    {
-        Stack,
-        Local,
-        Global
-    }
+    Stack,
+    Local,
+    Global
 }

@@ -1,48 +1,43 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+public abstract partial class ViewModelBase : INotifyPropertyChanged
 {
-    public abstract partial class ViewModelBase : INotifyPropertyChanged
+    private PropertyChangedEventHandler propertyChangedHandler;
+
+    private static readonly Dictionary<string, PropertyChangedEventArgs> eventArgsCache = [];
+
+    private static PropertyChangedEventArgs GetEventArgs(string name)
     {
-        private PropertyChangedEventHandler propertyChangedHandler;
+        PropertyChangedEventArgs eventArgs;
 
-        private static readonly Dictionary<string, PropertyChangedEventArgs> eventArgsCache = new Dictionary<string, PropertyChangedEventArgs>();
-
-        private static PropertyChangedEventArgs GetEventArgs(string name)
+        lock (eventArgsCache)
         {
-            PropertyChangedEventArgs eventArgs;
-
-            lock (eventArgsCache)
+            if (!eventArgsCache.TryGetValue(name, out eventArgs))
             {
-                if (!eventArgsCache.TryGetValue(name, out eventArgs))
-                {
-                    eventArgs = new PropertyChangedEventArgs(name);
-                    eventArgsCache.Add(name, eventArgs);
-                }
-            }
-
-            return eventArgs;
-        }
-
-        protected void PropertyChanged(string name)
-        {
-            var handler = propertyChangedHandler;
-            if (handler != null)
-            {
-                handler(this, GetEventArgs(name));
+                eventArgs = new PropertyChangedEventArgs(name);
+                eventArgsCache.Add(name, eventArgs);
             }
         }
 
-        protected void AllPropertiesChanged()
-        {
-            PropertyChanged(string.Empty);
-        }
+        return eventArgs;
+    }
 
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+    protected void PropertyChanged(string name)
+    {
+        var handler = propertyChangedHandler;
+        if (handler != null)
         {
-            add { propertyChangedHandler += value; }
-            remove { propertyChangedHandler -= value; }
+            handler(this, GetEventArgs(name));
         }
+    }
+
+    protected void AllPropertiesChanged() => PropertyChanged(string.Empty);
+
+    event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+    {
+        add => propertyChangedHandler += value; remove => propertyChangedHandler -= value;
     }
 }

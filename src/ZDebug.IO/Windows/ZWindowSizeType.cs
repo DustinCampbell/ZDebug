@@ -1,8 +1,7 @@
-﻿namespace ZDebug.IO.Windows
+﻿namespace ZDebug.IO.Windows;
+
+public enum ZWindowSizeType
 {
-    public enum ZWindowSizeType
-    {
-        Fixed,
-        Proportional
-    }
+    Fixed,
+    Proportional
 }

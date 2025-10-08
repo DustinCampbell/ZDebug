@@ -1,30 +1,26 @@
 ﻿using System;
 using ZDebug.Core.Objects;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+internal sealed class PropertyViewModel : ViewModelBase
 {
-    internal sealed class PropertyViewModel : ViewModelBase
+    private readonly ZProperty property;
+
+    public PropertyViewModel(ZProperty property)
     {
-        private readonly ZProperty property;
+        this.property = property;
+    }
 
-        public PropertyViewModel(ZProperty property)
-        {
-            this.property = property;
-        }
+    public int Number => property.Number;
 
-        public int Number
+    public string DataDisplayText
+    {
+        get
         {
-            get { return property.Number; }
-        }
-
-        public string DataDisplayText
-        {
-            get
-            {
-                var bytes = property.ReadAsBytes();
-                var byteStrings = Array.ConvertAll(bytes, b => b.ToString("x2"));
-                return string.Join(" ", byteStrings);
-            }
+            var bytes = property.ReadAsBytes();
+            var byteStrings = Array.ConvertAll(bytes, b => b.ToString("x2"));
+            return string.Join(" ", byteStrings);
         }
     }
 }

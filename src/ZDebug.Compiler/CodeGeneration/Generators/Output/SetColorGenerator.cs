@@ -2,33 +2,32 @@
 using ZDebug.Core.Execution;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class SetColorGenerator : OpcodeGenerator
 {
-    internal class SetColorGenerator : OpcodeGenerator
+    private readonly Operand foregroundOp;
+    private readonly Operand backgroundOp;
+
+    public SetColorGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand foregroundOp;
-        private readonly Operand backgroundOp;
+        foregroundOp = instruction.Operands[0];
+        backgroundOp = instruction.Operands[1];
+    }
 
-        public SetColorGenerator(Instruction instruction)
-            : base(instruction)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        using (var foreground = il.NewLocal<ZColor>())
+        using (var background = il.NewLocal<ZColor>())
         {
-            this.foregroundOp = instruction.Operands[0];
-            this.backgroundOp = instruction.Operands[1];
-        }
+            compiler.EmitLoadOperand(foregroundOp);
+            foreground.Store();
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            using (var foreground = il.NewLocal<ZColor>())
-            using (var background = il.NewLocal<ZColor>())
-            {
-                compiler.EmitLoadOperand(foregroundOp);
-                foreground.Store();
+            compiler.EmitLoadOperand(backgroundOp);
+            background.Store();
 
-                compiler.EmitLoadOperand(backgroundOp);
-                background.Store();
-
-                compiler.EmitSetColor(foreground, background);
-            }
+            compiler.EmitSetColor(foreground, background);
         }
     }
 }

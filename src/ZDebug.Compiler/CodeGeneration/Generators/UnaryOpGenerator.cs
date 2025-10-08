@@ -1,80 +1,79 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal abstract class UnaryOpGenerator : OpcodeGenerator
 {
-    internal abstract class UnaryOpGenerator : OpcodeGenerator
+    private readonly Operand op;
+
+    public UnaryOpGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand op;
+        op = instruction.Operands[0];
 
-        public UnaryOpGenerator(Instruction instruction)
-            : base(instruction)
+        if (op.Kind == OperandKind.LargeConstant)
         {
-            this.op = instruction.Operands[0];
-
-            if (op.Kind == OperandKind.LargeConstant)
-            {
-                throw new ZCompilerException("Expected variable or small constant operand.");
-            }
-
-            if (op.Value > 255)
-            {
-                throw new ZCompilerException("Expected operand value from 0-255.");
-            }
+            throw new ZCompilerException("Expected variable or small constant operand.");
         }
 
-        protected abstract void Operation(ILBuilder il);
-
-        protected virtual void PostOperation(ILocal result, ILBuilder il, ICompiler compiler)
+        if (op.Value > 255)
         {
+            throw new ZCompilerException("Expected operand value from 0-255.");
         }
+    }
 
-        private void GenerateWithCalculatedVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
+    protected abstract void Operation(ILBuilder il);
+
+    protected virtual void PostOperation(ILocal result, ILBuilder il, ICompiler compiler)
+    {
+    }
+
+    private void GenerateWithCalculatedVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
+    {
+        using (var calculatedVariableIndex = il.NewLocal<byte>())
+        using (var result = il.NewLocal<short>())
         {
-            using (var calculatedVariableIndex = il.NewLocal<byte>())
-            using (var result = il.NewLocal<short>())
-            {
-                compiler.EmitLoadVariable(variableIndex);
-                calculatedVariableIndex.Store();
+            compiler.EmitLoadVariable(variableIndex);
+            calculatedVariableIndex.Store();
 
-                compiler.EmitLoadVariable(calculatedVariableIndex, indirect: true);
-                il.Convert.ToInt16();
+            compiler.EmitLoadVariable(calculatedVariableIndex, indirect: true);
+            il.Convert.ToInt16();
 
-                Operation(il);
-                result.Store();
+            Operation(il);
+            result.Store();
 
-                compiler.EmitStoreVariable(calculatedVariableIndex, result, indirect: true);
+            compiler.EmitStoreVariable(calculatedVariableIndex, result, indirect: true);
 
-                PostOperation(result, il, compiler);
-            }
+            PostOperation(result, il, compiler);
         }
+    }
 
-        private void GenerateWithVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
+    private void GenerateWithVariable(byte variableIndex, ILBuilder il, ICompiler compiler)
+    {
+        using (var result = il.NewLocal<short>())
         {
-            using (var result = il.NewLocal<short>())
-            {
-                compiler.EmitLoadVariable(variableIndex, indirect: true);
-                il.Convert.ToInt16();
+            compiler.EmitLoadVariable(variableIndex, indirect: true);
+            il.Convert.ToInt16();
 
-                Operation(il);
-                result.Store();
+            Operation(il);
+            result.Store();
 
-                compiler.EmitStoreVariable(variableIndex, result, indirect: true);
+            compiler.EmitStoreVariable(variableIndex, result, indirect: true);
 
-                PostOperation(result, il, compiler);
-            }
+            PostOperation(result, il, compiler);
         }
+    }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        if (op.IsVariable)
         {
-            if (op.IsVariable)
-            {
-                GenerateWithCalculatedVariable((byte)op.Value, il, compiler);
-            }
-            else
-            {
-                GenerateWithVariable((byte)op.Value, il, compiler);
-            }
+            GenerateWithCalculatedVariable((byte)op.Value, il, compiler);
+        }
+        else
+        {
+            GenerateWithVariable((byte)op.Value, il, compiler);
         }
     }
 }

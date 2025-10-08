@@ -5,251 +5,195 @@ using System.Linq;
 using ZDebug.Compiler.Profiling;
 using ZDebug.Core.Extensions;
 
-namespace ZDebug.Terp.Profiling
+namespace ZDebug.Terp.Profiling;
+
+public partial class ZMachineProfiler : IZMachineProfiler
 {
-    public partial class ZMachineProfiler : IZMachineProfiler
+    private readonly List<RoutineCompilationStatistics> allStatistics;
+    private readonly Dictionary<int, Routine> routines;
+    private readonly List<Call> calls;
+    private readonly Stack<Call> callStack;
+    private TimeSpan runningTime;
+
+    private readonly Dictionary<int, Tuple<int, TimeSpan>> instructionTimings;
+    private readonly Stopwatch instructionTimer;
+
+    private int routinesExecuted;
+    private int instructionsExecuted;
+
+    private readonly HashSet<int> calculatedCalls;
+    private int directCallCount;
+    private int calculatedCallCount;
+
+    public ZMachineProfiler()
     {
-        private readonly List<RoutineCompilationStatistics> allStatistics;
-        private readonly Dictionary<int, Routine> routines;
-        private readonly List<Call> calls;
-        private readonly Stack<Call> callStack;
-        private TimeSpan runningTime;
+        allStatistics = [];
+        routines = [];
+        calls = [];
+        callStack = new Stack<Call>();
 
-        private readonly Dictionary<int, Tuple<int, TimeSpan>> instructionTimings;
-        private Stopwatch instructionTimer;
+        instructionTimings = [];
+        instructionTimer = new Stopwatch();
 
-        private int routinesExecuted;
-        private int instructionsExecuted;
+        calculatedCalls = [];
+    }
 
-        private HashSet<int> calculatedCalls;
-        private int directCallCount;
-        private int calculatedCallCount;
+    void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
+    {
+        allStatistics.Add(statistics);
 
-        public ZMachineProfiler()
+        var address = statistics.Routine.Address;
+        if (!routines.ContainsKey(address))
         {
-            this.allStatistics = new List<RoutineCompilationStatistics>();
-            this.routines = new Dictionary<int, Routine>();
-            this.calls = new List<Call>();
-            this.callStack = new Stack<Call>();
+            routines.Add(address, new Routine(this, address, statistics));
+        }
+    }
 
-            this.instructionTimings = new Dictionary<int, Tuple<int, TimeSpan>>();
-            this.instructionTimer = new Stopwatch();
+    void IZMachineProfiler.Call(int address, bool calculated)
+    {
+        if (calculated)
+        {
+            calculatedCalls.Add(address);
+            calculatedCallCount++;
+        }
+        else
+        {
+            directCallCount++;
+        }
+    }
 
-            this.calculatedCalls = new HashSet<int>();
+    void IZMachineProfiler.EnterRoutine(int address)
+    {
+        routinesExecuted++;
+
+        var routine = routines[address];
+
+        var index = calls.Count;
+        var parent = callStack.Count > 0
+            ? callStack.Peek().Index
+            : -1;
+
+        var recursive = callStack.TopToBottom().Any(c => c.Routine.Address == address);
+
+        var call = new Call(this, routine, index, parent, recursive);
+        calls.Add(call);
+        callStack.Push(call);
+
+        call.Enter();
+    }
+
+    void IZMachineProfiler.ExitRoutine(int address)
+    {
+        var call = callStack.Pop();
+        call.Exit();
+    }
+
+    void IZMachineProfiler.ExecutingInstruction(int address) => instructionTimer.Restart();
+
+    void IZMachineProfiler.ExecutedInstruction(int address)
+    {
+        instructionTimer.Stop();
+
+        if (instructionTimings.TryGetValue(address, out var timings))
+        {
+            timings = Tuple.Create(timings.Item1 + 1, timings.Item2.Add(instructionTimer.Elapsed));
+        }
+        else
+        {
+            timings = Tuple.Create(1, instructionTimer.Elapsed);
         }
 
-        void IZMachineProfiler.RoutineCompiled(RoutineCompilationStatistics statistics)
-        {
-            allStatistics.Add(statistics);
+        instructionTimings[address] = timings;
 
-            var address = statistics.Routine.Address;
-            if (!routines.ContainsKey(address))
-            {
-                routines.Add(address, new Routine(this, address, statistics));
-            }
-        }
+        instructionsExecuted++;
+    }
 
-        void IZMachineProfiler.Call(int address, bool calculated)
-        {
-            if (calculated)
-            {
-                calculatedCalls.Add(address);
-                calculatedCallCount++;
-            }
-            else
-            {
-                directCallCount++;
-            }
-        }
+    void IZMachineProfiler.Quit()
+    {
+    }
 
-        void IZMachineProfiler.EnterRoutine(int address)
-        {
-            routinesExecuted++;
+    void IZMachineProfiler.Interrupt()
+    {
+    }
 
-            Routine routine = routines[address];
+    private Call GetCallByIndex(int index) => calls[index];
 
-            var index = calls.Count;
-            var parent = callStack.Count > 0
-                ? callStack.Peek().Index
-                : -1;
-
-            var recursive = callStack.TopToBottom().Any(c => c.Routine.Address == address);
-
-            var call = new Call(this, routine, index, parent, recursive);
-            calls.Add(call);
-            callStack.Push(call);
-
-            call.Enter();
-        }
-
-        void IZMachineProfiler.ExitRoutine(int address)
+    public void Stop(TimeSpan runningTime)
+    {
+        this.runningTime = runningTime;
+        while (callStack.Count > 0)
         {
             var call = callStack.Pop();
             call.Exit();
         }
 
-        void IZMachineProfiler.ExecutingInstruction(int address)
+        foreach (var routine in routines.Values)
         {
-            instructionTimer.Restart();
+            routine.Done();
         }
+    }
 
-        void IZMachineProfiler.ExecutedInstruction(int address)
+    public IEnumerable<RoutineCompilationStatistics> CompilationStatistics => allStatistics.ToList();
+
+    public double GetAverageOpcodeILSize(string opcodeName)
+    {
+        long totalILSize = 0;
+        long numberOpcodes = 0;
+        foreach (var routineStat in allStatistics)
         {
-            instructionTimer.Stop();
-
-            Tuple<int, TimeSpan> timings;
-            if (instructionTimings.TryGetValue(address, out timings))
+            foreach (var stat in routineStat.InstructionStatistics)
             {
-                timings = Tuple.Create(timings.Item1 + 1, timings.Item2.Add(instructionTimer.Elapsed));
+                if (stat.Instruction.Opcode.Name == opcodeName)
+                {
+                    numberOpcodes++;
+                    totalILSize += stat.Size;
+                }
             }
-            else
-            {
-                timings = Tuple.Create(1, instructionTimer.Elapsed);
-            }
-
-            instructionTimings[address] = timings;
-
-            instructionsExecuted++;
         }
 
-        void IZMachineProfiler.Quit()
+        if (numberOpcodes == 0)
         {
+            return 0;
         }
 
-        void IZMachineProfiler.Interrupt()
-        {
-        }
+        return (double)totalILSize / (double)numberOpcodes;
+    }
 
-        private Call GetCallByIndex(int index)
-        {
-            return calls[index];
-        }
+    public int RoutinesCompiled => allStatistics.Count;
 
-        public void Stop(TimeSpan runningTime)
-        {
-            this.runningTime = runningTime;
-            while (callStack.Count > 0)
-            {
-                var call = callStack.Pop();
-                call.Exit();
-            }
+    public int RoutinesExecuted => routinesExecuted;
 
+    public int InstructionsExecuted => instructionsExecuted;
+
+    public ICall RootCall => calls[0];
+
+    public IEnumerable<IRoutine> Routines
+    {
+        get
+        {
             foreach (var routine in routines.Values)
             {
-                routine.Done();
-            }
-        }
-
-        public IEnumerable<RoutineCompilationStatistics> CompilationStatistics
-        {
-            get
-            {
-                return allStatistics.ToList();
-            }
-        }
-
-        public double GetAverageOpcodeILSize(string opcodeName)
-        {
-            long totalILSize = 0;
-            long numberOpcodes = 0;
-            foreach (var routineStat in allStatistics)
-            {
-                foreach (var stat in routineStat.InstructionStatistics)
-                {
-                    if (stat.Instruction.Opcode.Name == opcodeName)
-                    {
-                        numberOpcodes++;
-                        totalILSize += stat.Size;
-                    }
-                }
-            }
-
-            if (numberOpcodes == 0)
-            {
-                return 0;
-            }
-
-            return (double)totalILSize / (double)numberOpcodes;
-        }
-
-        public int RoutinesCompiled
-        {
-            get
-            {
-                return allStatistics.Count;
-            }
-        }
-
-        public int RoutinesExecuted
-        {
-            get
-            {
-                return routinesExecuted;
-            }
-        }
-
-        public int InstructionsExecuted
-        {
-            get
-            {
-                return instructionsExecuted;
-            }
-        }
-
-        public ICall RootCall
-        {
-            get
-            {
-                return calls[0];
-            }
-        }
-
-        public IEnumerable<IRoutine> Routines
-        {
-            get
-            {
-                foreach (var routine in routines.Values)
-                {
-                    yield return routine;
-                }
-            }
-        }
-
-        public IEnumerable<Tuple<int, Tuple<int, TimeSpan>>> InstructionTimings
-        {
-            get
-            {
-                foreach (var timing in instructionTimings)
-                {
-                    var address = timing.Key;
-                    var timings = timing.Value;
-                    yield return Tuple.Create(address, timings);
-                }
-            }
-        }
-
-        public TimeSpan RunningTime
-        {
-            get
-            {
-                return runningTime;
-            }
-        }
-
-        public int DirectCallCount
-        {
-            get
-            {
-                return directCallCount;
-            }
-        }
-
-        public int CalculatedCallCount
-        {
-            get
-            {
-                return calculatedCallCount;
+                yield return routine;
             }
         }
     }
+
+    public IEnumerable<Tuple<int, Tuple<int, TimeSpan>>> InstructionTimings
+    {
+        get
+        {
+            foreach (var timing in instructionTimings)
+            {
+                var address = timing.Key;
+                var timings = timing.Value;
+                yield return Tuple.Create(address, timings);
+            }
+        }
+    }
+
+    public TimeSpan RunningTime => runningTime;
+
+    public int DirectCallCount => directCallCount;
+
+    public int CalculatedCallCount => calculatedCallCount;
 }

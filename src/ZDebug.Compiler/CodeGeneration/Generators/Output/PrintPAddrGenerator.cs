@@ -2,26 +2,25 @@
 using ZDebug.Core.Instructions;
 using ZDebug.Core.Utilities;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class PrintPAddrGenerator : OpcodeGenerator
 {
-    internal class PrintPAddrGenerator : OpcodeGenerator
+    private readonly Operand address;
+
+    public PrintPAddrGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand address;
+        address = instruction.Operands[0];
+    }
 
-        public PrintPAddrGenerator(Instruction instruction)
-            : base(instruction)
-        {
-            this.address = instruction.Operands[0];
-        }
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        il.Arguments.LoadMachine();
+        compiler.EmitLoadUnpackedStringAddress(address);
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            il.Arguments.LoadMachine();
-            compiler.EmitLoadUnpackedStringAddress(address);
+        il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
 
-            il.Call(Reflection<CompiledZMachine>.GetMethod("ReadZText", Types.Array<int>(), @public: false));
-
-            compiler.EmitPrintText();
-        }
+        compiler.EmitPrintText();
     }
 }

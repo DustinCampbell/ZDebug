@@ -2,102 +2,95 @@
 using ZDebug.Core.Collections;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
-{
-    internal class JeGenerator : OpcodeGenerator
-    {
-        private readonly ReadOnlyArray<Operand> ops;
-        private readonly Branch branch;
+namespace ZDebug.Compiler.CodeGeneration.Generators;
 
-        public JeGenerator(Instruction instruction)
-            : base(instruction)
+internal class JeGenerator : OpcodeGenerator
+{
+    private readonly ReadOnlyArray<Operand> ops;
+    private readonly Branch branch;
+
+    public JeGenerator(Instruction instruction)
+        : base(instruction)
+    {
+        ops = instruction.Operands;
+        branch = instruction.Branch;
+    }
+
+    private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)
+    {
+        if (ReuseFirstOperand)
         {
-            this.ops = instruction.Operands;
-            this.branch = instruction.Branch;
+            compiler.EmitLoadOperand(ops[1]);
+        }
+        else if (ReuseSecondOperand)
+        {
+            compiler.EmitLoadOperand(ops[0]);
+        }
+        else
+        {
+            compiler.EmitLoadOperand(ops[0]);
+            compiler.EmitLoadOperand(ops[1]);
         }
 
-        private void GenerateForTwoOperands(ILBuilder il, ICompiler compiler)
+        il.Compare.Equal();
+
+        compiler.EmitBranch(branch);
+    }
+
+    private void GeneratorForMoreThanTwoOperands(ILBuilder il, ICompiler compiler)
+    {
+        using (var x = il.NewLocal<ushort>())
         {
-            if (ReuseFirstOperand)
-            {
-                compiler.EmitLoadOperand(ops[1]);
-            }
-            else if (ReuseSecondOperand)
+            if (!ReuseFirstOperand)
             {
                 compiler.EmitLoadOperand(ops[0]);
             }
-            else
+
+            x.Store();
+
+            var success = il.NewLabel();
+            var done = il.NewLabel();
+
+            for (var j = 1; j < ops.Length; j++)
             {
-                compiler.EmitLoadOperand(ops[0]);
-                compiler.EmitLoadOperand(ops[1]);
+                compiler.EmitLoadOperand(ops[j]);
+                x.Load();
+
+                il.Compare.Equal();
+
+                // no need to write a branch for the last test
+                if (j < ops.Length - 1)
+                {
+                    success.BranchIf(Condition.True, @short: true);
+                }
+                else
+                {
+                    done.Branch(@short: true);
+                }
             }
 
-            il.Compare.Equal();
+            success.Mark();
+            il.Load(1);
 
+            done.Mark();
             compiler.EmitBranch(branch);
         }
 
-        private void GeneratorForMoreThanTwoOperands(ILBuilder il, ICompiler compiler)
+    }
+
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        if (ops.Length == 2)
         {
-            using (var x = il.NewLocal<ushort>())
-            {
-                if (!ReuseFirstOperand)
-                {
-                    compiler.EmitLoadOperand(ops[0]);
-                }
-
-                x.Store();
-
-                var success = il.NewLabel();
-                var done = il.NewLabel();
-
-                for (int j = 1; j < ops.Length; j++)
-                {
-                    compiler.EmitLoadOperand(ops[j]);
-                    x.Load();
-
-                    il.Compare.Equal();
-
-                    // no need to write a branch for the last test
-                    if (j < ops.Length - 1)
-                    {
-                        success.BranchIf(Condition.True, @short: true);
-                    }
-                    else
-                    {
-                        done.Branch(@short: true);
-                    }
-                }
-
-                success.Mark();
-                il.Load(1);
-
-                done.Mark();
-                compiler.EmitBranch(branch);
-            }
-
+            GenerateForTwoOperands(il, compiler);
         }
-
-        public override void Generate(ILBuilder il, ICompiler compiler)
+        else if (ops.Length == 3 || ops.Length == 4)
         {
-            if (ops.Length == 2)
-            {
-                GenerateForTwoOperands(il, compiler);
-            }
-            else if (ops.Length == 3 || ops.Length == 4)
-            {
-                GeneratorForMoreThanTwoOperands(il, compiler);
-            }
-        }
-
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
-
-        public override bool CanReuseSecondOperand
-        {
-            get { return ops.Length == 2; }
+            GeneratorForMoreThanTwoOperands(il, compiler);
         }
     }
+
+    public override bool CanReuseFirstOperand => true;
+
+    public override bool CanReuseSecondOperand => ops.Length == 2;
 }

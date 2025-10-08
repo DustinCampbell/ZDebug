@@ -3,176 +3,118 @@ using System.IO;
 using System.Text;
 using ZDebug.Core.Execution;
 
-namespace ZDebug.PerfHarness
+namespace ZDebug.PerfHarness;
+
+internal sealed class MockScreen : IScreen
 {
-    internal sealed class MockScreen : IScreen
+    private readonly Action doneAction;
+    private readonly string[] commands;
+    private int commandIndex;
+    private readonly StringBuilder output;
+
+    public MockScreen(Action doneAction)
     {
-        private readonly Action doneAction;
-        private readonly string[] commands;
-        private int commandIndex;
-        private StringBuilder output;
+        this.doneAction = doneAction;
+        output = new StringBuilder();
+    }
 
-        public MockScreen(Action doneAction)
-        {
-            this.doneAction = doneAction;
-            this.output = new StringBuilder();
-        }
+    public MockScreen(string scriptPath, Action doneAction)
+    {
+        this.doneAction = doneAction;
+        commands = File.ReadAllLines(scriptPath);
+        commandIndex = 0;
+        output = new StringBuilder();
+    }
 
-        public MockScreen(string scriptPath, Action doneAction)
-        {
-            this.doneAction = doneAction;
-            this.commands = File.ReadAllLines(scriptPath);
-            this.commandIndex = 0;
-            this.output = new StringBuilder();
-        }
+    public void Clear(int window)
+    {
+    }
 
-        public void Clear(int window)
-        {
-        }
+    public void ClearAll(bool unsplit = false)
+    {
+    }
 
-        public void ClearAll(bool unsplit = false)
-        {
-        }
+    public void Split(int height)
+    {
+    }
 
-        public void Split(int height)
-        {
-        }
+    public void Unsplit()
+    {
+    }
 
-        public void Unsplit()
-        {
-        }
+    public void SetWindow(int window)
+    {
+    }
 
-        public void SetWindow(int window)
-        {
-        }
+    public int GetCursorLine() => 0;
 
-        public int GetCursorLine()
-        {
-            return 0;
-        }
+    public int GetCursorColumn() => 0;
 
-        public int GetCursorColumn()
-        {
-            return 0;
-        }
+    public void SetCursor(int line, int column)
+    {
+    }
 
-        public void SetCursor(int line, int column)
-        {
-        }
+    public void SetTextStyle(ZTextStyle style)
+    {
+    }
 
-        public void SetTextStyle(ZTextStyle style)
-        {
-        }
+    public void SetForegroundColor(ZColor color)
+    {
+    }
 
-        public void SetForegroundColor(ZColor color)
-        {
-        }
+    public void SetBackgroundColor(ZColor color)
+    {
+    }
 
-        public void SetBackgroundColor(ZColor color)
-        {
-        }
+    public ZFont SetFont(ZFont font) => 0;
 
-        public ZFont SetFont(ZFont font)
-        {
-            return 0;
-        }
+    public void ShowStatus()
+    {
+    }
 
-        public void ShowStatus()
-        {
-        }
+    public byte ScreenHeightInLines => 25;
 
-        public byte ScreenHeightInLines
-        {
-            get { return 25; }
-        }
+    public byte ScreenWidthInColumns => 80;
 
-        public byte ScreenWidthInColumns
-        {
-            get { return 80; }
-        }
+    public ushort ScreenHeightInUnits => 0;
 
-        public ushort ScreenHeightInUnits
-        {
-            get { return 0; }
-        }
+    public ushort ScreenWidthInUnits => 0;
 
-        public ushort ScreenWidthInUnits
-        {
-            get { return 0; }
-        }
+    public byte FontHeightInUnits => 0;
 
-        public byte FontHeightInUnits
-        {
-            get { return 0; }
-        }
+    public byte FontWidthInUnits => 0;
 
-        public byte FontWidthInUnits
-        {
-            get { return 0; }
-        }
+    public bool SupportsColors => false;
 
-        public bool SupportsColors
-        {
-            get { return false; }
-        }
+    public bool SupportsBold => false;
 
-        public bool SupportsBold
-        {
-            get { return false; }
-        }
+    public bool SupportsItalic => false;
 
-        public bool SupportsItalic
-        {
-            get { return false; }
-        }
+    public bool SupportsFixedFont => false;
 
-        public bool SupportsFixedFont
-        {
-            get { return false; }
-        }
+    public ZColor DefaultBackgroundColor => ZColor.Default;
 
-        public ZColor DefaultBackgroundColor
-        {
-            get { return ZColor.Default; }
-        }
+    public ZColor DefaultForegroundColor => ZColor.Default;
 
-        public ZColor DefaultForegroundColor
-        {
-            get { return ZColor.Default; }
-        }
+    public void Print(string text) => output.Append(text);
 
-        public void Print(string text)
-        {
-            output.Append(text);
-        }
+    public void Print(char ch) => output.Append(ch);
 
-        public void Print(char ch)
-        {
-            output.Append(ch);
-        }
+    public void ReadChar(Action<char> callback) => doneAction();
 
-        public void ReadChar(Action<char> callback)
+    public void ReadCommand(int maxChars, Action<string> callback)
+    {
+        if (commands == null || commandIndex == commands.Length)
         {
             doneAction();
         }
-
-        public void ReadCommand(int maxChars, Action<string> callback)
+        else
         {
-            if (commands == null || commandIndex == commands.Length)
-            {
-                doneAction();
-            }
-            else
-            {
-                var command = commands[commandIndex++];
-                output.AppendLine(command);
-                callback(command);
-            }
-        }
-
-        public string Output
-        {
-            get { return output.ToString(); }
+            var command = commands[commandIndex++];
+            output.AppendLine(command);
+            callback(command);
         }
     }
+
+    public string Output => output.ToString();
 }

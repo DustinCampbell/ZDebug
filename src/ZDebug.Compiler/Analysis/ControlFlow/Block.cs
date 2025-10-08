@@ -1,61 +1,48 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ZDebug.Compiler.Analysis.ControlFlow
+namespace ZDebug.Compiler.Analysis.ControlFlow;
+
+internal class Block
 {
-    internal class Block
+    private readonly bool isEntry;
+    private readonly bool isExit;
+    private readonly List<Block> jumpSources;
+    private readonly List<Block> jumpTargets;
+
+    public Block(bool isEntry = false, bool isExit = false)
     {
-        private readonly bool isEntry;
-        private readonly bool isExit;
-        private readonly List<Block> jumpSources;
-        private readonly List<Block> jumpTargets;
+        Debug.Assert(!(isEntry && isExit));
 
-        public Block(bool isEntry = false, bool isExit = false)
+        this.isEntry = isEntry;
+        this.isExit = isExit;
+        jumpSources = [];
+        jumpTargets = [];
+    }
+
+    public void AddJumpTarget(Block block)
+    {
+        jumpTargets.Add(block);
+        block.jumpSources.Add(this);
+    }
+
+    public List<Block> JumpSources => jumpSources;
+
+    public List<Block> JumpTargets => jumpTargets;
+
+    public override string ToString()
+    {
+        if (isEntry)
         {
-            Debug.Assert(!(isEntry && isExit));
-
-            this.isEntry = isEntry;
-            this.isExit = isExit;
-            this.jumpSources = new List<Block>();
-            this.jumpTargets = new List<Block>();
+            return "Entry block";
         }
-
-        public void AddJumpTarget(Block block)
+        else if (isExit)
         {
-            this.jumpTargets.Add(block);
-            block.jumpSources.Add(this);
+            return "Exit block";
         }
-
-        public List<Block> JumpSources
+        else
         {
-            get
-            {
-                return this.jumpSources;
-            }
-        }
-
-        public List<Block> JumpTargets
-        {
-            get
-            {
-                return this.jumpTargets;
-            }
-        }
-
-        public override string ToString()
-        {
-            if (this.isEntry)
-            {
-                return "Entry block";
-            }
-            else if (this.isExit)
-            {
-                return "Exit block";
-            }
-            else
-            {
-                return "Invalid block";
-            }
+            return "Invalid block";
         }
     }
 }

@@ -1,45 +1,44 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ZDebug.Core.Utilities
+namespace ZDebug.Core.Utilities;
+
+public static partial class Reflection<T>
 {
-    public static partial class Reflection<T>
+    private readonly struct FieldInfoKey : IEquatable<FieldInfoKey>
     {
-        private struct FieldInfoKey : IEquatable<FieldInfoKey>
+        private readonly string name;
+        private readonly BindingFlags flags;
+
+        public FieldInfoKey(string name, BindingFlags flags)
         {
-            private readonly string name;
-            private readonly BindingFlags flags;
+            this.name = name;
+            this.flags = flags;
+        }
 
-            public FieldInfoKey(string name, BindingFlags flags)
+        public bool Equals(FieldInfoKey other)
+        {
+            return StringComparer.Ordinal.Equals(name, other.name) &&
+                flags == other.flags;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is FieldInfoKey)
             {
-                this.name = name;
-                this.flags = flags;
+                return Equals((FieldInfoKey)obj);
             }
 
-            public bool Equals(FieldInfoKey other)
-            {
-                return StringComparer.Ordinal.Equals(name, other.name) &&
-                    flags == other.flags;
-            }
+            return false;
+        }
 
-            public override bool Equals(object obj)
-            {
-                if (obj is FieldInfoKey)
-                {
-                    return Equals((FieldInfoKey)obj);
-                }
+        public override int GetHashCode()
+        {
+            var result = 0;
+            result ^= StringComparer.Ordinal.GetHashCode(name);
+            result ^= flags.GetHashCode();
 
-                return false;
-            }
-
-            public override int GetHashCode()
-            {
-                int result = 0;
-                result ^= StringComparer.Ordinal.GetHashCode(name);
-                result ^= flags.GetHashCode();
-
-                return result;
-            }
+            return result;
         }
     }
 }

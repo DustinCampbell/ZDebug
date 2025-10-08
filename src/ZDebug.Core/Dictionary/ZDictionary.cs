@@ -6,89 +6,76 @@ using ZDebug.Core.Collections;
 using ZDebug.Core.Extensions;
 using ZDebug.Core.Text;
 
-namespace ZDebug.Core.Dictionary
+namespace ZDebug.Core.Dictionary;
+
+public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
 {
-    public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
+    private readonly Story story;
+    private readonly ZText ztext;
+    private readonly int address;
+
+    private readonly ReadOnlyCollection<char> wordSeparators;
+
+    private readonly List<ZDictionaryEntry> entries;
+
+    internal ZDictionary(Story story, ZText ztext)
     {
-        private readonly Story story;
-        private readonly ZText ztext;
-        private readonly int address;
+        this.story = story;
+        this.ztext = ztext;
 
-        private readonly ReadOnlyCollection<char> wordSeparators;
+        address = Header.ReadDictionaryAddress(story.Memory);
 
-        private readonly List<ZDictionaryEntry> entries;
+        var reader = new MemoryReader(story.Memory, address);
 
-        internal ZDictionary(Story story, ZText ztext)
+        int wordSepCount = reader.NextByte();
+        wordSeparators = reader.NextBytes(wordSepCount).ConvertAll(b => (char)b).AsReadOnly();
+
+        int entryLength = reader.NextByte();
+        int entryCount = reader.NextWord();
+
+        var zwordsSize = story.Version <= 3 ? 2 : 3;
+        var dataSize = entryLength - (zwordsSize * 2);
+
+        entries = new List<ZDictionaryEntry>(entryCount);
+        for (var i = 0; i < entryCount; i++)
         {
-            this.story = story;
-            this.ztext = ztext;
-
-            this.address = Header.ReadDictionaryAddress(story.Memory);
-
-            var reader = new MemoryReader(story.Memory, address);
-
-            int wordSepCount = reader.NextByte();
-            this.wordSeparators = reader.NextBytes(wordSepCount).ConvertAll(b => (char)b).AsReadOnly();
-
-            int entryLength = reader.NextByte();
-            int entryCount = reader.NextWord();
-
-            int zwordsSize = story.Version <= 3 ? 2 : 3;
-            int dataSize = entryLength - (zwordsSize * 2);
-
-            this.entries = new List<ZDictionaryEntry>(entryCount);
-            for (int i = 0; i < entryCount; i++)
-            {
-                var entryAddress = reader.Address;
-                var entryZWords = reader.NextWords(zwordsSize);
-                var entryData = reader.NextBytes(dataSize);
-                var entryZText = ztext.ZWordsAsString(entryZWords, ZTextFlags.All);
-                entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryZText, entryData));
-            }
-        }
-
-        public bool TryLookupWord(string word, out ushort address)
-        {
-            for (int i = entries.Count - 1; i >= 0; i--)
-            {
-                var e = entries[i];
-                if (word.StartsWith(e.ZText))
-                {
-                    address = (ushort)e.Address;
-                    return true;
-                }
-            }
-
-            address = 0;
-            return false;
-        }
-
-        public ReadOnlyCollection<char> WordSeparators
-        {
-            get { return wordSeparators; }
-        }
-
-        public ZDictionaryEntry this[int index]
-        {
-            get { return entries[index]; }
-        }
-
-        public int Count
-        {
-            get { return entries.Count; }
-        }
-
-        public IEnumerator<ZDictionaryEntry> GetEnumerator()
-        {
-            foreach (var entry in entries)
-            {
-                yield return entry;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            var entryAddress = reader.Address;
+            var entryZWords = reader.NextWords(zwordsSize);
+            var entryData = reader.NextBytes(dataSize);
+            var entryZText = ztext.ZWordsAsString(entryZWords, ZTextFlags.All);
+            entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryZText, entryData));
         }
     }
+
+    public bool TryLookupWord(string word, out ushort address)
+    {
+        for (var i = entries.Count - 1; i >= 0; i--)
+        {
+            var e = entries[i];
+            if (word.StartsWith(e.ZText))
+            {
+                address = (ushort)e.Address;
+                return true;
+            }
+        }
+
+        address = 0;
+        return false;
+    }
+
+    public ReadOnlyCollection<char> WordSeparators => wordSeparators;
+
+    public ZDictionaryEntry this[int index] => entries[index];
+
+    public int Count => entries.Count;
+
+    public IEnumerator<ZDictionaryEntry> GetEnumerator()
+    {
+        foreach (var entry in entries)
+        {
+            yield return entry;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

@@ -8,144 +8,138 @@ using System.Xml.Linq;
 using AvalonDock;
 using ZDebug.Core;
 
-namespace ZDebug.UI.Utilities
+namespace ZDebug.UI.Utilities;
+
+public static partial class Storage
 {
-    public static partial class Storage
+    private const string DockLayoutFileName = "dock_layout.xml";
+    private const string WindowLayoutFileName = "window_layout.xml";
+
+    private static string GetDockLayoutFileName(string prefix)
     {
-        private const string DockLayoutFileName = "dock_layout.xml";
-        private const string WindowLayoutFileName = "window_layout.xml";
+        return prefix != null
+            ? prefix + "_" + DockLayoutFileName
+            : DockLayoutFileName;
+    }
 
-        private static string GetDockLayoutFileName(string prefix)
+    private static string GetWindowLayoutFileName(Window window) => window.Name + "_" + WindowLayoutFileName;
+
+    private static string GetStorySettingsFileName(Story story) => string.Format("{0:d6}_{1}_{2}_{3:x4}", story.SerialNumber, story.ReleaseNumber, story.Version, story.Checksum);
+
+    private static IsolatedStorageFile GetStorageFile() => IsolatedStorageFile.GetUserStoreForDomain();
+
+    public static XmlTextReader OpenXmlFile(string fileName)
+    {
+        var storage = GetStorageFile();
+        if (!storage.FileExists(fileName))
         {
-            return prefix != null
-                ? prefix + "_" + DockLayoutFileName
-                : DockLayoutFileName;
+            return null;
         }
 
-        private static string GetWindowLayoutFileName(Window window)
+        var fileStream = storage.OpenFile(fileName, FileMode.Open, FileAccess.Read);
+        var reader = new XmlTextReader(fileStream)
         {
-            return window.Name + "_" + WindowLayoutFileName;
-        }
+            WhitespaceHandling = WhitespaceHandling.None
+        };
 
-        private static string GetStorySettingsFileName(Story story)
-        {
-            return string.Format("{0:d6}_{1}_{2}_{3:x4}", story.SerialNumber, story.ReleaseNumber, story.Version, story.Checksum);
-        }
+        return reader;
+    }
 
-        private static IsolatedStorageFile GetStorageFile()
+    public static XmlTextWriter CreateXmlFile(string fileName)
+    {
+        var storage = GetStorageFile();
+        var fileStream = storage.CreateFile(fileName);
+        var writer = new XmlTextWriter(fileStream, Encoding.UTF8)
         {
-            return IsolatedStorageFile.GetUserStoreForDomain();
-        }
+            Formatting = Formatting.Indented
+        };
+        return writer;
+    }
 
-        public static XmlTextReader OpenXmlFile(string fileName)
+    public static void RestoreDockingLayout(DockingManager dockManager, string prefix = null)
+    {
+        using (var dockLayoutReader = OpenXmlFile(GetDockLayoutFileName(prefix)))
         {
-            var storage = GetStorageFile();
-            if (!storage.FileExists(fileName))
+            if (dockLayoutReader != null)
             {
-                return null;
-            }
-
-            var fileStream = storage.OpenFile(fileName, FileMode.Open, FileAccess.Read);
-            var reader = new XmlTextReader(fileStream);
-            reader.WhitespaceHandling = WhitespaceHandling.None;
-
-            return reader;
-        }
-
-        public static XmlTextWriter CreateXmlFile(string fileName)
-        {
-            var storage = GetStorageFile();
-            var fileStream = storage.CreateFile(fileName);
-            var writer = new XmlTextWriter(fileStream, Encoding.UTF8);
-            writer.Formatting = Formatting.Indented;
-            return writer;
-        }
-
-        public static void RestoreDockingLayout(DockingManager dockManager, string prefix = null)
-        {
-            using (var dockLayoutReader = OpenXmlFile(GetDockLayoutFileName(prefix)))
-            {
-                if (dockLayoutReader != null)
-                {
-                    dockManager.RestoreLayout(dockLayoutReader);
-                }
+                dockManager.RestoreLayout(dockLayoutReader);
             }
         }
+    }
 
-        public static void SaveDockingLayout(DockingManager dockManager, string prefix = null)
+    public static void SaveDockingLayout(DockingManager dockManager, string prefix = null)
+    {
+        using (var dockLayoutWriter = CreateXmlFile(GetDockLayoutFileName(prefix)))
         {
-            using (var dockLayoutWriter = CreateXmlFile(GetDockLayoutFileName(prefix)))
-            {
-                dockManager.SaveLayout(dockLayoutWriter);
-            }
+            dockManager.SaveLayout(dockLayoutWriter);
+        }
+    }
+
+    public static void RestoreWindowLayout(Window window)
+    {
+        if (window == null)
+        {
+            throw new ArgumentNullException("window");
+        }
+        if (string.IsNullOrWhiteSpace(window.Name))
+        {
+            throw new ArgumentException("Name is not set.", "window");
         }
 
-        public static void RestoreWindowLayout(Window window)
+        using (var windowLayoutReader = OpenXmlFile(GetWindowLayoutFileName(window)))
         {
-            if (window == null)
+            if (windowLayoutReader != null)
             {
-                throw new ArgumentNullException("window");
-            }
-            if (string.IsNullOrWhiteSpace(window.Name))
-            {
-                throw new ArgumentException("Name is not set.", "window");
-            }
+                windowLayoutReader.MoveToContent();
 
-            using (var windowLayoutReader = OpenXmlFile(GetWindowLayoutFileName(window)))
-            {
-                if (windowLayoutReader != null)
-                {
-                    windowLayoutReader.MoveToContent();
+                var xml = XElement.Load(windowLayoutReader);
 
-                    var xml = XElement.Load(windowLayoutReader);
-
-                    WindowPlacement.Restore(window, xml);
-                }
+                WindowPlacement.Restore(window, xml);
             }
         }
+    }
 
-        public static void SaveWindowLayout(Window window)
+    public static void SaveWindowLayout(Window window)
+    {
+        if (window == null)
         {
-            if (window == null)
-            {
-                throw new ArgumentNullException("window");
-            }
-            if (string.IsNullOrWhiteSpace(window.Name))
-            {
-                throw new ArgumentException("Name is not set.", "window");
-            }
-
-            using (var windowLayoutWriter = CreateXmlFile(GetWindowLayoutFileName(window)))
-            {
-                var xml = WindowPlacement.Save(window);
-                xml.Save(windowLayoutWriter);
-            }
+            throw new ArgumentNullException("window");
+        }
+        if (string.IsNullOrWhiteSpace(window.Name))
+        {
+            throw new ArgumentException("Name is not set.", "window");
         }
 
-        public static XElement RestoreStorySettings(Story story)
+        using (var windowLayoutWriter = CreateXmlFile(GetWindowLayoutFileName(window)))
         {
-            var fileName = GetStorySettingsFileName(story);
-            using (var reader = Storage.OpenXmlFile(fileName))
+            var xml = WindowPlacement.Save(window);
+            xml.Save(windowLayoutWriter);
+        }
+    }
+
+    public static XElement RestoreStorySettings(Story story)
+    {
+        var fileName = GetStorySettingsFileName(story);
+        using (var reader = Storage.OpenXmlFile(fileName))
+        {
+            if (reader != null)
             {
-                if (reader != null)
-                {
-                    reader.MoveToContent();
-                    return XElement.Load(reader);
-                }
-                else
-                {
-                    return new XElement("settings");
-                }
+                reader.MoveToContent();
+                return XElement.Load(reader);
+            }
+            else
+            {
+                return new XElement("settings");
             }
         }
+    }
 
-        public static void SaveStorySettings(Story story, XElement xml)
+    public static void SaveStorySettings(Story story, XElement xml)
+    {
+        var fileName = GetStorySettingsFileName(story);
+        using (var writer = Storage.CreateXmlFile(fileName))
         {
-            var fileName = GetStorySettingsFileName(story);
-            using (var writer = Storage.CreateXmlFile(fileName))
-            {
-                xml.Save(writer);
-            }
+            xml.Save(writer);
         }
     }
 }

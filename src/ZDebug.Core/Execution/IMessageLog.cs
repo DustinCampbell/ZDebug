@@ -1,8 +1,7 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public interface IMessageLog
 {
-    public interface IMessageLog
-    {
-        void SendWarning(string message);
-        void SendError(string message);
-    }
+    void SendWarning(string message);
+    void SendError(string message);
 }

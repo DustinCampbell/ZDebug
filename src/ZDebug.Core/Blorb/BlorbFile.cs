@@ -5,321 +5,313 @@ using System.Xml.Linq;
 using ZDebug.Core.Basics;
 using ZDebug.Core.Extensions;
 
-namespace ZDebug.Core.Blorb
+namespace ZDebug.Core.Blorb;
+
+public sealed class BlorbFile
 {
-    public sealed class BlorbFile
+    private readonly byte[] memory;
+    private readonly int releaseNumber;
+
+    private static string NameFromId(uint id)
     {
-        private readonly byte[] memory;
-        private int releaseNumber;
+        var chars = new char[4];
+        chars[0] = (char)((id >> 24) & 0xff);
+        chars[1] = (char)((id >> 16) & 0xff);
+        chars[2] = (char)((id >> 8) & 0xff);
+        chars[3] = (char)(id & 0xff);
 
-        private static string NameFromId(uint id)
+        return new string(chars);
+    }
+
+    private static uint MakeId(string name)
+    {
+        if (name.Length > 4)
         {
-            var chars = new char[4];
-            chars[0] = (char)((id >> 24) & 0xff);
-            chars[1] = (char)((id >> 16) & 0xff);
-            chars[2] = (char)((id >> 8) & 0xff);
-            chars[3] = (char)(id & 0xff);
-
-            return new string(chars);
+            throw new ArgumentException("ID names can contain at most 4 characters.", "name");
         }
 
-        private static uint MakeId(string name)
+        if (name.Length < 4)
         {
-            if (name.Length > 4)
-            {
-                throw new ArgumentException("ID names can contain at most 4 characters.", "name");
-            }
-
-            if (name.Length < 4)
-            {
-                name += new string(' ', 4 - name.Length);
-            }
-
-            var chars = name.ToCharArray();
-            return ((uint)((byte)chars[0] << 24) |
-                (uint)((byte)chars[1] << 16) |
-                (uint)((byte)chars[2] << 8) |
-                (byte)chars[3]);
+            name += new string(' ', 4 - name.Length);
         }
 
-        private static readonly uint id_FORM = MakeId("FORM");
-        private static readonly uint id_IFRS = MakeId("IFRS");
-        private static readonly uint id_RIdx = MakeId("RIdx");
-        private static readonly uint id_IFhd = MakeId("IFhd");
-        private static readonly uint id_Reso = MakeId("Reso");
-        private static readonly uint id_Loop = MakeId("Loop");
-        private static readonly uint id_RelN = MakeId("RelN");
-        private static readonly uint id_Plte = MakeId("Plte");
+        var chars = name.ToCharArray();
+        return (uint)((byte)chars[0] << 24) |
+            (uint)((byte)chars[1] << 16) |
+            (uint)((byte)chars[2] << 8) |
+            (byte)chars[3];
+    }
 
-        private static readonly uint id_Snd = MakeId("Snd");
-        private static readonly uint id_Exec = MakeId("Exec");
-        private static readonly uint id_Pict = MakeId("Pict");
-        private static readonly uint id_Copyright = MakeId("(c)");
-        private static readonly uint id_AUTH = MakeId("AUTH");
-        private static readonly uint id_ANNO = MakeId("ANNO");
+    private static readonly uint id_FORM = MakeId("FORM");
+    private static readonly uint id_IFRS = MakeId("IFRS");
+    private static readonly uint id_RIdx = MakeId("RIdx");
+    private static readonly uint id_IFhd = MakeId("IFhd");
+    private static readonly uint id_Reso = MakeId("Reso");
+    private static readonly uint id_Loop = MakeId("Loop");
+    private static readonly uint id_RelN = MakeId("RelN");
+    private static readonly uint id_Plte = MakeId("Plte");
 
-        private static readonly uint id_ZCOD = MakeId("ZCOD");
-        private static readonly uint id_IFmd = MakeId("IFmd");
-        private static readonly uint id_PNG = MakeId("PNG");
-        private static readonly uint id_JPEG = MakeId("JPEG");
+    private static readonly uint id_Snd = MakeId("Snd");
+    private static readonly uint id_Exec = MakeId("Exec");
+    private static readonly uint id_Pict = MakeId("Pict");
+    private static readonly uint id_Copyright = MakeId("(c)");
+    private static readonly uint id_AUTH = MakeId("AUTH");
+    private static readonly uint id_ANNO = MakeId("ANNO");
 
-        private struct ChunkDescriptor
+    private static readonly uint id_ZCOD = MakeId("ZCOD");
+    private static readonly uint id_IFmd = MakeId("IFmd");
+    private static readonly uint id_PNG = MakeId("PNG");
+    private static readonly uint id_JPEG = MakeId("JPEG");
+
+    private struct ChunkDescriptor
+    {
+        public uint Type;
+        public uint Length;
+        public uint Address;
+        public uint DataAddress;
+
+        public override string ToString() => string.Format("'{0}'; Address={1:x8}; DataAddress={2:x8}; Length={3}", NameFromId(Type), Address, DataAddress, Length);
+    }
+
+    private struct ResourceDecriptor
+    {
+        public uint Usage;
+        public uint Number;
+        public int ChunkNumber;
+
+        public override string ToString() => string.Format("'{0}'; Number={1}; ChunkNumber", NameFromId(Usage), Number, ChunkNumber);
+    }
+
+    private struct ZHeader
+    {
+        public ushort ReleaseNumber;
+        public char[] SerialNumber;
+        public ushort Checksum;
+    }
+
+    private readonly List<ChunkDescriptor> chunks;
+    private readonly List<ResourceDecriptor> resources;
+
+    public BlorbFile(Stream stream)
+    {
+        if (stream == null)
         {
-            public uint Type;
-            public uint Length;
-            public uint Address;
-            public uint DataAddress;
-
-            public override string ToString()
-            {
-                return string.Format("'{0}'; Address={1:x8}; DataAddress={2:x8}; Length={3}", NameFromId(Type), Address, DataAddress, Length);
-            }
+            throw new ArgumentNullException("stream");
         }
 
-        private struct ResourceDecriptor
-        {
-            public uint Usage;
-            public uint Number;
-            public int ChunkNumber;
+        memory = stream.ReadFully();
 
-            public override string ToString()
-            {
-                return string.Format("'{0}'; Number={1}; ChunkNumber", NameFromId(Usage), Number, ChunkNumber);
-            }
+        var reader = new MemoryReader(memory, 0);
+
+        var dwords = reader.NextDWords(3);
+
+        // First, ensure that this is a valid format
+        if (dwords[0] != id_FORM)
+        {
+            throw new InvalidOperationException();
         }
 
-        private struct ZHeader
+        if (dwords[2] != id_IFRS)
         {
-            public ushort ReleaseNumber;
-            public char[] SerialNumber;
-            public ushort Checksum;
+            throw new InvalidOperationException();
         }
 
-        private readonly List<ChunkDescriptor> chunks;
-        private readonly List<ResourceDecriptor> resources;
+        var totalLength = (int)dwords[1] + 8;
 
-        public BlorbFile(Stream stream)
+        // Collect all chunks
+        chunks = [];
+
+        while (reader.Address < totalLength)
         {
-            if (stream == null)
+            var chunk = new ChunkDescriptor
             {
-                throw new ArgumentNullException("stream");
-            }
+                Address = (uint)reader.Address
+            };
 
-            this.memory = stream.ReadFully();
+            var type = reader.NextDWord();
+            var len = reader.NextDWord();
 
-            var reader = new MemoryReader(this.memory, 0);
-
-            var dwords = reader.NextDWords(3);
-
-            // First, ensure that this is a valid format
-            if (dwords[0] != id_FORM)
+            chunk.Type = type;
+            if (type == id_FORM)
             {
-                throw new InvalidOperationException();
-            }
-
-            if (dwords[2] != id_IFRS)
-            {
-                throw new InvalidOperationException();
-            }
-
-            int totalLength = (int)dwords[1] + 8;
-
-            // Collect all chunks
-            this.chunks = new List<ChunkDescriptor>();
-
-            while (reader.Address < totalLength)
-            {
-                var chunk = new ChunkDescriptor();
-
-                chunk.Address = (uint)reader.Address;
-
-                var type = reader.NextDWord();
-                var len = reader.NextDWord();
-
-                chunk.Type = type;
-                if (type == id_FORM)
-                {
-                    chunk.DataAddress = chunk.Address;
-                    chunk.Length = len + 8;
-                }
-                else
-                {
-                    chunk.DataAddress = (uint)reader.Address;
-                    chunk.Length = len;
-                }
-
-                chunks.Add(chunk);
-
-                reader.Skip((int)len);
-                if ((reader.Address & 1) != 0)
-                {
-                    reader.Skip(1);
-                }
-
-                if (reader.Address > totalLength)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-
-            // Loop through chunks and collect resources
-            this.resources = new List<ResourceDecriptor>();
-
-            foreach (var chunk in chunks)
-            {
-                if (chunk.Type == id_RIdx)
-                {
-                    reader.Address = (int)chunk.DataAddress;
-                    var numResources = (int)reader.NextDWord();
-
-                    if (chunk.Length < (numResources * 12) + 4)
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    for (int i = 0; i < numResources; i++)
-                    {
-                        var resource = new ResourceDecriptor();
-                        resource.Usage = reader.NextDWord();
-                        resource.Number = reader.NextDWord();
-
-                        var resourcePos = reader.NextDWord();
-
-                        var chunkIndex = chunks.FindIndex(c => c.Address == resourcePos);
-                        if (chunkIndex < 0)
-                        {
-                            throw new InvalidOperationException();
-                        }
-
-                        resource.ChunkNumber = chunkIndex;
-
-                        resources.Add(resource);
-                    }
-                }
-                else if (chunk.Type == id_RelN)
-                {
-                    reader.Address = (int)chunk.DataAddress;
-                    if (chunk.Length < 2)
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    releaseNumber = reader.NextWord();
-                }
-                else if (chunk.Type == id_IFhd)
-                {
-                    reader.Address = (int)chunk.DataAddress;
-                    if (chunk.Length < 3)
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    var header = new ZHeader();
-                    header.ReleaseNumber = reader.NextWord();
-                    header.SerialNumber = new char[6];
-                    for (int i = 0; i < 6; i++)
-                    {
-                        header.SerialNumber[i] = (char)reader.NextByte();
-                    }
-                    header.Checksum = reader.NextWord();
-                }
-                else if (chunk.Type == id_Reso)
-                {
-
-                }
-                else if (chunk.Type == id_Loop)
-                {
-
-                }
-                else if (chunk.Type == id_Plte)
-                {
-
-                }
-            }
-        }
-
-        private ResourceDecriptor FindExecResource()
-        {
-            var index = resources.FindIndex(res => res.Usage == id_Exec);
-
-            if (index < 0)
-            {
-                throw new BlorbFileException("Blorb file does not contain a resource with 'Exec' usage.");
-            }
-
-            return resources[index];
-        }
-
-        private ChunkDescriptor FindChunkByType(uint type)
-        {
-            var index = chunks.FindIndex(ch => ch.Type == type);
-
-            if (index < 0)
-            {
-                throw new BlorbFileException("Blorb file does not contain a chunk of type '" + NameFromId(type) + "'.");
-            }
-
-            return chunks[index];
-        }
-
-        private byte[] GetChunkData(ChunkDescriptor chunk)
-        {
-            return memory.ReadBytes((int)chunk.DataAddress, (int)chunk.Length);
-        }
-
-        public Story LoadStory()
-        {
-            var resource = FindExecResource();
-            var chunk = chunks[resource.ChunkNumber];
-
-            if (chunk.Type != id_ZCOD)
-            {
-                throw new BlorbFileException("Blorb file does not contain 'ZCOD' chunk");
-            }
-
-            return Story.FromBytes(GetChunkData(chunk));
-        }
-
-        public XElement LoadMetadata()
-        {
-            var chunk = FindChunkByType(id_IFmd);
-
-            using (var stream = new MemoryStream(GetChunkData(chunk)))
-            {
-                return XElement.Load(stream);
-            }
-        }
-
-        public PictureKind GetPictureKind(int resourceNumber)
-        {
-            var resource = resources[resourceNumber];
-            var chunk = chunks[resource.ChunkNumber];
-
-            if (chunk.Type == id_PNG)
-            {
-                return PictureKind.Png;
-            }
-            else if (chunk.Type == id_JPEG)
-            {
-                return PictureKind.Jpeg;
+                chunk.DataAddress = chunk.Address;
+                chunk.Length = len + 8;
             }
             else
             {
-                return PictureKind.Unknown;
+                chunk.DataAddress = (uint)reader.Address;
+                chunk.Length = len;
+            }
+
+            chunks.Add(chunk);
+
+            reader.Skip((int)len);
+            if ((reader.Address & 1) != 0)
+            {
+                reader.Skip(1);
+            }
+
+            if (reader.Address > totalLength)
+            {
+                throw new InvalidOperationException();
             }
         }
 
-        public Stream LoadPictureStream(int resourceNumber)
-        {
-            var resource = resources[resourceNumber];
-            var chunk = chunks[resource.ChunkNumber];
+        // Loop through chunks and collect resources
+        resources = [];
 
-            return new MemoryStream(GetChunkData(chunk));
-        }
-
-        public int ReleaseNumber
+        foreach (var chunk in chunks)
         {
-            get { return releaseNumber; }
+            if (chunk.Type == id_RIdx)
+            {
+                reader.Address = (int)chunk.DataAddress;
+                var numResources = (int)reader.NextDWord();
+
+                if (chunk.Length < (numResources * 12) + 4)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                for (var i = 0; i < numResources; i++)
+                {
+                    var resource = new ResourceDecriptor
+                    {
+                        Usage = reader.NextDWord(),
+                        Number = reader.NextDWord()
+                    };
+
+                    var resourcePos = reader.NextDWord();
+
+                    var chunkIndex = chunks.FindIndex(c => c.Address == resourcePos);
+                    if (chunkIndex < 0)
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    resource.ChunkNumber = chunkIndex;
+
+                    resources.Add(resource);
+                }
+            }
+            else if (chunk.Type == id_RelN)
+            {
+                reader.Address = (int)chunk.DataAddress;
+                if (chunk.Length < 2)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                releaseNumber = reader.NextWord();
+            }
+            else if (chunk.Type == id_IFhd)
+            {
+                reader.Address = (int)chunk.DataAddress;
+                if (chunk.Length < 3)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var header = new ZHeader
+                {
+                    ReleaseNumber = reader.NextWord(),
+                    SerialNumber = new char[6]
+                };
+                for (var i = 0; i < 6; i++)
+                {
+                    header.SerialNumber[i] = (char)reader.NextByte();
+                }
+                header.Checksum = reader.NextWord();
+            }
+            else if (chunk.Type == id_Reso)
+            {
+
+            }
+            else if (chunk.Type == id_Loop)
+            {
+
+            }
+            else if (chunk.Type == id_Plte)
+            {
+
+            }
         }
     }
+
+    private ResourceDecriptor FindExecResource()
+    {
+        var index = resources.FindIndex(res => res.Usage == id_Exec);
+
+        if (index < 0)
+        {
+            throw new BlorbFileException("Blorb file does not contain a resource with 'Exec' usage.");
+        }
+
+        return resources[index];
+    }
+
+    private ChunkDescriptor FindChunkByType(uint type)
+    {
+        var index = chunks.FindIndex(ch => ch.Type == type);
+
+        if (index < 0)
+        {
+            throw new BlorbFileException("Blorb file does not contain a chunk of type '" + NameFromId(type) + "'.");
+        }
+
+        return chunks[index];
+    }
+
+    private byte[] GetChunkData(ChunkDescriptor chunk) => memory.ReadBytes((int)chunk.DataAddress, (int)chunk.Length);
+
+    public Story LoadStory()
+    {
+        var resource = FindExecResource();
+        var chunk = chunks[resource.ChunkNumber];
+
+        if (chunk.Type != id_ZCOD)
+        {
+            throw new BlorbFileException("Blorb file does not contain 'ZCOD' chunk");
+        }
+
+        return Story.FromBytes(GetChunkData(chunk));
+    }
+
+    public XElement LoadMetadata()
+    {
+        var chunk = FindChunkByType(id_IFmd);
+
+        using (var stream = new MemoryStream(GetChunkData(chunk)))
+        {
+            return XElement.Load(stream);
+        }
+    }
+
+    public PictureKind GetPictureKind(int resourceNumber)
+    {
+        var resource = resources[resourceNumber];
+        var chunk = chunks[resource.ChunkNumber];
+
+        if (chunk.Type == id_PNG)
+        {
+            return PictureKind.Png;
+        }
+        else if (chunk.Type == id_JPEG)
+        {
+            return PictureKind.Jpeg;
+        }
+        else
+        {
+            return PictureKind.Unknown;
+        }
+    }
+
+    public Stream LoadPictureStream(int resourceNumber)
+    {
+        var resource = resources[resourceNumber];
+        var chunk = chunks[resource.ChunkNumber];
+
+        return new MemoryStream(GetChunkData(chunk));
+    }
+
+    public int ReleaseNumber => releaseNumber;
 }
