@@ -434,7 +434,7 @@ public class ZObjectTable : IIndexedEnumerable<ZObject>
             prop = reader.NextProperty(version, propertyTable, ++index);
         }
 
-        return props.ToArray();
+        return [.. props];
     }
 
     internal ushort? TryReadLeftSiblingNumberByObjectNumber(ushort objNum)

@@ -289,10 +289,7 @@ public sealed partial class InterpretedZMachine
 
         if (second == 0) // zero out first table
         {
-            for (int j = 0; j < size; j++)
-            {
-                this.Memory.WriteByte(first + j, 0);
-            }
+            this.Memory.AsSpan(first, size).Clear();
         }
         else if ((short)size < 0 || first > second) // copy forwards
         {
@@ -302,19 +299,11 @@ public sealed partial class InterpretedZMachine
                 copySize = (ushort)(-((short)size));
             }
 
-            for (int j = 0; j < copySize; j++)
-            {
-                var value = this.Memory.ReadByte(first + j);
-                this.Memory.WriteByte(second + j, value);
-            }
+            this.Memory.AsSpan(first, copySize).CopyTo(this.Memory.AsSpan(second));
         }
         else // copy backwards
         {
-            for (int j = size - 1; j >= 0; j--)
-            {
-                var value = this.Memory.ReadByte(first + j);
-                this.Memory.WriteByte(second + j, value);
-            }
+            this.Memory.AsSpan(first, size).CopyTo(this.Memory.AsSpan(second));
         }
     }
 

@@ -324,24 +324,19 @@ public sealed partial class CompiledZMachine : ZMachine, IDisposable
             byte maxWords = this.Memory.ReadByte(parseBuffer);
             byte parsedWords = Math.Min(maxWords, (byte)tokens.Length);
 
-            this.Memory.WriteByte(parseBuffer + 1, parsedWords);
+            var writer = new MemoryWriter(this.Memory, parseBuffer + 1);
+
+            writer.WriteByte(parsedWords);
 
             for (int i = 0; i < parsedWords; i++)
             {
                 ZCommandToken token = tokens[i];
 
                 ushort address = this.ZText.LookupWord(token.Text, dictionaryAddress);
-                if (address > 0)
-                {
-                    this.Memory.WriteWord(parseBuffer + 2 + (i * 4), address);
-                }
-                else
-                {
-                    this.Memory.WriteWord(parseBuffer + 2 + (i * 4), 0);
-                }
+                writer.WriteWord(address);
 
-                this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 2, (byte)token.Length);
-                this.Memory.WriteByte(parseBuffer + 2 + (i * 4) + 3, (byte)(token.Start + 1));
+                writer.WriteByte((byte)token.Length);
+                writer.WriteByte((byte)(token.Start + 1));
             }
 
             inputReceived = true;

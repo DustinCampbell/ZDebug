@@ -100,16 +100,14 @@ public sealed class BlorbFile
 
     public BlorbFile(Stream stream)
     {
-        if (stream == null)
-        {
-            throw new ArgumentNullException("stream");
-        }
+        ArgumentNullException.ThrowIfNull(stream);
 
         this.memory = stream.ReadFully();
 
         var reader = new MemoryReader(this.memory, 0);
 
-        var dwords = reader.NextDWords(3);
+        var dwords = new uint[3];
+        reader.CopyDWords(dwords);
 
         // First, ensure that this is a valid format
         if (dwords[0] != id_FORM)
@@ -133,8 +131,8 @@ public sealed class BlorbFile
 
             chunk.Address = (uint)reader.Address;
 
-            var type = reader.NextDWord();
-            var len = reader.NextDWord();
+            var type = reader.ReadDWord();
+            var len = reader.ReadDWord();
 
             chunk.Type = type;
             if (type == id_FORM)
@@ -170,7 +168,7 @@ public sealed class BlorbFile
             if (chunk.Type == id_RIdx)
             {
                 reader.Address = (int)chunk.DataAddress;
-                var numResources = (int)reader.NextDWord();
+                var numResources = (int)reader.ReadDWord();
 
                 if (chunk.Length < (numResources * 12) + 4)
                 {
@@ -180,10 +178,10 @@ public sealed class BlorbFile
                 for (int i = 0; i < numResources; i++)
                 {
                     var resource = new ResourceDecriptor();
-                    resource.Usage = reader.NextDWord();
-                    resource.Number = reader.NextDWord();
+                    resource.Usage = reader.ReadDWord();
+                    resource.Number = reader.ReadDWord();
 
-                    var resourcePos = reader.NextDWord();
+                    var resourcePos = reader.ReadDWord();
 
                     var chunkIndex = chunks.FindIndex(c => c.Address == resourcePos);
                     if (chunkIndex < 0)
@@ -204,7 +202,7 @@ public sealed class BlorbFile
                     throw new InvalidOperationException();
                 }
 
-                releaseNumber = reader.NextWord();
+                releaseNumber = reader.ReadWord();
             }
             else if (chunk.Type == id_IFhd)
             {
@@ -215,13 +213,14 @@ public sealed class BlorbFile
                 }
 
                 var header = new ZHeader();
-                header.ReleaseNumber = reader.NextWord();
+                header.ReleaseNumber = reader.ReadWord();
                 header.SerialNumber = new char[6];
                 for (int i = 0; i < 6; i++)
                 {
-                    header.SerialNumber[i] = (char)reader.NextByte();
+                    header.SerialNumber[i] = (char)reader.ReadByte();
                 }
-                header.Checksum = reader.NextWord();
+
+                header.Checksum = reader.ReadWord();
             }
             else if (chunk.Type == id_Reso)
             {

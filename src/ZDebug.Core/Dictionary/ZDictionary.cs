@@ -27,11 +27,15 @@ public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
 
         var reader = new MemoryReader(story.Memory, address);
 
-        int wordSepCount = reader.NextByte();
-        this.wordSeparators = reader.NextBytes(wordSepCount).ConvertAll(b => (char)b).AsReadOnly();
+        int wordSepCount = reader.ReadByte();
 
-        int entryLength = reader.NextByte();
-        int entryCount = reader.NextWord();
+        var wordSeps = new byte[wordSepCount];
+        reader.CopyBytes(wordSeps);
+
+        this.wordSeparators = wordSeps.ConvertAll(b => (char)b).AsReadOnly();
+
+        int entryLength = reader.ReadByte();
+        int entryCount = reader.ReadWord();
 
         int zwordsSize = story.Version <= 3 ? 2 : 3;
         int dataSize = entryLength - (zwordsSize * 2);
@@ -40,8 +44,13 @@ public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
         for (int i = 0; i < entryCount; i++)
         {
             var entryAddress = reader.Address;
-            var entryZWords = reader.NextWords(zwordsSize);
-            var entryData = reader.NextBytes(dataSize);
+
+            var entryZWords = new ushort[zwordsSize];
+            reader.CopyWords(entryZWords);
+
+            var entryData = new byte[dataSize];
+            reader.CopyBytes(entryData);
+
             var entryZText = ztext.ZWordsAsString(entryZWords, ZTextFlags.All);
             entries.Add(new ZDictionaryEntry(entryAddress, i, entryZWords, entryZText, entryData));
         }

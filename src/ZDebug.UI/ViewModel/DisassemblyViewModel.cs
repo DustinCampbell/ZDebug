@@ -121,8 +121,6 @@ internal sealed class DisassemblyViewModel : ViewModelWithViewBase<UserControl>
 
     private void DebuggerService_MachineCreated(object sender, MachineCreatedEventArgs e)
     {
-        var reader = new MemoryReader(storyService.Story.Memory, 0);
-
         DisassemblyLineViewModel ipLine;
 
         lines.BeginBulkOperation();

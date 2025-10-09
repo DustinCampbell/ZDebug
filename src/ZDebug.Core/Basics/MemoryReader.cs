@@ -1,142 +1,83 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Basics;
 
-public sealed class MemoryReader
+public struct MemoryReader(Memory<byte> memory, int address)
 {
-    private readonly byte[] memory;
-    private int address;
+    private const int WordSize = 2;
+    private const int DWordSize = 4;
 
-    public MemoryReader(byte[] memory, int address)
-    {
-        this.memory = memory;
-        this.address = address;
-    }
+    private readonly Memory<byte> memory = memory;
+    private int address = address;
 
-    public byte NextByte()
-    {
-        if (address + 1 > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
+    private readonly ReadOnlySpan<byte> Span => memory.Span[address..];
 
-        var result = memory.ReadByte(address);
-        address++;
-        return result;
-    }
-
-    public byte[] NextBytes(int length)
-    {
-        if (length == 0)
-        {
-            return new byte[0];
-        }
-
-        if (address + length > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
-
-        var result = memory.ReadBytes(address, length);
-        address += length;
-        return result;
-    }
-
-    public ushort NextWord()
-    {
-        if (address + 2 > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
-
-        var result = memory.ReadWord(address);
-        address += 2;
-        return result;
-    }
-
-    public ushort[] NextWords(int length)
-    {
-        if (length == 0)
-        {
-            return new ushort[0];
-        }
-
-        if (address + (length * 2) > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
-
-        var result = memory.ReadWords(address, length);
-        address += (length * 2);
-        return result;
-    }
-
-    public uint NextDWord()
-    {
-        if (address + 4 > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
-
-        var result = memory.ReadDWord(address);
-        address += 4;
-        return result;
-    }
-
-    public uint[] NextDWords(int length)
-    {
-        if (length == 0)
-        {
-            return new uint[0];
-        }
-
-        if (address + (length * 4) > memory.Length)
-        {
-            throw new InvalidOperationException("Attempted to read past end of memory");
-        }
-
-        var result = memory.ReadDWords(address, length);
-        address += (length * 4);
-        return result;
-    }
-
-    public void Skip(int length)
-    {
-        if (length < 0 || address + length > memory.Length)
-        {
-            throw new ArgumentOutOfRangeException("length");
-        }
-
-        address += length;
-    }
+    public readonly Memory<byte> Memory => memory;
 
     public int Address
     {
-        get { return address; }
+        readonly get => address;
         set
         {
-            if (value < 0 || value > memory.Length)
-            {
-                throw new ArgumentOutOfRangeException("value");
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(value);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, memory.Length);
 
             address = value;
         }
     }
 
-    public int Size
+    public readonly int BytesRemaining => Span.Length;
+
+    public byte ReadByte()
     {
-        get { return memory.Length; }
+        var result = Span.ReadByte();
+        address++;
+
+        return result;
     }
 
-    public int RemainingBytes
+    public void CopyBytes(Span<byte> destination)
     {
-        get { return memory.Length - address; }
+        Span.CopyBytes(destination);
+        address += destination.Length;
     }
 
-    public byte[] Memory
+    public ushort ReadWord()
     {
-        get { return memory; }
+        var result = Span.ReadWord();
+        address += WordSize;
+
+        return result;
+    }
+
+    public void CopyWords(Span<ushort> destination)
+    {
+        Span.CopyWords(destination);
+        address += destination.Length * WordSize;
+    }
+
+    public uint ReadDWord()
+    {
+        var result = Span.ReadDWord();
+        address += DWordSize;
+
+        return result;
+    }
+
+    public void CopyDWords(Span<uint> destination)
+    {
+        Span.CopyDWords(destination);
+        address += destination.Length * DWordSize;
+    }
+
+    public void Skip(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(count, BytesRemaining);
+
+        address += count;
     }
 }

@@ -24,10 +24,15 @@ public static class ByteArrayExtensions
         return result;
     }
 
+    public static void CopyBytes(this ReadOnlySpan<byte> source, Span<byte> destination)
+    {
+        source[..destination.Length].CopyTo(destination);
+    }
+
     public static byte[] ReadBytes(this ReadOnlySpan<byte> source, int count)
     {
         byte[] result = new byte[count];
-        source[..count].CopyTo(result);
+        source.CopyBytes(result);
 
         return result;
     }
@@ -63,16 +68,19 @@ public static class ByteArrayExtensions
         return result;
     }
 
+    public static void CopyWords(this ReadOnlySpan<byte> source, Span<ushort> destination)
+    {
+        for (int i = 0; i < destination.Length; i++)
+        {
+            destination[i] = ReadWord(source);
+            source = source[WordSize..];
+        }
+    }
+
     public static ushort[] ReadWords(this ReadOnlySpan<byte> source, int count)
     {
         ushort[] result = new ushort[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            result[i] = ReadWord(source);
-
-            source = source[WordSize..];
-        }
+        source.CopyWords(result);
 
         return result;
     }
@@ -108,16 +116,19 @@ public static class ByteArrayExtensions
         return result;
     }
 
+    public static void CopyDWords(this ReadOnlySpan<byte> source, Span<uint> destination)
+    {
+        for (int i = 0; i < destination.Length; i++)
+        {
+            destination[i] = ReadDWord(source);
+            source = source[DWordSize..];
+        }
+    }
+
     public static uint[] ReadDWords(this ReadOnlySpan<byte> source, int count)
     {
         uint[] result = new uint[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            result[i] = ReadDWord(source);
-
-            source = source[DWordSize..];
-        }
+        source.CopyDWords(result);
 
         return result;
     }

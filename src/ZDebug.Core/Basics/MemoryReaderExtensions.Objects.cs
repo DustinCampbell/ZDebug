@@ -3,9 +3,9 @@ using ZDebug.Core.Objects;
 
 namespace ZDebug.Core.Basics;
 
-internal static partial class IMemoryReaderExtensions
+internal static partial class MemoryReaderExtensions
 {
-    private static ZProperty NextProperty_V1(this MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
+    private static ZProperty NextProperty_V1(this ref MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
     {
         var address = reader.Address - 1;
         var number = sizeByte % 32;
@@ -16,7 +16,7 @@ internal static partial class IMemoryReaderExtensions
         return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
     }
 
-    private static ZProperty NextProperty_V4(this MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
+    private static ZProperty NextProperty_V4(this ref MemoryReader reader, byte sizeByte, ZPropertyTable propertyTable, int index)
     {
         var address = reader.Address - 1;
         var number = sizeByte & 0x3f; // number is in the bottom 6 bites
@@ -24,7 +24,7 @@ internal static partial class IMemoryReaderExtensions
         int length;
         if ((sizeByte & 0x80) == 0x80) // if bit 7 is set
         {
-            var nextByte = reader.NextByte() & 0x3f;
+            var nextByte = reader.ReadByte() & 0x3f;
             length = nextByte == 0 ? 64 : nextByte;
         }
         else if ((sizeByte & 0x40) == 0x40) // if bit 6 is set
@@ -42,9 +42,9 @@ internal static partial class IMemoryReaderExtensions
         return new ZProperty(reader.Memory, propertyTable, index, address, number, dataAddress, length);
     }
 
-    public static ZProperty NextProperty(this MemoryReader reader, int version, ZPropertyTable propertyTable, int index)
+    public static ZProperty NextProperty(this ref MemoryReader reader, int version, ZPropertyTable propertyTable, int index)
     {
-        var sizeByte = reader.NextByte();
+        var sizeByte = reader.ReadByte();
         if (sizeByte == 0)
         {
             return null;
@@ -64,17 +64,17 @@ internal static partial class IMemoryReaderExtensions
         }
     }
 
-    public static void SkipShortName(this MemoryReader reader)
+    public static void SkipShortName(this ref MemoryReader reader)
     {
-        var length = reader.NextByte();
+        var length = reader.ReadByte();
         reader.Skip(length * 2);
     }
 
-    public static void SkipProperties(this MemoryReader reader, int version)
+    public static void SkipProperties(this ref MemoryReader reader, int version)
     {
         while (true)
         {
-            var sizeByte = reader.NextByte();
+            var sizeByte = reader.ReadByte();
             if (sizeByte == 0)
             {
                 return;
@@ -87,7 +87,7 @@ internal static partial class IMemoryReaderExtensions
             }
             else if ((sizeByte & 0x80) == 0x80)
             {
-                var nextByte = reader.NextByte() & 0x3f;
+                var nextByte = reader.ReadByte() & 0x3f;
                 dataLength = nextByte == 0 ? 64 : nextByte;
             }
             else if ((sizeByte & 0x40) == 0x40)

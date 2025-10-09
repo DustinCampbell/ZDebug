@@ -60,16 +60,18 @@ internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
         lines.BeginBulkOperation();
         try
         {
-            while (reader.RemainingBytes > 0)
+            while (reader.BytesRemaining > 0)
             {
                 var address = reader.Address;
 
                 ushort[] values;
 
-                if (reader.RemainingBytes >= 16 || reader.RemainingBytes % 2 == 0)
+                if (reader.BytesRemaining >= 16 || reader.BytesRemaining % 2 == 0)
                 {
-                    var count = Math.Min(8, reader.RemainingBytes / 2);
-                    values = reader.NextWords(count);
+                    var count = Math.Min(8, reader.BytesRemaining / 2);
+                    values = new ushort[count];
+
+                    reader.CopyWords(values);
                 }
                 else
                 {
@@ -79,19 +81,19 @@ internal partial class MemoryViewModel : ViewModelWithViewBase<UserControl>
                     // (padding with zeroes if necessry). Need to fix it to show odd
                     // number of bytes if that's the case.
                     var valueList = new List<ushort>();
-                    while (reader.RemainingBytes > 0)
+                    while (reader.BytesRemaining > 0)
                     {
-                        if (reader.RemainingBytes > 2)
+                        if (reader.BytesRemaining > 2)
                         {
-                            valueList.Add(reader.NextWord());
+                            valueList.Add(reader.ReadWord());
                         }
                         else
                         {
-                            valueList.Add((ushort)(reader.NextByte() << 8));
+                            valueList.Add((ushort)(reader.ReadByte() << 8));
                         }
                     }
 
-                    values = valueList.ToArray();
+                    values = [.. valueList];
                 }
 
                 lines.Add(new MemoryLineViewModel(address, values));

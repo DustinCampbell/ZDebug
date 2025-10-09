@@ -111,11 +111,11 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
         var dictionaryBase = Header.ReadDictionaryAddress(memory);
 
         var reader = new MemoryReader(memory, dictionaryBase);
-        var separatorCount = reader.NextByte();
+        var separatorCount = reader.ReadByte();
         reader.Skip(separatorCount);
 
-        var entrySize = reader.NextByte();
-        var entryCount = reader.NextWord();
+        var entrySize = reader.ReadByte();
+        var entryCount = reader.ReadWord();
 
         var dictionaryEnd = (reader.Address + (entrySize * entryCount)) - 1;
 
@@ -186,7 +186,7 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
 
         var reader = new MemoryReader(memory, classNumbersBase);
 
-        while (reader.NextWord() != 0)
+        while (reader.ReadWord() != 0)
             ;
 
         var classNumbersEnd = reader.Address - 1;
@@ -194,7 +194,7 @@ public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
         AddRegion(MemoryMapRegionKind.ClassPrototypeObjectNumbers, "Class prototype object numbers", classNumbersBase, classNumbersEnd);
 
         var propertyNamesBase = reader.Address;
-        var propertyCount = reader.NextWord() - 1;
+        var propertyCount = reader.ReadWord() - 1;
         reader.Skip(propertyCount * 2);
         var propertyNamesEnd = reader.Address - 1;
 

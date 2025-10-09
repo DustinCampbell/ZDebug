@@ -5,7 +5,7 @@ namespace ZDebug.Core.Objects;
 
 public class ZProperty
 {
-    private readonly byte[] memory;
+    private readonly Memory<byte> memory;
     private readonly ZPropertyTable propertyTable;
     private readonly int index;
     private readonly int address;
@@ -13,7 +13,7 @@ public class ZProperty
     private readonly int dataAddress;
     private readonly int length;
 
-    internal ZProperty(byte[] memory, ZPropertyTable propertyTable, int index, int address, int number, int dataAddress, int length)
+    internal ZProperty(Memory<byte> memory, ZPropertyTable propertyTable, int index, int address, int number, int dataAddress, int length)
     {
         this.memory = memory;
         this.propertyTable = propertyTable;
@@ -64,6 +64,8 @@ public class ZProperty
         get { return length == 2; }
     }
 
+    private Span<byte> Data => memory.Span[dataAddress..];
+
     public byte ReadAsByte()
     {
         if (!IsByte)
@@ -71,7 +73,7 @@ public class ZProperty
             throw new InvalidOperationException("Attempted to read property with length " + length + " as a byte.");
         }
 
-        return memory.ReadByte(dataAddress);
+        return Data.ReadByte();
     }
 
     public void WriteAsByte(byte value)
@@ -81,7 +83,7 @@ public class ZProperty
             throw new InvalidOperationException("Attempted to write property with length " + length + " as a byte.");
         }
 
-        memory.WriteByte(dataAddress, value);
+        Data.WriteByte(value);
     }
 
     public ushort ReadAsWord()
@@ -91,7 +93,7 @@ public class ZProperty
             throw new InvalidOperationException("Attempted to read property with length " + length + " as a word.");
         }
 
-        return memory.ReadWord(dataAddress);
+        return Data.ReadWord();
     }
 
     public void WriteAsWord(ushort value)
@@ -101,16 +103,16 @@ public class ZProperty
             throw new InvalidOperationException("Attempted to write property with length " + length + " as a word.");
         }
 
-        memory.WriteWord(dataAddress, value);
+        Data.WriteWord(value);
     }
 
     public byte[] ReadAsBytes()
     {
-        return memory.ReadBytes(dataAddress, length);
+        return Data.ReadBytes(length);
     }
 
     public void WriteAsBytes(byte[] values)
     {
-        memory.WriteBytes(dataAddress, values);
+        Data.WriteBytes(values);
     }
 }
