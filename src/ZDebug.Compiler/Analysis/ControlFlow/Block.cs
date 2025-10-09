@@ -1,61 +1,60 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ZDebug.Compiler.Analysis.ControlFlow
+namespace ZDebug.Compiler.Analysis.ControlFlow;
+
+internal class Block
 {
-    internal class Block
+    private readonly bool isEntry;
+    private readonly bool isExit;
+    private readonly List<Block> jumpSources;
+    private readonly List<Block> jumpTargets;
+
+    public Block(bool isEntry = false, bool isExit = false)
     {
-        private readonly bool isEntry;
-        private readonly bool isExit;
-        private readonly List<Block> jumpSources;
-        private readonly List<Block> jumpTargets;
+        Debug.Assert(!(isEntry && isExit));
 
-        public Block(bool isEntry = false, bool isExit = false)
+        this.isEntry = isEntry;
+        this.isExit = isExit;
+        this.jumpSources = new List<Block>();
+        this.jumpTargets = new List<Block>();
+    }
+
+    public void AddJumpTarget(Block block)
+    {
+        this.jumpTargets.Add(block);
+        block.jumpSources.Add(this);
+    }
+
+    public List<Block> JumpSources
+    {
+        get
         {
-            Debug.Assert(!(isEntry && isExit));
-
-            this.isEntry = isEntry;
-            this.isExit = isExit;
-            this.jumpSources = new List<Block>();
-            this.jumpTargets = new List<Block>();
+            return this.jumpSources;
         }
+    }
 
-        public void AddJumpTarget(Block block)
+    public List<Block> JumpTargets
+    {
+        get
         {
-            this.jumpTargets.Add(block);
-            block.jumpSources.Add(this);
+            return this.jumpTargets;
         }
+    }
 
-        public List<Block> JumpSources
+    public override string ToString()
+    {
+        if (this.isEntry)
         {
-            get
-            {
-                return this.jumpSources;
-            }
+            return "Entry block";
         }
-
-        public List<Block> JumpTargets
+        else if (this.isExit)
         {
-            get
-            {
-                return this.jumpTargets;
-            }
+            return "Exit block";
         }
-
-        public override string ToString()
+        else
         {
-            if (this.isEntry)
-            {
-                return "Entry block";
-            }
-            else if (this.isExit)
-            {
-                return "Exit block";
-            }
-            else
-            {
-                return "Invalid block";
-            }
+            return "Invalid block";
         }
     }
 }

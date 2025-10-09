@@ -1,10 +1,9 @@
 ﻿
-namespace ZDebug.Compiler.Generate
+namespace ZDebug.Compiler.Generate;
+
+public interface IRefLocal : ILocal
 {
-    public interface IRefLocal : ILocal
-    {
-        void LoadIndirectValue();
-        void LoadIndirectValueAndBox();
-        void StoreIndirectValue();
-    }
+    void LoadIndirectValue();
+    void LoadIndirectValueAndBox();
+    void StoreIndirectValue();
 }

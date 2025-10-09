@@ -2,51 +2,50 @@
 using System.Composition;
 using System.Globalization;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+[Export, Shared]
+internal sealed class GoToAddressDialogViewModel : DialogViewModelBase
 {
-    [Export, Shared]
-    internal sealed class GoToAddressDialogViewModel : DialogViewModelBase
+    private int address;
+    private string addressText;
+
+    [ImportingConstructor]
+    public GoToAddressDialogViewModel()
+        : base("GoToAddressDialogView")
     {
-        private int address;
-        private string addressText;
+    }
 
-        [ImportingConstructor]
-        public GoToAddressDialogViewModel()
-            : base("GoToAddressDialogView")
+    public bool AcceptableAddress
+    {
+        get
         {
+            return address > 0;
         }
+    }
 
-        public bool AcceptableAddress
+    public int Address
+    {
+        get { return address; }
+    }
+
+    public string AddressText
+    {
+        get
         {
-            get
-            {
-                return address > 0;
-            }
+            return addressText;
         }
-
-        public int Address
+        set
         {
-            get { return address; }
-        }
-
-        public string AddressText
-        {
-            get
+            addressText = value;
+            if (!Int32.TryParse(addressText, NumberStyles.HexNumber, null, out address))
             {
-                return addressText;
-            }
-            set
-            {
-                addressText = value;
-                if (!Int32.TryParse(addressText, NumberStyles.HexNumber, null, out address))
+                if (!Int32.TryParse(addressText, NumberStyles.Integer, null, out address))
                 {
-                    if (!Int32.TryParse(addressText, NumberStyles.Integer, null, out address))
-                    {
-                        address = 0;
-                    }
+                    address = 0;
                 }
-                PropertyChanged("AcceptableAddress");
             }
+            PropertyChanged("AcceptableAddress");
         }
     }
 }

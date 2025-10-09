@@ -1,13 +1,12 @@
 ﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock"
         xmlns:c="clr-namespace:ZDebug.UI.Controls;assembly=ZDebug.UI.Core"
         xmlns:vm="clr-namespace:ZDebug.UI.ViewModel;assembly=ZDebug.UI.Core"
         Name="wndMain"
         Title="{Binding Title}"
         ResizeMode="CanResizeWithGrip"
-        Width ="800"
-        Height="600"
+        Width ="1200"
+        Height="800"
         vm:ViewModelBase.RegisterViewModelCommands="{Binding}">
 
     <Grid>
@@ -104,46 +103,78 @@
             </ToolBar>
         </ToolBarTray>
 
-        <ad:DockingManager Name="dockManager" Grid.Row="2">
-            <ad:ResizingPanel Orientation="Vertical">
-                <ad:ResizingPanel Orientation="Horizontal">
-                    <ad:ResizingPanel Orientation="Vertical" ad:ResizingPanel.ResizeWidth="300">
-                        <ad:DockablePane>
-                            <ad:DockableContent Title="Story Info" Name="storyInfoContent"/>
-                        </ad:DockablePane>
-                        <ad:DockablePane>
-                            <ad:DockableContent Title="Memory Map" Name="memoryMapContent"/>
-                        </ad:DockablePane>
-                        <ad:DockablePane>
-                            <ad:DockableContent Title="Globals" Name="globalsContent"/>
-                        </ad:DockablePane>
-                    </ad:ResizingPanel>
-                    <ad:ResizingPanel Orientation="Vertical">
-                        <ad:DocumentPane SelectedIndex="0">
-                            <ad:DocumentContent Title="Disassembly" Name="disassemblyContent"/>
-                            <ad:DocumentContent Title="Objects" Name="objectsContent"/>
-                            <!--<ad:DocumentContent Title="Memory" Name="memoryContent"/>-->
-                        </ad:DocumentPane>
-                        <ad:ResizingPanel Orientation="Horizontal" ad:ResizingPanel.ResizeHeight="150">
-                            <ad:DockablePane>
-                                <ad:DockableContent Title="Locals" Name="localsContent"/>
-                            </ad:DockablePane>
-                            <ad:DockablePane>
-                                <ad:DockableContent Title="Call Stack" Name="callStackContent"/>
-                            </ad:DockablePane>
-                        </ad:ResizingPanel>
-                    </ad:ResizingPanel>
-                    <ad:ResizingPanel Orientation="Vertical">
-                        <ad:DockablePane>
-                            <ad:DockableContent Title="Output" Name="outputContent"/>
-                        </ad:DockablePane>
-                        <ad:DockablePane ad:ResizingPanel.ResizeHeight="150">
-                            <ad:DockableContent Title="Messages" Name="messagesContent"/>
-                        </ad:DockablePane>
-                    </ad:ResizingPanel>
-                </ad:ResizingPanel>
-            </ad:ResizingPanel>
-        </ad:DockingManager>
+        <DockingManager Name="dockManager" Grid.Row="2">
+            <DockingManager.Theme>
+                <Vs2013LightTheme/>
+            </DockingManager.Theme>
+            <LayoutRoot>
+                <LayoutPanel Orientation="Vertical">
+                    <LayoutPanel Orientation="Horizontal">
+                        <LayoutAnchorablePaneGroup Orientation="Vertical" DockWidth="300">
+                            <LayoutAnchorablePane>
+                                <LayoutAnchorable
+                                    Title="Story Info"
+                                    ContentId="StoryInfo"
+                                    x:Name="storyInfoContent"/>
+                            </LayoutAnchorablePane>
+                            <LayoutAnchorablePane>
+                                <LayoutAnchorable
+                                    Title="Memory Map"
+                                    ContentId="MemoryMap"
+                                    x:Name="memoryMapContent"/>
+                            </LayoutAnchorablePane>
+                            <LayoutAnchorablePane>
+                                <LayoutAnchorable
+                                    Title="Globals"
+                                    Content="Globals"
+                                    x:Name="globalsContent"/>
+                            </LayoutAnchorablePane>
+                        </LayoutAnchorablePaneGroup>
+                        <LayoutPanel Orientation="Vertical">
+                            <LayoutDocumentPane SelectedContentIndex="0">
+                                <LayoutDocument
+                                    Title="Disassembly"
+                                    Content="Disassembly"
+                                    x:Name="disassemblyContent"/>
+                                <LayoutDocument
+                                    Title="Objects"
+                                    Content="Objects"
+                                    x:Name="objectsContent"/>
+                                <!--<LayoutDocumentPane Title="Memory" Name="memoryContent"/>-->
+                            </LayoutDocumentPane>
+                            <LayoutAnchorablePaneGroup Orientation="Horizontal" DockHeight="150">
+                                <LayoutAnchorablePane>
+                                    <LayoutAnchorable
+                                        Title="Locals"
+                                        ContentId="Locals"
+                                        x:Name="localsContent"/>
+                                </LayoutAnchorablePane>
+                                <LayoutAnchorablePane>
+                                    <LayoutAnchorable
+                                        Title="Call Stack"
+                                        ContentId="CallStack"
+                                        x:Name="callStackContent"/>
+                                </LayoutAnchorablePane>
+                            </LayoutAnchorablePaneGroup>
+                        </LayoutPanel>
+                        <LayoutAnchorablePaneGroup Orientation="Vertical">
+                            <LayoutAnchorablePane>
+                                <LayoutAnchorable
+                                    Title="Output"
+                                    ContentId="Output"
+                                    x:Name="outputContent"/>
+                            </LayoutAnchorablePane>
+                            <LayoutAnchorablePane DockHeight="150">
+                                <LayoutAnchorable
+                                    Title="Messages"
+                                    ContentId="Messages"
+                                    x:Name="messagesContent"/>
+                            </LayoutAnchorablePane>
+                        </LayoutAnchorablePaneGroup>
+                    </LayoutPanel>
+                </LayoutPanel>
+            </LayoutRoot>
+        </DockingManager>
 
         <StatusBar Grid.Row="3">
             <StatusBarItem Content="Z-Debug"/>

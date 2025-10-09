@@ -2,10 +2,12 @@
 using System.Composition;
 using System.Media;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using AvalonDock;
+using AvalonDock.Layout;
 using Microsoft.Win32;
 using ZDebug.Compiler;
 using ZDebug.Core.Execution;
@@ -15,383 +17,383 @@ using ZDebug.UI.Services;
 using ZDebug.UI.Utilities;
 using ZDebug.UI.ViewModel;
 
-namespace ZDebug.Terp.ViewModel
+namespace ZDebug.Terp.ViewModel;
+
+[Export, Shared]
+internal class MainWindowViewModel : ViewModelWithViewBase<Window>, ISoundEngine
 {
-    [Export, Shared]
-    internal class MainWindowViewModel : ViewModelWithViewBase<Window>, ISoundEngine
+    private readonly StoryService storyService;
+    private readonly GameScriptService gameScriptService;
+    private readonly ProfilerService profilerService;
+
+    private readonly ScreenViewModel screenViewModel;
+    private readonly ProfilerViewModel profilerViewModel;
+    private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
+    private readonly GameScriptDialogViewModel gameScriptDialogViewModel;
+
+    private IScreen screen;
+    private CompiledZMachine zmachine;
+    private DispatcherTimer updateTimer;
+    private Task zmachineTask;
+
+    [ImportingConstructor]
+    public MainWindowViewModel(
+        StoryService storyService,
+        GameScriptService gameScriptService,
+        ProfilerService profilerService,
+        ScreenViewModel screenViewModel,
+        ProfilerViewModel profilerViewModel,
+        GameInfoDialogViewModel gameInfoDialogViewModel,
+        GameScriptDialogViewModel gameScriptDialogViewModel)
+        : base("MainWindowView")
     {
-        private readonly StoryService storyService;
-        private readonly GameScriptService gameScriptService;
-        private readonly ProfilerService profilerService;
+        this.storyService = storyService;
+        this.storyService.StoryOpened += StoryService_StoryOpened;
+        this.storyService.StoryClosing += StoryService_StoryClosing;
 
-        private readonly ScreenViewModel screenViewModel;
-        private readonly ProfilerViewModel profilerViewModel;
-        private readonly GameInfoDialogViewModel gameInfoDialogViewModel;
-        private readonly GameScriptDialogViewModel gameScriptDialogViewModel;
+        this.gameScriptService = gameScriptService;
 
-        private IScreen screen;
-        private CompiledZMachine zmachine;
-        private Thread zmachineThread;
-        private DispatcherTimer updateTimer;
+        this.profilerService = profilerService;
 
-        [ImportingConstructor]
-        public MainWindowViewModel(
-            StoryService storyService,
-            GameScriptService gameScriptService,
-            ProfilerService profilerService,
-            ScreenViewModel screenViewModel,
-            ProfilerViewModel profilerViewModel,
-            GameInfoDialogViewModel gameInfoDialogViewModel,
-            GameScriptDialogViewModel gameScriptDialogViewModel)
-            : base("MainWindowView")
+        this.screenViewModel = screenViewModel;
+        this.profilerViewModel = profilerViewModel;
+        this.gameInfoDialogViewModel = gameInfoDialogViewModel;
+        this.gameScriptDialogViewModel = gameScriptDialogViewModel;
+
+        this.OpenStoryCommand = RegisterCommand(
+            text: "Open",
+            name: "Open",
+            executed: OpenStoryExecuted,
+            canExecute: OpenStoryCanExecute,
+            inputGestures: new KeyGesture(Key.O, ModifierKeys.Control));
+
+        this.EditGameScriptCommand = RegisterCommand(
+            text: "EditGameScript",
+            name: "Edit Game Script",
+            executed: EditGameScriptExecuted,
+            canExecute: EditGameScriptCanExecute);
+
+        this.ExitCommand = RegisterCommand(
+            text: "Exit",
+            name: "Exit",
+            executed: ExitExecuted,
+            canExecute: ExitCanExecute,
+            inputGestures: new KeyGesture(Key.F4, ModifierKeys.Alt));
+
+        this.StopCommand = RegisterCommand(
+            text: "Stop",
+            name: "Stop",
+            executed: StopExecuted,
+            canExecute: StopCanExecute);
+
+        this.AboutGameCommand = RegisterCommand(
+            text: "AboutGame",
+            name: "About Game",
+            executed: AboutGameExecuted,
+            canExecute: AboutGameCanExecute);
+    }
+
+    protected override void ViewCreated(Window view)
+    {
+        var screenContent = this.View.FindName<LayoutDocument>("screenContent");
+        screenContent.Content = screenViewModel.CreateView();
+        this.screen = screenViewModel;
+
+        var profilerContent = this.View.FindName<LayoutDocument>("profilerContent");
+        profilerContent.Content = profilerViewModel.CreateView();
+
+        this.updateTimer = new DispatcherTimer(
+            interval: TimeSpan.FromMilliseconds(100),
+            priority: DispatcherPriority.Normal,
+            callback: delegate { UpdateProfilerStatistics(); },
+            dispatcher: this.View.Dispatcher);
+
+        this.updateTimer.Stop();
+
+        this.View.SourceInitialized += (s, e) =>
         {
-            this.storyService = storyService;
-            this.storyService.StoryOpened += StoryService_StoryOpened;
-            this.storyService.StoryClosing += StoryService_StoryClosing;
+            Storage.RestoreWindowLayout(this.View);
+        };
 
-            this.gameScriptService = gameScriptService;
+        var dockManager = this.View.FindName<DockingManager>("dockManager");
+        dockManager.Loaded += (s, e) =>
+        {
+            Storage.SaveDockingLayout(dockManager, "original");
+            Storage.RestoreDockingLayout(dockManager);
+        };
 
-            this.profilerService = profilerService;
+        this.View.Closing += (s, e) =>
+        {
+            storyService.CloseStory();
+            Storage.SaveDockingLayout(dockManager);
+            Storage.SaveWindowLayout(this.View);
+        };
+    }
 
-            this.screenViewModel = screenViewModel;
-            this.profilerViewModel = profilerViewModel;
-            this.gameInfoDialogViewModel = gameInfoDialogViewModel;
-            this.gameScriptDialogViewModel = gameScriptDialogViewModel;
+    // commands...
+    public ICommand OpenStoryCommand { get; private set; }
+    public ICommand EditGameScriptCommand { get; private set; }
+    public ICommand ExitCommand { get; private set; }
+    public ICommand StopCommand { get; private set; }
+    public ICommand AboutGameCommand { get; private set; }
 
-            this.OpenStoryCommand = RegisterCommand(
-                text: "Open",
-                name: "Open",
-                executed: OpenStoryExecuted,
-                canExecute: OpenStoryCanExecute,
-                inputGestures: new KeyGesture(Key.O, ModifierKeys.Control));
+    private bool OpenStoryCanExecute()
+    {
+        return true;
+    }
 
-            this.EditGameScriptCommand = RegisterCommand(
-                text: "EditGameScript",
-                name: "Edit Game Script",
-                executed: EditGameScriptExecuted,
-                canExecute: EditGameScriptCanExecute);
+    private void OpenStoryExecuted()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Open Story File",
+            Filter = "Supported Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8,*.zblorb)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8;*.zblorb|" +
+                     "Z-Code Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8|" +
+                     "Blorb Files (*.zblorb)|*.zblorb|" +
+                     "All Files (*.*)|*.*"
+        };
 
-            this.ExitCommand = RegisterCommand(
-                text: "Exit",
-                name: "Exit",
-                executed: ExitExecuted,
-                canExecute: ExitCanExecute,
-                inputGestures: new KeyGesture(Key.F4, ModifierKeys.Alt));
-
-            this.StopCommand = RegisterCommand(
-                text: "Stop",
-                name: "Stop",
-                executed: StopExecuted,
-                canExecute: StopCanExecute);
-
-            this.AboutGameCommand = RegisterCommand(
-                text: "AboutGame",
-                name: "About Game",
-                executed: AboutGameExecuted,
-                canExecute: AboutGameCanExecute);
+        if (dialog.ShowDialog(this.View) == true)
+        {
+            storyService.OpenStory(dialog.FileName);
         }
 
-        protected override void ViewCreated(Window view)
+        this.updateTimer.Start();
+    }
+
+    private bool EditGameScriptCanExecute()
+    {
+        return true;
+    }
+
+    private void EditGameScriptExecuted()
+    {
+        gameScriptDialogViewModel.ShowDialog(owner: this.View);
+    }
+
+    private bool ExitCanExecute()
+    {
+        return true;
+    }
+
+    private void ExitExecuted()
+    {
+        this.View.Close();
+    }
+
+    private bool StopCanExecute()
+    {
+        return zmachine != null;
+    }
+
+    private void StopExecuted()
+    {
+        zmachine.Stop();
+    }
+
+    private bool AboutGameCanExecute()
+    {
+        return storyService.HasGameInfo;
+    }
+
+    private void AboutGameExecuted()
+    {
+        gameInfoDialogViewModel.ShowDialog(owner: this.View);
+    }
+
+    public string Title
+    {
+        get
         {
-            var screenContent = this.View.FindName<DocumentContent>("screenContent");
-            screenContent.Content = screenViewModel.CreateView();
-            this.screen = screenViewModel;
+            return "Z-Terp";
+        }
+    }
 
-            var profilerContent = this.View.FindName<DocumentContent>("profilerContent");
-            profilerContent.Content = profilerViewModel.CreateView();
+    void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+    {
+        //profilerService.Create();
+        PropertyChanged("Profiling");
 
-            this.updateTimer = new DispatcherTimer(
-                interval: TimeSpan.FromMilliseconds(100),
-                priority: DispatcherPriority.Normal,
-                callback: delegate { UpdateProfilerStatistics(); },
-                dispatcher: this.View.Dispatcher);
+        e.Story.RegisterInterpreter(new Interpreter());
+        zmachine = new CompiledZMachine(e.Story, profiler: profilerService.Profiler);
+        zmachine.SetRandomSeed(42);
 
-            this.updateTimer.Stop();
+        zmachine.RegisterScreen(screen);
+        zmachine.RegisterSoundEngine(this);
 
-            this.View.SourceInitialized += (s, e) =>
-            {
-                Storage.RestoreWindowLayout(this.View);
-            };
+        zmachineTask = Task.Run(() => Run());
 
-            var dockManager = this.View.FindName<DockingManager>("dockManager");
-            dockManager.Loaded += (s, e) =>
-            {
-                Storage.SaveDockingLayout(dockManager, "original");
-                Storage.RestoreDockingLayout(dockManager);
-            };
+        PropertyChanged("Title");
+    }
 
-            this.View.Closing += (s, e) =>
-            {
-                storyService.CloseStory();
-                Storage.SaveDockingLayout(dockManager);
-                Storage.SaveWindowLayout(this.View);
-            };
+    void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
+    {
+        if (zmachineTask != null)
+        {
+            zmachine.Cancel();
+            zmachineTask.Wait();
         }
 
-        // commands...
-        public ICommand OpenStoryCommand { get; private set; }
-        public ICommand EditGameScriptCommand { get; private set; }
-        public ICommand ExitCommand { get; private set; }
-        public ICommand StopCommand { get; private set; }
-        public ICommand AboutGameCommand { get; private set; }
+        profilerService.Destroy();
 
-        private bool OpenStoryCanExecute()
+        zmachine.Dispose();
+        zmachineTask = null;
+        zmachine = null;
+
+        PropertyChanged("Title");
+    }
+
+    private void Run()
+    {
+        profilerService.Start();
+        try
         {
-            return true;
+            zmachine.Run();
         }
-
-        private void OpenStoryExecuted()
+        catch (ZMachineQuitException)
         {
-            var dialog = new OpenFileDialog
-            {
-                Title = "Open Story File",
-                Filter = "Supported Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8,*.zblorb)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8;*.zblorb|" +
-                         "Z-Code Files (*.z3,*.z4,*.z5,*.z6,*.z7,*.z8)|*.z3;*.z4;*.z5;*.z6;*.z7;*.z8|" +
-                         "Blorb Files (*.zblorb)|*.zblorb|" +
-                         "All Files (*.*)|*.*"
-            };
-
-            if (dialog.ShowDialog(this.View) == true)
-            {
-                storyService.OpenStory(dialog.FileName);
-            }
-
-            this.updateTimer.Start();
-        }
-
-        private bool EditGameScriptCanExecute()
-        {
-            return true;
-        }
-
-        private void EditGameScriptExecuted()
-        {
-            gameScriptDialogViewModel.ShowDialog(owner: this.View);
-        }
-
-        private bool ExitCanExecute()
-        {
-            return true;
-        }
-
-        private void ExitExecuted()
-        {
-            this.View.Close();
-        }
-
-        private bool StopCanExecute()
-        {
-            return zmachine != null;
-        }
-
-        private void StopExecuted()
-        {
-            zmachine.Stop();
-        }
-
-        private bool AboutGameCanExecute()
-        {
-            return storyService.HasGameInfo;
-        }
-
-        private void AboutGameExecuted()
-        {
-            gameInfoDialogViewModel.ShowDialog(owner: this.View);
-        }
-
-        public string Title
-        {
-            get
-            {
-                return "Z-Terp";
-            }
-        }
-
-        void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
-        {
-            //profilerService.Create();
-            PropertyChanged("Profiling");
-
-            e.Story.RegisterInterpreter(new Interpreter());
-            zmachine = new CompiledZMachine(e.Story, profiler: profilerService.Profiler);
-            zmachine.SetRandomSeed(42);
-
-            zmachine.RegisterScreen(screen);
-            zmachine.RegisterSoundEngine(this);
-
-            zmachineThread = new Thread(new ThreadStart(Run));
-            zmachineThread.Start();
-
-            PropertyChanged("Title");
-        }
-
-        void StoryService_StoryClosing(object sender, StoryClosingEventArgs e)
-        {
-            if (zmachineThread != null)
-            {
-                zmachineThread.Abort();
-            }
-
-            profilerService.Destroy();
-
-            zmachineThread = null;
-            zmachine = null;
-
-            PropertyChanged("Title");
-        }
-
-        private void Run()
-        {
-            profilerService.Start();
-            try
-            {
-                zmachine.Run();
-            }
-            catch (ZMachineQuitException)
-            {
-                // done
-                updateTimer.Stop();
-                UpdateProfilerStatistics();
-            }
-            catch (ZMachineInterruptedException)
-            {
-                // done
-                updateTimer.Stop();
-                UpdateProfilerStatistics();
-            }
-            catch (ThreadAbortException)
-            {
-                // done
-                updateTimer.Stop();
-            }
-            catch (Exception ex)
-            {
-                updateTimer.Stop();
-                screen.Print("\n");
-                screen.Print(ex.GetType().FullName);
-                screen.Print("\n");
-                screen.Print(ex.Message);
-                screen.Print("\n");
-                screen.Print(ex.StackTrace);
-                UpdateProfilerStatistics();
-            }
-
+            // done
             updateTimer.Stop();
-            profilerService.Stop();
+            UpdateProfilerStatistics();
+        }
+        catch (ZMachineInterruptedException)
+        {
+            // done
+            updateTimer.Stop();
+            UpdateProfilerStatistics();
+        }
+        catch (ThreadAbortException)
+        {
+            // done
+            updateTimer.Stop();
+        }
+        catch (Exception ex)
+        {
+            updateTimer.Stop();
+            screen.Print("\n");
+            screen.Print(ex.GetType().FullName);
+            screen.Print("\n");
+            screen.Print(ex.Message);
+            screen.Print("\n");
+            screen.Print(ex.StackTrace);
+            UpdateProfilerStatistics();
         }
 
-        void ISoundEngine.HighBeep()
+        updateTimer.Stop();
+        profilerService.Stop();
+    }
+
+    void ISoundEngine.HighBeep()
+    {
+        SystemSounds.Asterisk.Play();
+    }
+
+    void ISoundEngine.LowBeep()
+    {
+        SystemSounds.Beep.Play();
+    }
+
+    private void UpdateProfilerStatistics()
+    {
+        profilerService.UpdateProfilerStatistics();
+
+        PropertyChanged("CompileTime");
+        PropertyChanged("RoutinesCompiled");
+        PropertyChanged("ZCodeToILRatio");
+        PropertyChanged("ZCodeToILRatioPercent");
+        PropertyChanged("RoutinesExecuted");
+        PropertyChanged("InstructionsExecuted");
+        PropertyChanged("CalculatedVariableLoads");
+        PropertyChanged("CalculatedVariableStores");
+        PropertyChanged("DirectCalls");
+        PropertyChanged("CalculatedCalls");
+    }
+
+    public bool Profiling
+    {
+        get
         {
-            SystemSounds.Asterisk.Play();
+            return profilerService.Profiling;
         }
+    }
 
-        void ISoundEngine.LowBeep()
+    public TimeSpan CompileTime
+    {
+        get
         {
-            SystemSounds.Beep.Play();
+            return profilerService.CompileTime;
         }
+    }
 
-        private void UpdateProfilerStatistics()
+    public int RoutinesCompiled
+    {
+        get
         {
-            profilerService.UpdateProfilerStatistics();
-
-            PropertyChanged("CompileTime");
-            PropertyChanged("RoutinesCompiled");
-            PropertyChanged("ZCodeToILRatio");
-            PropertyChanged("ZCodeToILRatioPercent");
-            PropertyChanged("RoutinesExecuted");
-            PropertyChanged("InstructionsExecuted");
-            PropertyChanged("CalculatedVariableLoads");
-            PropertyChanged("CalculatedVariableStores");
-            PropertyChanged("DirectCalls");
-            PropertyChanged("CalculatedCalls");
+            return profilerService.RoutinesCompiled;
         }
+    }
 
-        public bool Profiling
+    public double ZCodeToILRatio
+    {
+        get
         {
-            get
-            {
-                return profilerService.Profiling;
-            }
+            return profilerService.ZCodeToILRatio;
         }
+    }
 
-        public TimeSpan CompileTime
+    public double ZCodeToILRatioPercent
+    {
+        get
         {
-            get
-            {
-                return profilerService.CompileTime;
-            }
+            return profilerService.ZCodeToILRatio * 100;
         }
+    }
 
-        public int RoutinesCompiled
+    public int RoutinesExecuted
+    {
+        get
         {
-            get
-            {
-                return profilerService.RoutinesCompiled;
-            }
+            return profilerService.RoutinesExecuted;
         }
+    }
 
-        public double ZCodeToILRatio
+    public int InstructionsExecuted
+    {
+        get
         {
-            get
-            {
-                return profilerService.ZCodeToILRatio;
-            }
+            return profilerService.InstructionsExecuted;
         }
+    }
 
-        public double ZCodeToILRatioPercent
+    public int CalculatedVariableLoads
+    {
+        get
         {
-            get
-            {
-                return profilerService.ZCodeToILRatio * 100;
-            }
+            return profilerService.CalculatedVariableLoads;
         }
+    }
 
-        public int RoutinesExecuted
+    public int CalculatedVariableStores
+    {
+        get
         {
-            get
-            {
-                return profilerService.RoutinesExecuted;
-            }
+            return profilerService.CalculatedVariableStores;
         }
+    }
 
-        public int InstructionsExecuted
+    public int DirectCalls
+    {
+        get
         {
-            get
-            {
-                return profilerService.InstructionsExecuted;
-            }
+            return profilerService.DirectCalls;
         }
+    }
 
-        public int CalculatedVariableLoads
+    public int CalculatedCalls
+    {
+        get
         {
-            get
-            {
-                return profilerService.CalculatedVariableLoads;
-            }
-        }
-
-        public int CalculatedVariableStores
-        {
-            get
-            {
-                return profilerService.CalculatedVariableStores;
-            }
-        }
-
-        public int DirectCalls
-        {
-            get
-            {
-                return profilerService.DirectCalls;
-            }
-        }
-
-        public int CalculatedCalls
-        {
-            get
-            {
-                return profilerService.CalculatedCalls;
-            }
+            return profilerService.CalculatedCalls;
         }
     }
 }

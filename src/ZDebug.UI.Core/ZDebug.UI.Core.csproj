@@ -1,12 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <UseWpf>true</UseWpf>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AvalonDock-1.x" />
+    <PackageReference Include="Dirkster.AvalonDock" />
+    <PackageReference Include="Dirkster.AvalonDock.Themes.VS2013" />
     <PackageReference Include="System.Composition" />
   </ItemGroup>
 

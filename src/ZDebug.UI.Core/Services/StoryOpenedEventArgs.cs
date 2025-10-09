@@ -1,23 +1,22 @@
 ﻿using System;
 using ZDebug.Core;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+public sealed class StoryOpenedEventArgs : EventArgs
 {
-    public sealed class StoryOpenedEventArgs : EventArgs
+    private readonly Story story;
+
+    public StoryOpenedEventArgs(Story story)
     {
-        private readonly Story story;
+        this.story = story;
+    }
 
-        public StoryOpenedEventArgs(Story story)
+    public Story Story
+    {
+        get
         {
-            this.story = story;
-        }
-
-        public Story Story
-        {
-            get
-            {
-                return story;
-            }
+            return story;
         }
     }
 }

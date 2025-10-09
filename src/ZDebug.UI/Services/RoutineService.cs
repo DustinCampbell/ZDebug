@@ -4,98 +4,97 @@ using System.Linq;
 using System.Xml.Linq;
 using ZDebug.Core.Routines;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+[Export, Shared]
+internal class RoutineService : IService, IPersistable
 {
-    [Export, Shared]
-    internal class RoutineService : IService, IPersistable
+    private readonly StoryService storyService;
+
+    private ZRoutineTable routineTable;
+
+    [ImportingConstructor]
+    public RoutineService(
+        StoryService storyService)
     {
-        private readonly StoryService storyService;
+        this.storyService = storyService;
+        this.storyService.StoryOpened += StoryService_StoryOpened;
+        this.storyService.StoryClosed += StoryService_StoryClosed;
+    }
 
-        private ZRoutineTable routineTable;
+    private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
+    {
+        routineTable = new ZRoutineTable(e.Story);
+    }
 
-        [ImportingConstructor]
-        public RoutineService(
-            StoryService storyService)
+    private void StoryService_StoryClosed(object sender, StoryClosedEventArgs e)
+    {
+        routineTable = null;
+    }
+
+    // TODO: Hide this when there's a debugger service with an appropriate event.
+    public void Add(int address)
+    {
+        routineTable.Add(address);
+    }
+
+    public void SetRoutineName(int address, string name)
+    {
+        var routine = routineTable.GetByAddress(address);
+        if (routine.Name == name)
         {
-            this.storyService = storyService;
-            this.storyService.StoryOpened += StoryService_StoryOpened;
-            this.storyService.StoryClosed += StoryService_StoryClosed;
+            return;
         }
 
-        private void StoryService_StoryOpened(object sender, StoryOpenedEventArgs e)
-        {
-            routineTable = new ZRoutineTable(e.Story);
-        }
+        routine.Name = name;
 
-        private void StoryService_StoryClosed(object sender, StoryClosedEventArgs e)
+        var handler = RoutineNameChanged;
+        if (handler != null)
         {
-            routineTable = null;
+            handler(this, new RoutineNameChangedEventArgs(routine));
         }
+    }
 
-        // TODO: Hide this when there's a debugger service with an appropriate event.
-        public void Add(int address)
+    public ZRoutineTable RoutineTable
+    {
+        get
         {
-            routineTable.Add(address);
+            return routineTable;
         }
+    }
 
-        public void SetRoutineName(int address, string name)
+    void IPersistable.Load(XElement xml)
+    {
+        var routinesElem = xml.Element("knownroutines");
+        if (routinesElem != null)
         {
-            var routine = routineTable.GetByAddress(address);
-            if (routine.Name == name)
+            foreach (var routineElem in routinesElem.Elements("routine"))
             {
-                return;
-            }
+                var addAttr = routineElem.Attribute("address");
+                var nameAttr = routineElem.Attribute("name");
 
-            routine.Name = name;
+                var address = (int)addAttr;
+                var name = nameAttr != null ? (string)nameAttr : null;
 
-            var handler = RoutineNameChanged;
-            if (handler != null)
-            {
-                handler(this, new RoutineNameChangedEventArgs(routine));
-            }
-        }
-
-        public ZRoutineTable RoutineTable
-        {
-            get
-            {
-                return routineTable;
-            }
-        }
-
-        void IPersistable.Load(XElement xml)
-        {
-            var routinesElem = xml.Element("knownroutines");
-            if (routinesElem != null)
-            {
-                foreach (var routineElem in routinesElem.Elements("routine"))
+                if (routineTable.Exists(address))
                 {
-                    var addAttr = routineElem.Attribute("address");
-                    var nameAttr = routineElem.Attribute("name");
-
-                    var address = (int)addAttr;
-                    var name = nameAttr != null ? (string)nameAttr : null;
-
-                    if (routineTable.Exists(address))
-                    {
-                        routineTable.GetByAddress(address).Name = name;
-                    }
-                    else
-                    {
-                        routineTable.Add(address, name);
-                    }
+                    routineTable.GetByAddress(address).Name = name;
+                }
+                else
+                {
+                    routineTable.Add(address, name);
                 }
             }
         }
-
-        XElement IPersistable.Store()
-        {
-            return new XElement("knownroutines",
-                routineTable.Select(r => new XElement("routine",
-                    new XAttribute("address", r.Address),
-                    new XAttribute("name", r.Name))));
-        }
-
-        public event EventHandler<RoutineNameChangedEventArgs> RoutineNameChanged;
     }
+
+    XElement IPersistable.Store()
+    {
+        return new XElement("knownroutines",
+            routineTable.Select(r => new XElement("routine",
+                new XAttribute("address", r.Address),
+                new XAttribute("name", r.Name))));
+    }
+
+    public event EventHandler<RoutineNameChangedEventArgs> RoutineNameChanged;
 }

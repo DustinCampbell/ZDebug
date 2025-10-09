@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace ZDebug.Terp.Services
+namespace ZDebug.Terp.Services;
+
+public sealed class ProfilerStoppedEventArgs : EventArgs
 {
-    public sealed class ProfilerStoppedEventArgs : EventArgs
-    {
-    }
 }

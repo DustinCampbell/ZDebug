@@ -1,132 +1,131 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class GetPropGenerator : OpcodeGenerator
 {
-    internal class GetPropGenerator : OpcodeGenerator
+    private readonly Operand objectOp;
+    private readonly Operand propertyOp;
+    private readonly Variable store;
+
+    public GetPropGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand objectOp;
-        private readonly Operand propertyOp;
-        private readonly Variable store;
+        this.objectOp = instruction.Operands[0];
+        this.propertyOp = instruction.Operands[1];
+        this.store = instruction.StoreVariable;
+    }
 
-        public GetPropGenerator(Instruction instruction)
-            : base(instruction)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        using (var objNum = il.NewLocal<ushort>())
+        using (var result = il.NewLocal<ushort>())
         {
-            this.objectOp = instruction.Operands[0];
-            this.propertyOp = instruction.Operands[1];
-            this.store = instruction.StoreVariable;
-        }
+            var done = il.NewLabel();
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            using (var objNum = il.NewLocal<ushort>())
-            using (var result = il.NewLocal<ushort>())
+            // Read objNum
+            var invalidObjNum = il.NewLabel();
+            compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
+            objNum.Store();
+
+            using (var propNum = il.NewLocal<ushort>())
+            using (var propAddress = il.NewLocal<ushort>())
+            using (var value = il.NewLocal<ushort>())
             {
-                var done = il.NewLabel();
+                // Read propNum
+                compiler.EmitLoadOperand(propertyOp);
+                propNum.Store();
 
-                // Read objNum
-                var invalidObjNum = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
-                objNum.Store();
+                int mask = compiler.Version < 4 ? 0x1f : 0x3f;
 
-                using (var propNum = il.NewLocal<ushort>())
-                using (var propAddress = il.NewLocal<ushort>())
-                using (var value = il.NewLocal<ushort>())
-                {
-                    // Read propNum
-                    compiler.EmitLoadOperand(propertyOp);
-                    propNum.Store();
+                // Read first property address into propAddress
+                compiler.EmitLoadFirstPropertyAddress(objNum);
+                propAddress.Store();
 
-                    int mask = compiler.Version < 4 ? 0x1f : 0x3f;
+                var loopStart = il.NewLabel();
+                var loopDone = il.NewLabel();
 
-                    // Read first property address into propAddress
-                    compiler.EmitLoadFirstPropertyAddress(objNum);
-                    propAddress.Store();
+                loopStart.Mark();
 
-                    var loopStart = il.NewLabel();
-                    var loopDone = il.NewLabel();
+                compiler.EmitLoadMemoryByte(propAddress);
+                value.Store();
 
-                    loopStart.Mark();
+                value.Load();
+                il.Math.And(mask);
+                il.Convert.ToUInt16();
+                propNum.Load();
+                loopDone.BranchIf(Condition.AtMost, @short: true);
 
-                    compiler.EmitLoadMemoryByte(propAddress);
-                    value.Store();
+                propAddress.Load();
+                compiler.EmitLoadNextPropertyAddress();
+                propAddress.Store();
 
-                    value.Load();
-                    il.Math.And(mask);
-                    il.Convert.ToUInt16();
-                    propNum.Load();
-                    loopDone.BranchIf(Condition.AtMost, @short: true);
+                loopStart.Branch();
 
-                    propAddress.Load();
-                    compiler.EmitLoadNextPropertyAddress();
-                    propAddress.Store();
+                loopDone.Mark();
 
-                    loopStart.Branch();
+                var propNotFound = il.NewLabel();
 
-                    loopDone.Mark();
+                value.Load();
+                il.Math.And(mask);
+                propNum.Load();
+                propNotFound.BranchIf(Condition.NotEqual);
 
-                    var propNotFound = il.NewLabel();
+                propAddress.Load();
+                il.Math.Add(1);
+                il.Convert.ToUInt16();
+                propAddress.Store();
 
-                    value.Load();
-                    il.Math.And(mask);
-                    propNum.Load();
-                    propNotFound.BranchIf(Condition.NotEqual);
+                var sizeMask = compiler.Version < 4 ? 0xe0 : 0xc0;
 
-                    propAddress.Load();
-                    il.Math.Add(1);
-                    il.Convert.ToUInt16();
-                    propAddress.Store();
+                var secondBranch = il.NewLabel();
 
-                    var sizeMask = compiler.Version < 4 ? 0xe0 : 0xc0;
+                value.Load();
+                il.Math.And(sizeMask);
+                secondBranch.BranchIf(Condition.True, @short: true);
 
-                    var secondBranch = il.NewLabel();
-
-                    value.Load();
-                    il.Math.And(sizeMask);
-                    secondBranch.BranchIf(Condition.True, @short: true);
-
-                    compiler.EmitLoadMemoryByte(propAddress);
-                    result.Store();
-
-                    done.Branch();
-
-                    secondBranch.Mark();
-
-                    compiler.EmitLoadMemoryWord(propAddress);
-                    result.Store();
-
-                    done.Branch();
-
-                    propNotFound.Mark();
-
-                    compiler.EmitLoadDefaultPropertyAddress(propNum);
-                    propAddress.Store();
-
-                    compiler.EmitLoadMemoryWord(propAddress);
-                    result.Store();
-
-                    done.Branch();
-                }
-
-                invalidObjNum.Mark();
-
-                il.Load(0);
+                compiler.EmitLoadMemoryByte(propAddress);
                 result.Store();
 
-                done.Mark();
+                done.Branch();
 
-                compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
+                secondBranch.Mark();
+
+                compiler.EmitLoadMemoryWord(propAddress);
+                result.Store();
+
+                done.Branch();
+
+                propNotFound.Mark();
+
+                compiler.EmitLoadDefaultPropertyAddress(propNum);
+                propAddress.Store();
+
+                compiler.EmitLoadMemoryWord(propAddress);
+                result.Store();
+
+                done.Branch();
             }
-        }
 
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+            invalidObjNum.Mark();
 
-        public override bool CanReuseStoreVariable
-        {
-            get { return true; }
+            il.Load(0);
+            result.Store();
+
+            done.Mark();
+
+            compiler.EmitStoreVariable(store, result, reuse: ReuseStoreVariable);
         }
+    }
+
+    public override bool CanReuseFirstOperand
+    {
+        get { return true; }
+    }
+
+    public override bool CanReuseStoreVariable
+    {
+        get { return true; }
     }
 }

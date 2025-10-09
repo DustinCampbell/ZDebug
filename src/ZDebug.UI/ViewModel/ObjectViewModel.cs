@@ -2,85 +2,84 @@
 using System.Collections.ObjectModel;
 using ZDebug.Core.Objects;
 
-namespace ZDebug.UI.ViewModel
+namespace ZDebug.UI.ViewModel;
+
+internal sealed class ObjectViewModel : ViewModelBase
 {
-    internal sealed class ObjectViewModel : ViewModelBase
+    private readonly ZObject obj;
+    private readonly ReadOnlyCollection<PropertyViewModel> properties;
+
+    public ObjectViewModel(ZObject obj)
     {
-        private readonly ZObject obj;
-        private readonly ReadOnlyCollection<PropertyViewModel> properties;
+        this.obj = obj;
 
-        public ObjectViewModel(ZObject obj)
+        var props = new List<PropertyViewModel>();
+        foreach (var prop in obj.PropertyTable)
         {
-            this.obj = obj;
+            props.Add(new PropertyViewModel(prop));
+        }
 
-            var props = new List<PropertyViewModel>();
-            foreach (var prop in obj.PropertyTable)
+        properties = new ReadOnlyCollection<PropertyViewModel>(props);
+    }
+
+    public int Number
+    {
+        get { return obj.Number; }
+    }
+
+    public int Parent
+    {
+        get { return obj.HasParent ? obj.Parent.Number : 0; }
+    }
+
+    public int Sibling
+    {
+        get { return obj.HasSibling ? obj.Sibling.Number : 0; }
+    }
+
+    public int Child
+    {
+        get { return obj.HasChild ? obj.Child.Number : 0; }
+    }
+
+    public string ShortName
+    {
+        get { return obj.ShortName; }
+    }
+
+    public string Attributes
+    {
+        get
+        {
+            var attributes = obj.GetAllAttributes();
+
+            var list = new List<string>();
+            for (int i = 0; i < attributes.Length; i++)
             {
-                props.Add(new PropertyViewModel(prop));
+                if (attributes[i])
+                {
+                    list.Add(i.ToString());
+                }
             }
 
-            properties = new ReadOnlyCollection<PropertyViewModel>(props);
-        }
-
-        public int Number
-        {
-            get { return obj.Number; }
-        }
-
-        public int Parent
-        {
-            get { return obj.HasParent ? obj.Parent.Number : 0; }
-        }
-
-        public int Sibling
-        {
-            get { return obj.HasSibling ? obj.Sibling.Number : 0; }
-        }
-
-        public int Child
-        {
-            get { return obj.HasChild ? obj.Child.Number : 0; }
-        }
-
-        public string ShortName
-        {
-            get { return obj.ShortName; }
-        }
-
-        public string Attributes
-        {
-            get
+            if (list.Count > 0)
             {
-                var attributes = obj.GetAllAttributes();
-
-                var list = new List<string>();
-                for (int i = 0; i < attributes.Length; i++)
-                {
-                    if (attributes[i])
-                    {
-                        list.Add(i.ToString());
-                    }
-                }
-
-                if (list.Count > 0)
-                {
-                    return string.Join(", ", list);
-                }
-                else
-                {
-                    return "None";
-                }
+                return string.Join(", ", list);
+            }
+            else
+            {
+                return "None";
             }
         }
+    }
 
-        public int PropertyTableAddress
-        {
-            get { return obj.PropertyTable.Address; }
-        }
+    public int PropertyTableAddress
+    {
+        get { return obj.PropertyTable.Address; }
+    }
 
-        public ReadOnlyCollection<PropertyViewModel> Properties
-        {
-            get { return properties; }
-        }
+    public ReadOnlyCollection<PropertyViewModel> Properties
+    {
+        get { return properties; }
     }
 }

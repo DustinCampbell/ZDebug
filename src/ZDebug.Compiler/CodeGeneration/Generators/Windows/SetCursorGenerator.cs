@@ -1,34 +1,33 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class SetCursorGenerator : OpcodeGenerator
 {
-    internal class SetCursorGenerator : OpcodeGenerator
+    private readonly Operand lineOp;
+    private readonly Operand columnOp;
+
+    public SetCursorGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand lineOp;
-        private readonly Operand columnOp;
+        this.lineOp = instruction.Operands[0];
+        this.columnOp = instruction.Operands[1];
+    }
 
-        public SetCursorGenerator(Instruction instruction)
-            : base(instruction)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        using (var line = il.NewLocal<ushort>())
+        using (var column = il.NewLocal<ushort>())
         {
-            this.lineOp = instruction.Operands[0];
-            this.columnOp = instruction.Operands[1];
+            compiler.EmitLoadOperand(lineOp);
+            line.Store();
+
+            compiler.EmitLoadOperand(columnOp);
+            column.Store();
+
+            compiler.EmitSetCursor(line, column);
         }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            using (var line = il.NewLocal<ushort>())
-            using (var column = il.NewLocal<ushort>())
-            {
-                compiler.EmitLoadOperand(lineOp);
-                line.Store();
-
-                compiler.EmitLoadOperand(columnOp);
-                column.Store();
-
-                compiler.EmitSetCursor(line, column);
-            }
-
-        }
     }
 }

@@ -2,23 +2,22 @@
 using NUnit.Framework;
 using ZDebug.Core.Tests.Utilities;
 
-namespace ZDebug.Core.Tests
+namespace ZDebug.Core.Tests;
+
+[TestFixture]
+public class SanityMoqTests
 {
-    [TestFixture]
-    public class SanityMoqTests
+    public interface ICalculator
     {
-        public interface ICalculator
-        {
-            int Add(int x, int y);
-        }
+        int Add(int x, int y);
+    }
 
-        [Test, Category(Categories.Sanity)]
-        public void SimpleMock()
-        {
-            var calc = new Mock<ICalculator>();
-            calc.Setup(c => c.Add(2, 2)).Returns(4);
+    [Test, Category(Categories.Sanity)]
+    public void SimpleMock()
+    {
+        var calc = new Mock<ICalculator>();
+        calc.Setup(c => c.Add(2, 2)).Returns(4);
 
-            Assert.That(calc.Object.Add(2, 2), Is.EqualTo(4));
-        }
+        Assert.That(calc.Object.Add(2, 2), Is.EqualTo(4));
     }
 }

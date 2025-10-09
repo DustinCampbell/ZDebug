@@ -1,53 +1,52 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class TestAttrGenerator : OpcodeGenerator
 {
-    internal class TestAttrGenerator : OpcodeGenerator
+    private readonly Operand objectOp;
+    private readonly Operand attributeOp;
+    private readonly Branch branch;
+
+    public TestAttrGenerator(Instruction instruction)
+        : base(instruction)
     {
-        private readonly Operand objectOp;
-        private readonly Operand attributeOp;
-        private readonly Branch branch;
+        this.objectOp = instruction.Operands[0];
+        this.attributeOp = instruction.Operands[1];
+        this.branch = instruction.Branch;
+    }
 
-        public TestAttrGenerator(Instruction instruction)
-            : base(instruction)
+    public override void Generate(ILBuilder il, ICompiler compiler)
+    {
+        using (var objNum = il.NewLocal<ushort>())
+        using (var attribute = il.NewLocal<byte>())
         {
-            this.objectOp = instruction.Operands[0];
-            this.attributeOp = instruction.Operands[1];
-            this.branch = instruction.Branch;
+            // Read objNum
+            var invalidObjNum = il.NewLabel();
+            compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
+            objNum.Store();
+
+            // Read attribute
+            compiler.EmitLoadOperand(attributeOp);
+            attribute.Store();
+
+            compiler.EmitObjectHasAttribute(objNum, attribute);
+            compiler.EmitBranch(branch);
+
+            var done = il.NewLabel();
+            done.Branch(@short: true);
+
+            invalidObjNum.Mark();
+            il.Load(false);
+            compiler.EmitBranch(branch);
+
+            done.Mark();
         }
+    }
 
-        public override void Generate(ILBuilder il, ICompiler compiler)
-        {
-            using (var objNum = il.NewLocal<ushort>())
-            using (var attribute = il.NewLocal<byte>())
-            {
-                // Read objNum
-                var invalidObjNum = il.NewLabel();
-                compiler.EmitLoadValidObject(objectOp, invalidObjNum, reuse: ReuseFirstOperand);
-                objNum.Store();
-
-                // Read attribute
-                compiler.EmitLoadOperand(attributeOp);
-                attribute.Store();
-
-                compiler.EmitObjectHasAttribute(objNum, attribute);
-                compiler.EmitBranch(branch);
-
-                var done = il.NewLabel();
-                done.Branch(@short: true);
-
-                invalidObjNum.Mark();
-                il.Load(false);
-                compiler.EmitBranch(branch);
-
-                done.Mark();
-            }
-        }
-
-        public override bool CanReuseFirstOperand
-        {
-            get { return true; }
-        }
+    public override bool CanReuseFirstOperand
+    {
+        get { return true; }
     }
 }

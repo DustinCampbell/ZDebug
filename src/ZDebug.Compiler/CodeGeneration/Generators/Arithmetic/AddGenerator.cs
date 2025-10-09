@@ -1,52 +1,51 @@
 ﻿using ZDebug.Compiler.Generate;
 using ZDebug.Core.Instructions;
 
-namespace ZDebug.Compiler.CodeGeneration.Generators
+namespace ZDebug.Compiler.CodeGeneration.Generators;
+
+internal class AddGenerator : BinaryOpGenerator
 {
-    internal class AddGenerator : BinaryOpGenerator
+    public AddGenerator(Instruction instruction)
+        : base(instruction, signed: true)
     {
-        public AddGenerator(Instruction instruction)
-            : base(instruction, signed: true)
+    }
+
+    protected override void LoadOperands(ILBuilder il, ICompiler compiler, Operand op1, Operand op2)
+    {
+        if (ReuseFirstOperand)
         {
+            il.Convert.ToInt16();
+
+            compiler.EmitLoadOperand(op2, convertResult: false);
+            il.Convert.ToInt16();
         }
-
-        protected override void LoadOperands(ILBuilder il, ICompiler compiler, Operand op1, Operand op2)
+        else if (ReuseSecondOperand)
         {
-            if (ReuseFirstOperand)
-            {
-                il.Convert.ToInt16();
+            il.Convert.ToInt16();
 
-                compiler.EmitLoadOperand(op2, convertResult: false);
-                il.Convert.ToInt16();
-            }
-            else if (ReuseSecondOperand)
-            {
-                il.Convert.ToInt16();
-
-                compiler.EmitLoadOperand(op1, convertResult: false);
-                il.Convert.ToInt16();
-            }
-            else
-            {
-                compiler.EmitLoadOperand(op1, convertResult: false);
-                il.Convert.ToInt16();
-
-                compiler.EmitLoadOperand(op2, convertResult: false);
-                il.Convert.ToInt16();
-            }
+            compiler.EmitLoadOperand(op1, convertResult: false);
+            il.Convert.ToInt16();
         }
-
-        protected override void Operation(ILBuilder il)
+        else
         {
-            il.Math.Add();
+            compiler.EmitLoadOperand(op1, convertResult: false);
+            il.Convert.ToInt16();
+
+            compiler.EmitLoadOperand(op2, convertResult: false);
+            il.Convert.ToInt16();
         }
+    }
 
-        public override bool CanReuseSecondOperand
+    protected override void Operation(ILBuilder il)
+    {
+        il.Math.Add();
+    }
+
+    public override bool CanReuseSecondOperand
+    {
+        get
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
     }
 }

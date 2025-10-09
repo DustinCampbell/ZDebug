@@ -1,10 +1,9 @@
 ﻿using System.Xml.Linq;
 
-namespace ZDebug.UI.Services
+namespace ZDebug.UI.Services;
+
+public interface IPersistable
 {
-    public interface IPersistable
-    {
-        void Load(XElement xml);
-        XElement Store();
-    }
+    void Load(XElement xml);
+    XElement Store();
 }

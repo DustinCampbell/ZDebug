@@ -1,22 +1,21 @@
-﻿namespace ZDebug.Core.Execution
+﻿namespace ZDebug.Core.Execution;
+
+public abstract partial class ZMachine
 {
-    public abstract partial class ZMachine
+    private class NullOutputStream : IOutputStream
     {
-        private class NullOutputStream : IOutputStream
+        private NullOutputStream()
         {
-            private NullOutputStream()
-            {
-            }
-
-            public void Print(string text)
-            {
-            }
-
-            public void Print(char ch)
-            {
-            }
-
-            public static readonly IOutputStream Instance = new NullOutputStream();
         }
+
+        public void Print(string text)
+        {
+        }
+
+        public void Print(char ch)
+        {
+        }
+
+        public static readonly IOutputStream Instance = new NullOutputStream();
     }
 }
