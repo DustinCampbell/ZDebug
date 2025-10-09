@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Extensions;
 
 namespace ZDebug.Core.Basics;
 
-public sealed class MemoryMap : IIndexedEnumerable<MemoryMapRegion>
+public sealed class MemoryMap : IReadOnlyList<MemoryMapRegion>
 {
     private readonly byte[] memory;
     private readonly List<MemoryMapRegion> regions;

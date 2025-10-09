@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ZDebug.Core.Basics;
-using ZDebug.Core.Collections;
 using ZDebug.Core.Extensions;
 using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Dictionary;
 
-public sealed class ZDictionary : IIndexedEnumerable<ZDictionaryEntry>
+public sealed class ZDictionary : IReadOnlyList<ZDictionaryEntry>
 {
     private readonly Story story;
     private readonly ZText ztext;

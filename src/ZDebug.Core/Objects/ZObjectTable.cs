@@ -8,7 +8,7 @@ using ZDebug.Core.Text;
 
 namespace ZDebug.Core.Objects;
 
-public class ZObjectTable : IIndexedEnumerable<ZObject>
+public class ZObjectTable : IReadOnlyList<ZObject>
 {
     private readonly byte[] memory;
     private readonly ZText ztext;

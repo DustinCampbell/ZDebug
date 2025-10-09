@@ -7,7 +7,7 @@ using ZDebug.Core.Instructions;
 
 namespace ZDebug.Core.Routines;
 
-public sealed class ZRoutineTable : IIndexedEnumerable<ZRoutine>
+public sealed class ZRoutineTable : IReadOnlyList<ZRoutine>
 {
     private readonly Story story;
     private readonly InstructionCache cache;

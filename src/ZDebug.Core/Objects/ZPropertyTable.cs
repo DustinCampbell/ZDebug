@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using ZDebug.Core.Collections;
 
 namespace ZDebug.Core.Objects;
 
-public class ZPropertyTable : IIndexedEnumerable<ZProperty>
+public class ZPropertyTable : IReadOnlyList<ZProperty>
 {
     private readonly ZObjectTable objectTable;
     private readonly ushort address;
